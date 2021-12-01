@@ -7,8 +7,9 @@ const INSTALL_PATH = path.resolve(INSTALL_DIR, 'moddable');
 const BIN_PATH = path.resolve(INSTALL_PATH, 'build', 'bin', 'mac', 'release')
 const exec = $;
 
-// 1. clone moddable repo into ./local/share directory if it does not exist yet
+// 0. ensure xcode command line tools are available (?)
 
+// 1. clone moddable repo into ./local/share directory if it does not exist yet
 try {
   await fs.ensureDir(INSTALL_DIR);
 } catch (error) {

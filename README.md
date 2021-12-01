@@ -4,7 +4,12 @@ The Moddable SDK and associated dev board tooling is incredibly empowering for e
 
 **Feature support:**
 
-- [X] Moddable SDK install & setup
+- [X] [Moddable SDK install & setup](https://github.com/Moddable-OpenSource/moddable/blob/public/documentation/Moddable%20SDK%20-%20Getting%20Started.md)
+- [ ] [ESP32 SDK setup](https://github.com/Moddable-OpenSource/moddable/blob/public/documentation/devices/esp32.md)
+- [ ] [ESP8266 SDK setup](https://github.com/Moddable-OpenSource/moddable/blob/public/documentation/devices/esp8266.md)
+- [ ] [Gecko SDK setup](https://github.com/Moddable-OpenSource/moddable/blob/public/documentation/devices/gecko/GeckoBuild.md)
+- [ ] [QCA4020 SDK setup](https://github.com/Moddable-OpenSource/moddable/blob/public/documentation/devices/qca4020/README.md)
+- [ ] Update Moddable SDK
 
 **Platform support:**
 
@@ -27,3 +32,13 @@ Run script:
 ```
 ./xs-setup.mjs
 ```
+
+## Features
+
+### Moddable SDK install / setup
+
+This process mostly automates the instructions provided by Moddable's "Getting Started" documentation with a few exceptions:
+
+- it will not install XCode, just ensures the command line tools are available
+- the `moddable` git repo is cloned into `~/.local/share` instead of a new/existing `~/Projects` directory
+- a symlink for `xsbug.app` is created in `/Applications` for easy access through Launchpad (on Mac)
