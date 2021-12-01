@@ -8,12 +8,17 @@ const BIN_PATH = path.resolve(INSTALL_PATH, 'build', 'bin', 'mac', 'release')
 const exec = $;
 
 // 0. ensure xcode command line tools are available (?)
+if (!(await exec`xcode-select -p`)) {
+  console.error(chalk.red("Xcode command line tools are required to build SDK: https://developer.apple.com/xcode/"));
+  process.exit(1);
+}
 
 // 1. clone moddable repo into ./local/share directory if it does not exist yet
 try {
   await fs.ensureDir(INSTALL_DIR);
 } catch (error) {
   console.error(chalk.red("Error setting up install directory: ", error));
+  process.exit(1);
 }
 
 if (await fs.pathExists(INSTALL_PATH)) {
@@ -23,6 +28,7 @@ if (await fs.pathExists(INSTALL_PATH)) {
     await exec`git clone ${MODDABLE_REPO} ${INSTALL_PATH}`
   } catch (error) {
     console.log(chalk.red("Error cloning moddable repo: "), error)
+    process.exit(1);
   }
 }
 
@@ -55,4 +61,5 @@ try {
   await fs.ensureSymlink(path.resolve(INSTALL_PATH, 'build', 'bin', 'mac', 'release', 'xsbug.app'), '/Applications/xsbug.app')
 } catch (error) {
   console.log(chalk.red("Issue creating symlink for xsbug.app: ", error))
+  process.exit(1);
 }
