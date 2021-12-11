@@ -54,8 +54,6 @@ if (argv.device === "esp32") {
     await exec`git clone -b ${ESP_BRANCH} --recursive ${ESP_IDF_REPO} ${IDF_PATH}`;
   }
   // 3. brew install python3, cmake, ninja, dfu-util
-  // TODO: figure out how to do this safely, maybe use `nothrow` and check exit code
-  // const BREW_DEPS = ["python3", "cmake", "ninja", "dfu-util"];
   console.log(chalk.blue("Installing / upgrading homebrew dependencies"));
   await exec`arch -arm64 brew install python; arch -arm64 brew upgrade python`.pipe(
     process.stdout
