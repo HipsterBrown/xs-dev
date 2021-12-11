@@ -46,7 +46,7 @@ if (argv.device === "esp32") {
   // TODO: figure out how to do this safely, maybe use `nothrow` and check exit code
   // const BREW_DEPS = ["python3", "cmake", "ninja", "dfu-util"];
   console.log(chalk.blue("Installing / upgrading homebrew dependencies"));
-  await exec`arch -arm64 brew install python3; arch -arm64 brew upgrade python3`.pipe(
+  await exec`arch -arm64 brew install python; arch -arm64 brew upgrade python`.pipe(
     process.stdout
   );
   await exec`arch -arm64 brew install cmake; arch -arm64 brew upgrade cmake`.pipe(
@@ -90,6 +90,62 @@ if (argv.device === "esp32") {
 
   console.log(
     chalk.green("Successfully set up esp32 platform support for moddable!")
+  );
+  process.exit(0);
+}
+
+if (argv.device === "esp8266") {
+  console.log(chalk.blue("Setting up ESP8266 SDK"));
+  const TOOLCHAIN =
+    "https://www.moddable.com/private/esp8266.toolchain.darwin.tgz";
+  const ARDUINO_CORE =
+    "https://github.com/esp8266/Arduino/releases/download/2.3.0/esp8266-2.3.0.zip";
+  const ESP_RTOS_REPO = "https://github.com/espressif/ESP8266_RTOS_SDK.git";
+  const ESP_BRANCH = "release/v3.2";
+  const ESP_DIR = path.resolve(process.env.HOME, "esp");
+  const RTOS_PATH = path.resolve(ESP_DIR, "ESP8266_RTOS_SDK");
+
+  // 1. ensure ~/.local/share/esp directory
+  console.log(chalk.blue("Ensuring esp directory"));
+  await fs.ensureDir(ESP_DIR);
+
+  cd(ESP_DIR);
+  // 3. download and untar xtensa toolchain
+  if (!(await fs.pathExists(path.resolve(ESP_DIR, "toolchain")))) {
+    console.log(chalk.blue("Downloading xtensa toolchain"));
+    await exec`wget --show-progress -nc ${TOOLCHAIN}`;
+    await exec`tar -xvf esp8266.toolchain.darwin.tgz`;
+  }
+
+  // 4. download and unzip esp8266 core for arduino
+  if (!(await fs.pathExists(path.resolve(ESP_DIR, "esp8266-2.3.0")))) {
+    console.log(chalk.blue("Downloading esp8266 core for arduino"));
+    await exec`wget --show-progress -nc ${ARDUINO_CORE}`;
+    await exec`unzip esp8266-2.3.0.zip`;
+  }
+
+  // 5. clone esp8266 RTOS SDK
+  if (!(await fs.pathExists(RTOS_PATH))) {
+    console.log(chalk.blue("Cloning esp8266 RTOS SDK repo"));
+    await exec`git clone -b ${ESP_BRANCH} ${ESP_RTOS_REPO} ${RTOS_PATH}`;
+  }
+
+  // 6. ensure python, pip, and pyserial are installed
+  console.log(chalk.blue("Installing / upgrading homebrew dependencies"));
+  await exec`arch -arm64 brew install python; arch -arm64 brew upgrade python`.pipe(
+    process.stdout
+  );
+
+  if (!(await exec`which pip`)) {
+    console.log(chalk.blue("Installing pip"));
+    await exec`sudo easy_install pip`.pipe(process.stdout);
+  }
+
+  console.log(chalk.blue("Installing pyserial"));
+  await exec`python -m pip install pyserial`.pipe(process.stdout);
+
+  console.log(
+    chalk.green("Successfully set up esp8266 platform support for moddable!")
   );
   process.exit(0);
 }

@@ -6,7 +6,7 @@ The Moddable SDK and associated dev board tooling is incredibly empowering for e
 
 - [X] [Moddable SDK install & setup](https://github.com/Moddable-OpenSource/moddable/blob/public/documentation/Moddable%20SDK%20-%20Getting%20Started.md)
 - [X] [ESP32 SDK setup](https://github.com/Moddable-OpenSource/moddable/blob/public/documentation/devices/esp32.md)
-- [ ] [ESP8266 SDK setup](https://github.com/Moddable-OpenSource/moddable/blob/public/documentation/devices/esp8266.md)
+- [X] [ESP8266 SDK setup](https://github.com/Moddable-OpenSource/moddable/blob/public/documentation/devices/esp8266.md)
 - [ ] [Gecko SDK setup](https://github.com/Moddable-OpenSource/moddable/blob/public/documentation/devices/gecko/GeckoBuild.md)
 - [ ] [QCA4020 SDK setup](https://github.com/Moddable-OpenSource/moddable/blob/public/documentation/devices/qca4020/README.md)
 - [ ] Update Moddable SDK
@@ -51,4 +51,14 @@ Run script:
 
 ```
 ./xs-setup.mjs --device=esp32
+```
+
+### ESP8266 SDK install / setup
+
+This process automates the instructions for downloading all the dependencies for the ESP8266 RTOS SDK.
+
+Run script:
+
+```
+./xs-setup.mjs --device=esp8266
 ```
