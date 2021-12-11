@@ -26,6 +26,17 @@ async function existsInProfile(str) {
   return file.includes(str);
 }
 
+if (argv._.includes("test")) {
+  const devices = { esp32: "esp32", esp8266: "esp" };
+  const PLATFORM = devices[argv.device] || "mac";
+  console.log(chalk.blue("Running hello world example for ESP32"));
+  const UPLOAD_PORT = argv.port || "/dev/cu.SLAB_USBtoUART";
+
+  cd(path.resolve(INSTALL_PATH, "examples", "helloworld"));
+  await exec`UPLOAD_PORT=${UPLOAD_PORT} mcconfig -d -m -p ${PLATFORM}`;
+  process.exit(0);
+}
+
 if (argv.device === "esp32") {
   console.log(chalk.blue("Setting up ESP32 SDK"));
   const ESP_IDF_REPO = "https://github.com/espressif/esp-idf.git";
@@ -89,7 +100,11 @@ if (argv.device === "esp32") {
   await exec`source $IDF_PATH/export.sh`;
 
   console.log(
-    chalk.green("Successfully set up esp32 platform support for moddable!")
+    chalk.green(`
+      Successfully set up esp32 platform support for moddable!
+      Test out the setup by plugging in your device and running: ./xs-setup.mjs test --device=esp32
+      If there is trouble finding the correct port, pass the "--port" flag to the above command with the path to the "/dev.cu.*" that matches your device.
+    `)
   );
   process.exit(0);
 }
@@ -145,7 +160,11 @@ if (argv.device === "esp8266") {
   await exec`python -m pip install pyserial`.pipe(process.stdout);
 
   console.log(
-    chalk.green("Successfully set up esp8266 platform support for moddable!")
+    chalk.green(`
+      Successfully set up esp8266 platform support for moddable!
+      Test out the setup by plugging in your device and running: ./xs-setup.mjs test --device=esp8266
+      If there is trouble finding the correct port, pass the "--port" flag to the above command with the path to the "/dev.cu.*" that matches your device.
+    `)
   );
   process.exit(0);
 }
@@ -205,6 +224,6 @@ try {
 
 console.log(
   chalk.green(`
-  Moddable SDK successfully set up! Start the xsbug.app and run the "helloworld example": 'cd $MODDABLE/examples/helloworld && mcconfig -d -m -p mac'
-`)
+    Moddable SDK successfully set up! Start the xsbug.app and run the "helloworld example": ./xs-setup.mjs test'
+  `)
 );
