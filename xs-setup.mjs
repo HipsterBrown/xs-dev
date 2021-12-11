@@ -26,6 +26,30 @@ async function existsInProfile(str) {
   return file.includes(str);
 }
 
+if (argv._.includes("update")) {
+  console.log(chalk.blue("Updating Moddable SDK"));
+
+  // 1. update clone of repo
+  cd(INSTALL_PATH);
+  await exec`git stash push && git pull && git stash pop`.pipe(process.stdout);
+
+  // 2. clear build cache
+  await exec`rm -rf build/bin`;
+  await exec`rm -rf build/tmp`;
+
+  // 3. rebuild tooling
+  cd(path.resolve(INSTALL_PATH, "build", "makefiles", "mac"));
+  await exec`make`.pipe(process.stdout);
+
+  // 4. profit
+  console.log(
+    chalk.green(`
+    Moddable SDK successfully updated! Start the xsbug.app and run the "helloworld example": ./xs-setup.mjs test'
+  `)
+  );
+  process.exit(0);
+}
+
 if (argv._.includes("test")) {
   const devices = { esp32: "esp32", esp8266: "esp" };
   const PLATFORM = devices[argv.device] || "mac";
