@@ -27,6 +27,84 @@ async function existsInProfile(str) {
   return file.includes(str);
 }
 
+if (command === "init") {
+  const [, , name] = argv._;
+
+  if (!name) {
+    console.error(
+      "The init command must include a name, i.e. ./xs-dev.mjs init my-project"
+    );
+    process.exit(1);
+  }
+
+  const projectPath = path.join(".", name);
+  const includeTypes = argv.typescript;
+
+  await fs.outputJson(path.join(projectPath, "manifest.json"), {
+    include: [
+      "$(MODDABLE)/examples/manifest_base.json",
+      includeTypes && "$(MODDABLE)/examples/manifest_typings.json",
+    ].filter(Boolean),
+    modules: {
+      "*": "./main",
+    },
+  });
+
+  await fs.outputFile(
+    path.join(projectPath, includeTypes ? "main.ts" : "main.js"),
+    `
+debugger;
+
+let message = "Hello, world - sample";
+trace(message);
+  `
+  );
+
+  console.log(chalk.green("Created new xs project! Run with `xs-dev.mjs run`"));
+  process.exit(0);
+}
+
+if (command === "run") {
+  let [, , projectPath] = argv._;
+  projectPath = projectPath || ".";
+
+  cd(projectPath);
+
+  const devices = { esp32: "esp32", esp8266: "esp" };
+  const PLATFORM = devices[argv.device] || "mac";
+  const UPLOAD_PORT = argv.port || "/dev/cu.SLAB_USBtoUART";
+
+  await exec`UPLOAD_PORT=${UPLOAD_PORT} mcconfig -d -m -p ${PLATFORM}`;
+  process.exit(0);
+}
+
+if (command === "include") {
+  let [, , dep] = argv._;
+
+  if (!dep) {
+    console.error(
+      "Dependency path required for `include` command: `xs-dev.mjs include moddable/network/wifi`"
+    );
+    process.exit(1);
+  }
+
+  if (dep.startsWith("moddable")) {
+    dep = dep.replace("moddable/", "");
+    const manifest = await fs.readJson("./manifest.json");
+    const includes = new Set(manifest.include);
+    includes.add(`$(MODDABLE)/modules/${dep}/manifest.json`);
+    await fs.outputJson("./manifest.json", {
+      ...manifest,
+      include: Array.from(includes),
+    });
+    console.log(chalk.green("Added module dependency to project!"));
+  } else {
+    console.warn("Only moddable dependencies are supported at this time.");
+  }
+
+  process.exit(0);
+}
+
 if (command === "run-example") {
   if (argv.list) {
     console.log(chalk.blue("Available example projects to run:"));

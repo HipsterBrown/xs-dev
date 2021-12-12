@@ -108,7 +108,7 @@ Flags:
 - `device`: `esp8266` | `esp32` | `mac` (defaults to `mac`)
 - `port`: path to port for connected device (defaults to: `/dev/cu.SLAB_USBtoUART`)
 
-## Project management (Coming soon)
+## Project management
 
 ### Start a project
 
@@ -121,7 +121,7 @@ Creates a `main.js` and base configured `manifest.json` for running in the simul
 
 Flags:
 
-- `device`: `esp8266` | `esp23` (set the default platform for the project)
+- `typescript`: includes typings and creates `main.ts` (experimental)
 
 ### Build and run a project
 
@@ -134,7 +134,7 @@ Flags:
 - `device`: `esp8266` | `esp32` | `mac` (defaults to `mac`)
 - `port`: path to port for connected device (defaults to: `/dev/cu.SLAB_USBtoUART`)
 
-### Add a core dependency
+### Add a core dependency (Coming soon)
 
 ```
 ./xs-dev.mjs include moddable/network/wifi
@@ -142,7 +142,7 @@ Flags:
 
 Updates the `manifest.json` with the path to the dependency.
 
-### Add a remote dependency
+### Add a remote dependency (Coming soon)
 
 ```
 ./xs-dev.mjs get dtex/j5e
@@ -156,7 +156,7 @@ To include a specific module for the installed dependency:
 ./xs-dev.mjs include j5e/lib/led
 ```
 
-### Remove a dependency
+### Remove a dependency (Coming soon)
 
 ```
 ./xs-dev.mjs remove moddable/network/wifi
