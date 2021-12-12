@@ -1,4 +1,4 @@
-# Setup CLI for [Moddable XS tools](https://github.com/Moddable-OpenSource/moddable/blob/public/documentation/Moddable%20SDK%20-%20Getting%20Started.md)
+# CLI for automating the setup and usage of [Moddable XS tools](https://github.com/Moddable-OpenSource/moddable/blob/public/documentation/Moddable%20SDK%20-%20Getting%20Started.md)
 
 The Moddable SDK and associated dev board tooling is incredibly empowering for embedded JS hardware development, however the set up process can be tedious to follow when getting started. This project aims to streamline the install and environment configuration requirements across platforms in just a few commands.
 
@@ -24,7 +24,7 @@ Globally install [`zx`](https://github.com/google/zx) before running the script.
 Clone this repo and `cd` into the directory:
 
 ```
-git clone https://github.com/HipsterBrown/xs-setup && cd xs-setup
+git clone https://github.com/HipsterBrown/xs-setup && cd xs-dev
 ```
 
 ## Features
@@ -40,31 +40,43 @@ This process mostly automates the instructions provided by Moddable's "Getting S
 Run script for initial setup:
 
 ```
-./xs-setup.mjs
+./xs-dev.mjs setup
 ```
 
 Run script for updating SDK:
 
 ```
-./xs-setup.mjs update
+./xs-dev.mjs update
 ```
 
 ### ESP32 SDK install / setup
 
 This process automates the instructions for downloading and building the esp-idf SDK tooling.
 
-Run script:
+Run script for platform setup:
 
 ```
-./xs-setup.mjs --device=esp32
+./xs-dev.mjs setup --device=esp32
+```
+
+Run script to confirm the setup:
+
+```
+./xs-dev.mjs test --device=esp32
 ```
 
 ### ESP8266 SDK install / setup
 
 This process automates the instructions for downloading all the dependencies for the ESP8266 RTOS SDK.
 
-Run script:
+Run script for platform setup:
 
 ```
-./xs-setup.mjs --device=esp8266
+./xs-dev.mjs setup --device=esp8266
+```
+
+Run script to confirm the setup:
+
+```
+./xs-dev.mjs test --device=esp8266
 ```
