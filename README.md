@@ -10,6 +10,7 @@ The Moddable SDK and associated dev board tooling is incredibly empowering for e
 - [ ] [Gecko SDK setup](https://github.com/Moddable-OpenSource/moddable/blob/public/documentation/devices/gecko/GeckoBuild.md)
 - [ ] [QCA4020 SDK setup](https://github.com/Moddable-OpenSource/moddable/blob/public/documentation/devices/qca4020/README.md)
 - [X] Update Moddable SDK
+- [ ] Project management, including dependencies
 
 **Platform support:**
 
@@ -80,3 +81,85 @@ Run script to confirm the setup:
 ```
 ./xs-dev.mjs test --device=esp8266
 ```
+
+### Run Moddable examples
+
+While it is still possible to run the Moddable example projects in the documented workflow:
+
+```
+cd $MODDABLE/examples/<example directory>
+mcconfig -d -m -p <platform here>
+```
+
+This tool aims to simplify that process.
+
+List available examples:
+```
+./xs-dev.mjs run-example --list
+```
+
+Run an example:
+```
+./xs-dev.mjs run-example helloworld
+```
+
+Flags:
+
+- `device`: `esp8266` | `esp32` | `mac` (defaults to `mac`)
+- `port`: path to port for connected device (defaults to: `/dev/cu.SLAB_USBtoUART`)
+
+## Project management (Coming soon)
+
+### Start a project
+
+
+```
+./xs-dev.mjs init my-project
+```
+
+Creates a `main.js` and base configured `manifest.json` for running in the simulator.
+
+Flags:
+
+- `device`: `esp8266` | `esp23` (set the default platform for the project)
+
+### Build and run a project
+
+```
+./xs-dev.mjs run path/to/project
+```
+
+Flags:
+
+- `device`: `esp8266` | `esp32` | `mac` (defaults to `mac`)
+- `port`: path to port for connected device (defaults to: `/dev/cu.SLAB_USBtoUART`)
+
+### Add a core dependency
+
+```
+./xs-dev.mjs include moddable/network/wifi
+```
+
+Updates the `manifest.json` with the path to the dependency.
+
+### Add a remote dependency
+
+```
+./xs-dev.mjs get dtex/j5e
+```
+
+Assumes the dependency is a GitHub repo, clones it to `~/.local/share`, creates an environment variable with the name of the repo, and updates the `manifest.json` with the path to that dependency.
+
+To include a specific module for the installed dependency:
+
+```
+./xs-dev.mjs include j5e/lib/led
+```
+
+### Remove a dependency
+
+```
+./xs-dev.mjs remove moddable/network/wifi
+```
+
+Updates the `manifest.json` to remove the dependency.

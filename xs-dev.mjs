@@ -27,6 +27,17 @@ async function existsInProfile(str) {
   return file.includes(str);
 }
 
+if (command === "run-example") {
+  if (argv.list) {
+    console.log(chalk.blue("Available example projects to run:"));
+    // read $MODDABLE/examples to find all directories with a manifest.json
+    cd(path.resolve(INSTALL_PATH, "examples"));
+    await exec`ls -d */`;
+  }
+
+  process.exit(0);
+}
+
 if (command === "update") {
   console.log(chalk.blue("Updating Moddable SDK"));
 
