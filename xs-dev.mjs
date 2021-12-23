@@ -72,7 +72,8 @@ if (command === "run") {
 
   const devices = { esp32: "esp32", esp8266: "esp" };
   const PLATFORM = devices[argv.device] || "mac";
-  const UPLOAD_PORT = argv.port || "/dev/cu.SLAB_USBtoUART";
+  const UPLOAD_PORT =
+    argv.port || process.env.UPLOAD_PORT || "/dev/cu.SLAB_USBtoUART";
 
   await exec`UPLOAD_PORT=${UPLOAD_PORT} mcconfig -d -m -p ${PLATFORM}`;
   process.exit(0);
