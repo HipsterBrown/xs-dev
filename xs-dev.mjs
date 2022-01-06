@@ -3,7 +3,8 @@
 const MODDABLE_REPO = "https://github.com/Moddable-OpenSource/moddable";
 const HOME_DIR = os.homedir();
 const INSTALL_DIR = path.resolve(HOME_DIR, ".local", "share");
-const INSTALL_PATH = path.resolve(INSTALL_DIR, "moddable");
+const INSTALL_PATH =
+  process.env.MODDABLE || path.resolve(INSTALL_DIR, "moddable");
 const BIN_PATH = path.resolve(INSTALL_PATH, "build", "bin", "mac", "release");
 const exec = $;
 const [, command] = argv._;
@@ -70,11 +71,14 @@ if (command === "run") {
 
   cd(projectPath);
 
-  const devices = { esp32: "esp32", esp8266: "esp" };
-  const PLATFORM = devices[argv.device] || "mac";
+  const deviceAliases = { esp8266: "esp" };
+  const osPlatforms = { darwin: "mac", windows_nt: "win", linux: "lin" };
+  const PLATFORM =
+    deviceAliases[argv.device] ||
+    argv.device ||
+    osPlatforms[os.type().toLowerCase()];
   const UPLOAD_PORT =
     argv.port || process.env.UPLOAD_PORT || "/dev/cu.SLAB_USBtoUART";
-
   await exec`UPLOAD_PORT=${UPLOAD_PORT} mcconfig -d -m -p ${PLATFORM}`;
   process.exit(0);
 }
@@ -118,10 +122,21 @@ if (command === "run-example") {
 }
 
 if (command === "update") {
-  console.log(chalk.blue("Updating Moddable SDK"));
+  console.log(chalk.blue("Checking for SDK changes"));
 
   // 1. update clone of repo
   cd(INSTALL_PATH);
+  const { stdout: currentRev } = await exec`git rev-parse public`;
+  const {
+    stdout: removeRev,
+  } = await exec`git ls-remote origin refs/heads/public`;
+
+  if (removeRev.split("\t").shift() === currentRev.trim()) {
+    console.log(chalk.green("Moddable SDK already up to date!"));
+    process.exit(0);
+  }
+
+  console.log(chalk.blue("Updating Moddable SDK"));
   await exec`git pull`.pipe(process.stdout);
 
   // 2. clear build cache
@@ -142,10 +157,15 @@ if (command === "update") {
 }
 
 if (command === "test") {
-  const devices = { esp32: "esp32", esp8266: "esp" };
-  const PLATFORM = devices[argv.device] || "mac";
-  console.log(chalk.blue("Running hello world example for ESP32"));
-  const UPLOAD_PORT = argv.port || "/dev/cu.SLAB_USBtoUART";
+  const deviceAliases = { esp8266: "esp" };
+  const osPlatforms = { darwin: "mac", windows_nt: "win", linux: "lin" };
+  const PLATFORM =
+    deviceAliases[argv.device] ||
+    argv.device ||
+    osPlatforms[os.type().toLowerCase()];
+  console.log(chalk.blue(`Running hello world example for ${PLATFORM}`));
+  const UPLOAD_PORT =
+    argv.port || process.env.UPLOAD_PORT || "/dev/cu.SLAB_USBtoUART";
 
   cd(path.resolve(INSTALL_PATH, "examples", "helloworld"));
   await exec`UPLOAD_PORT=${UPLOAD_PORT} mcconfig -d -m -p ${PLATFORM}`;
@@ -171,16 +191,10 @@ if (command === "setup") {
     }
     // 3. brew install python3, cmake, ninja, dfu-util
     console.log(chalk.blue("Installing / upgrading homebrew dependencies"));
-    await exec`arch -arm64 brew install python; arch -arm64 brew upgrade python`.pipe(
-      process.stdout
-    );
-    await exec`arch -arm64 brew install cmake; arch -arm64 brew upgrade cmake`.pipe(
-      process.stdout
-    );
-    await exec`arch -arm64 brew install ninja; arch -arm64 brew upgrade ninja`.pipe(
-      process.stdout
-    );
-    await exec`arch -arm64 brew install dfu-util; arch -arm64 brew upgrade dfu-util`.pipe(
+    await exec`brew install python; brew upgrade python`.pipe(process.stdout);
+    await exec`brew install cmake; brew upgrade cmake`.pipe(process.stdout);
+    await exec`brew install ninja; brew upgrade ninja`.pipe(process.stdout);
+    await exec`brew install dfu-util; brew upgrade dfu-util`.pipe(
       process.stdout
     );
 
@@ -338,7 +352,7 @@ if (command === "setup") {
 
   console.log(
     chalk.green(`
-    Moddable SDK successfully set up! Start the xsbug.app and run the "helloworld example": ./xs-dev.mjs test'
+    Moddable SDK successfully set up! Start the xsbug.app and run the "helloworld example": ./xs-dev.mjs uest'
   `)
   );
 }

@@ -2,6 +2,8 @@
 
 The Moddable SDK and associated dev board tooling is incredibly empowering for embedded JS hardware development, however the set up process can be tedious to follow when getting started. This project aims to streamline the install and environment configuration requirements across platforms in just a few commands.
 
+**This project is a work in progress and should be considered pre-1.0.**
+
 **Feature support:**
 
 - [X] [Moddable SDK install & setup](https://github.com/Moddable-OpenSource/moddable/blob/public/documentation/Moddable%20SDK%20-%20Getting%20Started.md)
@@ -25,7 +27,7 @@ Globally install [`zx`](https://github.com/google/zx) before running the script.
 Clone this repo and `cd` into the directory:
 
 ```
-git clone https://github.com/HipsterBrown/xs-setup && cd xs-dev
+git clone https://github.com/HipsterBrown/xs-setup && cd xs-setup
 ```
 
 ## Features
@@ -66,6 +68,11 @@ Run script to confirm the setup:
 ./xs-dev.mjs test --device=esp32
 ```
 
+Flags:
+
+- `device`: `esp8266` | `esp32` | [any of the allowed platform identifiers](https://github.com/Moddable-OpenSource/moddable/blob/public/documentation/tools/tools.md#arguments) (defaults to current OS platform)
+- `port`: path to port for connected device (defaults to: `UPLOAD_PORT` environment variable)
+
 ### ESP8266 SDK install / setup
 
 This process automates the instructions for downloading all the dependencies for the ESP8266 RTOS SDK.
@@ -81,6 +88,11 @@ Run script to confirm the setup:
 ```
 ./xs-dev.mjs test --device=esp8266
 ```
+
+Flags:
+
+- `device`: `esp8266` | `esp32` | [any of the allowed platform identifiers](https://github.com/Moddable-OpenSource/moddable/blob/public/documentation/tools/tools.md#arguments) (defaults to current OS platform)
+- `port`: path to port for connected device (defaults to: `UPLOAD_PORT` environment variable)
 
 ### Run Moddable examples
 
@@ -98,15 +110,15 @@ List available examples:
 ./xs-dev.mjs run-example --list
 ```
 
-Run an example:
+Run an example (coming soon):
 ```
 ./xs-dev.mjs run-example helloworld
 ```
 
 Flags:
 
-- `device`: `esp8266` | `esp32` | `mac` (defaults to `mac`)
-- `port`: path to port for connected device (defaults to: `/dev/cu.SLAB_USBtoUART`)
+- `device`: `esp8266` | `esp32` | [any of the allowed platform identifiers](https://github.com/Moddable-OpenSource/moddable/blob/public/documentation/tools/tools.md#arguments) (defaults to current OS platform)
+- `port`: path to port for connected device (defaults to: `UPLOAD_PORT` environment variable)
 
 ## Project management
 
@@ -131,8 +143,8 @@ Flags:
 
 Flags:
 
-- `device`: `esp8266` | `esp32` | `mac` (defaults to `mac`)
-- `port`: path to port for connected device (defaults to: `/dev/cu.SLAB_USBtoUART`)
+- `device`: `esp8266` | `esp32` | [any of the allowed platform identifiers](https://github.com/Moddable-OpenSource/moddable/blob/public/documentation/tools/tools.md#arguments) (defaults to current OS platform)
+- `port`: path to port for connected device (defaults to: `UPLOAD_PORT` environment variable)
 
 ### Add a core dependency (Coming soon)
 
