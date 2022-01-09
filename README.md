@@ -13,7 +13,7 @@ The Moddable SDK and associated dev board tooling is incredibly empowering for e
 - [ ] [QCA4020 SDK setup](https://github.com/Moddable-OpenSource/moddable/blob/public/documentation/devices/qca4020/README.md)
 - [X] Update Moddable SDK
 - [ ] Project management, including dependencies
-- [ ] WASM simulator
+- [X] WASM simulator
 - [ ] Raspberry Pi Pico
 
 **Platform support:**
@@ -95,6 +95,25 @@ Flags:
 
 - `device`: `esp8266` | `esp32` | [any of the allowed platform identifiers](https://github.com/Moddable-OpenSource/moddable/blob/public/documentation/tools/tools.md#arguments) (defaults to current OS platform)
 - `port`: path to port for connected device (defaults to: `UPLOAD_PORT` environment variable)
+
+### Wasm Simulator install / setup
+
+This process automates the instructions for downloading all the dependencies for the [wasm simulator](https://github.com/Moddable-OpenSource/moddable/blob/public/documentation/devices/wasm.md) and building the Moddable tooling. These dependencies will be placed in `~/.local/share/wasm`, which will be created if it doesn't exist.
+
+Run script for platform setup:
+
+```
+./xs-dev.mjs setup --device=wasm
+```
+
+_If there are issues building the Moddable wasm tools, please try running `eval $SHELL` or starting a new shell insance before running the setup script again._
+
+
+Run script to confirm the setup:
+
+```
+./xs-dev.mjs test --device=wasm
+```
 
 ### Run Moddable examples
 

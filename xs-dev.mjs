@@ -174,10 +174,92 @@ if (command === "test") {
 
   cd(path.resolve(INSTALL_PATH, "examples", "helloworld"));
   await exec`UPLOAD_PORT=${UPLOAD_PORT} mcconfig -d -m -p ${PLATFORM}`;
+
+  if (argv.device === "wasm") {
+    cd(
+      path.resolve(
+        process.env.MODDABLE,
+        "build",
+        "bin",
+        "wasm",
+        "debug",
+        "helloworld"
+      )
+    );
+    console.log(
+      chalk.blue(
+        `Starting python server on port 8000, go to http://localhost:8000 in your browser to view simulator`
+      )
+    );
+    await exec`python3 -m http.server`;
+  }
+
   process.exit(0);
 }
 
 if (command === "setup") {
+  if (argv.device === "wasm") {
+    console.log(chalk.blue(`Setting up Wasm simulator`));
+    const EMSDK_REPO = "https://github.com/emscripten-core/emsdk.git";
+    const BINARYEN_REPO = "https://github.com/WebAssembly/binaryen.git";
+    const WASM_DIR = path.resolve(INSTALL_DIR, "wasm");
+    const EMSDK_PATH = path.resolve(WASM_DIR, "emsdk");
+    const BINARYEN_PATH = path.resolve(WASM_DIR, "binaryen");
+
+    // 0. ensure wasm instal directory
+    console.log(chalk.blue("Ensuring wasm directory"));
+    await fs.ensureDir(WASM_DIR);
+
+    // 1. Clone EM_SDK repo, install, and activate latest version
+    if (!(await fs.pathExists(EMSDK_PATH))) {
+      console.log(chalk.blue("Cloning emsdk repo"));
+      await exec`git clone ${EMSDK_REPO} ${EMSDK_PATH}`;
+      cd(EMSDK_PATH);
+      await exec`./emsdk install latest`.pipe(process.stdout);
+      await exec`./emsdk activate latest`.pipe(process.stdout);
+    }
+
+    // 2. CLone Binaryen repo and build
+    if (!(await fs.pathExists(BINARYEN_PATH))) {
+      console.log(chalk.blue("Cloning binaryen repo"));
+      await exec`git clone ${BINARYEN_REPO} ${BINARYEN_PATH}`;
+      cd(BINARYEN_PATH);
+
+      if (!(await depExists("cmake"))) {
+        await exec`brew install cmake`.pipe(process.stdout);
+      }
+
+      await exec`cmake . && make`.pipe(process.stdout);
+    }
+
+    // 3. Setup PATH and env variables for EM_SDK and Binaryen
+    if (!(await existsInProfile("emsdk_env.sh"))) {
+      console.log(
+        chalk.blue("Sourcing emsdk environment and adding binaryen to PATH")
+      );
+      await appendToProfile(`
+source ${path.resolve(EMSDK_PATH, "emsdk_env.sh")}
+export PATH=${path.resolve(BINARYEN_PATH, "bin")}:$PATH
+      `);
+      await exec`source ${path.resolve(EMSDK_PATH, "emsdk_env.sh")}`;
+      process.env.PATH += path.resolve(BINARYEN_PATH, "bin");
+    }
+
+    // 4. Build Moddable WASM tools
+    console.log(chalk.blue("Building Moddable wasm tools"));
+    cd(path.resolve(process.env.MODDABLE, "build", "makefiles", "wasm"));
+    await exec`make`.pipe(process.stdout);
+
+    // 5. Success and test w/ wasm target
+    console.log(
+      chalk.green(`
+      Successfully set up wasm platform support for Moddable!
+      Test out the setup by plugging in your device and running: ./xs-dev.mjs test --device=wasm
+    `)
+    );
+    process.exit(0);
+  }
+
   if (argv.device === "esp32") {
     console.log(chalk.blue("Setting up ESP32 SDK"));
     const ESP_IDF_REPO = "https://github.com/espressif/esp-idf.git";
