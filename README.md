@@ -13,6 +13,8 @@ The Moddable SDK and associated dev board tooling is incredibly empowering for e
 - [ ] [QCA4020 SDK setup](https://github.com/Moddable-OpenSource/moddable/blob/public/documentation/devices/qca4020/README.md)
 - [X] Update Moddable SDK
 - [ ] Project management, including dependencies
+- [ ] WASM simulator
+- [ ] Raspberry Pi Pico
 
 **Platform support:**
 
@@ -54,7 +56,7 @@ Run script for updating SDK:
 
 ### ESP32 SDK install / setup
 
-This process automates the instructions for downloading and building the esp-idf SDK tooling.
+This process automates the instructions for downloading and building the esp-idf SDK tooling. This tooling will be placed in the `~/.local/share/esp32` directory, which will be created if it doesn't exist.
 
 Run script for platform setup:
 
@@ -75,7 +77,7 @@ Flags:
 
 ### ESP8266 SDK install / setup
 
-This process automates the instructions for downloading all the dependencies for the ESP8266 RTOS SDK.
+This process automates the instructions for downloading all the dependencies for the ESP8266 RTOS SDK. These dependencies will be placed in the `~/.local/share/esp` directory, which will be created if it doesn't exist.
 
 Run script for platform setup:
 

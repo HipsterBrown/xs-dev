@@ -28,6 +28,11 @@ async function existsInProfile(str) {
   return file.includes(str);
 }
 
+async function depExists(tool) {
+  const { stdout: result } = await exec`which ${tool}`;
+  return !result.includes("not found");
+}
+
 if (command === "init") {
   const [, , name] = argv._;
 
@@ -191,15 +196,21 @@ if (command === "setup") {
     }
     // 3. brew install python3, cmake, ninja, dfu-util
     console.log(chalk.blue("Installing / upgrading homebrew dependencies"));
-    await exec`brew install python; brew upgrade python`.pipe(process.stdout);
-    await exec`brew install cmake; brew upgrade cmake`.pipe(process.stdout);
-    await exec`brew install ninja; brew upgrade ninja`.pipe(process.stdout);
-    await exec`brew install dfu-util; brew upgrade dfu-util`.pipe(
-      process.stdout
-    );
+    if (!(await depExists("python"))) {
+      await exec`brew install python`.pipe(process.stdout);
+    }
+    if (!(await depExists("cmake"))) {
+      await exec`brew install cmake`.pipe(process.stdout);
+    }
+    if (!(await depExists("ninja"))) {
+      await exec`brew install ninja`.pipe(process.stdout);
+    }
+    if (!(await depExists("dfu-util"))) {
+      await exec`brew install dfu-util`.pipe(process.stdout);
+    }
 
     // 4. install pip, if needed
-    if (!(await exec`which pip3`)) {
+    if (!(await depExists("pip3"))) {
       console.log(chalk.blue("Installing pip3"));
       await exec`sudo easy_install pip3`.pipe(process.stdout);
     }
@@ -245,7 +256,7 @@ if (command === "setup") {
       "https://github.com/esp8266/Arduino/releases/download/2.3.0/esp8266-2.3.0.zip";
     const ESP_RTOS_REPO = "https://github.com/espressif/ESP8266_RTOS_SDK.git";
     const ESP_BRANCH = "release/v3.2";
-    const ESP_DIR = path.resolve(process.env.HOME, "esp");
+    const ESP_DIR = path.resolve(INSTALL_DIR, "esp");
     const RTOS_PATH = path.resolve(ESP_DIR, "ESP8266_RTOS_SDK");
 
     // 1. ensure ~/.local/share/esp directory
@@ -275,15 +286,27 @@ if (command === "setup") {
 
     // 6. ensure python, pip, and pyserial are installed
     console.log(chalk.blue("Installing / upgrading homebrew dependencies"));
-    await exec`brew install python; brew upgrade python`.pipe(process.stdout);
+    if (await depExists("python")) {
+      console.log(chalk.blue("Python dependency exists"));
+    } else {
+      await exec`brew install python`.pipe(process.stdout);
+    }
 
-    if (!(await exec`which pip`)) {
+    if (!(await depExists("pip"))) {
       console.log(chalk.blue("Installing pip"));
       await exec`sudo easy_install pip`.pipe(process.stdout);
     }
 
     console.log(chalk.blue("Installing pyserial"));
     await exec`python -m pip install pyserial`.pipe(process.stdout);
+
+    // 7. create ESP_BARE env export in shell profile
+    if (!process.env.ESP_BASE) {
+      console.log(chalk.blue("Configuring $ESP_BASE"));
+      process.env.ESP_BASE = ESP_DIR;
+      await appendToProfile(`export ESP_BASE=${process.env.ESP_BASE}`);
+      await exec`export ESP_BASE=${process.env.ESP_BASE}`;
+    }
 
     console.log(
       chalk.green(`
