@@ -275,9 +275,7 @@ if (command === "setup") {
 
     // 6. ensure python, pip, and pyserial are installed
     console.log(chalk.blue("Installing / upgrading homebrew dependencies"));
-    await exec`arch -arm64 brew install python; arch -arm64 brew upgrade python`.pipe(
-      process.stdout
-    );
+    await exec`brew install python; brew upgrade python`.pipe(process.stdout);
 
     if (!(await exec`which pip`)) {
       console.log(chalk.blue("Installing pip"));
@@ -352,7 +350,7 @@ if (command === "setup") {
 
   console.log(
     chalk.green(`
-    Moddable SDK successfully set up! Start the xsbug.app and run the "helloworld example": ./xs-dev.mjs uest'
+    Moddable SDK successfully set up! Start the xsbug.app and run the "helloworld example": ./xs-dev.mjs test'
   `)
   );
 }
