@@ -85,6 +85,27 @@ if (command === "run") {
   const UPLOAD_PORT =
     argv.port || process.env.UPLOAD_PORT || "/dev/cu.SLAB_USBtoUART";
   await exec`UPLOAD_PORT=${UPLOAD_PORT} mcconfig -d -m -p ${PLATFORM}`;
+
+  if (argv.device === "wasm") {
+    console.log(__dirname);
+    cd(
+      path.resolve(
+        process.env.MODDABLE,
+        "build",
+        "bin",
+        "wasm",
+        "debug",
+        process.cwd().split("/").pop()
+      )
+    );
+    console.log(
+      chalk.blue(
+        `Starting python server on port 8000, go to http://localhost:8000 in your browser to view simulator`
+      )
+    );
+    await exec`python3 -m http.server`;
+  }
+
   process.exit(0);
 }
 
