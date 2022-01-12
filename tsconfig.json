@@ -3,26 +3,27 @@
     "allowSyntheticDefaultImports": false,
     "experimentalDecorators": true,
     "lib": [
-      "es2015",
-      "scripthost",
-      "es2015.promise",
-      "es2015.generator",
-      "es2015.iterable",
-      "dom"
+      "esnext",
+      "scripthost"
     ],
     "module": "commonjs",
     "moduleResolution": "node",
-    "noImplicitAny": false,
+    "noImplicitAny": true,
     "noImplicitThis": true,
     "noUnusedLocals": true,
     "sourceMap": false,
     "inlineSourceMap": true,
     "outDir": "build",
     "strict": false,
-    "target": "es5",
+    "strictNullChecks": true,
+    "target": "es2018",
     "declaration": true,
     "declarationDir": "build/types"
   },
-  "include": ["src/**/*"],
-  "exclude": ["node_modules"]
+  "include": [
+    "src/**/*"
+  ],
+  "exclude": [
+    "node_modules"
+  ]
 }
