@@ -1,9 +1,9 @@
-import type { GluegunToolbox } from 'gluegun'
+import type { GluegunCommand } from 'gluegun'
 
-module.exports = {
+const command: GluegunCommand = {
   name: 'generate',
   alias: ['g'],
-  run: async (toolbox: GluegunToolbox) => {
+  run: async (toolbox) => {
     const {
       parameters,
       template: { generate },
@@ -23,3 +23,5 @@ module.exports = {
     }
   },
 }
+
+export default command

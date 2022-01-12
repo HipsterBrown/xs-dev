@@ -9,7 +9,6 @@ async function run(argv: string[]): Promise<GluegunToolbox> {
   const cli = build()
     .brand('xs-dev')
     .src(__dirname)
-    .plugins('./node_modules', { matching: 'xs-dev-*', hidden: true })
     .help() // provides default for help, h, --help, -h
     .version() // provides default for version, v, --version, -v
     .create()
@@ -17,10 +16,7 @@ async function run(argv: string[]): Promise<GluegunToolbox> {
   // this can improve performance if they're not necessary for your project:
   // .exclude(['meta', 'strings', 'print', 'filesystem', 'semver', 'system', 'prompt', 'http', 'template', 'patching', 'package-manager'])
   // and run it
-  const toolbox = await cli.run(argv)
-
-  // send it back (for testing, mostly)
-  return toolbox
+  return await cli.run(argv)
 }
 
 module.exports = { run }
