@@ -1,16 +1,24 @@
 import type { XSDevToolbox } from '../types'
 
-export default (toolbox: XSDevToolbox): void => {
+export default async (toolbox: XSDevToolbox): Promise<void> => {
+  const { filesystem, system, print, patching } = toolbox
+  const HOME_DIR = filesystem.homedir()
+  const INSTALL_DIR = filesystem.resolve(HOME_DIR, '.local', 'share')
+  const INSTALL_PATH =
+    process.env.MODDABLE ?? filesystem.resolve(INSTALL_DIR, 'moddable')
+  const PROFILE = await (async function () {
+    const shell = process.env.SHELL ?? (await system.run(`echo $0`))
+    if (shell.includes('zsh')) return '.zshrc'
+    if (shell.includes('bash')) return '.bashrc'
+    return '.profile'
+  })()
+  const PROFILE_PATH = filesystem.resolve(HOME_DIR, PROFILE)
+
   toolbox.setup = {
     darwin: async () => {
-      const { filesystem, system, print, patching } = toolbox
       print.info('Setting up the mac tools!')
-
-      const HOME_DIR = filesystem.homedir()
-      const INSTALL_DIR = filesystem.resolve(HOME_DIR, '.local', 'share')
-      const INSTALL_PATH =
-        process.env.MODDABLE ?? filesystem.resolve(INSTALL_DIR, 'moddable')
       const MODDABLE_REPO = 'https://github.com/Moddable-OpenSource/moddable'
+
       const BIN_PATH = filesystem.resolve(
         INSTALL_PATH,
         'build',
@@ -24,17 +32,10 @@ export default (toolbox: XSDevToolbox): void => {
         'makefiles',
         'mac'
       )
-      const PROFILE = await (async function () {
-        const shell = process.env.SHELL ?? (await system.run(`echo $0`))
-        if (shell.includes('zsh')) return '.zshrc'
-        if (shell.includes('bash')) return '.bashrc'
-        return '.profile'
-      })()
-      const PROFILE_PATH = filesystem.resolve(HOME_DIR, PROFILE)
 
       // 0. ensure xcode command line tools are available (?)
       try {
-        await system.run('xcode-select -p')
+        await system.spawn('xcode-select -p')
       } catch (error) {
         print.error(
           'Xcode command line tools are required to build the SDK: https://developer.apple.com/xcode/'
@@ -54,7 +55,7 @@ export default (toolbox: XSDevToolbox): void => {
         print.info('Moddable repo already installed')
       } else {
         try {
-          await system.run(`git clone ${MODDABLE_REPO} ${INSTALL_PATH}`)
+          await system.spawn(`git clone ${MODDABLE_REPO} ${INSTALL_PATH}`)
         } catch (error) {
           print.error(`Error cloning moddable repo: ${String(error)}`)
           process.exit(1)
@@ -79,7 +80,7 @@ export default (toolbox: XSDevToolbox): void => {
       // 3. cd into makefiles dir for platform, run `make`
       try {
         const dir = filesystem.cwd(filesystem.resolve(BUILD_DIR))
-        await system.run('make', { cwd: dir.cwd() })
+        await system.spawn('make', { cwd: dir.cwd() })
       } catch (error) {
         print.error(`Error building mac tooling: ${String(error)}`)
         process.exit(1)
@@ -109,8 +110,83 @@ export default (toolbox: XSDevToolbox): void => {
     windows_nt: async () =>
       toolbox.print.warning('Windows setup is not currently supported'),
     esp: async () => toolbox.print.info('Setting up esp8266 tools'),
-    esp8266: async () => toolbox.info('Setting up esp8266 tools'),
-    esp32: async () => toolbox.info('Setting up esp32 tools'),
-    wasm: async () => toolbox.info('Setting up wasm tools'),
+    esp8266: async () => toolbox.print.info('Setting up esp8266 tools'),
+    esp32: async () => toolbox.print.info('Setting up esp32 tools'),
+    wasm: async () => {
+      const EMSDK_REPO = 'https://github.com/emscripten-core/emsdk.git'
+      const BINARYEN_REPO = 'https://github.com/WebAssembly/binaryen.git'
+      const WASM_DIR = filesystem.resolve(INSTALL_DIR, 'wasm')
+      const EMSDK_PATH = filesystem.resolve(WASM_DIR, 'emsdk')
+      const BINARYEN_PATH = filesystem.resolve(WASM_DIR, 'binaryen')
+
+      print.info('Setting up wasm simulator tools')
+
+      // 0. ensure wasm instal directory and Moddable exists
+      if (process.env.MODDABLE === undefined) {
+        print.warning(
+          'Moddable tooling required. Run `xs-dev setup` before trying again.'
+        )
+        process.exit(1)
+      }
+      print.info('Ensuring wasm directory')
+      filesystem.dir(WASM_DIR)
+
+      // 1. Clone EM_SDK repo, install, and activate latest version
+      if (filesystem.exists(EMSDK_PATH) === false) {
+        print.info('Cloning emsdk repo')
+        try {
+          await system.spawn(`git clone ${EMSDK_REPO} ${EMSDK_PATH}`)
+          await system.spawn('./emsdk install latest', {
+            cwd: EMSDK_PATH,
+          })
+          await system.spawn('./emsdk activate latest', {
+            cwd: EMSDK_PATH,
+          })
+        } catch (error) {
+          print.error(`Error activating emsdk: ${String(error)}`)
+          process.exit(1)
+        }
+      }
+
+      // 2. Clone Binaryen repo and build
+      if (filesystem.exists(BINARYEN_PATH) === false) {
+        print.info('Cloning binaryen repo')
+        await system.spawn(`git clone ${BINARYEN_REPO} ${BINARYEN_PATH}`)
+
+        if (system.which('cmake') === null) {
+          print.info('Cmake required, installing with Homebrew')
+          await system.spawn('brew install cmake')
+        }
+
+        await system.spawn('cmake . && make', {
+          cwd: BINARYEN_PATH,
+        })
+      }
+
+      // 3. Setup PATH and env variables for EM_SDK and Binaryen
+      print.info('Sourcing emsdk environment and adding binaryen to PATH')
+      await patching.patch(PROFILE_PATH, {
+        insert: `source ${filesystem.resolve(EMSDK_PATH, 'emsdk_env.sh')}`,
+      })
+      await patching.patch(PROFILE_PATH, {
+        insert: `export PATH=${filesystem.resolve(BINARYEN_PATH, 'bin')}:$PATH`,
+      })
+      process.env.PATH = `$PATH:${filesystem.resolve(BINARYEN_PATH, 'bin')}`
+
+      // 4. Build Moddable WASM tools
+      print.info('Building Moddable wasm tools')
+      await system.spawn(`make`, {
+        cwd: filesystem.resolve(
+          String(process.env.MODDABLE),
+          'build',
+          'makefiles',
+          'wasm'
+        ),
+      })
+
+      print.success(
+        `Successfully set up wasm platform support for Moddable! Test out the setup by plugging in your device and running: xs-dev test --device wasm`
+      )
+    },
   }
 }

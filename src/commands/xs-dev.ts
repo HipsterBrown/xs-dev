@@ -6,6 +6,7 @@ const command: GluegunCommand = {
     const { print } = toolbox
 
     print.info('Welcome to XS Dev! Run xs-dev --help to learn more.')
+    print.printHelp(toolbox)
   },
 }
 
