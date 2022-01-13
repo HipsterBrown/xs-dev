@@ -5,7 +5,7 @@ const command: GluegunCommand = {
   run: async (toolbox) => {
     const { print } = toolbox
 
-    print.info('Welcome to your CLI')
+    print.info('Welcome to XS Dev! Run xs-dev --help to learn more.')
   },
 }
 

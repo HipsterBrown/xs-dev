@@ -10,9 +10,9 @@ const command: GluegunCommand<XSDevToolbox> = {
   name: 'setup',
   description:
     'Download and build Moddable tooling for various platform targets',
-  run: async ({ print, parameters, setup }) => {
-    const { device = platformType().toLowerCase() as Device }: SetupOptions =
-      parameters.options
+  run: async ({ parameters, setup }) => {
+    const currentPlatform: Device = platformType().toLowerCase() as Device
+    const { device = currentPlatform }: SetupOptions = parameters.options
     await setup[device]()
   },
 }
