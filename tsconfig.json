@@ -2,10 +2,7 @@
   "compilerOptions": {
     "allowSyntheticDefaultImports": false,
     "experimentalDecorators": true,
-    "lib": [
-      "esnext",
-      "scripthost"
-    ],
+    "lib": ["esnext", "scripthost"],
     "module": "commonjs",
     "moduleResolution": "node",
     "noImplicitAny": true,
@@ -20,10 +17,6 @@
     "declaration": true,
     "declarationDir": "build/types"
   },
-  "include": [
-    "src/**/*"
-  ],
-  "exclude": [
-    "node_modules"
-  ]
+  "include": ["src/**/*"],
+  "exclude": ["node_modules"]
 }

@@ -31,11 +31,16 @@
   ],
   "license": "MIT",
   "dependencies": {
-    "gluegun": "latest"
+    "axios": "^0.24.0",
+    "gluegun": "latest",
+    "tar-fs": "^2.1.1",
+    "unzip-stream": "^0.3.1"
   },
   "devDependencies": {
     "@types/jest": "^27.4.0",
     "@types/node": "^16.2.0",
+    "@types/tar-fs": "^2.0.1",
+    "@types/unzip-stream": "^0.3.1",
     "@typescript-eslint/eslint-plugin": "^4.0.1",
     "@typescript-eslint/parser": "^4.0.0",
     "eslint": "^7.12.1",
