@@ -1,5 +1,6 @@
-import { print, filesystem, system, patching } from 'gluegun'
+import { print, filesystem, system } from 'gluegun'
 import { INSTALL_DIR, PROFILE_PATH } from './constants'
+import upsert from '../patching/upsert'
 
 export default async function (): Promise<void> {
   const EMSDK_REPO = 'https://github.com/emscripten-core/emsdk.git'
@@ -54,13 +55,18 @@ export default async function (): Promise<void> {
 
   // 3. Setup PATH and env variables for EM_SDK and Binaryen
   print.info('Sourcing emsdk environment and adding binaryen to PATH')
-  await patching.patch(PROFILE_PATH, {
-    insert: `source ${filesystem.resolve(EMSDK_PATH, 'emsdk_env.sh')}`,
-  })
-  await patching.patch(PROFILE_PATH, {
-    insert: `export PATH=${filesystem.resolve(BINARYEN_PATH, 'bin')}:$PATH`,
-  })
-  process.env.PATH = `$PATH:${filesystem.resolve(BINARYEN_PATH, 'bin')}`
+  await upsert(
+    PROFILE_PATH,
+    `source ${filesystem.resolve(EMSDK_PATH, 'emsdk_env.sh')}`
+  )
+  await upsert(
+    PROFILE_PATH,
+    `export PATH=${filesystem.resolve(BINARYEN_PATH, 'bin')}:$PATH`
+  )
+  process.env.PATH = `${String(process.env.PATH)}:${filesystem.resolve(
+    BINARYEN_PATH,
+    'bin'
+  )}`
 
   // 4. Build Moddable WASM tools
   print.info('Building Moddable wasm tools')

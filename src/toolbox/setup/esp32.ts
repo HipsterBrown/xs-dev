@@ -1,5 +1,6 @@
-import { print, filesystem, system, patching, semver } from 'gluegun'
+import { print, filesystem, system, semver } from 'gluegun'
 import { INSTALL_DIR, PROFILE_PATH } from './constants'
+import upsert from '../patching/upsert'
 
 export default async function (): Promise<void> {
   const ESP_IDF_REPO = 'https://github.com/espressif/esp-idf.git'
@@ -21,7 +22,7 @@ export default async function (): Promise<void> {
   filesystem.dir(ESP32_DIR)
 
   // 2. clone esp-idf into ~/.local/share/esp32/esp-idf
-  if (filesystem.exists(IDF_PATH) === false) {
+  if (!filesystem.exists(IDF_PATH)) {
     print.info('Cloning esp-idf repo')
     await system.spawn(
       `git clone -b ${ESP_BRANCH} --recursive ${ESP_IDF_REPO} ${IDF_PATH}`
@@ -71,9 +72,7 @@ export default async function (): Promise<void> {
   if (process.env.IDF_PATH === undefined) {
     print.info('Configuring $IDF_PATH')
     process.env.IDF_PATH = IDF_PATH
-    await patching.patch(PROFILE_PATH, {
-      insert: `export IDF_PATH=${IDF_PATH}`,
-    })
+    await upsert(PROFILE_PATH, `export IDF_PATH=${IDF_PATH}`)
   }
 
   // 7. cd to IDF_PATH, run install.sh
@@ -82,13 +81,11 @@ export default async function (): Promise<void> {
 
   // 8. append 'source $IDF_PATH/export.sh' to shell profile
   print.info('Sourcing esp-idf environment')
-  await patching.patch(PROFILE_PATH, {
-    insert: `source $IDF_PATH/export.sh`,
-  })
+  await upsert(PROFILE_PATH, `source $IDF_PATH/export.sh`)
 
   print.success(`
-      Successfully set up esp32 platform support for Moddable!
-      Test out the setup by plugging in your device and running: xs-dev test --device=esp32
-      If there is trouble finding the correct port, pass the "--port" flag to the above command with the path to the "/dev.cu.*" that matches your device.
-      `)
+  Successfully set up esp32 platform support for Moddable!
+  Test out the setup by plugging in your device and running: xs-dev test --device=esp32
+  If there is trouble finding the correct port, pass the "--port" flag to the above command with the path to the "/dev.cu.*" that matches your device.
+  `)
 }

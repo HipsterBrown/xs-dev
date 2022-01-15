@@ -1,10 +1,11 @@
-import { print, filesystem, system, patching } from 'gluegun'
+import { print, filesystem, system } from 'gluegun'
 import axios from 'axios'
 import { finished } from 'stream/promises'
 import { extract } from 'tar-fs'
 import { createGunzip } from 'zlib'
 import { Extract as ZipExtract } from 'unzip-stream'
 import { INSTALL_DIR, PROFILE_PATH } from './constants'
+import upsert from '../patching/upsert'
 
 export default async function (): Promise<void> {
   const TOOLCHAIN =
@@ -38,9 +39,7 @@ export default async function (): Promise<void> {
     spinner.start('Downloading xtensa toolchain')
     const writer = extract(ESP_DIR, { readable: true })
     const gunzip = createGunzip()
-    const response = await axios({
-      url: TOOLCHAIN,
-      method: 'get',
+    const response = await axios.get(TOOLCHAIN, {
       responseType: 'stream',
     })
     response.data.pipe(gunzip).pipe(writer)
@@ -53,9 +52,7 @@ export default async function (): Promise<void> {
     const spinner = print.spin()
     spinner.start('Downloading arduino core tooling')
     const writer = ZipExtract({ path: ESP_DIR })
-    const response = await axios({
-      url: ARDUINO_CORE,
-      method: 'get',
+    const response = await axios.get(ARDUINO_CORE, {
       responseType: 'stream',
     })
     response.data.pipe(writer)
@@ -89,9 +86,7 @@ export default async function (): Promise<void> {
   if (process.env.ESP_BASE === undefined) {
     print.info('Configuring $ESP_BASE')
     process.env.ESP_BASE = ESP_DIR
-    await patching.patch(PROFILE_PATH, {
-      insert: `export ESP_BASE=${process.env.ESP_BASE}`,
-    })
+    await upsert(PROFILE_PATH, `export ESP_BASE=${process.env.ESP_BASE}`)
   }
 
   print.success(`

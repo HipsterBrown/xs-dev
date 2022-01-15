@@ -1,5 +1,6 @@
-import { print, filesystem, system, patching } from 'gluegun'
+import { print, filesystem, system } from 'gluegun'
 import { INSTALL_PATH, INSTALL_DIR, PROFILE_PATH } from './constants'
+import upsert from '../patching/upsert'
 
 export default async function (): Promise<void> {
   print.info('Setting up the mac tools!')
@@ -53,12 +54,8 @@ export default async function (): Promise<void> {
     process.env.MODDABLE = INSTALL_PATH
     process.env.PATH = `${String(process.env.PATH)}:${BIN_PATH}`
 
-    await patching.patch(PROFILE_PATH, {
-      insert: `export MODDABLE=${process.env.MODDABLE}`,
-    })
-    await patching.patch(PROFILE_PATH, {
-      insert: `export PATH="${BIN_PATH}:$PATH"`,
-    })
+    await upsert(PROFILE_PATH, `export MODDABLE=${process.env.MODDABLE}`)
+    await upsert(PROFILE_PATH, `export PATH="${BIN_PATH}:$PATH"`)
   } else {
     print.info(`Using current MODDABLE env: ${process.env.MODDABLE}`)
   }
