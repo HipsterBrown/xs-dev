@@ -2,6 +2,7 @@ import { GluegunCommand } from 'gluegun'
 
 const command: GluegunCommand = {
   name: 'xs-dev',
+  description: 'CLI for automating the setup and usage of Moddable XS tools',
   run: async (toolbox) => {
     const { print } = toolbox
 
