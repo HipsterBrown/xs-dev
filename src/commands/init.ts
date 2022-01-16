@@ -14,7 +14,7 @@ const command: GluegunCommand = {
       parameters,
       filesystem,
       template: { generate },
-      print: { warning, spin },
+      print: { warning, spin, info },
     } = toolbox
 
     const name = parameters.first
@@ -28,10 +28,12 @@ const command: GluegunCommand = {
 
       const includes = [
         io
-          ? '$(MODDABLE)/modules/io/manifest.json'
-          : '$(MODDABLE)/examples/manifest_base.json',
-        typescript && '$(MODDABLE)/examples/manifest_typings.json',
-      ].filter(Boolean)
+          ? '"$(MODDABLE)/modules/io/manifest.json"'
+          : '"$(MODDABLE)/examples/manifest_base.json"',
+        typescript && '"$(MODDABLE)/examples/manifest_typings.json"',
+      ]
+        .filter(Boolean)
+        .join(',\n\t')
 
       await generate({
         template: 'manifest.json.ejs',
@@ -45,6 +47,7 @@ const command: GluegunCommand = {
       })
 
       spinner.succeed()
+      info('Run the project using: xs-dev run')
     } else {
       warning(
         'Name is required to generate project: xs-dev init my-project-name'

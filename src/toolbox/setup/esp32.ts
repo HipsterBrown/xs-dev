@@ -22,7 +22,7 @@ export default async function (): Promise<void> {
   filesystem.dir(ESP32_DIR)
 
   // 2. clone esp-idf into ~/.local/share/esp32/esp-idf
-  if (!filesystem.exists(IDF_PATH)) {
+  if (filesystem.exists(IDF_PATH) === false) {
     print.info('Cloning esp-idf repo')
     await system.spawn(
       `git clone -b ${ESP_BRANCH} --recursive ${ESP_IDF_REPO} ${IDF_PATH}`
@@ -36,7 +36,7 @@ export default async function (): Promise<void> {
     system.which('python') === null ||
     // get python verion, check if v3
     semver.satisfies(
-      (await system.spawn('python --version', { trim: true })).stdout
+      (await system.exec('python --version', { trim: true }))
         .toString()
         .split(' ')
         .pop(),
