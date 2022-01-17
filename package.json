@@ -28,6 +28,10 @@
     "bin"
   ],
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/HipsterBrown/xs-dev.git"
+  },
   "dependencies": {
     "axios": "^0.24.0",
     "gluegun": "latest",
