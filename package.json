@@ -38,7 +38,7 @@
   },
   "devDependencies": {
     "@types/jest": "^27.4.0",
-    "@types/node": "^16.2.0",
+    "@types/node": "^12.12.0",
     "@types/serve-handler": "^6.1.1",
     "@types/tar-fs": "^2.0.1",
     "@types/unzip-stream": "^0.3.1",
