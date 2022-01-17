@@ -211,3 +211,19 @@ xs-dev remove network/wifi
 ```
 
 Updates the `manifest.json` to remove the dependency.
+
+## Development
+
+Clone the project and install dependencies. We're using [pnpm](https://pnpm.io/) and [volta](https://volta.sh/) to manage packages and Node.
+
+```
+git clone https://github.com/HipsterBrown/xs-dev.git
+cd xs-dev
+pnpm install
+```
+
+Link dev version of CLI:
+
+```
+pnpm link .
+```
