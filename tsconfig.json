@@ -1,8 +1,11 @@
 {
   "compilerOptions": {
-    "allowSyntheticDefaultImports": false,
+    "allowSyntheticDefaultImports": true,
     "experimentalDecorators": true,
-    "lib": ["esnext", "scripthost"],
+    "lib": [
+      "esnext",
+      "scripthost"
+    ],
     "module": "commonjs",
     "moduleResolution": "node",
     "noImplicitAny": true,
@@ -15,8 +18,13 @@
     "strictNullChecks": true,
     "target": "es2018",
     "declaration": true,
-    "declarationDir": "build/types"
+    "declarationDir": "build/types",
+    "esModuleInterop": true
   },
-  "include": ["src/**/*"],
-  "exclude": ["node_modules"]
+  "include": [
+    "src/**/*"
+  ],
+  "exclude": [
+    "node_modules"
+  ]
 }

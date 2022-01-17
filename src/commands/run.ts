@@ -1,5 +1,7 @@
 import type { GluegunCommand } from 'gluegun'
 import { type as platformType } from 'os'
+import handler from 'serve-handler'
+import { createServer } from 'http'
 import type { Device, XSDevToolbox } from '../types'
 
 interface RunOptions {
@@ -44,9 +46,6 @@ const command: GluegunCommand<XSDevToolbox> = {
     spinner.stop()
 
     if (targetPlatform === 'wasm') {
-      print.info(
-        'Starting python server on port 8000, go to http://localhost:8000 in your browser to view simulator'
-      )
       const buildName = String(projectPath.split('/').pop())
       const debugPath = filesystem.resolve(
         String(process.env.MODDABLE),
@@ -56,7 +55,13 @@ const command: GluegunCommand<XSDevToolbox> = {
         'debug',
         buildName
       )
-      await system.spawn('python3 -m http.server', { cwd: debugPath })
+      createServer((req, res) => {
+        void handler(req, res, { public: debugPath })
+      }).listen(8080, () => {
+        print.info(
+          'Started server on port 8080, go to http://localhost:8080 in your browser to view the simulator'
+        )
+      })
     }
   },
 }
