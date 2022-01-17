@@ -42,6 +42,22 @@ const command: GluegunCommand<XSDevToolbox> = {
     })
 
     spinner.stop()
+
+    if (targetPlatform === 'wasm') {
+      print.info(
+        'Starting python server on port 8000, go to http://localhost:8000 in your browser to view simulator'
+      )
+      const buildName = String(projectPath.split('/').pop())
+      const debugPath = filesystem.resolve(
+        String(process.env.MODDABLE),
+        'build',
+        'bin',
+        'wasm',
+        'debug',
+        buildName
+      )
+      await system.spawn('python3 -m http.server', { cwd: debugPath })
+    }
   },
 }
 

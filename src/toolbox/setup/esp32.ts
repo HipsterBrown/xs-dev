@@ -61,12 +61,12 @@ export default async function (): Promise<void> {
   // 4. install pip, if needed
   if (system.which('pip3') === null) {
     print.info('Installing pip3')
-    await system.spawn('sudo easy_install pip3')
+    await system.spawn('python3 -m ensurepip --user')
   }
 
   // 5. pip install pyserial, if needed
   print.info('Installing pyserial through pip3')
-  await system.spawn('python3 -m install pyserial')
+  await system.spawn('python3 -m pip install pyserial')
 
   // 6. append IDF_PATH env export to shell profile
   if (process.env.IDF_PATH === undefined) {
