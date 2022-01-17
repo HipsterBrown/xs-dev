@@ -3,6 +3,7 @@ import { type as platformType } from 'os'
 import handler from 'serve-handler'
 import { createServer } from 'http'
 import type { Device, XSDevToolbox } from '../types'
+import { collectChoicesFromTree } from '../toolbox/prompt/choices'
 
 interface RunOptions {
   device?: Device
@@ -20,33 +21,6 @@ const DEVICE_ALIAS: Record<Device | 'esp8266', string> = Object.freeze({
   esp32: 'esp32',
   wasm: 'wasm',
 })
-
-interface InspectTreeResult {
-  name: string
-  type: 'dir' | 'file' | 'symlink'
-  children: InspectTreeResult[]
-}
-function collectChoicesFromTree(
-  fd: InspectTreeResult,
-  results: string[] = [],
-  root: string = ''
-): string[] {
-  if (
-    fd.type === 'dir' &&
-    fd.children.find((file) => file.name === 'manifest.json') !== undefined
-  ) {
-    results.push(root + fd.name)
-  } else if (fd.type === 'dir') {
-    results.concat(
-      fd.children
-        .map((child) =>
-          collectChoicesFromTree(child, results, `${root}${fd.name}/`)
-        )
-        .flat()
-    )
-  }
-  return results.flat()
-}
 
 const command: GluegunCommand<XSDevToolbox> = {
   name: 'run',
