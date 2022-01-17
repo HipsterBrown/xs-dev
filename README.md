@@ -12,7 +12,7 @@ The Moddable SDK and associated dev board tooling is incredibly empowering for e
 - [ ] [Gecko SDK setup](https://github.com/Moddable-OpenSource/moddable/blob/public/documentation/devices/gecko/GeckoBuild.md)
 - [ ] [QCA4020 SDK setup](https://github.com/Moddable-OpenSource/moddable/blob/public/documentation/devices/qca4020/README.md)
 - [X] Update Moddable SDK
-- [ ] Project management, including dependencies
+- [X] Project management, including dependencies
 - [X] WASM simulator
 - [ ] Raspberry Pi Pico
 
@@ -22,14 +22,14 @@ The Moddable SDK and associated dev board tooling is incredibly empowering for e
 - [ ] Windows
 - [ ] Linux
 
-## Usage
+## Requirements
 
-Globally install [`zx`](https://github.com/google/zx) before running the script.
+[Node.js >= v12](https://nodejs.org/en/)
 
-Clone this repo and `cd` into the directory:
+## Install
 
 ```
-git clone https://github.com/HipsterBrown/xs-setup && cd xs-setup
+npm install -g xs-dev
 ```
 
 ## Features
@@ -45,13 +45,13 @@ This process mostly automates the instructions provided by Moddable's "Getting S
 Run script for initial setup:
 
 ```
-./xs-dev.mjs setup
+xs-dev setup
 ```
 
 Run script for updating SDK:
 
 ```
-./xs-dev.mjs update
+xs-dev update
 ```
 
 ### ESP32 SDK install / setup
@@ -61,13 +61,13 @@ This process automates the instructions for downloading and building the esp-idf
 Run script for platform setup:
 
 ```
-./xs-dev.mjs setup --device=esp32
+xs-dev setup --device=esp32
 ```
 
 Run script to confirm the setup:
 
 ```
-./xs-dev.mjs test --device=esp32
+xs-dev run --example helloworld --device=esp32
 ```
 
 Flags:
@@ -82,13 +82,13 @@ This process automates the instructions for downloading all the dependencies for
 Run script for platform setup:
 
 ```
-./xs-dev.mjs setup --device=esp8266
+xs-dev setup --device=esp8266
 ```
 
 Run script to confirm the setup:
 
 ```
-./xs-dev.mjs test --device=esp8266
+xs-dev run --example helloworld --device=esp8266
 ```
 
 Flags:
@@ -103,7 +103,7 @@ This process automates the instructions for downloading all the dependencies for
 Run script for platform setup:
 
 ```
-./xs-dev.mjs setup --device=wasm
+xs-dev setup --device=wasm
 ```
 
 _If there are issues building the Moddable wasm tools, please try running `eval $SHELL` or starting a new shell insance before running the setup script again._
@@ -112,7 +112,7 @@ _If there are issues building the Moddable wasm tools, please try running `eval 
 Run script to confirm the setup:
 
 ```
-./xs-dev.mjs test --device=wasm
+xs-dev run --example helloworld --device=wasm
 ```
 
 ### Run Moddable examples
@@ -128,12 +128,12 @@ This tool aims to simplify that process.
 
 List available examples:
 ```
-./xs-dev.mjs run-example --list
+xs-dev run --list-examples
 ```
 
 Run an example (coming soon):
 ```
-./xs-dev.mjs run-example helloworld
+xs-dev run --example helloworld
 ```
 
 Flags:
@@ -147,7 +147,7 @@ Flags:
 
 
 ```
-./xs-dev.mjs init my-project
+xs-dev init my-project
 ```
 
 Creates a `main.js` and base configured `manifest.json` for running in the simulator.
@@ -155,11 +155,20 @@ Creates a `main.js` and base configured `manifest.json` for running in the simul
 Flags:
 
 - `typescript`: includes typings and creates `main.ts` (experimental)
+- `io`: includes [TC53 IO manifest](https://github.com/Moddable-OpenSource/moddable/blob/public/documentation/io/io.md)
 
 ### Build and run a project
 
+In the project directory:
+
 ```
-./xs-dev.mjs run path/to/project
+xs-dev run
+```
+
+When not in the project directory:
+
+```
+xs-dev run path/to/project
 ```
 
 Flags:
@@ -167,10 +176,16 @@ Flags:
 - `device`: `esp8266` | `esp32` | [any of the allowed platform identifiers](https://github.com/Moddable-OpenSource/moddable/blob/public/documentation/tools/tools.md#arguments) (defaults to current OS platform)
 - `port`: path to port for connected device (defaults to: `UPLOAD_PORT` environment variable)
 
-### Add a core dependency (Coming soon)
+### Add a Moddable module
 
 ```
-./xs-dev.mjs include moddable/network/wifi
+xs-dev include network/wifi
+```
+
+Or select from available modules:
+
+```
+xs-dev include
 ```
 
 Updates the `manifest.json` with the path to the dependency.
@@ -178,7 +193,7 @@ Updates the `manifest.json` with the path to the dependency.
 ### Add a remote dependency (Coming soon)
 
 ```
-./xs-dev.mjs get dtex/j5e
+xs-dev get dtex/j5e
 ```
 
 Assumes the dependency is a GitHub repo, clones it to `~/.local/share`, creates an environment variable with the name of the repo, and updates the `manifest.json` with the path to that dependency.
@@ -186,13 +201,13 @@ Assumes the dependency is a GitHub repo, clones it to `~/.local/share`, creates 
 To include a specific module for the installed dependency:
 
 ```
-./xs-dev.mjs include j5e/lib/led
+xs-dev include j5e/lib/led
 ```
 
-### Remove a dependency (Coming soon)
+### Remove a dependency
 
 ```
-./xs-dev.mjs remove moddable/network/wifi
+xs-dev remove network/wifi
 ```
 
 Updates the `manifest.json` to remove the dependency.
