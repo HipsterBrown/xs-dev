@@ -8,13 +8,13 @@
     "xs-dev": "bin/xs-dev"
   },
   "scripts": {
-    "format": "prettier --write **/*.{js,ts,tsx,json}",
+    "format": "prettier --write **/*.{js,ts,json}",
     "lint": "eslint src/",
     "clean-build": "rm -rf ./build",
     "compile": "tsc -p .",
     "copy-templates": "if [ -e ./src/templates ]; then cp -a ./src/templates ./build/; fi",
-    "build": "yarn format && yarn lint && yarn clean-build && yarn compile && yarn copy-templates",
-    "prepublishOnly": "yarn build",
+    "build": "pnpm run format && pnpm run lint && pnpm run clean-build && pnpm run compile && pnpm run copy-templates",
+    "prepublishOnly": "pnpm run build",
     "test": "jest",
     "watch": "jest --watch",
     "snapupdate": "jest --updateSnapshot",
@@ -22,10 +22,9 @@
   },
   "files": [
     "tsconfig.json",
-    "tslint.json",
     "build",
     "LICENSE",
-    "readme.md",
+    "README.md",
     "docs",
     "bin"
   ],
