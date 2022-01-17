@@ -80,6 +80,6 @@ export default async function (): Promise<void> {
   })
 
   print.success(
-    `Successfully set up wasm platform support for Moddable! Test out the setup by plugging in your device and running: xs-dev test --device wasm`
+    `Successfully set up wasm platform support for Moddable! Test out the setup by plugging in your device and running: xs-dev run --example helloworld --device wasm`
   )
 }

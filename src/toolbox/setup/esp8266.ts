@@ -91,7 +91,7 @@ export default async function (): Promise<void> {
 
   print.success(`
   Successfully set up esp8266 platform support for moddable!
-  Test out the setup by plugging in your device and running: xs-dev test --device esp8266
+  Test out the setup by plugging in your device and running: xs-dev run --example helloworld --device esp8266
   If there is trouble finding the correct port, pass the "--port" flag to the above command with the path to the "/dev.cu.*" that matches your device.
   `)
 }

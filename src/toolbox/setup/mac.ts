@@ -85,6 +85,6 @@ export default async function (): Promise<void> {
   }
 
   print.success(
-    'Moddable SDK successfully set up! Start the xsbug.app and run the "helloworld example": xs-dev test'
+    'Moddable SDK successfully set up! Start the xsbug.app and run the "helloworld example": xs-dev run --example helloworld'
   )
 }

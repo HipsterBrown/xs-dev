@@ -7,6 +7,8 @@ import type { Device, XSDevToolbox } from '../types'
 interface RunOptions {
   device?: Device
   port?: string
+  example?: string
+  listExamples?: boolean
 }
 
 const DEVICE_ALIAS: Record<Device | 'esp8266', string> = Object.freeze({
@@ -19,14 +21,86 @@ const DEVICE_ALIAS: Record<Device | 'esp8266', string> = Object.freeze({
   wasm: 'wasm',
 })
 
+interface InspectTreeResult {
+  name: string
+  type: 'dir' | 'file' | 'symlink'
+  children: InspectTreeResult[]
+}
+function collectChoicesFromTree(
+  fd: InspectTreeResult,
+  results: string[] = [],
+  root: string = ''
+): string[] {
+  if (
+    fd.type === 'dir' &&
+    fd.children.find((file) => file.name === 'manifest.json') !== undefined
+  ) {
+    results.push(root + fd.name)
+  } else if (fd.type === 'dir') {
+    results.concat(
+      fd.children
+        .map((child) =>
+          collectChoicesFromTree(child, results, `${root}${fd.name}/`)
+        )
+        .flat()
+    )
+  }
+  return results.flat()
+}
+
 const command: GluegunCommand<XSDevToolbox> = {
   name: 'run',
   description: 'Build and launch project on target device or simulator',
-  run: async ({ parameters, print, system, filesystem }) => {
-    const projectPath = filesystem.resolve(parameters.first ?? '.')
+  run: async ({ parameters, print, system, filesystem, prompt }) => {
     const currentPlatform: Device = platformType().toLowerCase() as Device
-    const { device = currentPlatform, port }: RunOptions = parameters.options
+    const {
+      device = currentPlatform,
+      port,
+      example,
+      listExamples = false,
+    }: RunOptions = parameters.options
     const targetPlatform: string = DEVICE_ALIAS[device] ?? device
+    let projectPath = filesystem.resolve(parameters.first ?? '.')
+
+    if (listExamples) {
+      const exampleProjectPath = filesystem.resolve(
+        String(process.env.MODDABLE),
+        'examples'
+      )
+      const examples = filesystem.inspectTree(exampleProjectPath)?.children
+      const choices =
+        examples !== undefined
+          ? examples.map((example) => collectChoicesFromTree(example)).flat()
+          : []
+      const { example: selectedExample } = await prompt.ask([
+        {
+          type: 'autocomplete',
+          name: 'example',
+          message: 'Here are the available examples:',
+          choices,
+        },
+      ])
+      print.info(`Run the example: xs-dev run --example ${selectedExample}`)
+      process.exit(0)
+    }
+
+    if (example !== undefined) {
+      const exampleProjectPath = filesystem.resolve(
+        String(process.env.MODDABLE),
+        'examples',
+        example
+      )
+      if (
+        filesystem.exists(
+          filesystem.resolve(exampleProjectPath, 'manifest.json')
+        ) === false
+      ) {
+        print.error('Example project must contain a manifest.json.')
+        print.info(`Lookup the available examples: xs-dev run --list-examples`)
+        process.exit(1)
+      }
+      projectPath = exampleProjectPath
+    }
 
     if (port !== undefined) {
       process.env.UPLOAD_PORT = port
