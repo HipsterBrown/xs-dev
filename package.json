@@ -1,6 +1,6 @@
 {
   "name": "xs-dev",
-  "version": "0.0.1",
+  "version": "0.1.0",
   "description": "CLI for automating the setup and usage of Moddable XS tools",
   "types": "build/types/types.d.ts",
   "bin": {
@@ -40,6 +40,7 @@
     "unzip-stream": "^0.3.1"
   },
   "devDependencies": {
+    "@changesets/cli": "^2.19.0",
     "@types/jest": "^27.4.0",
     "@types/node": "^16.11.0",
     "@types/serve-handler": "^6.1.1",
