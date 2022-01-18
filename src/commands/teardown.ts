@@ -17,7 +17,7 @@ const command: GluegunCommand = {
     filesystem.remove(filesystem.resolve(INSTALL_DIR, 'moddable'))
     filesystem.remove(filesystem.resolve(INSTALL_DIR, 'wasm'))
     filesystem.remove(filesystem.resolve(INSTALL_DIR, 'esp32'))
-    filesystem.remove(filesystem.resolve(INSTALL_DIR, 'esp8266'))
+    filesystem.remove(filesystem.resolve(INSTALL_DIR, 'esp'))
 
     await patching.patch(PROFILE_PATH, {
       delete: `source ${EXPORTS_FILE_PATH}`,

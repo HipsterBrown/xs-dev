@@ -6,6 +6,7 @@ import { extract } from 'tar-fs'
 import { createGunzip } from 'zlib'
 import { Extract as ZipExtract } from 'unzip-stream'
 import { INSTALL_DIR, EXPORTS_FILE_PATH } from './constants'
+import { moddableExists } from './moddable'
 import upsert from '../patching/upsert'
 
 const finishedPromise = promisify(finished)
@@ -26,7 +27,7 @@ export default async function (): Promise<void> {
   spinner.start('Setting up esp8266 tools')
 
   // 0. ensure Moddable exists
-  if (process.env.MODDABLE === undefined) {
+  if (!moddableExists()) {
     spinner.fail(
       'Moddable tooling required. Run `xs-dev setup` before trying again.'
     )

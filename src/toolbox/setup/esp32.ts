@@ -1,5 +1,6 @@
 import { print, filesystem, system, semver } from 'gluegun'
 import { INSTALL_DIR, EXPORTS_FILE_PATH } from './constants'
+import { moddableExists } from './moddable'
 import upsert from '../patching/upsert'
 
 export default async function (): Promise<void> {
@@ -12,7 +13,7 @@ export default async function (): Promise<void> {
   spinner.start('Setting up esp32 tools')
 
   // 0. ensure Moddable exists
-  if (process.env.MODDABLE === undefined) {
+  if (!moddableExists()) {
     spinner.fail(
       'Moddable tooling required. Run `xs-dev setup` before trying again.'
     )
