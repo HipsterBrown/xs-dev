@@ -5,6 +5,7 @@ import updateWindows from '../toolbox/update/windows'
 import updateESP8266 from '../toolbox/update/esp8266'
 import updateESP32 from '../toolbox/update/esp32'
 import updateWasm from '../toolbox/update/wasm'
+import updatePico from '../toolbox/update/pico'
 
 export default async (toolbox: XSDevToolbox): Promise<void> => {
   toolbox.update = {
@@ -15,5 +16,6 @@ export default async (toolbox: XSDevToolbox): Promise<void> => {
     esp8266: updateESP8266,
     esp32: updateESP32,
     wasm: updateWasm,
+    pico: updatePico,
   }
 }

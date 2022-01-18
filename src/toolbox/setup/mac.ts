@@ -75,7 +75,7 @@ export default async function (): Promise<void> {
   // 3. cd into makefiles dir for platform, run `make`
   try {
     spinner.start('Building platform tooling')
-    await system.exec('make', { cwd: BUILD_DIR })
+    await system.exec('make', { cwd: BUILD_DIR, stdout: process.stdout })
     spinner.succeed()
   } catch (error) {
     spinner.fail(`Error building mac tooling: ${String(error)}`)
