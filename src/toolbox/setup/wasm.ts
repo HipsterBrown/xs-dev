@@ -1,5 +1,5 @@
 import { print, filesystem, system } from 'gluegun'
-import { INSTALL_DIR, PROFILE_PATH } from './constants'
+import { INSTALL_DIR, EXPORTS_FILE_PATH } from './constants'
 import upsert from '../patching/upsert'
 
 export default async function (): Promise<void> {
@@ -9,58 +9,76 @@ export default async function (): Promise<void> {
   const EMSDK_PATH = filesystem.resolve(WASM_DIR, 'emsdk')
   const BINARYEN_PATH = filesystem.resolve(WASM_DIR, 'binaryen')
 
-  print.info('Setting up wasm simulator tools')
+  const spinner = print.spin({ stream: process.stdout })
+  spinner.start('Setting up wasm simulator tools')
 
   // 0. ensure wasm instal directory and Moddable exists
   if (process.env.MODDABLE === undefined) {
-    print.warning(
-      'Moddable tooling required. Run `xs-dev setup` before trying again.'
+    spinner.fail(
+      'Moddable platform tooling required. Run `xs-dev setup` before trying again.'
     )
     process.exit(1)
   }
-  print.info('Ensuring wasm directory')
+  spinner.info('Ensuring wasm directory')
   filesystem.dir(WASM_DIR)
 
   // 1. Clone EM_SDK repo, install, and activate latest version
   if (filesystem.exists(EMSDK_PATH) === false) {
-    print.info('Cloning emsdk repo')
+    spinner.start('Cloning emsdk repo')
     try {
       await system.spawn(`git clone ${EMSDK_REPO} ${EMSDK_PATH}`)
-      await system.spawn('./emsdk install latest', {
+
+      spinner.start('Installing latest EMSDK')
+      await system.exec('./emsdk install latest', {
         cwd: EMSDK_PATH,
+        stdout: process.stdout,
       })
-      await system.spawn('./emsdk activate latest', {
+      await system.exec('./emsdk activate latest', {
         cwd: EMSDK_PATH,
+        stdout: process.stdout,
       })
     } catch (error) {
-      print.error(`Error activating emsdk: ${String(error)}`)
+      spinner.fail(`Error activating emsdk: ${String(error)}`)
       process.exit(1)
     }
   }
+  spinner.succeed('emsdk setup complete')
 
   // 2. Clone Binaryen repo and build
   if (filesystem.exists(BINARYEN_PATH) === false) {
-    print.info('Cloning binaryen repo')
+    spinner.start('Cloning binaryen repo')
     await system.spawn(`git clone ${BINARYEN_REPO} ${BINARYEN_PATH}`)
 
+    spinner.info('Binaryen repo cloned')
+
     if (system.which('cmake') === null) {
-      print.info('Cmake required, installing with Homebrew')
-      await system.spawn('brew install cmake')
+      spinner.start('Cmake required, installing with Homebrew')
+      await system.exec('brew install cmake')
     }
 
-    await system.spawn('cmake . && make', {
+    spinner.start('Building Binaryen tooling')
+    await system.exec('cmake .', {
       cwd: BINARYEN_PATH,
+      stdout: process.stdout,
     })
+    spinner.succeed('cmake complete')
+    spinner.start('Start make process, this could take a couple minutes')
+    await system.exec('make', {
+      cwd: BINARYEN_PATH,
+      stdout: process.stdout,
+    })
+    spinner.succeed()
   }
 
   // 3. Setup PATH and env variables for EM_SDK and Binaryen
-  print.info('Sourcing emsdk environment and adding binaryen to PATH')
+  spinner.info('Sourcing emsdk environment and adding binaryen to PATH')
+  filesystem.file(EXPORTS_FILE_PATH)
   await upsert(
-    PROFILE_PATH,
+    EXPORTS_FILE_PATH,
     `source ${filesystem.resolve(EMSDK_PATH, 'emsdk_env.sh')}`
   )
   await upsert(
-    PROFILE_PATH,
+    EXPORTS_FILE_PATH,
     `export PATH=${filesystem.resolve(BINARYEN_PATH, 'bin')}:$PATH`
   )
   process.env.PATH = `${String(process.env.PATH)}:${filesystem.resolve(
@@ -69,17 +87,28 @@ export default async function (): Promise<void> {
   )}`
 
   // 4. Build Moddable WASM tools
-  print.info('Building Moddable wasm tools')
-  await system.spawn(`make`, {
-    cwd: filesystem.resolve(
-      String(process.env.MODDABLE),
-      'build',
-      'makefiles',
-      'wasm'
-    ),
+  if (
+    filesystem.exists(
+      filesystem.resolve(String(process.env.MODDABLE), 'build', 'bin', 'wasm')
+    ) === false
+  ) {
+    spinner.start('Building Moddable wasm tools')
+    await system.exec(`make`, {
+      cwd: filesystem.resolve(
+        String(process.env.MODDABLE),
+        'build',
+        'makefiles',
+        'wasm'
+      ),
+      stdout: process.stdout,
+    })
+  }
+  await system.exec(`source ${EXPORTS_FILE_PATH}`, {
+    shell: process.env.SHELL,
+    stdout: process.stdout,
   })
 
-  print.success(
-    `Successfully set up wasm platform support for Moddable! Test out the setup by plugging in your device and running: xs-dev run --example helloworld --device wasm`
+  spinner.succeed(
+    `Successfully set up wasm platform support for Moddable! Test out the setup by starting a new terminal session and running: xs-dev run --example helloworld --device wasm`
   )
 }

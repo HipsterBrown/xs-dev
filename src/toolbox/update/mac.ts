@@ -19,13 +19,14 @@ export default async function (): Promise<void> {
   const spinner = print.spin()
   spinner.start('Updating Moddable SDK!')
 
-  spinner.info('Stashing any unsaved changes before committing')
+  spinner.start('Stashing any unsaved changes before committing')
   await system.exec('git stash', { cwd: process.env.MODDABLE })
   await system.exec('git pull origin public', { cwd: process.env.MODDABLE })
 
   await system.exec('rm -rf build/{tmp,bin}', { cwd: process.env.MODDABLE })
+  spinner.succeed()
 
-  spinner.info('Rebuilding platform tools')
+  spinner.start('Rebuilding platform tools')
   await system.exec('make', {
     cwd: filesystem.resolve(
       String(process.env.MODDABLE),

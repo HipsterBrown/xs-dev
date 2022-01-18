@@ -11,3 +11,9 @@ export const PROFILE = (function () {
   return '.profile'
 })()
 export const PROFILE_PATH = filesystem.resolve(HOME_DIR, PROFILE)
+export const EXPORTS_FILE_PATH = filesystem.resolve(
+  HOME_DIR,
+  '.local',
+  'share',
+  'xs-dev-export.sh'
+)
