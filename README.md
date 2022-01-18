@@ -34,7 +34,7 @@ npm install -g xs-dev
 
 ## Features
 
-### Moddable SDK install / setup / update
+### Moddable SDK setup / update / teardown
 
 This process mostly automates the instructions provided by Moddable's "Getting Started" documentation with a few exceptions:
 
@@ -52,6 +52,12 @@ Run script for updating SDK:
 
 ```
 xs-dev update
+```
+
+Remove all setup and environment changes with teardown command:
+
+```
+xs-dev teardown
 ```
 
 ### ESP32 SDK install / setup
