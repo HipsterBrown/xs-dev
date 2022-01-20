@@ -2,8 +2,8 @@ import { print, filesystem, system } from 'gluegun'
 import {
   INSTALL_PATH,
   INSTALL_DIR,
-  PROFILE_PATH,
   EXPORTS_FILE_PATH,
+  getProfilePath,
 } from './constants'
 import upsert from '../patching/upsert'
 
@@ -24,6 +24,8 @@ export default async function (): Promise<void> {
     'makefiles',
     'mac'
   )
+
+  const PROFILE_PATH = getProfilePath()
 
   // 0. ensure xcode command line tools are available (?)
   try {
