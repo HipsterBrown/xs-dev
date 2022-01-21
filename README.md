@@ -228,8 +228,21 @@ cd xs-dev
 pnpm install
 ```
 
-Link dev version of CLI:
+Link dev version of CLI using `pnpm`, which will override any other globally installed version:
 
 ```
-pnpm link .
+pnpm link --global
+pnpm link --global xs-dev
+```
+
+Or create an alias to clearly denote the local version of the CLI:
+
+```
+alias local-xs-dev=$PWD/bin/xs-dev
+```
+
+To maintain the alias between shell sessions, for example I use zsh:
+
+```
+echo "alias local-xs-dev=$PWD/bin/xs-dev" >> ~/.zshrc
 ```
