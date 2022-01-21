@@ -1,7 +1,10 @@
-import { print, filesystem, system, semver } from 'gluegun'
+import { print, filesystem, system } from 'gluegun'
+import { type as platformType } from 'os'
 import { INSTALL_DIR, EXPORTS_FILE_PATH } from './constants'
 import { moddableExists } from './moddable'
 import upsert from '../patching/upsert'
+import { installDeps as installMacDeps } from './esp32/mac'
+import { installDeps as installLinuxDeps } from './esp32/linux'
 
 export default async function (): Promise<void> {
   const ESP_IDF_REPO = 'https://github.com/espressif/esp-idf.git'
@@ -35,43 +38,16 @@ export default async function (): Promise<void> {
   }
 
   // 3. brew install python3, cmake, ninja, dfu-util
-  spinner.start('Installing build dependencies: python, cmake, ninja, dfu-util')
+  // or sudo apt-get install git wget flex bison gperf python-is-python3 python3-pip python3-serial python-setuptools cmake ninja-build ccache libffi-dev libssl-dev dfu-util
+  spinner.start('Installing build dependencies')
 
-  if (
-    system.which('python') === null ||
-    // get python verion, check if v3
-    semver.satisfies(
-      (await system.exec('python --version', { trim: true }))
-        .toString()
-        .split(' ')
-        .pop(),
-      '>= 3.x.x'
-    )
-  ) {
-    await system.exec('brew install python')
+  if (platformType() === 'Darwin') {
+    await installMacDeps(spinner)
   }
 
-  if (system.which('cmake') === null) {
-    await system.exec('brew install cmake')
+  if (platformType() === 'Linux') {
+    await installLinuxDeps(spinner)
   }
-
-  if (system.which('ninja') === null) {
-    await system.exec('brew install ninja')
-  }
-
-  if (system.which('dfu-util') === null) {
-    await system.exec('brew install dfu-util')
-  }
-
-  // 4. install pip, if needed
-  if (system.which('pip3') === null) {
-    spinner.start('Installing pip3')
-    await system.exec('python3 -m ensurepip --user')
-  }
-
-  // 5. pip install pyserial, if needed
-  spinner.start('Installing pyserial through pip3')
-  await system.exec('python3 -m pip install pyserial')
 
   // 6. append IDF_PATH env export to shell profile
   if (process.env.IDF_PATH === undefined) {
