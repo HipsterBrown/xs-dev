@@ -22,6 +22,7 @@ export default async function (): Promise<void> {
   }
   spinner.info('Ensuring wasm directory')
   filesystem.dir(WASM_DIR)
+  filesystem.file(EXPORTS_FILE_PATH)
 
   // 1. Clone EM_SDK repo, install, and activate latest version
   if (filesystem.exists(EMSDK_PATH) === false) {
@@ -38,6 +39,10 @@ export default async function (): Promise<void> {
         cwd: EMSDK_PATH,
         stdout: process.stdout,
       })
+      await upsert(
+        EXPORTS_FILE_PATH,
+        `source ${filesystem.resolve(EMSDK_PATH, 'emsdk_env.sh')}`
+      )
     } catch (error) {
       spinner.fail(`Error activating emsdk: ${String(error)}`)
       process.exit(1)
@@ -48,7 +53,9 @@ export default async function (): Promise<void> {
   // 2. Clone Binaryen repo and build
   if (filesystem.exists(BINARYEN_PATH) === false) {
     spinner.start('Cloning binaryen repo')
-    await system.spawn(`git clone ${BINARYEN_REPO} ${BINARYEN_PATH}`)
+    await system.spawn(
+      `git clone --recursive ${BINARYEN_REPO} ${BINARYEN_PATH}`
+    )
 
     spinner.info('Binaryen repo cloned')
 
@@ -72,12 +79,7 @@ export default async function (): Promise<void> {
   }
 
   // 3. Setup PATH and env variables for EM_SDK and Binaryen
-  spinner.info('Sourcing emsdk environment and adding binaryen to PATH')
-  filesystem.file(EXPORTS_FILE_PATH)
-  await upsert(
-    EXPORTS_FILE_PATH,
-    `source ${filesystem.resolve(EMSDK_PATH, 'emsdk_env.sh')}`
-  )
+  spinner.info('Sourcing adding binaryen to PATH')
   await upsert(
     EXPORTS_FILE_PATH,
     `export PATH=${filesystem.resolve(BINARYEN_PATH, 'bin')}:$PATH`

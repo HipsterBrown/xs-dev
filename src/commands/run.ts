@@ -10,6 +10,7 @@ interface RunOptions {
   port?: string
   example?: string
   listExamples?: boolean
+  listDevices?: boolean
 }
 
 const DEVICE_ALIAS: Record<Device | 'esp8266', string> = Object.freeze({
@@ -32,9 +33,54 @@ const command: GluegunCommand<XSDevToolbox> = {
       port,
       example,
       listExamples = false,
+      listDevices = false,
     }: RunOptions = parameters.options
-    const targetPlatform: string = DEVICE_ALIAS[device] ?? device
+    let targetPlatform: string = DEVICE_ALIAS[device] ?? device
     let projectPath = filesystem.resolve(parameters.first ?? '.')
+
+    if (listDevices) {
+      const choices = [
+        'esp',
+        'esp/moddable_zero',
+        'esp/moddable_one',
+        'esp/moddable_three',
+        'esp/nodemcu',
+        'esp32',
+        'esp32/moddable_two',
+        'esp32/nodemcu',
+        'esp32/m5stack',
+        'esp32/m5stack_core2',
+        'esp32/m5stick_fire',
+        'esp32/m5atom_echo',
+        'esp32/m5atom_lite',
+        'esp32/m5atom_matrix',
+        'esp32/m5paper',
+        'esp32/m5core_ink',
+        'esp32/heltec_wifi_kit_32',
+        'esp32/esp32_thing',
+        'esp32/esp32_thing_plus',
+        'esp32/wrover_kit',
+        'esp32/kaluga',
+        'esp32/saola_wroom',
+        'esp32/saola_wrover',
+        'wasm',
+      ]
+      const { device: selectedDevice } = await prompt.ask([
+        {
+          type: 'autocomplete',
+          name: 'device',
+          message: 'Here are the available target devices:',
+          choices,
+        },
+      ])
+
+      if (selectedDevice !== '' && selectedDevice !== undefined) {
+        targetPlatform = selectedDevice
+      } else {
+        print.warning('Please select a target device to run')
+        process.exit(0)
+      }
+    }
 
     if (listExamples) {
       const exampleProjectPath = filesystem.resolve(
@@ -54,8 +100,16 @@ const command: GluegunCommand<XSDevToolbox> = {
           choices,
         },
       ])
-      print.info(`Run the example: xs-dev run --example ${selectedExample}`)
-      process.exit(0)
+
+      if (selectedExample !== '' && selectedExample !== undefined) {
+        print.info(
+          `Running the example: xs-dev run --example ${selectedExample}`
+        )
+        projectPath = filesystem.resolve(exampleProjectPath, selectedExample)
+      } else {
+        print.warning('Please select an example to run.')
+        process.exit(0)
+      }
     }
 
     if (example !== undefined) {
