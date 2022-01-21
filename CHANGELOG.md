@@ -1,5 +1,11 @@
 # xs-dev
 
+## 0.2.0
+
+### Minor Changes
+
+- Add --list-devices flag to setup and run commands
+
 ## 0.1.1
 
 ### Patch Changes
