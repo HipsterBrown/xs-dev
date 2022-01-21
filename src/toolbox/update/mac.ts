@@ -34,6 +34,7 @@ export default async function (): Promise<void> {
       'makefiles',
       'mac'
     ),
+    stdout: process.stdout,
   })
 
   spinner.succeed(

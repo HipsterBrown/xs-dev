@@ -10,6 +10,7 @@ export const EXPORTS_FILE_PATH = filesystem.resolve(
   'share',
   'xs-dev-export.sh'
 )
+export const MODDABLE_REPO = 'https://github.com/Moddable-OpenSource/moddable'
 export function getProfilePath(): string {
   const shell = process.env.SHELL ?? ''
   let profile = '.profile'
