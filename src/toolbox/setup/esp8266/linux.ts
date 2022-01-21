@@ -6,7 +6,7 @@ export async function installDeps(
 ): Promise<void> {
   spinner.start('Installing python deps with apt-get')
   await system.exec(
-    'sudo apt-get install python-is-python3 python3-pip python3-serial'
+    'sudo apt-get install --yes python-is-python3 python3-pip python3-serial'
   )
   spinner.succeed()
 }

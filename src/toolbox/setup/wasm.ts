@@ -1,9 +1,11 @@
 import { print, filesystem, system } from 'gluegun'
+import { type as platformType } from 'os'
 import { INSTALL_DIR, EXPORTS_FILE_PATH } from './constants'
 import { moddableExists } from './moddable'
 import upsert from '../patching/upsert'
 
 export default async function (): Promise<void> {
+  const OS = platformType().toLowerCase()
   const EMSDK_REPO = 'https://github.com/emscripten-core/emsdk.git'
   const BINARYEN_REPO = 'https://github.com/WebAssembly/binaryen.git'
   const WASM_DIR = filesystem.resolve(INSTALL_DIR, 'wasm')
@@ -60,8 +62,16 @@ export default async function (): Promise<void> {
     spinner.info('Binaryen repo cloned')
 
     if (system.which('cmake') === null) {
-      spinner.start('Cmake required, installing with Homebrew')
-      await system.exec('brew install cmake')
+      if (OS === 'darwin') {
+        spinner.start('Cmake required, installing with Homebrew')
+        await system.exec('brew install cmake')
+      }
+
+      if (OS === 'linux') {
+        spinner.start('Cmake required, installing with apt')
+        await system.exec('sudo apt --yes install cmake')
+      }
+      spinner.succeed()
     }
 
     spinner.start('Building Binaryen tooling')

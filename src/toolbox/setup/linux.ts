@@ -41,14 +41,14 @@ export default async function (): Promise<void> {
   // 1. Install or update the packages required to compile:
   spinner.start('Installing dependencies...')
   await system.exec(
-    'sudo apt-get install gcc git wget make libncurses-dev flex bison gperf',
+    'sudo apt-get install --yes gcc git wget make libncurses-dev flex bison gperf',
     { stdout: process.stdout }
   )
   spinner.succeed()
 
   // 2. Install the development version of the GTK+ 3 library
   spinner.start('Installing GTK+ 3...')
-  await system.exec('sudo apt-get install libgtk-3-dev', {
+  await system.exec('sudo apt-get --yes install libgtk-3-dev', {
     stdout: process.stdout,
   })
   spinner.succeed()
@@ -81,7 +81,6 @@ export default async function (): Promise<void> {
   await system.exec('make install', {
     cwd: BUILD_DIR,
     stdout: process.stdout,
-    stdin: process.stdin,
   })
   spinner.succeed()
 

@@ -42,6 +42,8 @@ This process mostly automates the instructions provided by Moddable's "Getting S
 - the `moddable` git repo is cloned into `~/.local/share` instead of a new/existing `~/Projects` directory
 - a symlink for `xsbug.app` is created in `/Applications` for easy access through Launchpad (on Mac)
 
+**On Linux, `xs-dev setup` commands should be prefixed with `sudo -E` to provide the user permission to install dependencies in the current shell environment.**
+
 Run script for initial setup:
 
 ```
