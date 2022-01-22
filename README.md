@@ -20,11 +20,15 @@ The Moddable SDK and associated dev board tooling is incredibly empowering for e
 
 - [X] Mac
 - [ ] Windows
-- [ ] Linux
+- [X] Linux
 
 ## Requirements
 
 [Node.js >= v12](https://nodejs.org/en/)
+
+**On Linux:**
+
+Setup commands rely on [`ssh-askpass`](https://packages.ubuntu.com/bionic/ssh-askpass) to prompt for permission when installing other tools and dependencies.
 
 ## Install
 
