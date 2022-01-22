@@ -5,15 +5,18 @@ import { promisify } from 'util'
 import { extract } from 'tar-fs'
 import { createGunzip } from 'zlib'
 import { Extract as ZipExtract } from 'unzip-stream'
+import { type as platformType } from 'os'
 import { INSTALL_DIR, EXPORTS_FILE_PATH } from './constants'
 import { moddableExists } from './moddable'
 import upsert from '../patching/upsert'
+import { installDeps as installMacDeps } from './esp8266/mac'
+import { installDeps as installLinuxDeps } from './esp8266/linux'
 
 const finishedPromise = promisify(finished)
 
 export default async function (): Promise<void> {
-  const TOOLCHAIN =
-    'https://www.moddable.com/private/esp8266.toolchain.darwin.tgz'
+  const OS = platformType().toLowerCase()
+  const TOOLCHAIN = `https://www.moddable.com/private/esp8266.toolchain.${OS}.tgz`
   const ARDUINO_CORE =
     'https://github.com/esp8266/Arduino/releases/download/2.3.0/esp8266-2.3.0.zip'
   const ESP_RTOS_REPO = 'https://github.com/espressif/ESP8266_RTOS_SDK.git'
@@ -74,21 +77,13 @@ export default async function (): Promise<void> {
   }
 
   // 5. ensure python, pip, and pyserial are installed
-  if (system.which('python') === null) {
-    spinner.start('Installing python from homebrew')
-    await system.exec('brew install python')
-    spinner.succeed()
+  if (OS === 'darwin') {
+    await installMacDeps(spinner)
   }
 
-  if (system.which('pip') === null) {
-    spinner.start('Installing pip through ensurepip')
-    await system.exec('python -m ensurepip')
-    spinner.succeed()
+  if (OS === 'linux') {
+    await installLinuxDeps(spinner)
   }
-
-  spinner.start('Installing pyserial through pip')
-  await system.exec('python -m pip install pyserial')
-  spinner.succeed()
 
   // 7. create ESP_BARE env export in shell profile
   if (process.env.ESP_BASE === undefined) {

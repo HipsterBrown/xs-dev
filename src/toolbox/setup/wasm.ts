@@ -1,9 +1,12 @@
 import { print, filesystem, system } from 'gluegun'
+import { type as platformType } from 'os'
 import { INSTALL_DIR, EXPORTS_FILE_PATH } from './constants'
 import { moddableExists } from './moddable'
 import upsert from '../patching/upsert'
+import { execWithSudo } from '../system/exec'
 
 export default async function (): Promise<void> {
+  const OS = platformType().toLowerCase()
   const EMSDK_REPO = 'https://github.com/emscripten-core/emsdk.git'
   const BINARYEN_REPO = 'https://github.com/WebAssembly/binaryen.git'
   const WASM_DIR = filesystem.resolve(INSTALL_DIR, 'wasm')
@@ -27,9 +30,11 @@ export default async function (): Promise<void> {
   // 1. Clone EM_SDK repo, install, and activate latest version
   if (filesystem.exists(EMSDK_PATH) === false) {
     spinner.start('Cloning emsdk repo')
+    await system.spawn(`git clone ${EMSDK_REPO} ${EMSDK_PATH}`)
+    spinner.succeed()
+  }
+  if (process.env.EMSDK === undefined) {
     try {
-      await system.spawn(`git clone ${EMSDK_REPO} ${EMSDK_PATH}`)
-
       spinner.start('Installing latest EMSDK')
       await system.exec('./emsdk install latest', {
         cwd: EMSDK_PATH,
@@ -56,27 +61,34 @@ export default async function (): Promise<void> {
     await system.spawn(
       `git clone --recursive ${BINARYEN_REPO} ${BINARYEN_PATH}`
     )
+    spinner.succeed()
+  }
 
-    spinner.info('Binaryen repo cloned')
-
-    if (system.which('cmake') === null) {
+  if (system.which('cmake') === null) {
+    if (OS === 'darwin') {
       spinner.start('Cmake required, installing with Homebrew')
       await system.exec('brew install cmake')
     }
 
-    spinner.start('Building Binaryen tooling')
-    await system.exec('cmake .', {
-      cwd: BINARYEN_PATH,
-      stdout: process.stdout,
-    })
-    spinner.succeed('cmake complete')
-    spinner.start('Start make process, this could take a couple minutes')
-    await system.exec('make', {
-      cwd: BINARYEN_PATH,
-      stdout: process.stdout,
-    })
+    if (OS === 'linux') {
+      spinner.start('Cmake required, installing with apt')
+      await execWithSudo('apt --yes install cmake')
+    }
     spinner.succeed()
   }
+
+  spinner.start('Building Binaryen tooling')
+  await system.exec('cmake .', {
+    cwd: BINARYEN_PATH,
+    stdout: process.stdout,
+  })
+  spinner.succeed('cmake complete')
+  spinner.start('Start make process, this could take a couple minutes')
+  await system.exec('make', {
+    cwd: BINARYEN_PATH,
+    stdout: process.stdout,
+  })
+  spinner.succeed()
 
   // 3. Setup PATH and env variables for EM_SDK and Binaryen
   spinner.info('Sourcing adding binaryen to PATH')

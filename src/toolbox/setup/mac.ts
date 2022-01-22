@@ -3,13 +3,13 @@ import {
   INSTALL_PATH,
   INSTALL_DIR,
   EXPORTS_FILE_PATH,
+  MODDABLE_REPO,
   getProfilePath,
 } from './constants'
 import upsert from '../patching/upsert'
 
 export default async function (): Promise<void> {
   print.info('Setting up the mac tools!')
-  const MODDABLE_REPO = 'https://github.com/Moddable-OpenSource/moddable'
 
   const BIN_PATH = filesystem.resolve(
     INSTALL_PATH,
