@@ -1,5 +1,11 @@
 # xs-dev
 
+## 0.3.0
+
+### Minor Changes
+
+- Initial linux platform support
+
 ## 0.2.0
 
 ### Minor Changes
