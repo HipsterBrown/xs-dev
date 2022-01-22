@@ -1,8 +1,12 @@
 import { print, filesystem, system } from 'gluegun'
+import { type as platformType } from 'os'
 import { INSTALL_DIR, EXPORTS_FILE_PATH } from './constants'
 import upsert from '../patching/upsert'
+import { installDeps as installMacDeps } from './pico/mac'
+import { installDeps as installLinuxDeps } from './pico/linux'
 
 export default async function (): Promise<void> {
+  const OS = platformType().toLowerCase()
   const PICO_SDK_REPO = 'https://github.com/raspberrypi/pico-sdk'
   const PICO_EXAMPLES_REPO = 'https://github.com/raspberrypi/pico-examples'
   const PICO_DIR = filesystem.resolve(INSTALL_DIR, 'pico')
@@ -26,16 +30,24 @@ export default async function (): Promise<void> {
   spinner.info('Ensuring pico directory')
   filesystem.dir(PICO_DIR)
 
-  // 1. Install required components using brew
-  if (system.which('cmake') === null) {
-    spinner.start('Cmake required, installing with Homebrew')
-    await system.exec('brew install cmake')
-    spinner.succeed()
+  // 1. Install required components
+  if (OS === 'darwin') {
+    if (system.which('cmake') === null) {
+      spinner.start('Cmake required, installing with Homebrew')
+      await system.exec('brew install cmake')
+      spinner.succeed()
+    }
+
+    spinner.start('Tapping ArmMbed formulae and installing arm-embed-gcc')
+    await installMacDeps(spinner)
   }
 
-  spinner.start('Tapping ArmMbed formulae and installing arm-embed-gcc')
-  await system.exec('brew tap ArmMbed/homebrew-formulae')
-  await system.exec(`brew install arm-none-eabi-gcc`)
+  if (OS === 'linux') {
+    spinner.start('Installing build dependencies with apt')
+    await installLinuxDeps(spinner)
+    process.env.PICO_GCC_ROOT = '/usr'
+    await upsert(EXPORTS_FILE_PATH, `export PICO_GCC_ROOT=/usr`)
+  }
   spinner.succeed()
 
   // 2. Install the pico sdk and examples:
