@@ -3,6 +3,7 @@ import { type as platformType } from 'os'
 import { INSTALL_DIR, EXPORTS_FILE_PATH } from './constants'
 import { moddableExists } from './moddable'
 import upsert from '../patching/upsert'
+import { execWithSudo } from '../system/exec'
 
 export default async function (): Promise<void> {
   const OS = platformType().toLowerCase()
@@ -69,7 +70,7 @@ export default async function (): Promise<void> {
 
       if (OS === 'linux') {
         spinner.start('Cmake required, installing with apt')
-        await system.exec('sudo apt --yes install cmake')
+        await execWithSudo('apt --yes install cmake')
       }
       spinner.succeed()
     }

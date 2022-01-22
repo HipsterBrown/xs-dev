@@ -7,6 +7,7 @@ import {
   getProfilePath,
 } from './constants'
 import upsert from '../patching/upsert'
+import { execWithSudo } from '../system/exec'
 
 export default async function (): Promise<void> {
   print.info('Setting up Linux tools!')
@@ -40,15 +41,15 @@ export default async function (): Promise<void> {
 
   // 1. Install or update the packages required to compile:
   spinner.start('Installing dependencies...')
-  await system.exec(
-    'sudo apt-get install --yes gcc git wget make libncurses-dev flex bison gperf',
+  await execWithSudo(
+    'apt-get install --yes gcc git wget make libncurses-dev flex bison gperf',
     { stdout: process.stdout }
   )
   spinner.succeed()
 
   // 2. Install the development version of the GTK+ 3 library
   spinner.start('Installing GTK+ 3...')
-  await system.exec('sudo apt-get --yes install libgtk-3-dev', {
+  await execWithSudo('apt-get --yes install libgtk-3-dev', {
     stdout: process.stdout,
   })
   spinner.succeed()
@@ -78,7 +79,7 @@ export default async function (): Promise<void> {
 
   // 6. Install the desktop simulator and xsbug debugger applications
   spinner.start('Installing simulator')
-  await system.exec('make install', {
+  await execWithSudo('make install', {
     cwd: BUILD_DIR,
     stdout: process.stdout,
   })
