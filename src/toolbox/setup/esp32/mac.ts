@@ -1,6 +1,7 @@
 import { system, semver } from 'gluegun'
 import type { GluegunPrint } from 'gluegun'
 
+// brew install python3, cmake, ninja, dfu-util
 export async function installDeps(
   spinner: ReturnType<GluegunPrint['spin']>
 ): Promise<void> {

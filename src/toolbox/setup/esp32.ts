@@ -37,8 +37,7 @@ export default async function (): Promise<void> {
     spinner.succeed()
   }
 
-  // 3. brew install python3, cmake, ninja, dfu-util
-  // or sudo apt-get install git wget flex bison gperf python-is-python3 python3-pip python3-serial python-setuptools cmake ninja-build ccache libffi-dev libssl-dev dfu-util
+  // 3. Install build and run dependencies
   spinner.start('Installing build dependencies')
 
   if (platformType() === 'Darwin') {
@@ -49,14 +48,14 @@ export default async function (): Promise<void> {
     await installLinuxDeps(spinner)
   }
 
-  // 6. append IDF_PATH env export to shell profile
+  // 4. append IDF_PATH env export to shell profile
   if (process.env.IDF_PATH === undefined) {
     spinner.info('Configuring $IDF_PATH')
     process.env.IDF_PATH = IDF_PATH
     await upsert(EXPORTS_FILE_PATH, `export IDF_PATH=${IDF_PATH}`)
   }
 
-  // 7. cd to IDF_PATH, run install.sh
+  // 5. cd to IDF_PATH, run install.sh
   spinner.start('Installing esp-idf tooling')
   await system.exec('./install.sh', {
     cwd: IDF_PATH,
@@ -65,7 +64,7 @@ export default async function (): Promise<void> {
   })
   spinner.succeed()
 
-  // 8. append 'source $IDF_PATH/export.sh' to shell profile
+  // 6. append 'source $IDF_PATH/export.sh' to shell profile
   spinner.info('Sourcing esp-idf environment')
   await upsert(EXPORTS_FILE_PATH, `source $IDF_PATH/export.sh`)
   await system.exec('source $IDF_PATH/export.sh', {
