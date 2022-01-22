@@ -7,6 +7,7 @@ import { installDeps as installMacDeps } from './esp32/mac'
 import { installDeps as installLinuxDeps } from './esp32/linux'
 
 export default async function (): Promise<void> {
+  const OS = platformType().toLowerCase()
   const ESP_IDF_REPO = 'https://github.com/espressif/esp-idf.git'
   const ESP_BRANCH = 'v4.3.1'
   const ESP32_DIR = filesystem.resolve(INSTALL_DIR, 'esp32')
@@ -40,11 +41,11 @@ export default async function (): Promise<void> {
   // 3. Install build and run dependencies
   spinner.start('Installing build dependencies')
 
-  if (platformType() === 'Darwin') {
+  if (OS === 'darwin') {
     await installMacDeps(spinner)
   }
 
-  if (platformType() === 'Linux') {
+  if (OS === 'linux') {
     await installLinuxDeps(spinner)
   }
 
