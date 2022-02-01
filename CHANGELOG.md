@@ -1,5 +1,11 @@
 # xs-dev
 
+## 0.4.0
+
+### Minor Changes
+
+- Upgrade gluegun dependency to v5
+
 ## 0.3.0
 
 ### Minor Changes
