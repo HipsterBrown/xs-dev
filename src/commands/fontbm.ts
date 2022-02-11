@@ -21,7 +21,7 @@ const command: GluegunCommand<XSDevToolbox> = {
     }
   
     // 2. install freetype
-    if (filesystem.exists("/usr/local/Cellar/freetype") === false) {    //@@ is this the right way to check for FreeTYpe?
+    if (filesystem.exists("/usr/local/lib/libfreetype.a") === false) {    //@@ is this the right way to check for FreeTYpe?
       spinner.start('FreeTYpe required, installing with Homebrew')
       await system.exec('brew install freetype')
       spinner.succeed()
