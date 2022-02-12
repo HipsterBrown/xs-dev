@@ -1,6 +1,7 @@
 import type { GluegunCommand } from 'gluegun'
 import { type as platformType } from 'os'
 import type { Device, XSDevToolbox } from '../types'
+import setupFontbm from '../toolbox/setup/fontbm'
 
 interface SetupOptions {
   device?: Device
@@ -33,6 +34,16 @@ const command: GluegunCommand<XSDevToolbox> = {
         print.warning('Please select a target device to run')
         process.exit(0)
       }
+    }
+
+    if (parameters.options.tool) {
+        console.log("setup tool");
+        if ("fontbm" !== parameters.options.tool) {
+          print.warning(`Unknown tool ${parameters.options.tool}`);
+          process.exit(0);
+        }
+        await setupFontbm();
+        return;
     }
 
     await setup[target]()

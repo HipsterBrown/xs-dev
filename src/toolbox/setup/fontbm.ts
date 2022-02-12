@@ -1,13 +1,8 @@
-import type { GluegunCommand } from 'gluegun'
-import type { XSDevToolbox } from '../types'
-import { EXPORTS_FILE_PATH, INSTALL_DIR } from '../toolbox/setup/constants'
-import upsert from '../toolbox/patching/upsert'
+import { print, filesystem, system } from 'gluegun'
+import { EXPORTS_FILE_PATH, INSTALL_DIR } from './constants'
+import upsert from '../patching/upsert'
 
-const command: GluegunCommand<XSDevToolbox> = {
-  name: 'fontbm',
-  description: 'Download and install fontbm tool',
-  run: async (toolbox) => {
-    const { print, filesystem, system } = toolbox;
+export default async function (): Promise<void> {
     const spinner = print.spin();
     spinner.start('Beginning setup...');
 
@@ -57,7 +52,4 @@ const command: GluegunCommand<XSDevToolbox> = {
     }
 
     spinner.succeed('fontbm successfully set up!');
-    }
 }
-
-export default command
