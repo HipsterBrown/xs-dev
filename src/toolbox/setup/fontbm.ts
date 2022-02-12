@@ -1,10 +1,18 @@
 import { print, filesystem, system } from 'gluegun'
 import { EXPORTS_FILE_PATH, INSTALL_DIR } from './constants'
 import upsert from '../patching/upsert'
+import { type as platformType } from 'os'
+import { exit } from 'process';
 
 export default async function (): Promise<void> {
     const spinner = print.spin();
     spinner.start('Beginning setup...');
+
+    const OS = platformType().toLowerCase()
+    if ("darwin" !== OS) {
+      print.error(`OS "${OS}" not supported`);
+      exit(1);
+    }
 
     const FONTBM_REPO = 'https://github.com/vladimirgamalyan/fontbm.git';
     const FONTBM_DIR = filesystem.resolve(INSTALL_DIR, 'fontbm');
