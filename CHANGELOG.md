@@ -1,5 +1,11 @@
 # xs-dev
 
+## 0.5.0
+
+### Minor Changes
+
+- Add fontbm tool setup
+
 ## 0.4.0
 
 ### Minor Changes
