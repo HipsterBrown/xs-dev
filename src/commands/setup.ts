@@ -5,7 +5,8 @@ import setupFontbm from '../toolbox/setup/fontbm'
 
 interface SetupOptions {
   device?: Device
-  listDevices?: boolean
+  listDevices?: boolean,
+  tool?: string,
 }
 
 const command: GluegunCommand<XSDevToolbox> = {
@@ -14,7 +15,7 @@ const command: GluegunCommand<XSDevToolbox> = {
     'Download and build Moddable tooling for various platform targets',
   run: async ({ parameters, setup, prompt, print }) => {
     const currentPlatform: Device = platformType().toLowerCase() as Device
-    const { device, listDevices = false }: SetupOptions = parameters.options
+    const { device, listDevices = false, tool }: SetupOptions = parameters.options
     let target: Device = device ?? currentPlatform
 
     if (device === undefined && listDevices) {
@@ -36,8 +37,7 @@ const command: GluegunCommand<XSDevToolbox> = {
       }
     }
 
-    if (parameters.options.tool) {
-        console.log("setup tool");
+    if (tool) {
         if ("fontbm" !== parameters.options.tool) {
           print.warning(`Unknown tool ${parameters.options.tool}`);
           process.exit(0);
