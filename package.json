@@ -65,7 +65,7 @@
     "testEnvironment": "node"
   },
   "volta": {
-    "node": "16.2.0"
+    "node": "16.14.0"
   },
   "prettier": {
     "semi": false,
