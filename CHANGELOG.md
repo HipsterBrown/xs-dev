@@ -1,5 +1,11 @@
 # xs-dev
 
+## 0.6.0
+
+### Minor Changes
+
+- Add linux support for fontbm setup
+
 ## 0.5.0
 
 ### Minor Changes
