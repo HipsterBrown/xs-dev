@@ -21,12 +21,12 @@ export default async function (): Promise<void> {
 
   // 1. install cmake
   if (system.which('cmake') === null) {
-    if (OS == 'darwin') {
+    if (OS === 'darwin') {
       spinner.start('Cmake required, installing with Homebrew')
    	  await system.exec('brew install cmake')
       spinner.succeed()
 	}
-	else if (OS == 'linux') {
+	if (OS === 'linux') {
       spinner.start('CMake required, installing with apt')
       await execWithSudo(
         'apt-get install --yes cmake',
@@ -37,14 +37,14 @@ export default async function (): Promise<void> {
   }
 
   // 2. install freetype
-  if (OS == 'darwin') {
+  if (OS === 'darwin') {
     if (system.which('freetype-config') === null) {
       spinner.start('FreeType required, installing with Homebrew')
       await system.exec('brew install freetype')
       spinner.succeed()
     }
   }
-  else if (OS == 'linux') {
+  if (OS === 'linux') {
     spinner.start('Installing libfreetype-dev')
     await execWithSudo(
       'apt-get install --yes libfreetype-dev',
