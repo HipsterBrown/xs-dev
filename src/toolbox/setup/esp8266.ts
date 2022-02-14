@@ -40,7 +40,6 @@ export default async function (): Promise<void> {
   // 1. ensure ~/.local/share/esp directory
   spinner.info('Ensuring esp directory')
   filesystem.dir(ESP_DIR)
-  filesystem.file(EXPORTS_FILE_PATH)
 
   // 2. download and untar xtensa toolchain
   if (filesystem.exists(TOOLCHAIN_PATH) === false) {

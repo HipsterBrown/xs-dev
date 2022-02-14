@@ -27,7 +27,6 @@ export default async function (): Promise<void> {
   // 1. ensure ~/.local/share/esp32 directory
   spinner.info('Ensuring esp32 install directory')
   filesystem.dir(ESP32_DIR)
-  filesystem.file(EXPORTS_FILE_PATH)
 
   // 2. clone esp-idf into ~/.local/share/esp32/esp-idf
   if (filesystem.exists(IDF_PATH) === false) {

@@ -25,7 +25,6 @@ export default async function (): Promise<void> {
   }
   spinner.info('Ensuring wasm directory')
   filesystem.dir(WASM_DIR)
-  filesystem.file(EXPORTS_FILE_PATH)
 
   // 1. Clone EM_SDK repo, install, and activate latest version
   if (filesystem.exists(EMSDK_PATH) === false) {
@@ -33,8 +32,17 @@ export default async function (): Promise<void> {
     await system.spawn(`git clone ${EMSDK_REPO} ${EMSDK_PATH}`)
     spinner.succeed()
   }
-  if (process.env.EMSDK === undefined) {
+
+  if (
+    process.env.EMSDK === undefined ||
+    filesystem.exists(process.env.EMSDK) !== 'dir'
+  ) {
     try {
+      // clear residual env settings
+      process.env.EMSDK = undefined
+      process.env.EMSDK_NODE = undefined
+      process.env.EMSDK_PYTHON = undefined
+
       spinner.start('Installing latest EMSDK')
       await system.exec('./emsdk install latest', {
         cwd: EMSDK_PATH,
@@ -72,7 +80,7 @@ export default async function (): Promise<void> {
 
     if (OS === 'linux') {
       spinner.start('Cmake required, installing with apt')
-      await execWithSudo('apt --yes install cmake')
+      await execWithSudo('apt --yes install build-essential cmake')
     }
     spinner.succeed()
   }
