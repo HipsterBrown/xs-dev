@@ -29,7 +29,7 @@ export default async function (): Promise<void> {
 	if (OS === 'linux') {
       spinner.start('CMake required, installing with apt')
       await execWithSudo(
-        'apt-get install --yes cmake',
+        'apt-get install --yes build-essential cmake',
         { stdout: process.stdout }
       )
       spinner.succeed()
