@@ -41,8 +41,8 @@ const command: GluegunCommand<XSDevToolbox> = {
       }
     }
 
-    if (tool !== undefined) {
-      if (tool !== 'fontbm') {
+    if (tool != undefined) {
+      if (tool != 'fontbm') {
         print.warning(`Unknown tool ${tool}`)
         process.exit(0)
       }
