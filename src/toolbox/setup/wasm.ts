@@ -33,10 +33,13 @@ export default async function (): Promise<void> {
     spinner.succeed()
   }
 
-  if (
+  const shouldBuildEmsdk =
     process.env.EMSDK === undefined ||
-    filesystem.exists(process.env.EMSDK) !== 'dir'
-  ) {
+    filesystem.exists(process.env.EMSDK) !== 'dir' ||
+    filesystem.exists(process.env.EMSDK_NODE ?? '') !== 'file' ||
+    filesystem.exists(process.env.EMSDK_PYTHON ?? '') !== 'file'
+
+  if (shouldBuildEmsdk) {
     try {
       // clear residual env settings
       process.env.EMSDK = undefined
