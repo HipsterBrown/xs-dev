@@ -1,5 +1,11 @@
 # xs-dev
 
+## 0.7.0
+
+### Minor Changes
+
+- Update ESP32 tooling to v4.4
+
 ## 0.6.0
 
 ### Minor Changes
