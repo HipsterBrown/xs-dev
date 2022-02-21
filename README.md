@@ -200,6 +200,22 @@ xs-dev include
 
 Updates the `manifest.json` with the path to the dependency.
 
+### Scan for available devices
+
+If the default device discovery is having trouble finding the correct port when running a project, use this command to find available ports to pass through the `--port` flag:
+
+```
+$ xs-dev scan
+
+✔ Found the following available devices!
+  Port                         Device                      Features
+  /dev/cu.usbserial-0001       ESP8266EX                   WiFi
+  /dev/cu.usbserial-DN02N5XK   ESP32-D0WDQ6 (revision 0)   WiFi, BT, Dual Core, Coding Scheme None
+
+$ xs-dev run --port /dev/cu.usbserial-0001 --device esp8266
+```
+
+
 ### Add a remote dependency (Coming soon)
 
 ```
