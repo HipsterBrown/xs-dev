@@ -1,5 +1,7 @@
+import { SerialPort } from 'serialport'
 import type { GluegunCommand } from 'gluegun'
 import type { XSDevToolbox } from '../types'
+import { parseScanResult } from '../toolbox/scan/parse'
 
 const command: GluegunCommand<XSDevToolbox> = {
   name: 'scan',
@@ -15,12 +17,25 @@ const command: GluegunCommand<XSDevToolbox> = {
 
     spinner.start('Scanning for devices...')
 
-    const result = await system.exec(`esptool.py read_mac`)
+    const ports = await SerialPort.list()
+    const result = await Promise.all<Buffer[]>(
+      ports
+        .filter((port) => port.serialNumber !== undefined)
+        .map((port) => system.exec(`esptool.py --port ${port.path} read_mac`))
+    )
 
-    print.debug(result.toString())
+    const record = parseScanResult(result.map(String).join('\n'))
+    const rows = Object.keys(record).map((port) => {
+      const { device, features } = record[port]
+      return [port, device, features]
+    })
 
-    spinner.succeed('Found the following available devices!')
-    print.table([['Device', 'Port']])
+    if (rows.length === 0) {
+      spinner.warn('No available devices found.')
+    } else {
+      spinner.succeed('Found the following available devices!')
+      print.table([['Port', 'Device', 'Features'], ...rows])
+    }
   },
 }
 
