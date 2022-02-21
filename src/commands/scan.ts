@@ -13,6 +13,12 @@ const command: GluegunCommand<XSDevToolbox> = {
       process.exit(0)
     }
 
+    if (system.which('esptool.py') === null) {
+      print.error(
+        'esptool.py required to scan for devices. Please setup environment for ESP8266 or ESP32 before continuing:\n xs-dev setup --device esp32\n xs-dev setup --device esp8266.'
+      )
+    }
+
     const spinner = print.spin()
 
     spinner.start('Scanning for devices...')
