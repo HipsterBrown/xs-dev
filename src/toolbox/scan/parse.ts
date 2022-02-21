@@ -22,6 +22,7 @@ export function parseScanResult(output: string): ScanResult {
         state = 'deviceFound'
       }
       if (line.includes('failed to connect') && currentPort !== null) {
+        // eslint-disable-next-line @typescript-eslint/no-dynamic-delete
         delete result[currentPort]
         currentPort = null
         state = 'searching'
