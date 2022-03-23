@@ -1,5 +1,11 @@
 # xs-dev
 
+## 0.10.0
+
+### Minor Changes
+
+- Resolve pico sdk directory env variable, add to teardown
+
 ## 0.9.0
 
 ### Minor Changes
