@@ -10,9 +10,9 @@ export default async function (): Promise<void> {
   const PICO_SDK_REPO = 'https://github.com/raspberrypi/pico-sdk'
   const PICO_EXAMPLES_REPO = 'https://github.com/raspberrypi/pico-examples'
   const PICO_DIR = filesystem.resolve(INSTALL_DIR, 'pico')
-  const PICO_SDK_PATH = filesystem.resolve(PICO_DIR, 'pico-sdk')
+  const PICO_SDK_DIR = filesystem.resolve(PICO_DIR, 'pico-sdk')
   const PICO_EXAMPLES_PATH = filesystem.resolve(PICO_DIR, 'pico-examples')
-  const PICO_SDK_BUILD_DIR = filesystem.resolve(PICO_SDK_PATH, 'build')
+  const PICO_SDK_BUILD_DIR = filesystem.resolve(PICO_SDK_DIR, 'build')
 
   const spinner = print.spin()
   spinner.start('Starting pico tooling setup')
@@ -51,13 +51,13 @@ export default async function (): Promise<void> {
   spinner.succeed()
 
   // 2. Install the pico sdk and examples:
-  if (filesystem.exists(PICO_SDK_PATH) === false) {
+  if (filesystem.exists(PICO_SDK_DIR) === false) {
     spinner.start('Cloning pico-sdk repo')
-    await system.exec(`git clone -b master ${PICO_SDK_REPO} ${PICO_SDK_PATH}`, {
+    await system.exec(`git clone -b master ${PICO_SDK_REPO} ${PICO_SDK_DIR}`, {
       stdout: process.stdout,
     })
     await system.exec(`git submodule update --init`, {
-      cwd: PICO_SDK_PATH,
+      cwd: PICO_SDK_DIR,
       stdout: process.stdout,
     })
     spinner.succeed()
@@ -73,12 +73,12 @@ export default async function (): Promise<void> {
   }
 
   // 3. Set the PICO_SDK_PATH environment variable to point to the Pico SDK directory
-  if (process.env.PICO_SDK_PATH === undefined) {
-    spinner.info('Setting PICO_SDK_PATH')
-    process.env.PICO_SDK_PATH = PICO_SDK_PATH
-    await upsert(EXPORTS_FILE_PATH, `export PICO_SDK_PATH=${PICO_SDK_PATH}`)
+  if (process.env.PICO_SDK_DIR === undefined) {
+    spinner.info('Setting PICO_SDK_DIR')
+    process.env.PICO_SDK_DIR = PICO_SDK_DIR
+    await upsert(EXPORTS_FILE_PATH, `export PICO_SDK_DIR=${PICO_SDK_DIR}`)
   } else {
-    spinner.info(`Using existing $PICO_SDK_PATH: ${process.env.PICO_SDK_PATH}`)
+    spinner.info(`Using existing $PICO_SDK_DIR: ${process.env.PICO_SDK_DIR}`)
   }
 
   // 4. Build some pico tools:
