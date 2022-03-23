@@ -1,5 +1,11 @@
 # xs-dev
 
+## 0.9.0
+
+### Minor Changes
+
+- Add pico setup support
+
 ## 0.8.0
 
 ### Minor Changes
