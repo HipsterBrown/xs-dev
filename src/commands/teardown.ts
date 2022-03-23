@@ -19,6 +19,8 @@ const command: GluegunCommand = {
     filesystem.remove(filesystem.resolve(INSTALL_DIR, 'wasm'))
     filesystem.remove(filesystem.resolve(INSTALL_DIR, 'esp32'))
     filesystem.remove(filesystem.resolve(INSTALL_DIR, 'esp'))
+    filesystem.remove(filesystem.resolve(INSTALL_DIR, 'pico'))
+    filesystem.remove(filesystem.resolve(INSTALL_DIR, 'fontbm'))
 
     await patching.patch(PROFILE_PATH, {
       delete: `source ${EXPORTS_FILE_PATH}`,
