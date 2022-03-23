@@ -8,6 +8,7 @@ export type Device =
   | 'esp8266'
   | 'esp32'
   | 'wasm'
+  | 'pico'
 
 export interface XSDevToolbox extends GluegunToolbox {
   setup: Record<Device, () => Promise<void>>

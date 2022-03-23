@@ -14,7 +14,7 @@ The Moddable SDK and associated dev board tooling is incredibly empowering for e
 - [X] Update Moddable SDK
 - [X] Project management, including dependencies
 - [X] WASM simulator
-- [ ] Raspberry Pi Pico
+- [X] Raspberry Pi Pico
 
 **Platform support:**
 

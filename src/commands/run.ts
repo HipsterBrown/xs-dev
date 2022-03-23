@@ -21,6 +21,7 @@ const DEVICE_ALIAS: Record<Device | 'esp8266', string> = Object.freeze({
   esp: 'esp',
   esp32: 'esp32',
   wasm: 'wasm',
+  pico: 'pico',
 })
 
 const command: GluegunCommand<XSDevToolbox> = {
