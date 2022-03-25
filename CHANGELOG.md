@@ -1,5 +1,11 @@
 # xs-dev
 
+## 0.10.1
+
+### Patch Changes
+
+- Add better error message for missing examples and check for CLI updates periodically
+
 ## 0.10.0
 
 ### Minor Changes
