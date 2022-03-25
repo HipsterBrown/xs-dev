@@ -9,12 +9,10 @@ The Moddable SDK and associated dev board tooling is incredibly empowering for e
 - [X] [Moddable SDK install & setup](https://github.com/Moddable-OpenSource/moddable/blob/public/documentation/Moddable%20SDK%20-%20Getting%20Started.md)
 - [X] [ESP32 SDK setup](https://github.com/Moddable-OpenSource/moddable/blob/public/documentation/devices/esp32.md)
 - [X] [ESP8266 SDK setup](https://github.com/Moddable-OpenSource/moddable/blob/public/documentation/devices/esp8266.md)
-- [ ] [Gecko SDK setup](https://github.com/Moddable-OpenSource/moddable/blob/public/documentation/devices/gecko/GeckoBuild.md)
-- [ ] [QCA4020 SDK setup](https://github.com/Moddable-OpenSource/moddable/blob/public/documentation/devices/qca4020/README.md)
+- [X] [WASM simulator](https://github.com/Moddable-OpenSource/moddable/blob/public/documentation/devices/wasm.md)
+- [X] [Raspberry Pi Pico](https://github.com/Moddable-OpenSource/moddable/blob/public/documentation/devices/pico.md)
 - [X] Update Moddable SDK
 - [X] Project management, including dependencies
-- [X] WASM simulator
-- [X] Raspberry Pi Pico
 
 **Platform support:**
 
@@ -34,6 +32,12 @@ Setup commands rely on [`ssh-askpass`](https://packages.ubuntu.com/bionic/ssh-as
 
 ```
 npm install -g xs-dev
+```
+
+## Update
+
+```
+npm update -g xs-dev@latest
 ```
 
 ## Features
@@ -82,7 +86,7 @@ xs-dev run --example helloworld --device=esp32
 
 Flags:
 
-- `device`: `esp8266` | `esp32` | [any of the allowed platform identifiers](https://github.com/Moddable-OpenSource/moddable/blob/public/documentation/tools/tools.md#arguments) (defaults to current OS platform)
+- `device`: `esp8266` | `esp32` | `pico` | [any of the allowed platform identifiers](https://github.com/Moddable-OpenSource/moddable/blob/public/documentation/tools/tools.md#arguments) (defaults to current OS platform)
 - `port`: path to port for connected device (defaults to: `UPLOAD_PORT` environment variable)
 
 ### ESP8266 SDK install / setup
@@ -103,7 +107,7 @@ xs-dev run --example helloworld --device=esp8266
 
 Flags:
 
-- `device`: `esp8266` | `esp32` | [any of the allowed platform identifiers](https://github.com/Moddable-OpenSource/moddable/blob/public/documentation/tools/tools.md#arguments) (defaults to current OS platform)
+- `device`: `esp8266` | `esp32` | `pico` | [any of the allowed platform identifiers](https://github.com/Moddable-OpenSource/moddable/blob/public/documentation/tools/tools.md#arguments) (defaults to current OS platform)
 - `port`: path to port for connected device (defaults to: `UPLOAD_PORT` environment variable)
 
 ### Wasm Simulator install / setup
@@ -125,6 +129,27 @@ Run script to confirm the setup:
 xs-dev run --example helloworld --device=wasm
 ```
 
+### Raspberry Pi Pico SDK install / setup
+
+This process automates the instructions for downloading all the dependencies for the Pico SDK. These dependencies will be placed in the `~/.local/share/pico` directory, which will be created if it doesn't exist.
+
+Run script for platform setup:
+
+```
+xs-dev setup --device=pico
+```
+
+Run script to confirm the setup:
+
+```
+xs-dev run --example helloworld --device=pico
+```
+
+Flags:
+
+- `device`: `esp8266` | `esp32` | `pico` | [any of the allowed platform identifiers](https://github.com/Moddable-OpenSource/moddable/blob/public/documentation/tools/tools.md#arguments) (defaults to current OS platform)
+- `port`: path to port for connected device (defaults to: `UPLOAD_PORT` environment variable)
+
 ### Run Moddable examples
 
 While it is still possible to run the Moddable example projects in the documented workflow:
@@ -141,14 +166,14 @@ List available examples:
 xs-dev run --list-examples
 ```
 
-Run an example (coming soon):
+Run an example:
 ```
 xs-dev run --example helloworld
 ```
 
 Flags:
 
-- `device`: `esp8266` | `esp32` | [any of the allowed platform identifiers](https://github.com/Moddable-OpenSource/moddable/blob/public/documentation/tools/tools.md#arguments) (defaults to current OS platform)
+- `device`: `esp8266` | `esp32` | `pico` | [any of the allowed platform identifiers](https://github.com/Moddable-OpenSource/moddable/blob/public/documentation/tools/tools.md#arguments) (defaults to current OS platform)
 - `port`: path to port for connected device (defaults to: `UPLOAD_PORT` environment variable)
 
 ## Project management
@@ -183,7 +208,7 @@ xs-dev run path/to/project
 
 Flags:
 
-- `device`: `esp8266` | `esp32` | [any of the allowed platform identifiers](https://github.com/Moddable-OpenSource/moddable/blob/public/documentation/tools/tools.md#arguments) (defaults to current OS platform)
+- `device`: `esp8266` | `esp32` | `pico` | [any of the allowed platform identifiers](https://github.com/Moddable-OpenSource/moddable/blob/public/documentation/tools/tools.md#arguments) (defaults to current OS platform)
 - `port`: path to port for connected device (defaults to: `UPLOAD_PORT` environment variable)
 
 ### Add a Moddable module
