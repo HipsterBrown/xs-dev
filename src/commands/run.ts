@@ -119,6 +119,11 @@ const command: GluegunCommand<XSDevToolbox> = {
         'examples',
         example
       )
+      if (filesystem.exists(exampleProjectPath) === false) {
+        print.error('Example project does not exist.')
+        print.info(`Lookup the available examples: xs-dev run --list-examples`)
+        process.exit(1)
+      }
       if (
         filesystem.exists(
           filesystem.resolve(exampleProjectPath, 'manifest.json')
