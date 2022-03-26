@@ -65,6 +65,18 @@ const command: GluegunCommand<XSDevToolbox> = {
         'esp32/saola_wroom',
         'esp32/saola_wrover',
         'wasm',
+        'pico',
+        'pico/ili9341',
+        'pico/pico_display',
+        'pico/pico_display_2',
+        'simulator/moddable_one',
+        'simulator/moddable_two',
+        'simulator/moddable_three',
+        'simulator/m5stickc',
+        'simulator/m5paper',
+        'simulator/nodemcu',
+        'simulator/pico_display',
+        'simulator/pico_display_2',
       ]
       const { device: selectedDevice } = await prompt.ask([
         {
@@ -148,7 +160,7 @@ const command: GluegunCommand<XSDevToolbox> = {
 
     await system.exec(`mcconfig -d -m -p ${targetPlatform}`, {
       cwd: projectPath,
-      stdout: process.stdout,
+      process,
     })
 
     spinner.stop()
@@ -170,6 +182,8 @@ const command: GluegunCommand<XSDevToolbox> = {
           'Started server on port 8080, go to http://localhost:8080 in your browser to view the simulator'
         )
       })
+    } else {
+      process.exit(0)
     }
   },
 }
