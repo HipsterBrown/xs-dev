@@ -2,6 +2,7 @@ import type { GluegunCommand } from 'gluegun'
 import { type as platformType } from 'os'
 import type { Device, XSDevToolbox } from '../types'
 import setupFontbm from '../toolbox/setup/fontbm'
+import { DEVICE_ALIAS } from '../toolbox/prompt/devices'
 
 interface SetupOptions {
   device?: Device
@@ -23,7 +24,13 @@ const command: GluegunCommand<XSDevToolbox> = {
     let target: Device = device ?? currentPlatform
 
     if (device === undefined && listDevices) {
-      const choices = ['esp8266', 'esp32', 'wasm', currentPlatform]
+      const choices = [
+        'esp8266',
+        'esp32',
+        'pico',
+        'wasm',
+        DEVICE_ALIAS[currentPlatform],
+      ]
       const { device: selectedDevice } = await prompt.ask([
         {
           type: 'autocomplete',

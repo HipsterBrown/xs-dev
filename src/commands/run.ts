@@ -4,6 +4,7 @@ import handler from 'serve-handler'
 import { createServer } from 'http'
 import type { Device, XSDevToolbox } from '../types'
 import { collectChoicesFromTree } from '../toolbox/prompt/choices'
+import { DEVICE_ALIAS } from '../toolbox/prompt/devices'
 
 interface RunOptions {
   device?: Device
@@ -12,17 +13,6 @@ interface RunOptions {
   listExamples?: boolean
   listDevices?: boolean
 }
-
-const DEVICE_ALIAS: Record<Device | 'esp8266', string> = Object.freeze({
-  esp8266: 'esp',
-  darwin: 'mac',
-  windows_nt: 'win',
-  linux: 'lin',
-  esp: 'esp',
-  esp32: 'esp32',
-  wasm: 'wasm',
-  pico: 'pico',
-})
 
 const command: GluegunCommand<XSDevToolbox> = {
   name: 'run',
@@ -65,6 +55,18 @@ const command: GluegunCommand<XSDevToolbox> = {
         'esp32/saola_wroom',
         'esp32/saola_wrover',
         'wasm',
+        'pico',
+        'pico/ili9341',
+        'pico/pico_display',
+        'pico/pico_display_2',
+        'simulator/moddable_one',
+        'simulator/moddable_two',
+        'simulator/moddable_three',
+        'simulator/m5stickc',
+        'simulator/m5paper',
+        'simulator/nodemcu',
+        'simulator/pico_display',
+        'simulator/pico_display_2',
       ]
       const { device: selectedDevice } = await prompt.ask([
         {
@@ -148,7 +150,7 @@ const command: GluegunCommand<XSDevToolbox> = {
 
     await system.exec(`mcconfig -d -m -p ${targetPlatform}`, {
       cwd: projectPath,
-      stdout: process.stdout,
+      process,
     })
 
     spinner.stop()
@@ -170,6 +172,8 @@ const command: GluegunCommand<XSDevToolbox> = {
           'Started server on port 8080, go to http://localhost:8080 in your browser to view the simulator'
         )
       })
+    } else {
+      process.exit(0)
     }
   },
 }
