@@ -1,5 +1,11 @@
 # xs-dev
 
+## 0.11.0
+
+### Minor Changes
+
+- Display pico and all simulators in runnable device list, add pico to setup device list
+
 ## 0.10.1
 
 ### Patch Changes
