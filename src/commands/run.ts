@@ -4,6 +4,7 @@ import handler from 'serve-handler'
 import { createServer } from 'http'
 import type { Device, XSDevToolbox } from '../types'
 import { collectChoicesFromTree } from '../toolbox/prompt/choices'
+import { DEVICE_ALIAS } from '../toolbox/prompt/devices'
 
 interface RunOptions {
   device?: Device
@@ -12,17 +13,6 @@ interface RunOptions {
   listExamples?: boolean
   listDevices?: boolean
 }
-
-const DEVICE_ALIAS: Record<Device | 'esp8266', string> = Object.freeze({
-  esp8266: 'esp',
-  darwin: 'mac',
-  windows_nt: 'win',
-  linux: 'lin',
-  esp: 'esp',
-  esp32: 'esp32',
-  wasm: 'wasm',
-  pico: 'pico',
-})
 
 const command: GluegunCommand<XSDevToolbox> = {
   name: 'run',
