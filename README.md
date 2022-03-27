@@ -37,7 +37,7 @@ npm install -g xs-dev
 ## Update
 
 ```
-npm update -g xs-dev@latest
+npm update -g xs-dev
 ```
 
 ## Features
