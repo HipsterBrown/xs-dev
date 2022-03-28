@@ -45,7 +45,7 @@ const command: GluegunCommand = {
     print.info(`Adding "${String(moduleName)}" to manifest includes`)
     const modulePath = `$(MODDABLE)/modules/${String(moduleName)}/manifest.json`
     await patching.update(manifestPath, (manifest) => {
-      if (!manifest.include)
+      if (!("include" in manifest))
         manifest.include = []
       if (typeof manifest.include === "string")
         manifest.include = [manifest.include]

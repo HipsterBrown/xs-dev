@@ -20,7 +20,7 @@ const command: GluegunCommand = {
 
     print.info(`Removing "${String(moduleName)}" from manifest includes`)
     await patching.update(manifestPath, (manifest) => {      
-      if (!manifest.include)
+      if (!("include" in manifest))
         return
 
       if (typeof manifest.include === "string")
