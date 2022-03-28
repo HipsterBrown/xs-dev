@@ -47,14 +47,14 @@ const command: GluegunCommand = {
     await patching.update(manifestPath, (manifest) => {
       if (!manifest.include)
         manifest.include = []
-      if ("string" === typeof manifest.include)
+      if (typeof manifest.include === "string")
         manifest.include = [manifest.include]
       if (!manifest.include.includes(modulePath)) {
         manifest.include.push(
           modulePath
         )
       }
-      if (1 === manifest.include.length)
+      if (manifest.include.length === 1)
         manifest.include = manifest.include[0]
       return manifest
     })

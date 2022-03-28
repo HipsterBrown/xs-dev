@@ -23,7 +23,7 @@ const command: GluegunCommand = {
       if (!manifest.include)
         return
 
-      if ("string" === typeof manifest.include)
+      if (typeof manifest.include === "string")
         manifest.include = [manifest.include]
 
       const length = manifest.include.length
@@ -39,9 +39,9 @@ const command: GluegunCommand = {
       if (length === manifest.include.length)
         print.error(`"${moduleName}" not found. No modules removed.`)
 
-      if (1 === manifest.include.length)
+      if (manifest.include.length === 1)
         manifest.include = manifest.include[0]
-      else if (0 === manifest.include.length)
+      else if (manifest.include.length === 0)
         delete manifest.include
 
       return manifest
