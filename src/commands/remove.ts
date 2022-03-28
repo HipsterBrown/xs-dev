@@ -18,11 +18,32 @@ const command: GluegunCommand = {
       process.exit(1)
     }
 
-    print.info(`Removing "${String(moduleName)}" to manifest includes`)
-    await patching.update(manifestPath, (manifest) => {
+    print.info(`Removing "${String(moduleName)}" from manifest includes`)
+    await patching.update(manifestPath, (manifest) => {      
+      if (!("include" in manifest))
+        return
+
+      if (typeof manifest.include === "string")
+        manifest.include = [manifest.include]
+
+      const length = manifest.include.length
       manifest.include = manifest.include.filter(
-        (mod: string) => !mod.includes(moduleName)
+        (mod: string) => {
+          const result = !mod.includes(moduleName)
+          if (!result)
+            print.info(` Removing: ${mod}`)
+
+          return result
+        }
       )
+      if (length === manifest.include.length)
+        print.error(`"${moduleName}" not found. No modules removed.`)
+
+      if (manifest.include.length === 1)
+        manifest.include = manifest.include[0]
+      else if (manifest.include.length === 0)
+        delete manifest.include
+
       return manifest
     })
     print.success('Done!')

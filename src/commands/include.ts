@@ -30,22 +30,32 @@ const command: GluegunCommand = {
         modules !== undefined
           ? modules.map((mod) => collectChoicesFromTree(mod)).flat()
           : []
+      const filtered = (moduleName !== undefined) ? choices.filter((mod: string) => mod.includes(String(moduleName))) : choices
       const { mod: selectedModule } = await prompt.ask([
         {
           type: 'autocomplete',
           name: 'mod',
           message: 'Here are the available modules:',
-          choices,
+          choices: (filtered.length > 0) ? filtered : choices,
         },
       ])
       moduleName = selectedModule
     }
 
     print.info(`Adding "${String(moduleName)}" to manifest includes`)
+    const modulePath = `$(MODDABLE)/modules/${String(moduleName)}/manifest.json`
     await patching.update(manifestPath, (manifest) => {
-      manifest.include.push(
-        `$(MODDABLE)/modules/${String(moduleName)}/manifest.json`
-      )
+      if (!("include" in manifest))
+        manifest.include = []
+      if (typeof manifest.include === "string")
+        manifest.include = [manifest.include]
+      if (manifest.include.includes(modulePath) === false) {
+        manifest.include.push(
+          modulePath
+        )
+      }
+      if (manifest.include.length === 1)
+        manifest.include = manifest.include[0]
       return manifest
     })
     print.success('Done!')
