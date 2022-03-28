@@ -1,5 +1,11 @@
 # xs-dev
 
+## 0.11.1
+
+### Patch Changes
+
+- Address include/remove module handling issues
+
 ## 0.11.0
 
 ### Minor Changes
