@@ -27,7 +27,13 @@ const command: GluegunCommand<XSDevToolbox> = {
     const result = await Promise.all<Buffer[]>(
       ports
         .filter((port) => port.serialNumber !== undefined)
-        .map((port) => system.exec(`esptool.py --port ${port.path} read_mac`)) // eslint-disable-line @typescript-eslint/promise-function-async
+        .map(async (port) => {
+          try {
+            return await system.exec(`esptool.py --port ${port.path} read_mac`) // eslint-disable-line @typescript-eslint/promise-function-async
+          }
+          catch {
+          }
+        })
     )
 
     const record = parseScanResult(result.map(String).join('\n'))
