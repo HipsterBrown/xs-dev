@@ -185,12 +185,32 @@ Flags:
 xs-dev init my-project
 ```
 
-Creates a `main.js` and base configured `manifest.json` for running in the simulator.
+Creates a `main.js` and minimally configured `manifest.json` for running in the simulator.
 
 Flags:
 
 - `typescript`: includes typings and creates `main.ts` (experimental)
 - `io`: includes [TC53 IO manifest](https://github.com/Moddable-OpenSource/moddable/blob/public/documentation/io/io.md)
+- `example`: use [Moddable example project](https://github.com/Moddable-OpenSource/moddable/tree/public/examples) as base for new project
+- `overwrite`: replace any existing directory of the same name
+
+For the example flag, it can be used as a boolean to select a project from a list:
+
+```
+xs-dev init my-project --example
+```
+
+Or select from a filtered list of projects:
+
+```
+xs-dev init my-project --example http
+```
+
+Or if the complete example name is passed, it will be selected by default:
+
+```
+xs-dev init my-project --example network/mqtt/mqttbasic
+```
 
 ### Build and run a project
 
