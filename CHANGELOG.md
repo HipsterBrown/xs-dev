@@ -1,5 +1,11 @@
 # xs-dev
 
+## 0.12.0
+
+### Minor Changes
+
+- Initialize new project from Moddable example template
+
 ## 0.11.1
 
 ### Patch Changes
