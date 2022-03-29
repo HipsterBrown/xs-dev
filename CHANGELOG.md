@@ -1,5 +1,11 @@
 # xs-dev
 
+## 0.13.0
+
+### Minor Changes
+
+- Add --device flag for include & remove commands
+
 ## 0.12.0
 
 ### Minor Changes
