@@ -1,6 +1,10 @@
 import type { GluegunCommand } from 'gluegun'
 import { collectChoicesFromTree } from '../toolbox/prompt/choices'
 
+interface IncludeOptions {
+  device?: string
+}
+
 const command: GluegunCommand = {
   name: 'include',
   description: 'Name or select Moddable module to add to project manifest',
@@ -17,6 +21,9 @@ const command: GluegunCommand = {
       'modules'
     )
     let moduleName = parameters.first
+    const {
+      device = ""
+    }: IncludeOptions = parameters.options
 
     if (
       moduleName === undefined ||
@@ -44,7 +51,13 @@ const command: GluegunCommand = {
 
     print.info(`Adding "${String(moduleName)}" to manifest includes`)
     const modulePath = `$(MODDABLE)/modules/${String(moduleName)}/manifest.json`
-    await patching.update(manifestPath, (manifest) => {
+    await patching.update(manifestPath, (manifestIn) => {
+      let  manifest = manifestIn
+      if (device !== "") {
+        manifest.platforms ??= {}
+        manifest.platforms[device] ??= {}
+        manifest = manifest.platforms[device]
+      }
       if (!("include" in manifest))
         manifest.include = []
       if (typeof manifest.include === "string")
@@ -56,7 +69,7 @@ const command: GluegunCommand = {
       }
       if (manifest.include.length === 1)
         manifest.include = manifest.include[0]
-      return manifest
+      return manifestIn
     })
     print.success('Done!')
   },

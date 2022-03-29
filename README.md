@@ -231,7 +231,7 @@ Flags:
 - `device`: `esp8266` | `esp32` | `pico` | [any of the allowed platform identifiers](https://github.com/Moddable-OpenSource/moddable/blob/public/documentation/tools/tools.md#arguments) (defaults to current OS platform)
 - `port`: path to port for connected device (defaults to: `UPLOAD_PORT` environment variable)
 
-### Add a Moddable module
+### Add a Moddable SDK module
 
 ```
 xs-dev include network/wifi
@@ -241,9 +241,18 @@ Or select from available modules:
 
 ```
 xs-dev include
+xs-dev include files
 ```
 
-Updates the `manifest.json` with the path to the dependency.
+Updates the `manifest.json` to include the module. 
+
+Flags:
+
+- `device`: When this flag is present, the module is added to the `platforms` section for the specified device. When `device` is not provided, the module is added to the global manifest section to be used for all devices. For example, the following adds the module for use on `esp32` devices only:
+
+```
+xs-dev include files/flash --device esp32
+```
 
 ### Scan for available devices
 
@@ -275,13 +284,27 @@ To include a specific module for the installed dependency:
 xs-dev include j5e/lib/led
 ```
 
-### Remove a dependency
+### Remove a Moddable SDK module
 
 ```
 xs-dev remove network/wifi
 ```
 
-Updates the `manifest.json` to remove the dependency.
+Updates the `manifest.json` to remove the module.
+
+Or remove all modules that contain a string. This removes all modules that contain `"wifi"`.
+
+```
+xs-dev remove wifi
+```
+
+Flags:
+
+- `device`: When this flag is present, the module is removed from the `platforms` section for the specified device. When `device` is not provided, the module is removed from the global manifest section. For example, the following adds the module for use on `esp32` devices only:
+
+```
+xs-dev remove network/mqtt --device esp32
+```
 
 ## Development
 

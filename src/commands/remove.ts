@@ -1,5 +1,9 @@
 import type { GluegunCommand } from 'gluegun'
 
+interface RemoveOptions {
+  device?: string
+}
+
 const command: GluegunCommand = {
   name: 'remove',
   description: 'Name or select Moddable module to remove from project manifest',
@@ -12,6 +16,9 @@ const command: GluegunCommand = {
       process.exit(1)
     }
     const moduleName = parameters.first
+    const {
+      device = ""
+    }: RemoveOptions = parameters.options
 
     if (moduleName === undefined) {
       print.error('Module name is required')
@@ -19,7 +26,14 @@ const command: GluegunCommand = {
     }
 
     print.info(`Removing "${String(moduleName)}" from manifest includes`)
-    await patching.update(manifestPath, (manifest) => {      
+    await patching.update(manifestPath, (manifestIn) => {      
+      let  manifest = manifestIn
+      if (device !== "") {
+        manifest.platforms ??= {}
+        manifest.platforms[device] ??= {}
+        manifest = manifest.platforms[device]
+      }
+
       if (!("include" in manifest))
         return
 
@@ -44,7 +58,7 @@ const command: GluegunCommand = {
       else if (manifest.include.length === 0)
         delete manifest.include
 
-      return manifest
+      return manifestIn
     })
     print.success('Done!')
   },
