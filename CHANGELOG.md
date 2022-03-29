@@ -1,5 +1,11 @@
 # xs-dev
 
+## 0.13.1
+
+### Patch Changes
+
+- Catch scan errors thrown by esptool
+
 ## 0.13.0
 
 ### Minor Changes
