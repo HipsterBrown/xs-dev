@@ -1,5 +1,11 @@
 # xs-dev
 
+## 0.13.2
+
+### Patch Changes
+
+- Set PICO_GCC_ROOT to brew prefix on macOS
+
 ## 0.13.1
 
 ### Patch Changes
