@@ -40,6 +40,10 @@ export default async function (): Promise<void> {
 
     spinner.start('Tapping ArmMbed formulae and installing arm-embed-gcc')
     await installMacDeps(spinner)
+
+    const brewPrefix = await system.run('brew --prefix')
+    process.env.PICO_GCC_ROOT = brewPrefix
+    await upsert(EXPORTS_FILE_PATH, `export PICO_GCC_ROOT=${brewPrefix}`)
   }
 
   if (OS === 'linux') {
