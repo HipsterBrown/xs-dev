@@ -14,7 +14,7 @@ const command: GluegunCommand<XSDevToolbox> = {
     }
 
     if (system.which('esptool.py') === null) {
-      print.error(
+      print.warning(
         'esptool.py required to scan for devices. Please setup environment for ESP8266 or ESP32 before continuing:\n xs-dev setup --device esp32\n xs-dev setup --device esp8266.'
       )
     }
@@ -30,9 +30,7 @@ const command: GluegunCommand<XSDevToolbox> = {
         .map(async (port) => {
           try {
             return await system.exec(`esptool.py --port ${port.path} read_mac`) // eslint-disable-line @typescript-eslint/promise-function-async
-          }
-          catch {
-          }
+          } catch {}
         })
     )
 

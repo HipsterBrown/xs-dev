@@ -5,6 +5,6 @@ export async function installDeps(
   spinner: ReturnType<GluegunPrint['spin']>
 ): Promise<void> {
   await system.exec('brew tap ArmMbed/homebrew-formulae')
-  await system.exec(`brew install arm-none-eabi-gcc`)
+  await system.exec(`brew install arm-none-eabi-gcc libusb pkg-config`)
   spinner.succeed()
 }
