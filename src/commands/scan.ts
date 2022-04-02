@@ -29,6 +29,12 @@ const command: GluegunCommand<XSDevToolbox> = {
         .filter((port) => port.serialNumber !== undefined)
         .map(async (port) => {
           try {
+            if (
+              port.manufacturer?.includes('Raspberry Pi') === true &&
+              system.which('picotool') !== null
+            ) {
+              return await system.exec(`picotool info -fa`)
+            }
             return await system.exec(`esptool.py --port ${port.path} read_mac`) // eslint-disable-line @typescript-eslint/promise-function-async
           } catch {}
         })
