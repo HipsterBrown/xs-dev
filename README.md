@@ -131,7 +131,7 @@ xs-dev run --example helloworld --device=wasm
 
 ### Raspberry Pi Pico SDK install / setup
 
-This process automates the instructions for downloading all the dependencies for the Pico SDK. These dependencies will be placed in the `~/.local/share/pico` directory, which will be created if it doesn't exist.
+This process automates the instructions for downloading all the dependencies for the Pico SDK. These dependencies will be placed in the `~/.local/share/pico` directory, which will be created if it doesn't exist. It will also include the [`picotool` CLI](https://github.com/raspberrypi/picotool) to help with scanning for connected devices.
 
 Run script for platform setup:
 
