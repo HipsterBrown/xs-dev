@@ -1,5 +1,11 @@
 # xs-dev
 
+## 0.14.0
+
+### Minor Changes
+
+- Add picotool install to pico setup and scanning
+
 ## 0.13.2
 
 ### Patch Changes
