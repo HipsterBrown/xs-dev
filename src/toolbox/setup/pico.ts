@@ -9,9 +9,12 @@ export default async function (): Promise<void> {
   const OS = platformType().toLowerCase()
   const PICO_SDK_REPO = 'https://github.com/raspberrypi/pico-sdk'
   const PICO_EXAMPLES_REPO = 'https://github.com/raspberrypi/pico-examples'
+  const PICOTOOL_REPO = 'https://github.com/raspberrypi/picotool'
   const PICO_DIR = filesystem.resolve(INSTALL_DIR, 'pico')
   const PICO_SDK_DIR = filesystem.resolve(PICO_DIR, 'pico-sdk')
   const PICO_EXAMPLES_PATH = filesystem.resolve(PICO_DIR, 'pico-examples')
+  const PICOTOOL_PATH = filesystem.resolve(PICO_DIR, 'picotool')
+  const PICOTOOL_BUILD_DIR = filesystem.resolve(PICOTOOL_PATH, 'build')
   const PICO_SDK_BUILD_DIR = filesystem.resolve(PICO_SDK_DIR, 'build')
 
   const spinner = print.spin()
@@ -54,7 +57,7 @@ export default async function (): Promise<void> {
   }
   spinner.succeed()
 
-  // 2. Install the pico sdk and examples:
+  // 2. Install the pico sdk, examples, and picotool:
   if (filesystem.exists(PICO_SDK_DIR) === false) {
     spinner.start('Cloning pico-sdk repo')
     await system.exec(`git clone -b master ${PICO_SDK_REPO} ${PICO_SDK_DIR}`, {
@@ -73,6 +76,14 @@ export default async function (): Promise<void> {
       `git clone -b master ${PICO_EXAMPLES_REPO} ${PICO_EXAMPLES_PATH}`,
       { stdout: process.stdout }
     )
+    spinner.succeed()
+  }
+
+  if (filesystem.exists(PICOTOOL_PATH) === false) {
+    spinner.start('Cloning picotool repo')
+    await system.exec(`git clone -b master ${PICOTOOL_REPO} ${PICOTOOL_PATH}`, {
+      stdout: process.stdout,
+    })
     spinner.succeed()
   }
 
@@ -102,6 +113,35 @@ export default async function (): Promise<void> {
       stdout: process.stdout,
       cwd: PICO_SDK_BUILD_DIR,
     })
+    spinner.succeed()
+  }
+
+  // 5. Build _the_ picotool
+  if (process.env.PICO_SDK_PATH === undefined) {
+    spinner.info('Setting PICO_SDK_PATH')
+    process.env.PICO_SDK_PATH = PICO_SDK_DIR
+    await upsert(EXPORTS_FILE_PATH, `export PICO_SDK_PATH=${PICO_SDK_DIR}`)
+  } else {
+    spinner.info(`Using existing $PICO_SDK_PATH: ${process.env.PICO_SDK_PATH}`)
+  }
+
+  if (
+    filesystem.exists(PICOTOOL_BUILD_DIR) === false ||
+    filesystem.list(PICOTOOL_BUILD_DIR)?.length === 0
+  ) {
+    spinner.start('Build the picotool CLI')
+    filesystem.dir(PICOTOOL_BUILD_DIR)
+    await system.exec('cmake ..', {
+      shell: process.env.SHELL,
+      stdout: process.stdout,
+      cwd: PICOTOOL_BUILD_DIR,
+    })
+    await system.exec('make', {
+      shell: process.env.SHELL,
+      stdout: process.stdout,
+      cwd: PICOTOOL_BUILD_DIR,
+    })
+    await upsert(EXPORTS_FILE_PATH, `export PATH="${PICOTOOL_BUILD_DIR}:$PATH"`)
     spinner.succeed()
   }
 

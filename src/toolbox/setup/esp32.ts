@@ -66,7 +66,7 @@ export default async function (): Promise<void> {
 
   // 6. append 'source $IDF_PATH/export.sh' to shell profile
   spinner.info('Sourcing esp-idf environment')
-  await upsert(EXPORTS_FILE_PATH, `source $IDF_PATH/export.sh`)
+  await upsert(EXPORTS_FILE_PATH, `source $IDF_PATH/export.sh 1> /dev/null`)
   await system.exec('source $IDF_PATH/export.sh', {
     shell: process.env.SHELL,
   })
