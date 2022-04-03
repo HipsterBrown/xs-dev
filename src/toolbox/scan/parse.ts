@@ -1,8 +1,7 @@
 type ScanResult = Record<string, { device: string; features: string }>
 type ParseState = 'searching' | 'portFound' | 'deviceFound' | 'featuresFound'
 
-export function parseScanResult(output: string): ScanResult {
-  const lines = output.split('\n')
+function parseEsptoolLines(lines: string[]): ScanResult {
   let state: ParseState = 'searching'
   let currentPort: string | null = null
 
@@ -45,5 +44,56 @@ export function parseScanResult(output: string): ScanResult {
     }
 
     return result
+  }, {})
+}
+
+function parsePicotoolLines(lines: string[], port: string): ScanResult {
+  let state: ParseState = 'searching'
+  const currentPort = port.replace('tty', 'cu')
+
+  return lines.reduce<ScanResult>((result, line) => {
+    if (state === 'searching') {
+      result[currentPort] = { device: '', features: '' }
+      state = 'portFound'
+    }
+
+    if (state === 'portFound') {
+      if (line.trim().startsWith('features')) {
+        const [, features] = line.split(':')
+        result[currentPort].features = features.trim()
+        state = 'featuresFound'
+      }
+    }
+
+    if (state === 'featuresFound') {
+      if (line.trim().startsWith('pico_board')) {
+        const [, device] = line.split(':')
+        result[currentPort].device = device.trim()
+        state = 'deviceFound'
+      }
+    }
+
+    if (state === 'deviceFound') {
+      if (line.includes('asked to reboot')) {
+        state = 'searching'
+      }
+    }
+    return result
+  }, {})
+}
+
+export function parseScanResult(
+  scans: Array<
+    [output: Buffer, port: string] | [output: undefined, port: string]
+  >
+): ScanResult {
+  return scans.reduce<ScanResult>((result, [output, port]) => {
+    if (typeof output === 'undefined') return result
+    const lines = String(output).split('\n')
+
+    if (output.includes('pico_board')) {
+      return { ...result, ...parsePicotoolLines(lines, port) }
+    }
+    return { ...result, ...parseEsptoolLines(lines) }
   }, {})
 }

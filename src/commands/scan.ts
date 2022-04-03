@@ -15,7 +15,7 @@ const command: GluegunCommand<XSDevToolbox> = {
 
     if (system.which('esptool.py') === null) {
       print.warning(
-        'esptool.py required to scan for devices. Please setup environment for ESP8266 or ESP32 before continuing:\n xs-dev setup --device esp32\n xs-dev setup --device esp8266.'
+        'esptool.py required to scan for Espressif devices. Setup environment for ESP8266 or ESP32:\n xs-dev setup --device esp32\n xs-dev setup --device esp8266.'
       )
     }
 
@@ -24,7 +24,9 @@ const command: GluegunCommand<XSDevToolbox> = {
     spinner.start('Scanning for devices...')
 
     const ports = await SerialPort.list()
-    const result = await Promise.all<Buffer[]>(
+    const result: Array<
+      [output: Buffer, port: string] | [output: undefined, port: string]
+    > = await Promise.all(
       ports
         .filter((port) => port.serialNumber !== undefined)
         .map(async (port) => {
@@ -33,14 +35,19 @@ const command: GluegunCommand<XSDevToolbox> = {
               port.manufacturer?.includes('Raspberry Pi') === true &&
               system.which('picotool') !== null
             ) {
-              return await system.exec(`picotool info -fa`)
+              return await system
+                .exec(`picotool info -fa`)
+                .then((buffer) => [buffer, port.path])
             }
-            return await system.exec(`esptool.py --port ${port.path} read_mac`) // eslint-disable-line @typescript-eslint/promise-function-async
+            return await system
+              .exec(`esptool.py --port ${port.path} read_mac`)
+              .then((buffer) => [buffer, port.path])
           } catch {}
+          return [undefined, port.path]
         })
     )
 
-    const record = parseScanResult(result.map(String).join('\n'))
+    const record = parseScanResult(result)
     const rows = Object.keys(record).map((port) => {
       const { device, features } = record[port]
       return [port, device, features]
