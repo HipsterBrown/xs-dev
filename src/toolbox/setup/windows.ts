@@ -40,44 +40,28 @@ async function setEnv(name: string, value: RegistryItemValue): Promise<void> {
   }
 }
 
-async function addToPath(BIN_PATH: string): Promise<Result> {
+async function addToPath(BIN_PATH: string): Promise<string> {
   let result
   try {
-    result = await regedit.promisified.list([`HKCU\\ENVIRONMENT`])
+    result = await regedit.list([`HKCU\\ENVIRONMENT`])
   } catch (error) {
-    return {success: false, info: "Error while reading User Path from registry"}
+    throw new Error('Error while reading User Path from registry')
   }
 
-  try {
-    if (result) {
-      const pathString = result["HKCU\\ENVIRONMENT"].values.Path.value
+  const pathEnv = result['HKCU\\ENVIRONMENT'].values.Path
+  const tokens =
+  pathEnv.type === 'REG_EXPAND_SZ' ? pathEnv.value.split(';') : []
+  const moddableExists = tokens.some((token) => token === BIN_PATH)
 
-      const tokens = pathString.split(";")
-      let found = false
-      for (let x of tokens)
-        if (x === BIN_PATH)
-          found = true
-  
-      if (found) {
-        return {success: true, info: "Moddable BIN already in User PATH."}
-      } else {
-        const value = {
-          "HKCU\\ENVIRONMENT": {
-            "Path": {
-              value: pathString + ";" + BIN_PATH,
-              type: "REG_EXPAND_SZ"
-            }
-          }
-        }
-  
-        await regedit.promisified.putValue(value)
-        return {success: true}
-      }
-    }
-  } catch (error) {
-    return {success: false, info: `Error setting registry value`}
+  if (moddableExists) {
+    return 'Moddable BIN already in User PATH.'
+  } else {
+    await setEnv('PATH', {
+      value: `${tokens.join(';')};${BIN_PATH}`,
+      type: 'REG_EXPAND_SZ',
+    })
+    return 'Moddable BIN now set in PATH.'
   }
-  return {success: false}
 }
 
 export default async function (): Promise<void> {
