@@ -11,21 +11,7 @@ import {
 } from './constants'
 import upsert from '../patching/upsert'
 
-import { promisified as regedit } from 'regedit'
-
-interface Result {
-  success: boolean,
-  info?: string
-}
-
-enum RegType {
-  REG_SZ = "REG_SZ",
-  REG_EXPAND_SZ = "REG_EXPAND_SZ",
-  REG_DWORD = "REG_DWORD",
-  REG_QWORD = "REG_QWORD",
-  REG_MULTI_SZ = "REG_MULTI_SZ",
-  REG_DEFAULT = "REG_DEFAULT"
-}
+import { promisified as regedit, RegistryItemPutCollection, RegistryItemValue } from 'regedit'
 
 async function setEnv(name: string, value: RegistryItemValue): Promise<void> {
   try {
