@@ -89,10 +89,10 @@ export default async function (): Promise<void> {
     // @@TODO: need to check if perhaps VS.bat has not been run...
     process.exit(1)
   }
-  try {
-    await system.exec(`git --version`)
-  } catch (error) {
-    print.error('git is required to clone the Moddable SDK: https://git-scm.com/download/win')
+  if (system.which('git') === null) {
+    print.error(
+      'git is required to clone the Moddable SDK: https://git-scm.com/download/win'
+    )
     process.exit(1)
   }
 
