@@ -3,6 +3,13 @@ import type { GluegunCommand } from 'gluegun'
 import type { XSDevToolbox } from '../types'
 import { parseScanResult } from '../toolbox/scan/parse'
 
+// eslint-disable-next-line
+function sleep(timeout: number) {
+  return new Promise((resolve) => {
+    setTimeout(resolve, timeout)
+  })
+}
+
 const command: GluegunCommand<XSDevToolbox> = {
   name: 'scan',
   description: 'Look for available devices',
@@ -23,6 +30,13 @@ const command: GluegunCommand<XSDevToolbox> = {
 
     spinner.start('Scanning for devices...')
 
+    const hasPicotool = system.which('picotool') !== null
+
+    if (hasPicotool) {
+      await system.exec('picotool reboot -fa')
+      await sleep(1000)
+    }
+
     const ports = await SerialPort.list()
     const result: Array<
       [output: Buffer, port: string] | [output: undefined, port: string]
@@ -33,7 +47,7 @@ const command: GluegunCommand<XSDevToolbox> = {
           try {
             if (
               port.manufacturer?.includes('Raspberry Pi') === true &&
-              system.which('picotool') !== null
+              hasPicotool
             ) {
               return await system
                 .exec(`picotool info -fa`)
