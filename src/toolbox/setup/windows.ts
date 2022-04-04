@@ -82,10 +82,10 @@ export default async function (): Promise<void> {
   print.info(`Setting up Windows tools at ${INSTALL_PATH}`)
 
   // Check for Visual Studio CMD tools
-  try {
-    await system.exec('nmake /?')
-  } catch (error) {
-    print.error('Visual Studio 2022 Community is required to build the Moddable SDK: https://www.visualstudio.com/downloads/')
+    if (system.which('nmake') === null) {
+    print.error(
+      'Visual Studio 2022 Community is required to build the Moddable SDK: https://www.visualstudio.com/downloads/'
+    )
     // @@TODO: need to check if perhaps VS.bat has not been run...
     process.exit(1)
   }
