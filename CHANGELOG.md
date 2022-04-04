@@ -1,5 +1,11 @@
 # xs-dev
 
+## 0.14.1
+
+### Patch Changes
+
+- Reboot pico boards to application mode before scanning
+
 ## 0.14.0
 
 ### Minor Changes
