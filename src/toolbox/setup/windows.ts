@@ -11,7 +11,7 @@ import {
 } from './constants'
 import upsert from '../patching/upsert'
 
-const regedit = require("regedit")
+import { promisified as regedit } from 'regedit'
 
 interface Result {
   success: boolean,
