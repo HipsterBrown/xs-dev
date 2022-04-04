@@ -125,13 +125,14 @@ export default async function (): Promise<void> {
   // 2. configure MODDABLE env variable, add release binaries dir to PATH
   
   spinner.start(`Adding Moddable SDK to User Environment`)
-  let result = await setEnv("MODDABLE", INSTALL_PATH, RegType.REG_SZ)
-  if (result.success) {
-    if (result.info)
-      spinner.info(result.info)
+  try {
+    await setEnv('MODDABLE', {
+      value: INSTALL_PATH,
+      type: 'REG_SZ',
+    })
     spinner.succeed()
-  } else {
-    spinner.fail(result.info)
+  } catch (error) {
+    spinner.fail(error.toString())
   }
   process.env.MODDABLE = INSTALL_PATH
 
