@@ -137,13 +137,12 @@ export default async function (): Promise<void> {
   process.env.MODDABLE = INSTALL_PATH
 
   spinner.start(`Adding Moddable SDK to User Path`)
-  result = await addToPath(BIN_PATH)
-  if (result.success) {
-    if (result.info)
-      spinner.info(result.info)
+  try {
+    const result = await addToPath(BIN_PATH)
+    spinner.info(result)
     spinner.succeed()
-  } else {
-    spinner.fail(result.info)
+  } catch (error) {
+    spinner.fail(error.toString())
   }
   process.env.PATH = `${String(process.env.PATH)};${BIN_PATH}`
   
