@@ -27,30 +27,17 @@ enum RegType {
   REG_DEFAULT = "REG_DEFAULT"
 }
 
-async function setEnv(name: string, value: string, type: RegType): Promise<Result> {
-  let result
+async function setEnv(name: string, value: RegistryItemValue): Promise<void> {
   try {
-    result = await regedit.promisified.list([`HKCU\\ENVIRONMENT`])
-  } catch (error) {
-    return {success: false, info: "Error while reading user environment variables from registry"}
-  }
-  
-  try {
-    if (result) {
-      let reg = {
-        "HKCU\\ENVIRONMENT": {}
-      };
-      (reg as any)["HKCU\\ENVIRONMENT"][name] = {
-        value,
-        type
-      }
-      await regedit.promisified.putValue(reg)
-      return {success: true}
+    const reg: RegistryItemPutCollection = {
+      'HKCU\\ENVIRONMENT': {
+        [name]: value,
+      },
     }
+    await regedit.putValue(reg)
   } catch (error) {
-    return {success: false, info: "Error while saving environment variable to registry"}
+    throw new Error('Error while saving environment variable to registry')
   }
-  return {success: false}
 }
 
 async function addToPath(BIN_PATH: string): Promise<Result> {
