@@ -33,8 +33,10 @@ const command: GluegunCommand<XSDevToolbox> = {
     const hasPicotool = system.which('picotool') !== null
 
     if (hasPicotool) {
-      await system.exec('picotool reboot -fa')
-      await sleep(1000)
+      try {
+        await system.exec('picotool reboot -fa')
+        await sleep(1000)
+      } catch {}
     }
 
     const ports = await SerialPort.list()
