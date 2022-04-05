@@ -1,5 +1,11 @@
 # xs-dev
 
+## 0.14.2
+
+### Patch Changes
+
+- Catch picotool error thrown when no devices found
+
 ## 0.14.1
 
 ### Patch Changes
