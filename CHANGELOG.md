@@ -1,5 +1,11 @@
 # xs-dev
 
+## 0.14.3
+
+### Patch Changes
+
+- Filter picotool scans using usb bus address
+
 ## 0.14.2
 
 ### Patch Changes
