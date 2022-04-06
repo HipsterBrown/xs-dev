@@ -1,4 +1,5 @@
 import { SerialPort } from 'serialport'
+import { findBySerialNumber } from 'usb'
 import type { GluegunCommand } from 'gluegun'
 import type { XSDevToolbox } from '../types'
 import { parseScanResult } from '../toolbox/scan/parse'
@@ -51,8 +52,11 @@ const command: GluegunCommand<XSDevToolbox> = {
               port.manufacturer?.includes('Raspberry Pi') === true &&
               hasPicotool
             ) {
+              const device = await findBySerialNumber(port.serialNumber ?? '')
+              const bus = String(device?.busNumber)
+              const address = String(device?.deviceAddress)
               return await system
-                .exec(`picotool info -fa`)
+                .exec(`picotool info --bus ${bus} --address ${address} -fa`)
                 .then((buffer) => [buffer, port.path])
             }
             return await system
