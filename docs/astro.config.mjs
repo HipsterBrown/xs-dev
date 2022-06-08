@@ -9,5 +9,5 @@ import sitemap from '@astrojs/sitemap'
 export default defineConfig({
   integrations: [preact(), lit(), tailwind(), sitemap()],
   site: 'https://hipsterbrown.github.io',
-  base: 'xs-dev',
+  base: '/xs-dev',
 })
