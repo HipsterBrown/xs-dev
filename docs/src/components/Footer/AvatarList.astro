@@ -1,14 +1,14 @@
 ---
 // fetch all commits for just this page's path
 const path = 'docs/' + Astro.props.path;
-const url = `https://api.github.com/repos/withastro/astro/commits?path=${path}`;
-const commitsURL = `https://github.com/withastro/astro/commits/main/${path}`;
+const url = `https://api.github.com/repos/hipsterbrown/xs-dev/commits?path=${path}`;
+const commitsURL = `https://github.com/hipsterbrown/xs-dev/commits/main/${path}`;
 
 async function getCommits(url) {
 	try {
-		const token = import.meta.env.SNOWPACK_PUBLIC_GITHUB_TOKEN;
+		const token = import.meta.env.PUBLIC_GITHUB_TOKEN;
 		if (!token) {
-			throw new Error('Cannot find "SNOWPACK_PUBLIC_GITHUB_TOKEN" used for escaping rate-limiting.');
+			throw new Error('Cannot find "PUBLIC_GITHUB_TOKEN" used for escaping rate-limiting.');
 		}
 
 		const auth = `Basic ${Buffer.from(token, 'binary').toString('base64')}`;
