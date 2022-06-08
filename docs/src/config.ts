@@ -37,6 +37,7 @@ export const SIDEBAR = {
     { text: 'Teardown', link: 'en/features/teardown' },
     { text: 'Device Discovery', link: 'en/features/scan' },
     { text: 'Project Creation', link: 'en/features/init' },
+    { text: 'Build & Run', link: 'en/features/run' },
     { text: 'SDK Module Management', link: 'en/features/include' },
   ],
 }

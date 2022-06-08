@@ -39,6 +39,8 @@ Setup commands rely on [`ssh-askpass`](https://packages.ubuntu.com/bionic/ssh-as
 
 ## Installation
 
+Install the package globally from `npm`:
+
 ```
 npm install -g xs-dev
 ```
@@ -52,7 +54,6 @@ yarn global add xs-dev
 ```
 
 ## Update to latest release
-
 
 ```
 npm update -g xs-dev
