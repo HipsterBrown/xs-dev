@@ -334,3 +334,7 @@ To maintain the alias between shell sessions, for example I use zsh:
 ```
 echo "alias local-xs-dev=$PWD/bin/xs-dev" >> ~/.zshrc
 ```
+
+## Docs
+
+The documentation site is built with [Astro](https://astro.build) and can be found in the `docs/` directory. When working on them locally, run `pnpm start:docs` to start the development server that watches for file changes and reloads the page.
