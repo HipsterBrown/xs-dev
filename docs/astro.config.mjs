@@ -8,4 +8,6 @@ import sitemap from '@astrojs/sitemap'
 // https://astro.build/config
 export default defineConfig({
   integrations: [preact(), lit(), tailwind(), sitemap()],
+  site: 'https://hipsterbrown.github.io',
+  base: 'xs-dev',
 })
