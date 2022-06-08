@@ -1,25 +1,20 @@
 export const SITE = {
-	title: 'Documentation',
-	description: 'Your website description.',
-	defaultLanguage: 'en_US',
-};
+  title: 'xs-dev Documentation',
+  description: 'CLI for automating the setup and usage of Moddable XS tools',
+  defaultLanguage: 'en_US',
+}
 
 export const OPEN_GRAPH = {
-	image: {
-		src: 'https://github.com/withastro/astro/blob/main/assets/social/banner.jpg?raw=true',
-		alt:
-			'astro logo on a starry expanse of space,' +
-			' with a purple saturn-like planet floating in the right foreground',
-	},
-	twitter: 'astrodotbuild',
-};
+  twitter: 'hipsterbrown',
+  github: 'hipsterbrown',
+}
 
 export const KNOWN_LANGUAGES = {
-	English: 'en',
-};
+  English: 'en',
+}
 
 // Uncomment this to add an "Edit this page" button to every page of documentation.
-// export const GITHUB_EDIT_URL = `https://github.com/withastro/astro/blob/main/docs/`;
+export const GITHUB_EDIT_URL = `https://github.com/hipsterbrown/xs-dev/blob/main/docs/`
 
 // Uncomment this to add an "Join our Community" button to every page of documentation.
 // export const COMMUNITY_INVITE_URL = `https://astro.build/chat`;
@@ -33,14 +28,15 @@ export const KNOWN_LANGUAGES = {
 // }
 
 export const SIDEBAR = {
-	en: [
-		{ text: '', header: true },
-		{ text: 'Section Header', header: true },
-		{ text: 'Introduction', link: 'en/introduction' },
-		{ text: 'Page 2', link: 'en/page-2' },
-		{ text: 'Page 3', link: 'en/page-3' },
-
-		{ text: 'Another Section', header: true },
-		{ text: 'Page 4', link: 'en/page-4' },
-	],
-};
+  en: [
+    { text: '', header: true },
+    { text: 'Features', header: true },
+    { text: 'Introduction', link: 'en/introduction' },
+    { text: 'Setup', link: 'en/features/setup' },
+    { text: 'Updates', link: 'en/features/update' },
+    { text: 'Teardown', link: 'en/features/teardown' },
+    { text: 'Device Discovery', link: 'en/features/scan' },
+    { text: 'Project Creation', link: 'en/features/init' },
+    { text: 'SDK Module Management', link: 'en/features/include' },
+  ],
+}

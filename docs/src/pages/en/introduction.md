@@ -10,20 +10,28 @@ CLI for automating the setup and usage of [Moddable XS tools](https://github.com
 
 The Moddable SDK and associated dev board tooling is incredibly empowering for embedded JS hardware development, however the set up process can be tedious to follow when getting started. This project aims to streamline the install and environment configuration requirements across platforms in just a few commands.
 
-**Feature support:**
+**This project is a work in progress and should be considered pre-1.0.**
 
-- [X] [Moddable SDK install & setup](https://github.com/Moddable-OpenSource/moddable/blob/public/documentation/Moddable%20SDK%20-%20Getting%20Started.md)
-- [X] [ESP32 SDK setup](https://github.com/Moddable-OpenSource/moddable/blob/public/documentation/devices/esp32.md)
-- [X] [ESP8266 SDK setup](https://github.com/Moddable-OpenSource/moddable/blob/public/documentation/devices/esp8266.md)
-- [X] [WASM simulator](https://github.com/Moddable-OpenSource/moddable/blob/public/documentation/devices/wasm.md)
-- [X] [Raspberry Pi Pico](https://github.com/Moddable-OpenSource/moddable/blob/public/documentation/devices/pico.md)
-- [X] Update Moddable SDK
-- [X] Project management, including dependencies
+**Features:**
+
+- [X] [Moddable SDK setup](./features/setup)
+- [X] [SDK updates](./features/update)
+- [X] [Teardown](./features/teardown)
+- [X] [Device discovery](./features/scan)
+- [X] [Project creation](./features/init)
+- [X] [Run a project or example](./features/run)
+- [X] [SDK module management](./features/include)
+- [ ] Third-party dependency management ([coming soon](https://github.com/HipsterBrown/xs-dev/issues/49))
+
+<!-- - [X] [ESP32 SDK setup](https://github.com/Moddable-OpenSource/moddable/blob/public/documentation/devices/esp32.md) -->
+<!-- - [X] [ESP8266 SDK setup](https://github.com/Moddable-OpenSource/moddable/blob/public/documentation/devices/esp8266.md) -->
+<!-- - [X] [WASM simulator](https://github.com/Moddable-OpenSource/moddable/blob/public/documentation/devices/wasm.md) -->
+<!-- - [X] [Raspberry Pi Pico](https://github.com/Moddable-OpenSource/moddable/blob/public/documentation/devices/pico.md) -->
 
 **Platform support:**
 
 - [X] Mac
-- [ ] Windows
+- [ ] Windows ([coming soon](https://github.com/HipsterBrown/xs-dev/pull/44))
 - [X] Linux
 
 ## Requirements
@@ -34,7 +42,7 @@ The Moddable SDK and associated dev board tooling is incredibly empowering for e
 
 Setup commands rely on [`ssh-askpass`](https://packages.ubuntu.com/bionic/ssh-askpass) to prompt for permission when installing other tools and dependencies.
 
-## Getting Started
+## Installation
 
 ```
 npm install -g xs-dev
@@ -45,5 +53,20 @@ pnpm install -g xs-dev
 ```
 
 ```
-yarn add -g xs-dev
+yarn global add xs-dev
+```
+
+## Update to latest release
+
+
+```
+npm update -g xs-dev
+```
+
+```
+pnpm update -g xs-dev
+```
+
+```
+yarn global upgrade xs-dev
 ```
