@@ -8,7 +8,7 @@ layout: ../../layouts/MainLayout.astro
 
 CLI for automating the setup and usage of [Moddable XS tools](https://github.com/Moddable-OpenSource/moddable/blob/public/documentation/Moddable%20SDK%20-%20Getting%20Started.md)
 
-The Moddable SDK and associated dev board tooling is incredibly empowering for embedded JS hardware development, however the set up process can be tedious to follow when getting started. This project aims to streamline the install and environment configuration requirements across platforms in just a few commands.
+The Moddable SDK and associated dev board tooling is incredibly empowering for embedded JS hardware development, however the set up process can be tedious to follow when getting started. This project aims to streamline the installation and environment configuration requirements across platforms in just a few commands.
 
 **This project is a work in progress and should be considered pre-1.0.**
 
@@ -22,11 +22,6 @@ The Moddable SDK and associated dev board tooling is incredibly empowering for e
 - [X] [Run a project or example](./features/run)
 - [X] [SDK module management](./features/include)
 - [ ] Third-party dependency management ([coming soon](https://github.com/HipsterBrown/xs-dev/issues/49))
-
-<!-- - [X] [ESP32 SDK setup](https://github.com/Moddable-OpenSource/moddable/blob/public/documentation/devices/esp32.md) -->
-<!-- - [X] [ESP8266 SDK setup](https://github.com/Moddable-OpenSource/moddable/blob/public/documentation/devices/esp8266.md) -->
-<!-- - [X] [WASM simulator](https://github.com/Moddable-OpenSource/moddable/blob/public/documentation/devices/wasm.md) -->
-<!-- - [X] [Raspberry Pi Pico](https://github.com/Moddable-OpenSource/moddable/blob/public/documentation/devices/pico.md) -->
 
 **Platform support:**
 
