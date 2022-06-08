@@ -27,6 +27,7 @@ specifiers:
   jest: ^27.4.0
   lit: ^2.1.3
   preact: ^10.7.3
+  preact-render-to-string: ^5.2.0
   prettier: ^2.5.1
   serialport: ^10.3.0
   serve-handler: ^6.1.3
@@ -71,6 +72,7 @@ devDependencies:
   jest: 27.4.7_ts-node@10.4.0
   lit: 2.2.5
   preact: 10.7.3
+  preact-render-to-string: 5.2.0_preact@10.7.3
   prettier: 2.5.1
   ts-jest: 27.1.2_phpi45bkmqo24qpn6me32war5i
   ts-node: 10.4.0_pf6wn77ptdzjivnbizhsgg36ee
