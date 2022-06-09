@@ -2,18 +2,16 @@
 import { getLanguageFromURL, KNOWN_LANGUAGE_CODES } from '../../languages.ts';
 import * as CONFIG from '../../config.ts';
 import SkipToContent from './SkipToContent.astro';
-import SidebarToggle from './SidebarToggle.tsx';
-import LanguageSelect from './LanguageSelect.tsx';
+import './SidebarToggle.ts';
 
 const { currentPage } = Astro.props;
-const lang = currentPage && getLanguageFromURL(currentPage);
 ---
 
 <header>
 	<SkipToContent />
 	<nav class="nav-wrapper" title="Top Navigation">
 		<div class="menu-toggle">
-			<SidebarToggle client:idle />
+			<menu-toggle client:idle />
 		</div>
 		<div class="logo flex">
 			<a href="/">
@@ -21,7 +19,6 @@ const lang = currentPage && getLanguageFromURL(currentPage);
 			</a>
 		</div>
 		<div style="flex-grow: 1;"></div>
-		{KNOWN_LANGUAGE_CODES.length > 1 && <LanguageSelect lang={lang} client:idle />}
 	</nav>
 </header>
 
