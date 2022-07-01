@@ -1,0 +1,39 @@
+.flex-column {
+  flex-direction: column;
+}
+
+input {
+  border: 1px solid #333333;
+  padding: 0.5rem 1rem;
+}
+
+button {
+  border-radius: 0px;
+  padding: 0.5rem;
+}
+
+#search-container ul {
+  background: white;
+  top: 2.6rem;
+  display: flex;
+  flex-direction: column;
+  left: 0;
+  position: absolute;
+  width: 100%;
+}
+
+#search-container ul.has-results {
+  border: 1px solid #333333;
+}
+
+#search-container ul li {
+  padding: 0.5rem 1rem;
+}
+
+ul a {
+  color: blue;
+}
+
+#search-container {
+  position: relative;
+}
