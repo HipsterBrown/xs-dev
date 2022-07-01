@@ -4,6 +4,7 @@ import * as CONFIG from '../../config.ts';
 import SkipToContent from './SkipToContent.astro';
 import SidebarToggle from './SidebarToggle.tsx';
 import LanguageSelect from './LanguageSelect.tsx';
+import Search from './Search.tsx';
 
 const { currentPage } = Astro.props;
 const lang = currentPage && getLanguageFromURL(currentPage);
@@ -23,6 +24,7 @@ const lang = currentPage && getLanguageFromURL(currentPage);
 		<div style="flex-grow: 1;"></div>
 		{KNOWN_LANGUAGE_CODES.length > 1 && <LanguageSelect lang={lang} client:idle />}
 	</nav>
+  <Search client:idle />
 </header>
 
 <style>
@@ -34,7 +36,6 @@ const lang = currentPage && getLanguageFromURL(currentPage);
 		display: flex;
 		align-items: center;
 		justify-content: center;
-		overflow: hidden;
 		position: sticky;
 		top: 0;
 	}

@@ -23,6 +23,7 @@ specifiers:
   eslint-plugin-import: ^2.22.1
   eslint-plugin-node: ^11.1.0
   eslint-plugin-promise: ^5.0.0
+  fuse.js: ^6.6.2
   gluegun: ^5.0.0
   jest: ^27.4.0
   lit: ^2.1.3
@@ -69,6 +70,7 @@ devDependencies:
   eslint-plugin-import: 2.25.4_ffi3uiz42rv3jyhs6cr7p7qqry
   eslint-plugin-node: 11.1.0_eslint@7.32.0
   eslint-plugin-promise: 5.2.0_eslint@7.32.0
+  fuse.js: 6.6.2
   jest: 27.4.7_ts-node@10.4.0
   lit: 2.2.5
   preact: 10.7.3
@@ -3887,6 +3889,11 @@ packages:
 
   /functions-have-names/1.2.3:
     resolution: {integrity: sha512-xckBUXyTIqT97tq2x2AMb+g163b5JFysYk0x4qxNFwbfQkmNZoiRHb6sPzI9/QV33WeuvVYBUIiD4NzNIyqaRQ==}
+    dev: true
+
+  /fuse.js/6.6.2:
+    resolution: {integrity: sha512-cJaJkxCCxC8qIIcPBF9yGxY0W/tVZS3uEISDxhYIdtk8OL93pe+6Zj7LjCqVV4dzbqcriOZ+kQ/NE4RXZHsIGA==}
+    engines: {node: '>=10'}
     dev: true
 
   /gensync/1.0.0-beta.2:
