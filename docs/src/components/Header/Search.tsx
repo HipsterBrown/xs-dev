@@ -27,7 +27,7 @@ const SearchForm: FunctionalComponent = () => {
   }, [])
 
   return (
-    <div class="flex flex-column" id="search-container">
+    <div class="flex flex-column SearchContainer">
       <form method="GET" id="search-form" onSubmit={searchContent}>
         <div role="search" class="flex flex-row">
           <input
@@ -36,18 +36,25 @@ const SearchForm: FunctionalComponent = () => {
             name="search"
             aria-label="search documentation content"
             placeholder="search documentation content"
+            class="SearchContainer-input"
           />
-          <button type="submit">Search</button>
+          <button type="submit" class="SearchContainer-button">
+            Search
+          </button>
         </div>
       </form>
       <ul
-        class={results.length > 0 ? 'has-results' : undefined}
+        class={`SearchContainer-list ${
+          results.length > 0 ? 'has-results' : undefined
+        }`}
         aria-live="assertive"
         aria-atomic="true"
       >
         {results.map((result) => (
-          <li>
-            <a href={result.url}>{result.title}</a>
+          <li class="SearchContainer-list_item">
+            <a href={result.url} class="SearchContainer-link">
+              {result.title}
+            </a>
           </li>
         ))}
       </ul>

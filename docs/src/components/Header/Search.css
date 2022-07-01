@@ -2,17 +2,21 @@
   flex-direction: column;
 }
 
-input {
+.SearchContainer {
+  position: relative;
+}
+
+.SearchContainer-input {
   border: 1px solid #333333;
   padding: 0.5rem 1rem;
 }
 
-button {
+.SearchContainer-button {
   border-radius: 0px;
   padding: 0.5rem;
 }
 
-#search-container ul {
+.SearchContainer-list {
   background: white;
   top: 2.6rem;
   display: flex;
@@ -22,18 +26,14 @@ button {
   width: 100%;
 }
 
-#search-container ul.has-results {
+.SearchContainer-list.has-results {
   border: 1px solid #333333;
 }
 
-#search-container ul li {
+.SearchContainer-list_item {
   padding: 0.5rem 1rem;
 }
 
-ul a {
+.SearchContainer-link {
   color: blue;
-}
-
-#search-container {
-  position: relative;
 }
