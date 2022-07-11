@@ -11,7 +11,7 @@ import {
 
 import { promisified as regedit, RegistryItemPutCollection, RegistryItemValue } from 'regedit'
 
-async function setEnv(name: string, value: RegistryItemValue): Promise<void> {
+export async function setEnv(name: string, value: RegistryItemValue): Promise<void> {
   try {
     const reg: RegistryItemPutCollection = {
       'HKCU\\ENVIRONMENT': {
@@ -24,7 +24,7 @@ async function setEnv(name: string, value: RegistryItemValue): Promise<void> {
   }
 }
 
-async function addToPath(BIN_PATH: string): Promise<string> {
+export async function addToPath(BIN_PATH: string): Promise<string> {
   let result, pathKey, newPath
 
   try {
