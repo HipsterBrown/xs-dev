@@ -11,12 +11,14 @@ import { moddableExists } from './moddable'
 import upsert from '../patching/upsert'
 import { installDeps as installMacDeps } from './esp8266/mac'
 import { installDeps as installLinuxDeps } from './esp8266/linux'
+import { installDeps as installWindowsDeps } from './esp8266/windows'
 
 const finishedPromise = promisify(finished)
 
 export default async function (): Promise<void> {
   const OS = platformType().toLowerCase()
-  const TOOLCHAIN = `https://www.moddable.com/private/esp8266.toolchain.${OS}.tgz`
+  const isWindows = OS === "windows_nt"
+  const TOOLCHAIN = isWindows ? 'https://www.moddable.com/private/esp8266.toolchain.win32.zip' : `https://www.moddable.com/private/esp8266.toolchain.${OS}.tgz`
   const ARDUINO_CORE =
     'https://github.com/esp8266/Arduino/releases/download/2.3.0/esp8266-2.3.0.zip'
   const ESP_RTOS_REPO = 'https://github.com/espressif/ESP8266_RTOS_SDK.git'
@@ -37,6 +39,13 @@ export default async function (): Promise<void> {
     process.exit(1)
   }
 
+  if (isWindows && !(process.env.ISMODDABLECOMMANDPROMPT)) {
+    spinner.fail(
+      `Moddable tooling required. Run xs-dev commands from the Moddable Command Prompt.`
+    )
+    process.exit(1)
+  }
+
   // 1. ensure ~/.local/share/esp directory
   spinner.info('Ensuring esp directory')
   filesystem.dir(ESP_DIR)
@@ -44,13 +53,23 @@ export default async function (): Promise<void> {
   // 2. download and untar xtensa toolchain
   if (filesystem.exists(TOOLCHAIN_PATH) === false) {
     spinner.start('Downloading xtensa toolchain')
-    const writer = extract(ESP_DIR, { readable: true })
-    const gunzip = createGunzip()
-    const response = await axios.get(TOOLCHAIN, {
-      responseType: 'stream',
-    })
-    response.data.pipe(gunzip).pipe(writer)
-    await finishedPromise(writer)
+    
+    if (!isWindows) {
+      const writer = extract(ESP_DIR, { readable: true })
+      const gunzip = createGunzip()
+      const response = await axios.get(TOOLCHAIN, {
+        responseType: 'stream',
+      })
+      response.data.pipe(gunzip).pipe(writer)
+      await finishedPromise(writer)
+    } else {
+      const writer = ZipExtract({path: ESP_DIR})
+      const response = await axios.get(TOOLCHAIN, {
+        responseType: 'stream'
+      })
+      response.data.pipe(writer)
+      await finishedPromise(writer)
+    }
     spinner.succeed()
   }
 
@@ -84,12 +103,23 @@ export default async function (): Promise<void> {
     await installLinuxDeps(spinner)
   }
 
-  // 7. create ESP_BARE env export in shell profile
-  if (process.env.ESP_BASE === undefined) {
-    spinner.info('Configuring $ESP_BASE')
-    process.env.ESP_BASE = ESP_DIR
-    await upsert(EXPORTS_FILE_PATH, `export ESP_BASE=${process.env.ESP_BASE}`)
+  if (isWindows) {
+    try {
+      await installWindowsDeps(spinner, ESP_DIR)
+    } catch (error) {
+      print.error(`Windows dependencies failed to install. Please review the information above.`)
+      process.exit(1)
+    }
   }
+
+  // 7. create ESP_BASE env export in shell profile
+  if (!isWindows) {
+    if (process.env.ESP_BASE === undefined) {
+      spinner.info('Configuring $ESP_BASE')
+      process.env.ESP_BASE = ESP_DIR
+      await upsert(EXPORTS_FILE_PATH, `export ESP_BASE=${process.env.ESP_BASE}`)
+    }
+  } // Windows case is handled in ./esp8266/windows.ts
 
   spinner.succeed(`
   Successfully set up esp8266 platform support for moddable!
