@@ -6,7 +6,7 @@ import upsert from '../patching/upsert'
 import { installDeps as installMacDeps } from './esp32/mac'
 import { installDeps as installLinuxDeps } from './esp32/linux'
 import { installDeps as installWinDeps } from './esp32/windows'
-import { setEnv } from './windows'
+import { setEnv, ensureModdableCommandPrompt } from './windows'
 
 export default async function (): Promise<void> {
   const OS = platformType().toLowerCase()
@@ -27,12 +27,8 @@ export default async function (): Promise<void> {
     process.exit(1)
   }
 
-  if (isWindows && !(process.env.ISMODDABLECOMMANDPROMPT)) {
-    spinner.fail(
-      `Moddable tooling required. Run xs-dev commands from the Moddable Command Prompt.`
-    )
-    process.exit(1)
-  }
+  if (isWindows)
+    await ensureModdableCommandPrompt(spinner)
 
   // 1. ensure ~/.local/share/esp32 directory
   spinner.info('Ensuring esp32 install directory')
@@ -63,19 +59,26 @@ export default async function (): Promise<void> {
   }
 
   // 4. append IDF_PATH env export to shell profile
-  if (!isWindows) {
+  if (isWindows) {
+    spinner.info('Configuring IDF_PATH environment variable')
+    await setEnv("IDF_PATH", IDF_PATH)
+  } else {
     if (process.env.IDF_PATH === undefined) {
       spinner.info('Configuring $IDF_PATH')
       process.env.IDF_PATH = IDF_PATH
       await upsert(EXPORTS_FILE_PATH, `export IDF_PATH=${IDF_PATH}`)
     }
-  } else {
-    spinner.info('Configuring IDF_PATH environment variable')
-    await setEnv("IDF_PATH", IDF_PATH)
   }
 
   // 5. cd to IDF_PATH, run install.sh
-  if (!isWindows) {
+  if (isWindows) {
+    spinner.start('Running ESP-IDF Tools install.bat')
+    await system.exec(`${IDF_PATH}\\install.bat`, {
+      cwd: IDF_PATH,
+      stdout: process.stdout,
+    })
+    spinner.succeed()
+  } else {
     spinner.start('Installing esp-idf tooling')
     await system.exec('./install.sh', {
       cwd: IDF_PATH,
@@ -83,24 +86,17 @@ export default async function (): Promise<void> {
       stdout: process.stdout,
     })
     spinner.succeed()
-  } else {
-    spinner.start('Running ESP-IDF Tools install.bat')
-    await system.exec(`${IDF_PATH}\\install.bat`, {
-      cwd: IDF_PATH,
-      stdout: process.stdout,
-    })
-    spinner.succeed()
   }
 
   // 6. append 'source $IDF_PATH/export.sh' to shell profile
-  if (!isWindows) {
+  if (isWindows) {
+    await upsert(EXPORTS_FILE_PATH, `pushd %IDF_PATH% && call "%IDF_TOOLS_PATH%\\idf_cmd_init.bat" && popd`)
+  } else {
     spinner.info('Sourcing esp-idf environment')
     await upsert(EXPORTS_FILE_PATH, `source $IDF_PATH/export.sh 1> /dev/null`)
     await system.exec('source $IDF_PATH/export.sh', {
       shell: process.env.SHELL,
     })
-  } else {
-    await upsert(EXPORTS_FILE_PATH, `pushd %IDF_PATH% && call "%IDF_TOOLS_PATH%\\idf_cmd_init.bat" && popd`)
   }
 
   spinner.succeed(`

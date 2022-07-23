@@ -12,6 +12,7 @@ import upsert from '../patching/upsert'
 import { installDeps as installMacDeps } from './esp8266/mac'
 import { installDeps as installLinuxDeps } from './esp8266/linux'
 import { installDeps as installWindowsDeps } from './esp8266/windows'
+import { ensureModdableCommandPrompt } from './windows'
 
 const finishedPromise = promisify(finished)
 
@@ -39,12 +40,8 @@ export default async function (): Promise<void> {
     process.exit(1)
   }
 
-  if (isWindows && !(process.env.ISMODDABLECOMMANDPROMPT)) {
-    spinner.fail(
-      `Moddable tooling required. Run xs-dev commands from the Moddable Command Prompt.`
-    )
-    process.exit(1)
-  }
+  if (isWindows)
+    await ensureModdableCommandPrompt(spinner)
 
   // 1. ensure ~/.local/share/esp directory
   spinner.info('Ensuring esp directory')
@@ -54,20 +51,20 @@ export default async function (): Promise<void> {
   if (filesystem.exists(TOOLCHAIN_PATH) === false) {
     spinner.start('Downloading xtensa toolchain')
     
-    if (!isWindows) {
+    if (isWindows) {
+      const writer = ZipExtract({path: ESP_DIR})
+      const response = await axios.get(TOOLCHAIN, {
+        responseType: 'stream'
+      })
+      response.data.pipe(writer)
+      await finishedPromise(writer)
+    } else {
       const writer = extract(ESP_DIR, { readable: true })
       const gunzip = createGunzip()
       const response = await axios.get(TOOLCHAIN, {
         responseType: 'stream',
       })
       response.data.pipe(gunzip).pipe(writer)
-      await finishedPromise(writer)
-    } else {
-      const writer = ZipExtract({path: ESP_DIR})
-      const response = await axios.get(TOOLCHAIN, {
-        responseType: 'stream'
-      })
-      response.data.pipe(writer)
       await finishedPromise(writer)
     }
     spinner.succeed()
@@ -113,7 +110,7 @@ export default async function (): Promise<void> {
   }
 
   // 7. create ESP_BASE env export in shell profile
-  if (!isWindows) {
+  if (OS === 'darwin' || OS === 'linux') {
     if (process.env.ESP_BASE === undefined) {
       spinner.info('Configuring $ESP_BASE')
       process.env.ESP_BASE = ESP_DIR
@@ -122,8 +119,8 @@ export default async function (): Promise<void> {
   } // Windows case is handled in ./esp8266/windows.ts
 
   spinner.succeed(`
-  Successfully set up esp8266 platform support for moddable!
-  Test out the setup by starting a new terminal session, plugging in your device, and running: xs-dev run --example helloworld --device esp8266
+  Successfully set up esp8266 platform support for Moddable!
+  Test out the setup by starting a new ${isWindows ? 'Moddable Command Prompt' : 'terminal session'}, plugging in your device, and running: xs-dev run --example helloworld --device esp8266
   If there is trouble finding the correct port, pass the "--port" flag to the above command with the path to the "/dev.cu.*" that matches your device.
   `)
 }

@@ -1,4 +1,5 @@
 import { 
+  GluegunPrint,
   print,
   filesystem, 
   system 
@@ -27,6 +28,23 @@ export async function addToPath(path: string): Promise<void> {
   await setEnv("PATH", `${path};%PATH%`, newPath)
 }
 
+export async function openModdableCommandPrompt(): Promise<void> {
+  print.info('Opening the Moddable Command Prompt in a new Window')
+  await system.run(`START "Moddable Command Prompt" "${SHORTCUT}"`)
+}
+
+export async function ensureModdableCommandPrompt(spinner: ReturnType<GluegunPrint['spin']>): Promise<void> {
+  if (!(process.env.ISMODDABLECOMMANDPROMPT)) {
+    if (filesystem.exists(SHORTCUT)) {
+      spinner.fail(`Moddable tooling required. Run xs-dev commands from the Moddable Command Prompt: ${SHORTCUT}`)
+      await openModdableCommandPrompt()
+    } else {
+      spinner.fail('Moddable tooling required. Run `xs-dev setup` before trying again.')
+    }
+    process.exit(1)
+  }
+}
+
 export default async function (): Promise<void> {
   const BIN_PATH = filesystem.resolve(
     INSTALL_PATH,
@@ -42,18 +60,48 @@ export default async function (): Promise<void> {
     'win'
   )
 
+  const spinner = print.spin()
+  spinner.start('Beginning setup...')
+
   print.info(`Setting up Windows tools at ${INSTALL_PATH}`)
 
-  // 0. Check for Visual Studio CMD tools
+  // 0. Check for Visual Studio CMD tools & Git
     if (system.which('nmake') === null || process.env.VSINSTALLDIR == undefined) {
-    print.error('Visual Studio 2022 Community is required to build the Moddable SDK: https://www.visualstudio.com/downloads/')
-    print.error('If you already have VS 2022 Community installed, please run "xs-dev setup" from the x86 Native Tools Command Prompt for VS 2022')
+      try {
+        await system.exec('where winget')
+      } catch (error) {
+        print.error('Visual Studio 2022 Community is required to build the Moddable SDK')
+        print.error('If you already have VS 2022 Community installed, please run "xs-dev setup" from the x86 Native Tools Command Prompt for VS 2022')
+        print.error('You can download and install Visual Studio 2022 Community from https://www.visualstudio.com/downloads/')
+        print.info('Or xs-dev can manage installing Visual Stuudio 2022 Community and other dependencies using the Windows Package Manager Client (winget).')
+        print.info('You can install winget via the App Installer package in the Microsoft Store.')
+        print.info('Please install either Visual Studio 2022 Community or winget, then launch a new xs86 Native Tools Command Prompt for VS 2022 and re-run this setup.')
+        process.exit(1)
+      }
+
+    spinner.start('Installing Visual Studio 2022 Community from winget')
+    await system.exec('winget install -e --id Microsoft.VisualStudio.2022.Community --silent')
+    spinner.succeed()
+    print.info('Visual Studio 2022 Community successfully installed. Please close this window and launch the x86 Native Tools Command Prompt for VS 2022, then re-run this setup.')
     process.exit(1)
   }
+
   if (system.which('git') === null) {
-    print.error(
-      'git is required to clone the Moddable SDK: https://git-scm.com/download/win'
-    )
+    try {
+      await system.exec('where winget')
+    } catch (error) {
+      print.error('git is required to clone the Moddable SDK')
+      print.error('You can download and install git from https://git-scm.com/download/win')
+      print.info('Or xs-dev can manage installing git and other dependencies using the Windows Package Manager Client (winget).')
+      print.info('You can install winget via the App Installer package in the Microsoft Store.')
+      print.info('Please install either git or winget, then launch a new xs86 Native Tools Command Prompt for VS 2022 and re-run this setup.')
+      process.exit(1)
+    }
+    
+    spinner.start('Installing git from winget')
+    await system.exec('winget install -e --id Git.Git --silent')
+    spinner.succeed()
+    print.info('git successfully installed. Please close this window and re-launch the x86 Native Tools Command Prompt for VS 2022, then re-run this setup.')
     process.exit(1)
   }
 
@@ -62,9 +110,6 @@ export default async function (): Promise<void> {
   const vsBatPath = filesystem.resolve(process.env.VSINSTALLDIR, "VC", "Auxiliary", "Build", "vcvars32.bat")
   await upsert(EXPORTS_FILE_PATH, `call "${vsBatPath}"`)
   
-  const spinner = print.spin()
-  spinner.start('Beginning setup...')
-
   // 1. clone moddable repo into INSTALL_DIR directory if it does not exist yet
   try {
     filesystem.dir(INSTALL_DIR)
@@ -123,6 +168,8 @@ export default async function (): Promise<void> {
   
   spinner.succeed("Moddable SDK successfully set up!")
   print.info(`A shortcut to the Moddable Command Prompt has been created at ${SHORTCUT}.`)
-  print.info('Please close this Command Prompt and then use the shortcut to open a new Moddable Command Prompt. You should always use the Moddable Command Prompt when working with the Moddable SDK.')
+  print.info('You should always use the Moddable Command Prompt when working with the Moddable SDK.')
+  print.info(`The Moddable Command Prompt will now open for you in a new Window. Please close this Command Prompt and use the Moddable Command Prompt instead.`)
   print.info(`As a next step, try running the "helloworld example" in the Moddable Command Prompt: xs-dev run --example helloworld'`)
+  await openModdableCommandPrompt()
 }
