@@ -60,9 +60,6 @@ export default async function (): Promise<void> {
     'win'
   )
 
-  const spinner = print.spin()
-  spinner.start('Beginning setup...')
-
   print.info(`Setting up Windows tools at ${INSTALL_PATH}`)
 
   // 0. Check for Visual Studio CMD tools & Git
@@ -79,10 +76,18 @@ export default async function (): Promise<void> {
         process.exit(1)
       }
 
-    spinner.start('Installing Visual Studio 2022 Community from winget')
-    await system.exec('winget install -e --id Microsoft.VisualStudio.2022.Community --silent')
-    spinner.succeed()
-    print.info('Visual Studio 2022 Community successfully installed. Please close this window and launch the x86 Native Tools Command Prompt for VS 2022, then re-run this setup.')
+    print.info('Installing Visual Studio 2022 Community from winget...')
+    try {
+        await system.exec('winget install -e --id Microsoft.VisualStudio.2022.Community --silent', {stdio: 'inherit', shell: true})    
+    } catch (error) {
+        print.error('Visual Studio 2022 Community install failed')
+        process.exit(1)
+    }
+    
+    print.info('Visual Studio 2022 Community successfully installed.')
+    print.info('The "Desktop development for C++" workload must be manually installed.')
+    print.info('From your Start Menu, select Visual Studio Installer. Then "Modify." Then select "Desktop development with C++" Then "Modify" again.')
+    print.info('When complete, please close this window and launch the "x86 Native Tools Command Prompt for VS 2022" from the start menu.')
     process.exit(1)
   }
 
@@ -98,13 +103,19 @@ export default async function (): Promise<void> {
       process.exit(1)
     }
     
-    spinner.start('Installing git from winget')
-    await system.exec('winget install -e --id Git.Git --silent')
-    spinner.succeed()
+    print.info('Installing git from winget...')
+    try {
+        await system.exec('winget install -e --id Git.Git --silent', {stdio: 'inherit', shell: true})    
+    } catch (error) {
+        print.error('git install failed')
+        process.exit(1)
+    }
+
     print.info('git successfully installed. Please close this window and re-launch the x86 Native Tools Command Prompt for VS 2022, then re-run this setup.')
     process.exit(1)
   }
 
+  const spinner = print.spin()
   await upsert(EXPORTS_FILE_PATH, '@echo off')
 
   const vsBatPath = filesystem.resolve(process.env.VSINSTALLDIR, "VC", "Auxiliary", "Build", "vcvars32.bat")
