@@ -1,5 +1,11 @@
 # xs-dev
 
+## 0.15.0
+
+### Minor Changes
+
+- Use latest version of ESP-IDF
+
 ## 0.14.3
 
 ### Patch Changes
