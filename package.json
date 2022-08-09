@@ -20,7 +20,11 @@
     "coverage": "jest --coverage",
     "start:docs": "astro dev --root ./docs",
     "build:docs": "astro build --root ./docs",
-    "preview:docs": "astro preview --root ./docs"
+    "preview:docs": "astro preview --root ./docs",
+    "ci:version:changeset": "changeset version",
+    "ci:version": "pnpm ci:version:changeset && pnpm ci:version:install",
+    "ci:version:install": "pnpm install --frozen-lockfile=false",
+    "ci:publish": "changeset publish"
   },
   "files": [
     "tsconfig.json",
