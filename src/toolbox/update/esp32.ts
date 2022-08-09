@@ -66,7 +66,11 @@ export default async function (): Promise<void> {
 
   // remove sourced IDF_PATH/export settings before install
   // https://github.com/espressif/esp-idf/issues/8314#issuecomment-1024881587
-  await patching.replace(EXPORTS_FILE_PATH, `source $IDF_PATH/export.sh\n`, '')
+  await patching.replace(
+    EXPORTS_FILE_PATH,
+    `source $IDF_PATH/export.sh 1> /dev/null\n`,
+    ''
+  )
   await system.exec(`source ${EXPORTS_FILE_PATH}`, {
     shell: process.env.SHELL,
   })
@@ -82,7 +86,7 @@ export default async function (): Promise<void> {
 
   // 6. append 'source $IDF_PATH/export.sh' to shell profile
   spinner.info('Sourcing esp-idf environment')
-  await upsert(EXPORTS_FILE_PATH, `source $IDF_PATH/export.sh`)
+  await upsert(EXPORTS_FILE_PATH, `source $IDF_PATH/export.sh 1> /dev/null\n`)
   await system.exec('source $IDF_PATH/export.sh', {
     shell: process.env.SHELL,
   })
