@@ -1,5 +1,11 @@
 # xs-dev
 
+## 0.15.1
+
+### Patch Changes
+
+- aeff72f: Fix esp-idf exports sourcing during ESP32 update command
+
 ## 0.15.0
 
 ### Minor Changes
