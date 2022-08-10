@@ -5,7 +5,8 @@ export interface Props {
 	site: any;
 	canonicalURL: URL | string;
 }
-const { content = {}, canonicalURL } = Astro.props;
+const canonicalURL = new URL(Astro.url.pathname, Astro.site);
+const { content = {} } = Astro.props;
 const formattedContentTitle = content.title ? `${content.title} 🚀 ${SITE.title}` : SITE.title;
 ---
 
@@ -25,10 +26,3 @@ const formattedContentTitle = content.title ? `${content.title} 🚀 ${SITE.titl
 <meta name="twitter:site" content={OPEN_GRAPH.twitter} />
 <meta name="twitter:title" content={formattedContentTitle} />
 <meta name="twitter:description" content={content.description ? content.description : SITE.description} />
-
-<!--
-  TODO: Add json+ld data, maybe https://schema.org/APIReference makes sense?
-  Docs: https://developers.google.com/search/docs/advanced/structured-data/intro-structured-data
-  https://www.npmjs.com/package/schema-dts seems like a great resource for implementing this.
-  Even better, there's a React component that integrates with `schema-dts`: https://github.com/google/react-schemaorg
--->
