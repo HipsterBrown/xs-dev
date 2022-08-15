@@ -8,6 +8,7 @@ interface SetupOptions {
   device?: Device
   listDevices?: boolean
   tool?: string
+  targetBranch?: 'public' | 'latest-release'
 }
 
 const command: GluegunCommand<XSDevToolbox> = {
@@ -20,6 +21,7 @@ const command: GluegunCommand<XSDevToolbox> = {
       device,
       listDevices = false,
       tool,
+      targetBranch = 'latest-release',
     }: SetupOptions = parameters.options
     let target: Device = device ?? currentPlatform
 
@@ -57,7 +59,7 @@ const command: GluegunCommand<XSDevToolbox> = {
       return
     }
 
-    await setup[target]()
+    await setup[target]({ targetBranch })
   },
 }
 

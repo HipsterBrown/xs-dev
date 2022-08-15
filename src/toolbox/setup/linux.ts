@@ -8,8 +8,9 @@ import {
 } from './constants'
 import upsert from '../patching/upsert'
 import { execWithSudo } from '../system/exec'
+import { SetupArgs } from './types'
 
-export default async function (): Promise<void> {
+export default async function (_args: SetupArgs): Promise<void> {
   print.info('Setting up Linux tools!')
 
   const BIN_PATH = filesystem.resolve(
