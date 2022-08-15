@@ -1,3 +1,6 @@
+import os from 'os'
+import { promisify } from 'util'
+import { chmod } from 'fs'
 import { filesystem, print, system } from 'gluegun'
 import {
   INSTALL_DIR,
@@ -9,8 +12,11 @@ import {
 import upsert from '../patching/upsert'
 import { execWithSudo } from '../system/exec'
 import { SetupArgs } from './types'
+import { fetchLatestRelease, downloadReleaseTools } from './moddable'
 
-export default async function (_args: SetupArgs): Promise<void> {
+const chmodPromise = promisify(chmod)
+
+export default async function ({ targetBranch }: SetupArgs): Promise<void> {
   print.info('Setting up Linux tools!')
 
   const BIN_PATH = filesystem.resolve(
@@ -19,6 +25,13 @@ export default async function (_args: SetupArgs): Promise<void> {
     'bin',
     'lin',
     'release'
+  )
+  const DEBUG_BIN_PATH = filesystem.resolve(
+    INSTALL_PATH,
+    'build',
+    'bin',
+    'lin',
+    'debug'
   )
   const BUILD_DIR = filesystem.resolve(
     INSTALL_PATH,
@@ -55,8 +68,43 @@ export default async function (_args: SetupArgs): Promise<void> {
   if (filesystem.exists(INSTALL_PATH) !== false) {
     spinner.info('Moddable repo already installed')
   } else {
-    spinner.start('Cloning Moddable-OpenSource/moddable repo')
-    await system.spawn(`git clone ${MODDABLE_REPO} ${INSTALL_PATH}`)
+    if (targetBranch === 'latest-release') {
+      spinner.start('Getting latest Moddable-OpenSource/moddable release')
+      const release = await fetchLatestRelease()
+      await system.spawn(
+        `git clone ${MODDABLE_REPO} ${INSTALL_PATH} --depth 1 --branch ${release.tag_name} --single-branch`
+      )
+
+      filesystem.dir(BIN_PATH)
+      filesystem.dir(DEBUG_BIN_PATH)
+
+      const isArm = os.arch() === 'arm64'
+      const assetName = isArm
+        ? 'moddable-tools-lin64arm.zip'
+        : 'moddable-tools-lin64.zip'
+      spinner.info('Downloading release tools')
+      await downloadReleaseTools({
+        writePath: BIN_PATH,
+        assetName,
+        release,
+      })
+      const tools = filesystem.list(BIN_PATH) ?? []
+      await Promise.all(
+        tools.map(async (tool) => {
+          await chmodPromise(filesystem.resolve(BIN_PATH, tool), 0o751)
+          await filesystem.copyAsync(
+            filesystem.resolve(BIN_PATH, tool),
+            filesystem.resolve(DEBUG_BIN_PATH, tool)
+          )
+        })
+      )
+    }
+    if (targetBranch === 'public') {
+      spinner.start('Cloning Moddable-OpenSource/moddable repo')
+      await system.spawn(
+        `git clone ${MODDABLE_REPO} ${INSTALL_PATH} --depth 1 --branch ${targetBranch} --single-branch`
+      )
+    }
     spinner.succeed()
   }
 
@@ -70,9 +118,11 @@ export default async function (_args: SetupArgs): Promise<void> {
   await upsert(EXPORTS_FILE_PATH, `export PATH="${BIN_PATH}:$PATH"`)
 
   // 5. Build the Moddable command line tools, simulator, and debugger from the command line:
-  spinner.start('Building platform tooling')
-  await system.exec('make', { cwd: BUILD_DIR, stdout: process.stdout })
-  spinner.succeed()
+  if (targetBranch === 'public') {
+    spinner.start('Building platform tooling')
+    await system.exec('make', { cwd: BUILD_DIR, stdout: process.stdout })
+    spinner.succeed()
+  }
 
   // 6. Install the desktop simulator and xsbug debugger applications
   spinner.start('Installing simulator')
