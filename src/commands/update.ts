@@ -4,6 +4,7 @@ import type { Device, XSDevToolbox } from '../types'
 
 interface UpdateOptions {
   device?: Device
+  targetBranch?: 'public' | 'latest-release'
 }
 
 const command: GluegunCommand<XSDevToolbox> = {
@@ -11,8 +12,11 @@ const command: GluegunCommand<XSDevToolbox> = {
   description: 'Check and update Moddable tooling for various platform targets',
   run: async ({ parameters, update }) => {
     const currentPlatform: Device = platformType().toLowerCase() as Device
-    const { device = currentPlatform }: UpdateOptions = parameters.options
-    await update[device]()
+    const {
+      device = currentPlatform,
+      targetBranch = 'latest-release',
+    }: UpdateOptions = parameters.options
+    await update[device]({ targetBranch })
   },
 }
 
