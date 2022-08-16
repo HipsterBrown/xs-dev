@@ -126,6 +126,37 @@ export default async function ({ targetBranch }: SetupArgs): Promise<void> {
 
   // 6. Install the desktop simulator and xsbug debugger applications
   spinner.start('Installing simulator')
+  if (targetBranch === 'latest-release') {
+    filesystem.dir(
+      filesystem.resolve(
+        BUILD_DIR,
+        '..',
+        '..',
+        'tmp',
+        'lin',
+        'debug',
+        'simulator'
+      )
+    )
+    await system.exec(
+      `mcconfig -m -p x-lin ${filesystem.resolve(
+        INSTALL_PATH,
+        'tools',
+        'xsbug',
+        'manifest.json'
+      )}`,
+      { process }
+    )
+    await system.exec(
+      `mcconfig -m -p x-lin ${filesystem.resolve(
+        INSTALL_PATH,
+        'tools',
+        'mcsim',
+        'manifest.json'
+      )}`,
+      { process }
+    )
+  }
   await execWithSudo('make install', {
     cwd: BUILD_DIR,
     stdout: process.stdout,
