@@ -414,6 +414,13 @@ var x = new DOMParser()
 		<h1 id="sdk--tooling-updates">SDK &#x26; Tooling Updates</h1>
 <p>Stay up to date with the latest tooling from Moddable and supported device targets. As with the <a href="./setup"><code>setup</code></a> command, the current dev environment (Mac or Linux) is the default selected target:</p>
 <pre is:raw="" class="astro-code" style="background-color: #0d1117; overflow-x: auto;"><code><span class="line"><span style="color: #c9d1d9">xs-dev update</span></span></code></pre>
+<h2 id="target-branch">Target Branch</h2>
+<p>The default behavior of this command for Moddable developer tooling pulls the <a href="https://github.com/Moddable-OpenSource/moddable/releases">latest release tooling</a> and source code for the associated tagged branch. This provides a known-working state for the SDK and avoids needing to build the tooling on the local machine.</p>
+<p>To override this behavior, use the <code>--target-branch</code> flag to select <code>public</code>; this fetches the latest commit off that main branch and runs the build to generate the associated tools.</p>
+<pre is:raw="" class="astro-code" style="background-color: #0d1117; overflow-x: auto;"><code><span class="line"><span style="color: #c9d1d9">xs-dev setup --target-branch public</span></span></code></pre>
+<p><em>This will only work for the <code>mac</code>, <code>windows</code>, and <code>linux</code> device options, which are the respective defaults for the operating system on which the command is run.</em></p>
+<h2 id="device-updates">Device Updates</h2>
+<p>While the <code>update</code> command provides the latest Moddable SDK for the dev environment, the <code>--device</code> flag selects another platform target SDK to set up. It ensures the Moddable SDK has been installed first.</p>
 <p>The <code>--device</code> flag allows for selecting a different target platform:</p>
 <pre is:raw="" class="astro-code" style="background-color: #0d1117; overflow-x: auto;"><code><span class="line"><span style="color: #c9d1d9">xs-dev update --device esp32</span></span></code></pre>
 <p><em>There may be some platforms that are supported by the <code>setup</code> command but not <code>update</code> yet.</em></p>
