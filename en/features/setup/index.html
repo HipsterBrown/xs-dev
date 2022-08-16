@@ -412,7 +412,7 @@ var x = new DOMParser()
 	<section class="main-section astro-QZ65LDSP">
 		<h1 class="content-title astro-QZ65LDSP" id="overview">Setup</h1>
 		<h1 id="moddable-platform-setup">Moddable Platform Setup</h1>
-<p>This command downloads and builds the <a href="https://github.com/Moddable-OpenSource/moddable/blob/public/documentation/tools/tools.md">Moddable developer tooling</a> for the current OS (Windows support coming soon).</p>
+<p>This command downloads the <a href="https://github.com/Moddable-OpenSource/moddable/blob/public/documentation/tools/tools.md">Moddable developer tooling</a> for the current OS (Windows support coming soon).</p>
 <p><a href="/en/introduction#installation">After installing the CLI</a>, call the <code>setup</code> command:</p>
 <pre is:raw="" class="astro-code" style="background-color: #0d1117; overflow-x: auto;"><code><span class="line"><span style="color: #c9d1d9">xs-dev setup</span></span></code></pre>
 <p>This process mostly automates the instructions provided by <a href="https://github.com/Moddable-OpenSource/moddable/blob/public/documentation/Moddable%20SDK%20-%20Getting%20Started.md">Moddable’s “Getting Started” documentation</a> with a few exceptions.</p>
@@ -422,6 +422,11 @@ var x = new DOMParser()
 <p>A symlink for <a href="https://github.com/Moddable-OpenSource/moddable/blob/public/documentation/xs/xsbug.md"><code>xsbug.app</code></a> is created in <code>/Applications</code> for easy access through Launchpad.</p>
 <p><strong>On Unix environments:</strong></p>
 <p>The <a href="https://github.com/Moddable-OpenSource/moddable"><code>moddable</code> git repo</a> is cloned into <code>~/.local/share</code> instead of a new/existing <code>~/Projects</code> directory.</p>
+<h2 id="target-branch">Target Branch</h2>
+<p>The default behavior of this command for Moddable developer tooling pulls the <a href="https://github.com/Moddable-OpenSource/moddable/releases">latest release tooling</a> and source code for the associated tagged branch. This provides a known-working state for the SDK and avoids needing to build the tooling on the local machine.</p>
+<p>To override this behavior, use the <code>--target-branch</code> flag to select <code>public</code>; this fetches the latest commit off that main branch and runs the build to generate the associated tools.</p>
+<pre is:raw="" class="astro-code" style="background-color: #0d1117; overflow-x: auto;"><code><span class="line"><span style="color: #c9d1d9">xs-dev setup --target-branch public</span></span></code></pre>
+<p><em>This will only work for the <code>mac</code>, <code>windows</code>, and <code>linux</code> device options, which are the respective defaults for the operating system on which the command is run.</em></p>
 <h2 id="device-setup">Device Setup</h2>
 <p>While the <code>setup</code> command provides the Moddable SDK for the dev environment, the <code>--device</code> flag selects another platform target SDK to set up. It ensures the Moddable SDK has been installed first.</p>
 <pre is:raw="" class="astro-code" style="background-color: #0d1117; overflow-x: auto;"><code><span class="line"><span style="color: #c9d1d9">xs-dev setup --device esp32</span></span></code></pre>
