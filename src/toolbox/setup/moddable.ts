@@ -25,12 +25,10 @@ type GitHubRelease = ExtractFromArray<
 
 export async function fetchLatestRelease(): Promise<GitHubRelease> {
   const octokit = new Octokit()
-  const releases = await octokit.rest.repos.listReleases({
+  const { data: latestRelease } = await octokit.rest.repos.getLatestRelease({
     owner: 'Moddable-OpenSource',
     repo: 'moddable',
-    per_page: 1,
   })
-  const [latestRelease] = releases.data
   return latestRelease
 }
 
