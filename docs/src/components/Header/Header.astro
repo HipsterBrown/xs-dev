@@ -17,7 +17,7 @@ const lang = currentPage && getLanguageFromURL(currentPage);
 			<SidebarToggle client:idle />
 		</div>
 		<div class="logo flex">
-			<a href={Astro.site}>
+			<a href={import.meta.env.BASE_URL}>
 				<h1>{CONFIG.SITE.title ?? "Documentation"}</h1>
 			</a>
 		</div>
