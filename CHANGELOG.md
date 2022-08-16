@@ -1,5 +1,11 @@
 # xs-dev
 
+## 0.16.0
+
+### Minor Changes
+
+- cb9b3d7: Add support for target-branch option to setup, update commands; each pulls the latest Moddable release by default now
+
 ## 0.15.1
 
 ### Patch Changes
