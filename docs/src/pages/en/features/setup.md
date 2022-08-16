@@ -6,7 +6,7 @@ layout: ../../../layouts/MainLayout.astro
 
 # Moddable Platform Setup
 
-This command downloads and builds the [Moddable developer tooling](https://github.com/Moddable-OpenSource/moddable/blob/public/documentation/tools/tools.md) for the current OS (Windows support coming soon).
+This command downloads the [Moddable developer tooling](https://github.com/Moddable-OpenSource/moddable/blob/public/documentation/tools/tools.md) for the current OS (Windows support coming soon).
 
 [After installing the CLI](/en/introduction#installation), call the `setup` command:
 
@@ -27,6 +27,18 @@ A symlink for [`xsbug.app`](https://github.com/Moddable-OpenSource/moddable/blob
 **On Unix environments:**
 
 The [`moddable` git repo](https://github.com/Moddable-OpenSource/moddable) is cloned into `~/.local/share` instead of a new/existing `~/Projects` directory.
+
+## Target Branch
+
+The default behavior of this command for Moddable developer tooling pulls the [latest release tooling](https://github.com/Moddable-OpenSource/moddable/releases) and source code for the associated tagged branch. This provides a known-working state for the SDK and avoids needing to build the tooling on the local machine. 
+
+To override this behavior, use the `--target-branch` flag to select `public`; this fetches the latest commit off that main branch and runs the build to generate the associated tools.
+
+```
+xs-dev setup --target-branch public
+```
+
+_This will only work for the `mac`, `windows`, and `linux` device options, which are the respective defaults for the operating system on which the command is run._
 
 ## Device Setup
 

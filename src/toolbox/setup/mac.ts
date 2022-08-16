@@ -1,4 +1,7 @@
 import { print, filesystem, system } from 'gluegun'
+import os from 'os'
+import { promisify } from 'util'
+import { chmod } from 'fs'
 import {
   INSTALL_PATH,
   INSTALL_DIR,
@@ -7,8 +10,12 @@ import {
   getProfilePath,
 } from './constants'
 import upsert from '../patching/upsert'
+import { downloadReleaseTools, fetchLatestRelease } from './moddable'
+import { SetupArgs } from './types'
 
-export default async function (): Promise<void> {
+const chmodPromise = promisify(chmod)
+
+export default async function ({ targetBranch }: SetupArgs): Promise<void> {
   print.info('Setting up the mac tools!')
 
   const BIN_PATH = filesystem.resolve(
@@ -17,6 +24,13 @@ export default async function (): Promise<void> {
     'bin',
     'mac',
     'release'
+  )
+  const DEBUG_BIN_PATH = filesystem.resolve(
+    INSTALL_PATH,
+    'build',
+    'bin',
+    'mac',
+    'debug'
   )
   const BUILD_DIR = filesystem.resolve(
     INSTALL_PATH,
@@ -54,8 +68,54 @@ export default async function (): Promise<void> {
     spinner.info('Moddable repo already installed')
   } else {
     try {
-      spinner.start('Cloning Moddable-OpenSource/moddable repo')
-      await system.spawn(`git clone ${MODDABLE_REPO} ${INSTALL_PATH}`)
+      if (targetBranch === 'latest-release') {
+        spinner.start('Getting latest Moddable-OpenSource/moddable release')
+        const release = await fetchLatestRelease()
+        await system.spawn(
+          `git clone ${MODDABLE_REPO} ${INSTALL_PATH} --depth 1 --branch ${release.tag_name} --single-branch`
+        )
+
+        filesystem.dir(BIN_PATH)
+        filesystem.dir(DEBUG_BIN_PATH)
+
+        const isArm = os.arch() === 'arm64'
+        const assetName = isArm
+          ? 'moddable-tools-mac64arm.zip'
+          : 'moddable-tools-mac64.zip'
+        spinner.info('Downloading release tools')
+        await downloadReleaseTools({
+          writePath: BIN_PATH,
+          assetName,
+          release,
+        })
+        const tools = filesystem.list(BIN_PATH) ?? []
+        await Promise.all(
+          tools.map(async (tool) => {
+            if (tool.endsWith('.app')) {
+              const mainPath = filesystem.resolve(
+                BIN_PATH,
+                tool,
+                'Contents',
+                'MacOS',
+                'main'
+              )
+              await chmodPromise(mainPath, 0o751)
+            } else {
+              await chmodPromise(filesystem.resolve(BIN_PATH, tool), 0o751)
+            }
+            await filesystem.copyAsync(
+              filesystem.resolve(BIN_PATH, tool),
+              filesystem.resolve(DEBUG_BIN_PATH, tool)
+            )
+          })
+        )
+      }
+      if (targetBranch === 'public') {
+        spinner.start('Cloning Moddable-OpenSource/moddable repo')
+        await system.spawn(
+          `git clone ${MODDABLE_REPO} ${INSTALL_PATH} --depth 1 --branch ${targetBranch} --single-branch`
+        )
+      }
       spinner.succeed()
     } catch (error) {
       spinner.fail(`Error cloning moddable repo: ${String(error)}`)
@@ -73,13 +133,15 @@ export default async function (): Promise<void> {
   await upsert(EXPORTS_FILE_PATH, `export PATH="${BIN_PATH}:$PATH"`)
 
   // 3. cd into makefiles dir for platform, run `make`
-  try {
-    spinner.start('Building platform tooling')
-    await system.exec('make', { cwd: BUILD_DIR, stdout: process.stdout })
-    spinner.succeed()
-  } catch (error) {
-    spinner.fail(`Error building mac tooling: ${String(error)}`)
-    process.exit(1)
+  if (targetBranch === 'public') {
+    try {
+      spinner.start('Building platform tooling')
+      await system.exec('make', { cwd: BUILD_DIR, stdout: process.stdout })
+      spinner.succeed()
+    } catch (error) {
+      spinner.fail(`Error building mac tooling: ${String(error)}`)
+      process.exit(1)
+    }
   }
 
   // 4. symlink xsbug.app into user applications directory
