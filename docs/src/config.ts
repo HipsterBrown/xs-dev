@@ -39,8 +39,8 @@ export const SIDEBAR = {
     { text: 'Project Creation', link: 'en/features/init' },
     { text: 'Build & Run', link: 'en/features/run' },
     { text: 'SDK Module Management', link: 'en/features/include' },
-    { text: 'Tutorials', header: true },
-    { text: 'Prepare', link: 'en/tutorials/00-prepare' },
-    { text: 'Hello Console', link: 'en/tutorials/01-hello-console' },
+    { text: 'Guide', header: true },
+    { text: '00. Prepare', link: 'en/guide/00-prepare' },
+    { text: '01. Hello Console', link: 'en/guide/01-hello-console' },
   ],
 }
