@@ -41,5 +41,6 @@ export const SIDEBAR = {
     { text: 'SDK Module Management', link: 'en/features/include' },
     { text: 'Tutorials', header: true },
     { text: 'Prepare', link: 'en/tutorials/00-prepare' },
+    { text: 'Hello Console', link: 'en/tutorials/01-hello-console' },
   ],
 }
