@@ -10,6 +10,9 @@ export interface BuildArgs {
   listDevices: boolean
   projectPath: string
   targetPlatform: string
+  mode: 'development' | 'production'
+  deploy: boolean
+  outputDir: string
 }
 
 export async function build({
@@ -19,6 +22,9 @@ export async function build({
   listExamples,
   projectPath,
   targetPlatform,
+  mode,
+  deploy,
+  outputDir,
 }: BuildArgs): Promise<void> {
   if (listDevices) {
     const choices = [
@@ -137,7 +143,16 @@ export async function build({
     `Building and running project ${projectPath} on ${targetPlatform}`
   )
 
-  await system.exec(`mcconfig -d -m -p ${targetPlatform}`, {
+  const configArgs = [
+    '-m',
+    `-p ${targetPlatform}`,
+    `-t ${deploy ? 'all' : 'build'}`,
+    `-o ${outputDir}`,
+  ]
+  if (mode === 'development') configArgs.push('-d')
+  if (mode === 'production') configArgs.push('-i')
+
+  await system.exec(`mcconfig ${configArgs.join(' ')}`, {
     cwd: projectPath,
     process,
   })
