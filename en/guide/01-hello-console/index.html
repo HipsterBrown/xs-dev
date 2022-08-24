@@ -115,23 +115,23 @@ var x = new DOMParser()
 	}
 </script>
 
-		<!-- Page Metadata --><link rel="canonical" href="https://hipsterbrown.github.io/xs-dev/en/features/run">
+		<!-- Page Metadata --><link rel="canonical" href="https://hipsterbrown.github.io/xs-dev/en/guide/01-hello-console">
 
 <!-- OpenGraph Tags -->
-<meta property="og:title" content="Run 🚀 xs-dev Documentation">
+<meta property="og:title" content="Hello Console 🚀 xs-dev Documentation">
 <meta property="og:type" content="article">
-<meta property="og:url" content="https://hipsterbrown.github.io/xs-dev/en/features/run">
+<meta property="og:url" content="https://hipsterbrown.github.io/xs-dev/en/guide/01-hello-console">
 <meta property="og:locale" content="en_US">
-<meta name="description" property="og:description" content="Build and run Moddable projects or examples">
+<meta name="description" property="og:description" content="How to set up the basic development environment and run your first program">
 <meta property="og:site_name" content="xs-dev Documentation">
 
 <!-- Twitter Tags -->
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:site" content="hipsterbrown">
-<meta name="twitter:title" content="Run 🚀 xs-dev Documentation">
-<meta name="twitter:description" content="Build and run Moddable projects or examples">
+<meta name="twitter:title" content="Hello Console 🚀 xs-dev Documentation">
+<meta name="twitter:description" content="How to set up the basic development environment and run your first program">
 
-		<title>Run 🚀 xs-dev Documentation</title>
+		<title>Hello Console 🚀 xs-dev Documentation</title>
 		
 	<link rel="stylesheet" href="/xs-dev/assets/fe990e23.4c615ebc.css" />
 <link rel="stylesheet" href="/xs-dev/assets/0a72ad4c.3fcf43f8.css" /><script>/** @license Copyright 2020 Google LLC (BSD-3-Clause) */
@@ -425,34 +425,35 @@ var x = new DOMParser()
 			<div id="grid-main" class="astro-2DKKMXCL">
 				<article id="article" class="content astro-QZ65LDSP">
 	<section class="main-section astro-QZ65LDSP">
-		<h1 class="content-title astro-QZ65LDSP" id="overview">Run</h1>
-		<h1 id="run-moddable-projects">Run Moddable projects</h1>
-<p>Within a project directory, the <code>run</code> command will invoke <a href="https://github.com/Moddable-OpenSource/moddable/blob/public/documentation/tools/tools.md#mcconfig"><code>mcconfig</code></a> to generate the <code>make</code> file based on the <code>manifest.json</code> followed by building and running the project in the current environment simulator:</p>
-<pre is:raw="" class="astro-code" style="background-color: #0d1117; overflow-x: auto;"><code><span class="line"><span style="color: #c9d1d9">xs-dev run</span></span></code></pre>
-<p>When not in the project directory, a path can be passed to <code>run</code>:</p>
-<pre is:raw="" class="astro-code" style="background-color: #0d1117; overflow-x: auto;"><code><span class="line"><span style="color: #c9d1d9">xs-dev run path/to/project</span></span></code></pre>
-<h2 id="moddable-examples">Moddable examples</h2>
-<p>Use the <code>--example</code> flag to run a project included with the Moddable SDK:</p>
+		<h1 class="content-title astro-QZ65LDSP" id="overview">Hello Console</h1>
+		<p><strong>How to set up the basic development environment and run your first program</strong></p>
+<h2 id="install-the-cli">Install the CLI</h2>
+<p><code>xs-dev</code> can be installed globally using the <a href="./00-prepare#nodejs-package-manager-optional">NodeJS package manager of your choice</a>.</p>
+<pre is:raw="" class="astro-code" style="background-color: #0d1117; overflow-x: auto;"><code><span class="line"><span style="color: #c9d1d9">npm install -g xs-dev</span></span></code></pre>
+<pre is:raw="" class="astro-code" style="background-color: #0d1117; overflow-x: auto;"><code><span class="line"><span style="color: #c9d1d9">pnpm install -g xs-dev</span></span></code></pre>
+<pre is:raw="" class="astro-code" style="background-color: #0d1117; overflow-x: auto;"><code><span class="line"><span style="color: #c9d1d9">yarn global add xs-dev</span></span></code></pre>
+<h2 id="setup-system-tooling">Setup system tooling</h2>
+<p>As specified in the <a href="../features/setup">setup documentation</a>, the <a href="https://github.com/Moddable-OpenSource/moddable/blob/public/documentation/tools/tools.md">Moddable SDK and associated tooling</a> is installed using the following command:</p>
+<pre is:raw="" class="astro-code" style="background-color: #0d1117; overflow-x: auto;"><code><span class="line"><span style="color: #c9d1d9">xs-dev setup</span></span></code></pre>
+<p>This will determine the correct tooling to install based on your operating system.</p>
+<p><strong><a href="https://github.com/HipsterBrown/xs-dev/pull/53">Windows support coming soon</a></strong></p>
+<p>Once this process is done, you should see a success message:</p>
+<pre is:raw="" class="astro-code" style="background-color: #0d1117; overflow-x: auto;"><code><span class="line"><span style="color: #c9d1d9">Moddable SDK successfully set up! Start a new terminal session and run the "helloworld example": xs-dev run --example helloworld</span></span></code></pre>
+<h2 id="run-the-hello-world-example">Run the Hello World example</h2>
+<p>To start a new terminal session, you can either execute your shell of choice (<code>bash</code>/<code>zsh</code>/<code>fish</code>) or create a new terminal window / tab. This will ensure the expected tooling is available in your session <a href="https://en.wikipedia.org/wiki/PATH_(variable)">PATH</a>.</p>
+<p>You can <a href="../features/run#moddable-examples">run any Moddable example included in the SDK</a>. The “Hello World” example provides the simplest program to get started and can be run in the <a href="https://github.com/Moddable-OpenSource/moddable/blob/public/documentation/tools/tools.md#simulator">simulator</a>:</p>
 <pre is:raw="" class="astro-code" style="background-color: #0d1117; overflow-x: auto;"><code><span class="line"><span style="color: #c9d1d9">xs-dev run --example helloworld</span></span></code></pre>
-<p>The <code>--list-examples</code> provides a searchable list of available example projects:</p>
-<pre is:raw="" class="astro-code" style="background-color: #0d1117; overflow-x: auto;"><code><span class="line"><span style="color: #c9d1d9">xs-dev run --list-examples</span></span></code></pre>
-<h2 id="select-a-device-target">Select a device target</h2>
-<p>The <code>--device</code> flag allows for selecting a supported <a href="https://github.com/Moddable-OpenSource/moddable/blob/public/documentation/tools/tools.md#arguments">device or simulator target</a>:</p>
-<pre is:raw="" class="astro-code" style="background-color: #0d1117; overflow-x: auto;"><code><span class="line"><span style="color: #c9d1d9">xs-dev run --device esp32</span></span></code></pre>
-<p>To dynamically select the device, use the <code>--list-devices</code> flag:</p>
-<pre is:raw="" class="astro-code" style="background-color: #0d1117; overflow-x: auto;"><code><span class="line"><span style="color: #c9d1d9">xs-dev run --list-devices</span></span></code></pre>
-<p>This can be used in tandem with the <code>--example</code> or <code>--list-examples</code> flags to run an example project on a connected device:</p>
-<pre is:raw="" class="astro-code" style="background-color: #0d1117; overflow-x: auto;"><code><span class="line"><span style="color: #c9d1d9">xs-dev run --list-devices --list-examples</span></span></code></pre>
-<h2 id="select-a-port-address">Select a port address</h2>
-<p>The <code>--port</code> flag accepts a path to port for connected device (defaults to: <code>UPLOAD_PORT</code> environment variable):</p>
-<pre is:raw="" class="astro-code" style="background-color: #0d1117; overflow-x: auto;"><code><span class="line"><span style="color: #c9d1d9">xs-dev run --port /dev/cu.usbserial-0001 --device esp8266</span></span></code></pre>
-<p><em>This value can be discovered using the <a href="./scan"><code>scan</code></a> command.</em></p>
+<p>This will start up the debugger and simulator:</p>
+<p><img src="/run-hello-world.png" alt="Moddable simulator app and debugger app running on MacOS"></p>
+<p>This will keep running until the <code>Ctrl+C</code> keys are entered in the terminal session or both apps are quit.</p>
+<h2 id="keep-exploring">Keep exploring!</h2>
+<p>Use the <code>--list-examples</code> flag with the <code>run</code> command to search the extensive list of available examples to run in the simulator: <code>xs-dev run --list-examples</code></p>
 	</section>
 	<nav class="block sm:hidden astro-QZ65LDSP">
 		<h2 class="heading astro-OGRD34LS">More</h2>
 <ul class="astro-OGRD34LS">
 	<li class="header-link depth-2 astro-OGRD34LS">
-			<a class="edit-on-github astro-OGRD34LS" href="https://github.com/hipsterbrown/xs-dev/blob/main/docs/src/pages/xs-dev/en/features/run.md" target="_blank">
+			<a class="edit-on-github astro-OGRD34LS" href="https://github.com/hipsterbrown/xs-dev/blob/main/docs/src/pages/xs-dev/en/guide/01-hello-console.md" target="_blank">
 				<svg aria-hidden="true" focusable="false" data-prefix="fas" data-icon="pen" class="svg-inline--fa fa-pen fa-w-16 astro-OGRD34LS" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" height="1em" width="1em">
 					<path fill="currentColor" d="M290.74 93.24l128.02 128.02-277.99 277.99-114.14 12.6C11.35 513.54-1.56 500.62.14 485.34l12.7-114.22 277.9-277.88zm207.2-19.06l-60.11-60.11c-18.75-18.75-49.16-18.75-67.91 0l-56.55 56.55 128.02 128.02 56.55-56.55c18.75-18.76 18.75-49.16 0-67.91z" class="astro-OGRD34LS"></path>
 				</svg>
@@ -509,7 +510,7 @@ var x = new DOMParser()
 		<h2 class="heading astro-OGRD34LS">More</h2>
 <ul class="astro-OGRD34LS">
 	<li class="header-link depth-2 astro-OGRD34LS">
-			<a class="edit-on-github astro-OGRD34LS" href="https://github.com/hipsterbrown/xs-dev/blob/main/docs/src/pages/xs-dev/en/features/run.md" target="_blank">
+			<a class="edit-on-github astro-OGRD34LS" href="https://github.com/hipsterbrown/xs-dev/blob/main/docs/src/pages/xs-dev/en/guide/01-hello-console.md" target="_blank">
 				<svg aria-hidden="true" focusable="false" data-prefix="fas" data-icon="pen" class="svg-inline--fa fa-pen fa-w-16 astro-OGRD34LS" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" height="1em" width="1em">
 					<path fill="currentColor" d="M290.74 93.24l128.02 128.02-277.99 277.99-114.14 12.6C11.35 513.54-1.56 500.62.14 485.34l12.7-114.22 277.9-277.88zm207.2-19.06l-60.11-60.11c-18.75-18.75-49.16-18.75-67.91 0l-56.55 56.55 128.02 128.02 56.55-56.55c18.75-18.76 18.75-49.16 0-67.91z" class="astro-OGRD34LS"></path>
 				</svg>
