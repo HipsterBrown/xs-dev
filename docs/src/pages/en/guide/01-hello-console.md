@@ -52,7 +52,7 @@ xs-dev run --example helloworld
 
 This will start up the debugger and simulator:
 
-![Moddable simulator app and debugger app running on MacOS](/run-hello-world.png)
+![Moddable simulator app and debugger app running on MacOS](/xs-dev/run-hello-world.png)
 
 This will keep running until the `Ctrl+C` keys are entered in the terminal session or both apps are quit.
 

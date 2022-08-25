@@ -8,7 +8,7 @@ import LeftSidebar from '../components/LeftSidebar/LeftSidebar.astro';
 import RightSidebar from '../components/RightSidebar/RightSidebar.astro';
 import * as CONFIG from '../config';
 
-const { content = {} } = Astro.props;
+const { content = {}, headings = [] } = Astro.props;
 const currentPage = new URL(Astro.request.url).pathname;
 const currentFile = `src/pages${currentPage.replace(/\/$/, '')}.md`;
 const githubEditUrl = CONFIG.GITHUB_EDIT_URL && CONFIG.GITHUB_EDIT_URL + currentFile;
@@ -115,7 +115,7 @@ const githubEditUrl = CONFIG.GITHUB_EDIT_URL && CONFIG.GITHUB_EDIT_URL + current
 				</PageContent>
 			</div>
 			<aside id="grid-right" class="grid-sidebar" title="Table of Contents">
-				<RightSidebar {content} {githubEditUrl} />
+				<RightSidebar {content} {headings} {githubEditUrl} />
 			</aside>
 		</main>
 	</body>
