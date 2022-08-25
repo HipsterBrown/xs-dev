@@ -40,7 +40,7 @@ const command: GluegunCommand<XSDevToolbox> = {
       targetPlatform,
       projectPath,
       mode,
-      deploy: true,
+      deployStatus: 'run',
       outputDir: output,
     })
   },

@@ -3,6 +3,8 @@ import { createServer } from 'http'
 import { filesystem, print, prompt, system } from 'gluegun'
 import { collectChoicesFromTree } from '../prompt/choices'
 
+export type DeployStatus = 'none' | 'run' | 'push'
+
 export interface BuildArgs {
   port?: string
   example?: string
@@ -11,7 +13,7 @@ export interface BuildArgs {
   projectPath: string
   targetPlatform: string
   mode: 'development' | 'production'
-  deploy: boolean
+  deployStatus: DeployStatus
   outputDir: string
 }
 
@@ -23,7 +25,7 @@ export async function build({
   projectPath,
   targetPlatform,
   mode,
-  deploy,
+  deployStatus,
   outputDir,
 }: BuildArgs): Promise<void> {
   if (listDevices) {
@@ -141,14 +143,14 @@ export async function build({
 
   spinner.start(
     `Building${
-      deploy ? ' and running project' : ''
+      deployStatus !== 'none' ? ' and deploying project' : ''
     } ${projectPath} on ${targetPlatform}`
   )
 
   const configArgs = [
     '-m',
     `-p ${targetPlatform}`,
-    `-t ${deploy ? 'all' : 'build'}`,
+    `-t ${deployStatus === 'run' ? 'all' : 'build'}`,
     `-o ${outputDir}`,
   ]
   if (mode === 'development') configArgs.push('-d')
@@ -159,9 +161,19 @@ export async function build({
     process,
   })
 
+  if (deployStatus === 'push') {
+    await system.exec(
+      `mcconfig -t deploy -p ${targetPlatform} -o ${outputDir}`,
+      {
+        cwd: projectPath,
+        process,
+      }
+    )
+  }
+
   spinner.stop()
 
-  if (targetPlatform === 'wasm') {
+  if (deployStatus !== 'none' && targetPlatform === 'wasm') {
     const buildName = String(projectPath.split('/').pop())
     const debugPath = filesystem.resolve(
       String(process.env.MODDABLE),
