@@ -118,7 +118,7 @@ var x = new DOMParser()
 		<!-- Page Metadata --><link rel="canonical" href="https://hipsterbrown.github.io/xs-dev/en/features/run">
 
 <!-- OpenGraph Tags -->
-<meta property="og:title" content="Run 🚀 xs-dev Documentation">
+<meta property="og:title" content="Build and Run 🚀 xs-dev Documentation">
 <meta property="og:type" content="article">
 <meta property="og:url" content="https://hipsterbrown.github.io/xs-dev/en/features/run">
 <meta property="og:locale" content="en_US">
@@ -128,10 +128,10 @@ var x = new DOMParser()
 <!-- Twitter Tags -->
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:site" content="hipsterbrown">
-<meta name="twitter:title" content="Run 🚀 xs-dev Documentation">
+<meta name="twitter:title" content="Build and Run 🚀 xs-dev Documentation">
 <meta name="twitter:description" content="Build and run Moddable projects or examples">
 
-		<title>Run 🚀 xs-dev Documentation</title>
+		<title>Build and Run 🚀 xs-dev Documentation</title>
 		
 	<link rel="stylesheet" href="/xs-dev/assets/fe990e23.4c615ebc.css" />
 <link rel="stylesheet" href="/xs-dev/assets/0a72ad4c.3fcf43f8.css" /><script>/** @license Copyright 2020 Google LLC (BSD-3-Clause) */
@@ -425,8 +425,8 @@ var x = new DOMParser()
 			<div id="grid-main" class="astro-2DKKMXCL">
 				<article id="article" class="content astro-QZ65LDSP">
 	<section class="main-section astro-QZ65LDSP">
-		<h1 class="content-title astro-QZ65LDSP" id="overview">Run</h1>
-		<h1 id="run-moddable-projects">Run Moddable projects</h1>
+		<h1 class="content-title astro-QZ65LDSP" id="overview">Build and Run</h1>
+		<h2 id="running-projects">Running Projects</h2>
 <p>Within a project directory, the <code>run</code> command will invoke <a href="https://github.com/Moddable-OpenSource/moddable/blob/public/documentation/tools/tools.md#mcconfig"><code>mcconfig</code></a> to generate the <code>make</code> file based on the <code>manifest.json</code> followed by building and running the project in the current environment simulator:</p>
 <pre is:raw="" class="astro-code" style="background-color: #0d1117; overflow-x: auto;"><code><span class="line"><span style="color: #c9d1d9">xs-dev run</span></span></code></pre>
 <p>When not in the project directory, a path can be passed to <code>run</code>:</p>
@@ -447,6 +447,15 @@ var x = new DOMParser()
 <p>The <code>--port</code> flag accepts a path to port for connected device (defaults to: <code>UPLOAD_PORT</code> environment variable):</p>
 <pre is:raw="" class="astro-code" style="background-color: #0d1117; overflow-x: auto;"><code><span class="line"><span style="color: #c9d1d9">xs-dev run --port /dev/cu.usbserial-0001 --device esp8266</span></span></code></pre>
 <p><em>This value can be discovered using the <a href="./scan"><code>scan</code></a> command.</em></p>
+<h2 id="building-projects-for-release">Building projects for release</h2>
+<p>Within a project directory, the <code>build</code> command takes the same flags as the <code>run</code> command to invoke <a href="https://github.com/Moddable-OpenSource/moddable/blob/public/documentation/tools/tools.md#mcconfig"><code>mcconfig</code></a> to generate the <code>make</code> file based on the <code>manifest.json</code> followed by only building the project for <a href="#select-a-device-target">the target device</a>:</p>
+<pre is:raw="" class="astro-code" style="background-color: #0d1117; overflow-x: auto;"><code><span class="line"><span style="color: #c9d1d9">xs-dev build --device esp32</span></span></code></pre>
+<p>The build <code>--mode</code> can be set to <code>production</code> for the optimized release code or <code>development</code> for the debug-enabled release code. This will default to the <code>NODE_ENV</code> environment variable or <code>development</code> if that variable is not set.</p>
+<pre is:raw="" class="astro-code" style="background-color: #0d1117; overflow-x: auto;"><code><span class="line"><span style="color: #c9d1d9">xs-dev build --mode production --device esp32</span></span></code></pre>
+<p>The output directory can also be set using the <code>--output</code> flag, overriding the default path of <code>$MODDABLE/build</code>, where <code>$MODDABLE</code> is the location of the Moddable tooling repo on your local filesystem.</p>
+<pre is:raw="" class="astro-code" style="background-color: #0d1117; overflow-x: auto;"><code><span class="line"><span style="color: #c9d1d9">xs-dev build --output ./dist --device esp32</span></span></code></pre>
+<p>If you want to immediately deploy the release build, use the <code>--deploy</code> flag:</p>
+<pre is:raw="" class="astro-code" style="background-color: #0d1117; overflow-x: auto;"><code><span class="line"><span style="color: #c9d1d9">xs-dev build --deploy --device esp32</span></span></code></pre>
 	</section>
 	<nav class="block sm:hidden astro-QZ65LDSP">
 		<h2 class="heading astro-OGRD34LS">More</h2>
