@@ -48,3 +48,7 @@ Node comes with [npm](https://docs.npmjs.com/cli/v8/commands/npm) as the include
 
 - [pnpm](https://pnpm.io/installation)
 - [yarn](https://yarnpkg.com/)
+
+## Linux Permissions
+
+Setup commands rely on [`ssh-askpass`](https://packages.ubuntu.com/bionic/ssh-askpass) to prompt for permission when installing other tools and dependencies.
