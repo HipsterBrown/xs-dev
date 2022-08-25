@@ -1,5 +1,11 @@
 # xs-dev
 
+## 0.17.0
+
+### Minor Changes
+
+- 4c63c2a: Add build command for preparing production release output and deployment
+
 ## 0.16.0
 
 ### Minor Changes
