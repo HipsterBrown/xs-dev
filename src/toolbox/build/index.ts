@@ -140,7 +140,9 @@ export async function build({
   const spinner = print.spin()
 
   spinner.start(
-    `Building and running project ${projectPath} on ${targetPlatform}`
+    `Building${
+      deploy ? ' and running project' : ''
+    } ${projectPath} on ${targetPlatform}`
   )
 
   const configArgs = [
