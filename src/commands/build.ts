@@ -5,7 +5,7 @@ import { DEVICE_ALIAS } from '../toolbox/prompt/devices'
 
 type Mode = 'development' | 'production'
 
-interface RunOptions {
+interface BuildOptions {
   device?: Device
   port?: string
   example?: string
@@ -13,11 +13,12 @@ interface RunOptions {
   listDevices?: boolean
   mode?: Mode
   output?: string
+  deploy?: boolean
 }
 
 const command: GluegunCommand<XSDevToolbox> = {
-  name: 'run',
-  description: 'Build and launch project on target device or simulator',
+  name: 'build',
+  description: 'Build project for release to target device',
   run: async ({ parameters, filesystem, build }) => {
     const currentPlatform: Device = platformType().toLowerCase() as Device
     const {
@@ -27,8 +28,9 @@ const command: GluegunCommand<XSDevToolbox> = {
       listExamples = false,
       listDevices = false,
       mode = (process.env.NODE_ENV as Mode) ?? 'development',
-      output = filesystem.resolve(String(process.env.MODDABLE), 'build'),
-    }: RunOptions = parameters.options
+      output = '',
+      deploy = false,
+    }: BuildOptions = parameters.options
     const targetPlatform: string = DEVICE_ALIAS[device] ?? device
     const projectPath = filesystem.resolve(parameters.first ?? '.')
 
@@ -40,8 +42,11 @@ const command: GluegunCommand<XSDevToolbox> = {
       targetPlatform,
       projectPath,
       mode,
-      deployStatus: 'run',
-      outputDir: output,
+      deployStatus: deploy ? 'push' : 'none',
+      outputDir:
+        output !== ''
+          ? filesystem.resolve(output)
+          : filesystem.resolve(String(process.env.MODDABLE), 'build'),
     })
   },
 }
