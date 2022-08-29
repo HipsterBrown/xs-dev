@@ -17,7 +17,7 @@ The Moddable SDK and associated dev board tooling is incredibly empowering for e
 **Platform support:**
 
 - [X] Mac
-- [ ] Windows
+- [X] Windows (Beta support)
 - [X] Linux
 
 ## Requirements
