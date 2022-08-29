@@ -1,5 +1,11 @@
 # xs-dev
 
+## 0.18.0
+
+### Minor Changes
+
+- 40f6407: Initial Windows support for system tooling, ESP8266, ESP32 setup
+
 ## 0.17.0
 
 ### Minor Changes
