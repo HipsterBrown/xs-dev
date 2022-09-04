@@ -1,5 +1,11 @@
 # xs-dev
 
+## 0.19.0
+
+### Minor Changes
+
+- 5440efa: Adds "--asyncMain" option to init command
+
 ## 0.18.0
 
 ### Minor Changes
