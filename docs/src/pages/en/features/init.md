@@ -28,6 +28,14 @@ The `--io` flag sets up the project to use the [TC53 IO manifest](https://github
 xs-dev init my-io-project --io
 ```
 
+## asyncMain
+
+The `--asyncMain` flag will enable top level await in your project's entry file. In XS, TLA is only be available in imported modules by default.
+
+```
+xs-dev init my-io-project --asyncMain
+```
+
 ## Moddable example
 
 For the `--example` flag, it can be used as a boolean to select a project from the list of available [Moddable examples](https://github.com/Moddable-OpenSource/moddable/tree/public/examples):

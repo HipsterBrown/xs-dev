@@ -5,7 +5,8 @@ interface InitOptions {
   typescript?: boolean
   io?: boolean
   example?: string | boolean
-  overwrite?: boolean
+  overwrite?: boolean,
+  asyncMain?: boolean
 }
 
 const command: GluegunCommand = {
@@ -27,6 +28,7 @@ const command: GluegunCommand = {
       io = false,
       example = false,
       overwrite = false,
+      asyncMain = false,
     }: InitOptions = parameters.options
 
     if (name !== undefined) {
@@ -89,10 +91,14 @@ const command: GluegunCommand = {
           .filter(Boolean)
           .join(',\n\t')
 
+        const defines: String = asyncMain
+          ? ',\n  defines: {\n    async_main: 1\n  }'
+          : ''
+
         await generate({
           template: 'manifest.json.ejs',
           target: `${name}/manifest.json`,
-          props: { includes },
+          props: { includes, defines },
         })
 
         await generate({
