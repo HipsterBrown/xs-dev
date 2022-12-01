@@ -1,3 +1,4 @@
+import { type as platformType } from 'os'
 import type { GluegunCommand } from 'gluegun'
 import {
   INSTALL_DIR,
@@ -21,6 +22,10 @@ const command: GluegunCommand = {
     filesystem.remove(filesystem.resolve(INSTALL_DIR, 'esp'))
     filesystem.remove(filesystem.resolve(INSTALL_DIR, 'pico'))
     filesystem.remove(filesystem.resolve(INSTALL_DIR, 'fontbm'))
+
+    if (platformType() === 'darwin') {
+      filesystem.remove('/Applications/xsbug.app')
+    }
 
     await patching.patch(PROFILE_PATH, {
       delete: `source ${EXPORTS_FILE_PATH}`,
