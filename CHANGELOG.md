@@ -1,5 +1,11 @@
 # xs-dev
 
+## 0.19.1
+
+### Patch Changes
+
+- e43cd9e: Remove xsbug app symlink on macos
+
 ## 0.19.0
 
 ### Minor Changes
