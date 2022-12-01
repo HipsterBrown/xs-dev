@@ -1,5 +1,11 @@
 # xs-dev
 
+## 0.19.2
+
+### Patch Changes
+
+- 52fa88b: Update dependencies, resolving security warnings
+
 ## 0.19.1
 
 ### Patch Changes
