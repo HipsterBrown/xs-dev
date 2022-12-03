@@ -23,7 +23,7 @@ const command: GluegunCommand = {
     filesystem.remove(filesystem.resolve(INSTALL_DIR, 'pico'))
     filesystem.remove(filesystem.resolve(INSTALL_DIR, 'fontbm'))
 
-    if (platformType() === 'darwin') {
+    if (platformType() === 'Darwin') {
       filesystem.remove('/Applications/xsbug.app')
     }
 
