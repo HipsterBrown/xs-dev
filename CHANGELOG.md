@@ -1,5 +1,11 @@
 # xs-dev
 
+## 0.19.3
+
+### Patch Changes
+
+- 4a1cadc: Fix symlink teardown with correct OS type logic
+
 ## 0.19.2
 
 ### Patch Changes
