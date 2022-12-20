@@ -84,6 +84,12 @@ export default async function(): Promise<void> {
 
   if (system.which('cmake') === null) {
     if (OS === 'darwin') {
+      if (system.which('brew') === null) {
+        print.error(`Homebrew is required to install necessary dependencies. Visit https://brew.sh/ to learn more about installing Homebrew.
+  If you don't want to use Homebrew, please install cmake manually before trying this command again.`)
+        process.exit(1);
+      }
+
       spinner.start('Cmake required, installing with Homebrew')
       await system.exec('brew install cmake')
     }

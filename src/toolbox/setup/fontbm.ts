@@ -5,7 +5,7 @@ import { type as platformType } from 'os'
 import { exit } from 'process'
 import { execWithSudo } from '../system/exec'
 
-export default async function (): Promise<void> {
+export default async function(): Promise<void> {
   const spinner = print.spin()
   spinner.start('Beginning setup...')
 
@@ -22,11 +22,17 @@ export default async function (): Promise<void> {
   // 1. install cmake
   if (system.which('cmake') === null) {
     if (OS === 'darwin') {
+      if (system.which('brew') === null) {
+        print.error(`Homebrew is required to install necessary dependencies. Visit https://brew.sh/ to learn more about installing Homebrew.
+  If you don't want to use Homebrew, please install cmake manually before trying this command again.`)
+        process.exit(1);
+      }
+
       spinner.start('Cmake required, installing with Homebrew')
-   	  await system.exec('brew install cmake')
+      await system.exec('brew install cmake')
       spinner.succeed()
-	}
-	if (OS === 'linux') {
+    }
+    if (OS === 'linux') {
       spinner.start('CMake required, installing with apt')
       await execWithSudo(
         'apt-get install --yes build-essential cmake',

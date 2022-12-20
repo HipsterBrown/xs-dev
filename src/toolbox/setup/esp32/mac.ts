@@ -1,10 +1,16 @@
-import { system, semver } from 'gluegun'
+import { system, semver, print } from 'gluegun'
 import type { GluegunPrint } from 'gluegun'
 
 // brew install python3, cmake, ninja, dfu-util
 export async function installDeps(
   spinner: ReturnType<GluegunPrint['spin']>
 ): Promise<void> {
+  if (system.which('brew') === null) {
+    print.error(`Homebrew is required to install necessary dependencies. Visit https://brew.sh/ to learn more about installing Homebrew.
+If you don't want to use Homebrew, please install python, cmake, ninja, and dfu-util manually before trying this command again.`)
+    process.exit(1);
+  }
+
   if (
     system.which('python') === null ||
     // get python verion, check if v3
