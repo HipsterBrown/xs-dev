@@ -10,7 +10,7 @@ export async function installDeps(
       await system.exec('brew install python')
       spinner.succeed()
     } catch (error: unknown) {
-      if (error instanceof Error && error.toString().includes('xcode-select')) {
+      if (error instanceof Error && error.message.includes('xcode-select')) {
         spinner.fail('Apple Command Line Tools must be installed in order to install python from Homebrew. Please run `xcode-select --install` before trying again.')
         process.exit(1)
       }
