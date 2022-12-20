@@ -5,7 +5,7 @@ import { moddableExists } from './moddable'
 import upsert from '../patching/upsert'
 import { execWithSudo } from '../system/exec'
 
-export default async function (): Promise<void> {
+export default async function(): Promise<void> {
   const OS = platformType().toLowerCase()
   const EMSDK_REPO = 'https://github.com/emscripten-core/emsdk.git'
   const BINARYEN_REPO = 'https://github.com/WebAssembly/binaryen.git'
@@ -42,22 +42,29 @@ export default async function (): Promise<void> {
   if (shouldBuildEmsdk) {
     try {
       // clear residual env settings
-      process.env.EMSDK = undefined
-      process.env.EMSDK_NODE = undefined
-      process.env.EMSDK_PYTHON = undefined
+      process.env.EMSDK = ""
+      process.env.EMSDK_NODE = ""
+      process.env.EMSDK_PYTHON = ""
 
       spinner.start('Installing latest EMSDK')
+      print.debug(EMSDK_PATH)
       await system.exec('./emsdk install latest', {
+        process: process,
         cwd: EMSDK_PATH,
         stdout: process.stdout,
       })
       await system.exec('./emsdk activate latest', {
+        process: process,
         cwd: EMSDK_PATH,
         stdout: process.stdout,
       })
       await upsert(
         EXPORTS_FILE_PATH,
-        `source ${filesystem.resolve(EMSDK_PATH, 'emsdk_env.sh')}`
+        `export EMSDK_QUIET=1`
+      )
+      await upsert(
+        EXPORTS_FILE_PATH,
+        `source ${filesystem.resolve(EMSDK_PATH, 'emsdk_env.sh')} 1> /dev/null`
       )
     } catch (error) {
       spinner.fail(`Error activating emsdk: ${String(error)}`)
