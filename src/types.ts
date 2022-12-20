@@ -4,8 +4,11 @@ import type { BuildArgs } from './toolbox/build/index'
 
 export type Device =
   | 'darwin'
+  | 'mac'
   | 'linux'
+  | 'lin'
   | 'windows_nt'
+  | 'win'
   | 'esp'
   | 'esp8266'
   | 'esp32'

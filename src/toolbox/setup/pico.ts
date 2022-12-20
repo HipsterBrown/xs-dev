@@ -4,34 +4,36 @@ import { INSTALL_DIR, EXPORTS_FILE_PATH } from './constants'
 import upsert from '../patching/upsert'
 import { installDeps as installMacDeps } from './pico/mac'
 import { installDeps as installLinuxDeps } from './pico/linux'
+import { moddableExists } from './moddable'
 
-export default async function (): Promise<void> {
+export default async function(): Promise<void> {
   const OS = platformType().toLowerCase()
   const PICO_SDK_REPO = 'https://github.com/raspberrypi/pico-sdk'
   const PICO_EXAMPLES_REPO = 'https://github.com/raspberrypi/pico-examples'
   const PICOTOOL_REPO = 'https://github.com/raspberrypi/picotool'
-  const PICO_DIR = filesystem.resolve(INSTALL_DIR, 'pico')
-  const PICO_SDK_DIR = filesystem.resolve(PICO_DIR, 'pico-sdk')
-  const PICO_EXAMPLES_PATH = filesystem.resolve(PICO_DIR, 'pico-examples')
-  const PICOTOOL_PATH = filesystem.resolve(PICO_DIR, 'picotool')
+  const PICO_ROOT = process.env.PICO_ROOT ?? filesystem.resolve(INSTALL_DIR, 'pico')
+  const PICO_SDK_DIR = filesystem.resolve(PICO_ROOT, 'pico-sdk')
+  const PICO_EXAMPLES_PATH = filesystem.resolve(PICO_ROOT, 'pico-examples')
+  const PICOTOOL_PATH = filesystem.resolve(PICO_ROOT, 'picotool')
   const PICOTOOL_BUILD_DIR = filesystem.resolve(PICOTOOL_PATH, 'build')
   const PICO_SDK_BUILD_DIR = filesystem.resolve(PICO_SDK_DIR, 'build')
+  const PIOASM_PATH = filesystem.resolve(PICO_SDK_BUILD_DIR, 'pioasm', 'pioasm')
 
   const spinner = print.spin()
   spinner.start('Starting pico tooling setup')
 
   // 0. ensure pico instal directory and Moddable exists
-  if (
-    process.env.MODDABLE === undefined ||
-    filesystem.exists(process.env.MODDABLE) === false
-  ) {
+  if (!moddableExists()) {
     spinner.fail(
       'Moddable platform tooling required. Run `xs-dev setup` before trying again.'
     )
     process.exit(1)
   }
   spinner.info('Ensuring pico directory')
-  filesystem.dir(PICO_DIR)
+  filesystem.dir(PICO_ROOT)
+  if (process.env.PICO_ROOT === undefined) {
+    await upsert(EXPORTS_FILE_PATH, `export PICO_ROOT=${PICO_ROOT}`)
+  }
 
   // 1. Install required components
   if (OS === 'darwin') {
@@ -125,6 +127,14 @@ export default async function (): Promise<void> {
     spinner.info(`Using existing $PICO_SDK_PATH: ${process.env.PICO_SDK_PATH}`)
   }
 
+  if (process.env.PIOASM === undefined) {
+    spinner.info('Setting PIOASM')
+    process.env.PIOASM = PIOASM_PATH
+    await upsert(EXPORTS_FILE_PATH, `export PIOASM=${PIOASM_PATH}`)
+  } else {
+    spinner.info(`Using existing $PIOASM: ${process.env.PIOASM}`)
+  }
+
   if (
     filesystem.exists(PICOTOOL_BUILD_DIR) === false ||
     filesystem.list(PICOTOOL_BUILD_DIR)?.length === 0
@@ -144,6 +154,7 @@ export default async function (): Promise<void> {
     await upsert(EXPORTS_FILE_PATH, `export PATH="${PICOTOOL_BUILD_DIR}:$PATH"`)
     spinner.succeed()
   }
+
 
   spinner.succeed(`
 Successfully set up pico platform support for Moddable!

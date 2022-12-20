@@ -1,7 +1,11 @@
+import { type as platformType } from 'os'
 import handler from 'serve-handler'
 import { createServer } from 'http'
 import { filesystem, print, prompt, system } from 'gluegun'
 import { collectChoicesFromTree } from '../prompt/choices'
+import { moddableExists } from '../setup/moddable'
+import { DEVICE_ALIAS } from '../prompt/devices'
+import { Device } from '../../types'
 
 export type DeployStatus = 'none' | 'run' | 'push'
 
@@ -28,6 +32,8 @@ export async function build({
   deployStatus,
   outputDir,
 }: BuildArgs): Promise<void> {
+  const OS = platformType().toLowerCase() as Device
+
   if (listDevices) {
     const choices = [
       'esp',
@@ -81,6 +87,41 @@ export async function build({
     } else {
       print.warning('Please select a target device to run')
       process.exit(0)
+    }
+  }
+
+  if (targetPlatform !== '') {
+    if (!moddableExists()) {
+      print.error(
+        `Moddable tooling required. Run 'xs-dev setup --device ${DEVICE_ALIAS[OS]}' before trying again.`
+      )
+      process.exit(1)
+    }
+    // preflight / verify environment set up for target platform
+    if (targetPlatform.includes('esp32')) {
+      if (typeof process.env.IDF_PATH !== 'string' || filesystem.exists(process.env.IDF_PATH) !== 'dir') {
+        print.error('The current environment does not appear to be set up for the ESP32 build target. Please run `xs-dev setup --device esp32` before trying again.')
+        process.exit(1)
+      }
+    } else if (targetPlatform.includes('esp')) {
+      if (typeof process.env.ESP_BASE !== 'string' || filesystem.exists(process.env.ESP_BASE) !== 'dir') {
+        print.error('The current environment does not appear to be set up for the ESP8266 build target. Please run `xs-dev setup --device esp8266` before trying again.')
+        process.exit(1)
+      }
+    }
+
+    if (targetPlatform.includes('wasm')) {
+      if (!(process.env.PATH ?? '').includes('binaryen') || filesystem.exists(process.env.EMSDK ?? '') !== 'dir' || filesystem.exists(process.env.EMSDK_NODE ?? '') !== 'file' || filesystem.exists(process.env.EMSDK_PYTHON ?? '') !== 'file') {
+        print.error('The current environment does not appear to be set up for the wasm build target. Please run `xs-dev setup --device wasm` before trying again.')
+        process.exit(1)
+      }
+    }
+
+    if (targetPlatform.includes('pico')) {
+      if (typeof process.env.PICO_SDK_PATH !== 'string' || filesystem.exists(process.env.PICO_SDK_PATH) !== 'dir' || system.which('picotool') === null || filesystem.exists(process.env.PIOASM ?? '') !== 'file') {
+        print.error('The current environment does not appear to be set up for the pico build target. Please run `xs-dev setup --device pico` before trying again.')
+        process.exit(1)
+      }
     }
   }
 
@@ -142,8 +183,7 @@ export async function build({
   const spinner = print.spin()
 
   spinner.start(
-    `Building${
-      deployStatus !== 'none' ? ' and deploying project' : ''
+    `Building${deployStatus !== 'none' ? ' and deploying project' : ''
     } ${projectPath} on ${targetPlatform}`
   )
 

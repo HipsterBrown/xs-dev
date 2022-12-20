@@ -8,7 +8,7 @@ import { installDeps as installLinuxDeps } from './esp32/linux'
 import { installDeps as installWinDeps } from './esp32/windows'
 import { setEnv, ensureModdableCommandPrompt } from './windows'
 
-export default async function (): Promise<void> {
+export default async function(): Promise<void> {
   const OS = platformType().toLowerCase()
   const isWindows = OS === "windows_nt"
   const ESP_IDF_REPO = 'https://github.com/espressif/esp-idf.git'
@@ -27,8 +27,9 @@ export default async function (): Promise<void> {
     process.exit(1)
   }
 
-  if (isWindows)
+  if (isWindows) {
     await ensureModdableCommandPrompt(spinner)
+  }
 
   // 1. ensure ~/.local/share/esp32 directory
   spinner.info('Ensuring esp32 install directory')
@@ -102,6 +103,6 @@ export default async function (): Promise<void> {
   spinner.succeed(`
   Successfully set up esp32 platform support for Moddable!
   Test out the setup by starting a new ${isWindows ? 'Moddable Command Prompt' : 'terminal session'}, plugging in your device, and running: xs-dev run --example helloworld --device=esp32
-  If there is trouble finding the correct port, pass the "--port" flag to the above command with the ${isWindows? "COM Port" :  "path to the /dev.cu.*"} that matches your device.
+  If there is trouble finding the correct port, pass the "--port" flag to the above command with the ${isWindows ? "COM Port" : "path to the /dev.cu.*"} that matches your device.
   `)
 }

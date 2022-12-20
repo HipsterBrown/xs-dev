@@ -10,8 +10,11 @@ import updatePico from '../toolbox/update/pico'
 export default async (toolbox: XSDevToolbox): Promise<void> => {
   toolbox.update = {
     darwin: updateMac,
+    mac: updateMac,
     linux: updateLinux,
+    lin: updateLinux,
     windows_nt: updateWindows,
+    win: updateWindows,
     esp: updateESP8266,
     esp8266: updateESP8266,
     esp32: updateESP32,

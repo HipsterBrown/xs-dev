@@ -10,8 +10,11 @@ import setupPico from '../toolbox/setup/pico'
 export default async (toolbox: XSDevToolbox): Promise<void> => {
   toolbox.setup = {
     darwin: setupMac,
+    mac: setupMac,
     linux: setupLinux,
+    lin: setupLinux,
     windows_nt: setupWindows,
+    win: setupWindows,
     esp: setupESP8266,
     esp8266: setupESP8266,
     esp32: setupESP32,

@@ -13,11 +13,13 @@ import { installDeps as installMacDeps } from './esp8266/mac'
 import { installDeps as installLinuxDeps } from './esp8266/linux'
 import { installDeps as installWindowsDeps } from './esp8266/windows'
 import { ensureModdableCommandPrompt } from './windows'
+import { DEVICE_ALIAS } from '../prompt/devices'
+import { Device } from '../../types'
 
 const finishedPromise = promisify(finished)
 
-export default async function (): Promise<void> {
-  const OS = platformType().toLowerCase()
+export default async function(): Promise<void> {
+  const OS = platformType().toLowerCase() as Device
   const isWindows = OS === "windows_nt"
   const TOOLCHAIN = isWindows ? 'https://www.dropbox.com/s/edbtq6oi1up623i/esp8266.toolchain.win32.zip?dl=1' : `https://www.moddable.com/private/esp8266.toolchain.${OS}.tgz`
   const ARDUINO_CORE =
@@ -35,24 +37,25 @@ export default async function (): Promise<void> {
   // 0. ensure Moddable exists
   if (!moddableExists()) {
     spinner.fail(
-      'Moddable tooling required. Run `xs-dev setup` before trying again.'
+      `Moddable tooling required. Run 'xs-dev setup --device ${DEVICE_ALIAS[OS]}' before trying again.`
     )
     process.exit(1)
   }
 
-  if (isWindows)
+  if (isWindows) {
     await ensureModdableCommandPrompt(spinner)
+  }
 
   // 1. ensure ~/.local/share/esp directory
-  spinner.info('Ensuring esp directory')
+  spinner.info('Ensuring esp8266 directory')
   filesystem.dir(ESP_DIR)
 
   // 2. download and untar xtensa toolchain
   if (filesystem.exists(TOOLCHAIN_PATH) === false) {
     spinner.start('Downloading xtensa toolchain')
-    
+
     if (isWindows) {
-      const writer = ZipExtract({path: ESP_DIR})
+      const writer = ZipExtract({ path: ESP_DIR })
       const response = await axios.get(TOOLCHAIN, {
         responseType: 'stream'
       })
