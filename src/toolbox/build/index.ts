@@ -34,6 +34,13 @@ export async function build({
 }: BuildArgs): Promise<void> {
   const OS = platformType().toLowerCase() as Device
 
+  if (!moddableExists()) {
+    print.error(
+      `Moddable tooling required. Run 'xs-dev setup --device ${DEVICE_ALIAS[OS]}' before trying again.`
+    )
+    process.exit(1)
+  }
+
   if (listDevices) {
     const choices = [
       'esp',
@@ -91,13 +98,6 @@ export async function build({
   }
 
   if (targetPlatform !== '') {
-    if (!moddableExists()) {
-      print.error(
-        `Moddable tooling required. Run 'xs-dev setup --device ${DEVICE_ALIAS[OS]}' before trying again.`
-      )
-      process.exit(1)
-    }
-    // preflight / verify environment set up for target platform
     if (targetPlatform.includes('esp32')) {
       if (typeof process.env.IDF_PATH !== 'string' || filesystem.exists(process.env.IDF_PATH) !== 'dir') {
         print.error('The current environment does not appear to be set up for the ESP32 build target. Please run `xs-dev setup --device esp32` before trying again.')
