@@ -1,9 +1,23 @@
-import { print, prompt, system } from "gluegun";
-import upsert from "../patching/upsert";
-import { getProfilePath } from "./constants";
+import os from 'os'
+import { filesystem, print, prompt, system } from 'gluegun'
+import upsert from '../patching/upsert'
+import { getProfilePath } from './constants'
+
+function getBrewPath(): string {
+  if (os.arch() === 'arm64') return '/opt/homebrew/bin/brew'
+  return '/usr/local/bin/brew'
+}
 
 export async function ensureHomebrew(): Promise<void> {
   if (system.which('brew') === null) {
+    const brewPath = getBrewPath()
+    const homebrewEval = `eval "$(${brewPath} shellenv)"`
+
+    if (filesystem.exists(brewPath) === 'file') {
+      await system.exec(homebrewEval, { shell: process.env.SHELL, stdout: process.env.stdout })
+      return;
+    }
+
     const shouldInstallBrew = await prompt.confirm(`The "brew" command is not available. Homebrew is required to install necessary dependencies. Would you like to setup Homebrew automatically?`)
 
     if (shouldInstallBrew) {
@@ -14,7 +28,6 @@ export async function ensureHomebrew(): Promise<void> {
           stdout: process.stdout,
           stdin: process.stdin,
         })
-        const homebrewEval = `eval "$(/opt/homebrew/bin/brew shellenv)"`
         const PROFILE_PATH = getProfilePath()
         await upsert(PROFILE_PATH, homebrewEval)
         await system.exec(`source ${PROFILE_PATH}`, { shell: process.env.SHELL, stdout: process.stdout })
