@@ -15,7 +15,7 @@ export async function ensureHomebrew(): Promise<void> {
 
     if (filesystem.exists(brewPath) === 'dir') {
       print.debug(`Homebrew is on the system but not found in PATH. Running '${homebrewEval}' to attempt to fix PATH for this task`)
-      await system.exec(homebrewEval, { shell: process.env.SHELL, stdout: process.env.stdout })
+      process.env.PATH = `${brewPath}:${String(process.env.PATH)}`
       return;
     }
 
