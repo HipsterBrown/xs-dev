@@ -2,7 +2,8 @@ import {
   GluegunPrint,
   print,
   filesystem, 
-  system 
+  system,
+  prompt 
 } from 'gluegun'
 import {
   INSTALL_PATH,
@@ -71,26 +72,37 @@ export default async function (_args: SetupArgs): Promise<void> {
         print.error('Visual Studio 2022 Community is required to build the Moddable SDK')
         print.error('If you already have VS 2022 Community installed, please run "xs-dev setup" from the x86 Native Tools Command Prompt for VS 2022')
         print.error('You can download and install Visual Studio 2022 Community from https://www.visualstudio.com/downloads/')
-        print.info('Or xs-dev can manage installing Visual Stuudio 2022 Community and other dependencies using the Windows Package Manager Client (winget).')
+        print.info('Or xs-dev can manage installing Visual Studio 2022 Community and other dependencies using the Windows Package Manager Client (winget).')
         print.info('You can install winget via the App Installer package in the Microsoft Store.')
         print.info('Please install either Visual Studio 2022 Community or winget, then launch a new xs86 Native Tools Command Prompt for VS 2022 and re-run this setup.')
         process.exit(1)
       }
 
-    print.info('Installing Visual Studio 2022 Community from winget...')
-    try {
-        await system.exec('winget install -e --id Microsoft.VisualStudio.2022.Community --silent', {stdio: 'inherit', shell: true})    
-    } catch (error) {
-        print.error('Visual Studio 2022 Community install failed')
+
+      print.error('Visual Studio 2022 Community is required to build the Moddable SDK but has not been detected')
+      print.error('If you already have VS 2022 Community installed, please run "xs-dev setup" from the x86 Native Tools Command Prompt for VS 2022')
+      print.info('If you do not have VS 2022 Community installed, xs-dev can install it for you using the Windows Package Manager Client (winget).')
+      const response = await prompt.confirm('Would you like for xs-dev to install VS 2022 Community for you?')
+
+      if (!response) {
+        print.info('Okay. Please manually install VS 2022 Community from https://www.visualstudio.com/downloads/ if necessary and then run "xs-dev setup" from the x86 Native Tools Command Prompt for VS 2022')
         process.exit(1)
+      }
+        
+      print.info('Okay. Installing Visual Studio 2022 Community from winget...')
+      try {
+          await system.exec('winget install -e --id Microsoft.VisualStudio.2022.Community --silent', {stdio: 'inherit', shell: true})    
+      } catch (error) {
+          print.error('Visual Studio 2022 Community install failed')
+          process.exit(1)
+      }
+      
+      print.info('Visual Studio 2022 Community successfully installed.')
+      print.info('The "Desktop development for C++" workload must be manually installed.')
+      print.info('From your Start Menu, select Visual Studio Installer. Then "Modify." Then select "Desktop development with C++" Then "Modify" again.')
+      print.info('When complete, please close this window and launch the "x86 Native Tools Command Prompt for VS 2022" from the start menu.')
+      process.exit(1)
     }
-    
-    print.info('Visual Studio 2022 Community successfully installed.')
-    print.info('The "Desktop development for C++" workload must be manually installed.')
-    print.info('From your Start Menu, select Visual Studio Installer. Then "Modify." Then select "Desktop development with C++" Then "Modify" again.')
-    print.info('When complete, please close this window and launch the "x86 Native Tools Command Prompt for VS 2022" from the start menu.')
-    process.exit(1)
-  }
 
   if (system.which('git') === null) {
     try {
