@@ -8,7 +8,8 @@ import {
   INSTALL_PATH,
   INSTALL_DIR,
   MODDABLE_REPO,
-  EXPORTS_FILE_PATH
+  EXPORTS_FILE_PATH,
+  TEMP_PATH
 } from './constants'
 import upsert from '../patching/upsert'
 import ws from 'windows-shortcuts'
@@ -24,9 +25,18 @@ export async function setEnv(name: string, permanentValue: string, envValue?: st
   process.env[name] = envValue !== undefined ? envValue : permanentValue
 }
 
+export function setTemporaryEnv(name: string, envValue: string): void {
+  process.env[name] = envValue
+}
+
 export async function addToPath(path: string): Promise<void> {
   const newPath = `${path};${process.env.PATH ?? ""}`
   await setEnv("PATH", `${path};%PATH%`, newPath)
+}
+
+export function addToTemporaryPath(path: string): void {
+  const newPath = `${path};${process.env.PATH ?? ""}`
+  setTemporaryEnv("PATH", newPath)
 }
 
 export async function openModdableCommandPrompt(): Promise<void> {
@@ -60,6 +70,21 @@ export default async function (_args: SetupArgs): Promise<void> {
     'makefiles',
     'win'
   )
+  const TEMP_BUILD = filesystem.resolve(
+    TEMP_PATH,
+    'moddable',
+    'build',
+    'makefiles',
+    'win'
+  )
+  const TEMP_BIN = filesystem.resolve(
+    TEMP_PATH, 
+    'moddable',
+    'build',
+    'bin',
+    'win',
+    'release'
+  )
 
   print.info(`Setting up Windows tools at ${INSTALL_PATH}`)
 
@@ -73,7 +98,7 @@ export default async function (_args: SetupArgs): Promise<void> {
         print.error('You can download and install Visual Studio 2022 Community from https://www.visualstudio.com/downloads/')
         print.info('Or xs-dev can manage installing Visual Stuudio 2022 Community and other dependencies using the Windows Package Manager Client (winget).')
         print.info('You can install winget via the App Installer package in the Microsoft Store.')
-        print.info('Please install either Visual Studio 2022 Community or winget, then launch a new xs86 Native Tools Command Prompt for VS 2022 and re-run this setup.')
+        print.info('Please install either Visual Studio 2022 Community or winget, then launch a new x86 Native Tools Command Prompt for VS 2022 and re-run this setup.')
         process.exit(1)
       }
 
@@ -121,8 +146,14 @@ export default async function (_args: SetupArgs): Promise<void> {
 
   const vsBatPath = filesystem.resolve(process.env.VSINSTALLDIR, "VC", "Auxiliary", "Build", "vcvars32.bat")
   await upsert(EXPORTS_FILE_PATH, `call "${vsBatPath}"`)
+
+  const MODDABLE_TEMP = filesystem.resolve(TEMP_PATH, "moddable")
   
   // 1. clone moddable repo into INSTALL_DIR directory if it does not exist yet
+
+  if (filesystem.exists(TEMP_PATH))
+    filesystem.remove(TEMP_PATH)
+
   try {
     filesystem.dir(INSTALL_DIR)
   } catch (error) {
@@ -130,12 +161,15 @@ export default async function (_args: SetupArgs): Promise<void> {
     process.exit(1)
   }
 
+  let buildInPlace = false
+
   if (filesystem.exists(INSTALL_PATH) !== false) {
     spinner.info('Moddable repo already installed')
+    buildInPlace = true
   } else {
     try {
       spinner.start('Cloning Moddable-OpenSource/moddable repo')
-      await system.spawn(`git clone ${MODDABLE_REPO} ${INSTALL_PATH}`)
+      await system.spawn(`git clone ${MODDABLE_REPO} ${MODDABLE_TEMP}`)
       spinner.succeed()
     } catch (error) {
       spinner.fail(`Error cloning moddable repo: ${String(error)}`)
@@ -144,11 +178,15 @@ export default async function (_args: SetupArgs): Promise<void> {
   }
 
   // 2. configure MODDABLE env variable, add release binaries dir to PATH
-  spinner.start(`Creating Moddable SDK Environment Batch File`)
+  spinner.start(`Creating Temporary Install Environment`)
   try {
-    await setEnv('MODDABLE', INSTALL_PATH)
-    await addToPath(BIN_PATH)
-    await setEnv('ISMODDABLECOMMANDPROMPT', '1')
+    if (buildInPlace) {
+      setTemporaryEnv('MODDABLE', INSTALL_PATH)
+      addToTemporaryPath(BIN_PATH)
+    } else {
+      setTemporaryEnv('MODDABLE', MODDABLE_TEMP)
+      addToTemporaryPath(TEMP_BIN)
+    }
     spinner.succeed()
   } catch (error) {
     spinner.fail(error.toString())
@@ -157,14 +195,29 @@ export default async function (_args: SetupArgs): Promise<void> {
   // 3. build tools
   try {
     spinner.start(`Building Moddable SDK tools`)
-    await system.exec(`build.bat`, { cwd: BUILD_DIR, stdout: process.stdout})
+    await system.exec(`build.bat`, { cwd: buildInPlace ? BUILD_DIR : TEMP_BUILD, stdout: process.stdout})
     spinner.succeed()
   } catch (error) {
     spinner.fail(`Error building Moddable SDK tools: ${String(error)}`)
     process.exit(1)
   }
 
-  // 4. create Windows shortcut
+  // 4. move everything into place
+  spinner.start(`Finalizing Installation`)
+  try {
+    if (!buildInPlace) {
+      filesystem.move(filesystem.resolve(TEMP_PATH, "moddable"), INSTALL_PATH)
+      filesystem.remove(TEMP_PATH)
+    }
+    await setEnv('MODDABLE', INSTALL_PATH)
+    await addToPath(BIN_PATH)
+    await setEnv('ISMODDABLECOMMANDPROMPT', '1')
+    spinner.succeed()
+  } catch (error) {
+    spinner.fail(error.toString())
+  }
+
+  // 5. create Windows shortcut
   try {
     spinner.start(`Creating Moddable Command Prompt Shortcut`)
     await wsPromise(SHORTCUT, {
