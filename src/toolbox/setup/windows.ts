@@ -151,7 +151,7 @@ export default async function (_args: SetupArgs): Promise<void> {
   
   // 1. clone moddable repo into INSTALL_DIR directory if it does not exist yet
 
-  if (filesystem.exists(TEMP_PATH))
+  if (filesystem.exists(TEMP_PATH) !== false)
     filesystem.remove(TEMP_PATH)
 
   try {
