@@ -89,7 +89,7 @@ export default async function(): Promise<void> {
   if (filesystem.exists(RTOS_PATH) === false) {
     spinner.start('Cloning esp8266 RTOS SDK repo')
     await system.spawn(
-      `git clone -b ${ESP_BRANCH} ${ESP_RTOS_REPO} ${RTOS_PATH}`
+      `git clone --depth 1 --single-branch -b ${ESP_BRANCH} ${ESP_RTOS_REPO} ${RTOS_PATH}`
     )
     spinner.succeed()
   }

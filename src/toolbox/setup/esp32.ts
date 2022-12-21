@@ -39,7 +39,7 @@ export default async function(): Promise<void> {
   if (filesystem.exists(IDF_PATH) === false) {
     spinner.start('Cloning esp-idf repo')
     await system.spawn(
-      `git clone -b ${ESP_BRANCH} --recursive ${ESP_IDF_REPO} ${IDF_PATH}`
+      `git clone --depth 1 --single-branch -b ${ESP_BRANCH} --recursive ${ESP_IDF_REPO} ${IDF_PATH}`
     )
     spinner.succeed()
   }

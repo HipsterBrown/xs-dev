@@ -4,6 +4,7 @@ import { INSTALL_DIR, EXPORTS_FILE_PATH } from './constants'
 import { moddableExists } from './moddable'
 import upsert from '../patching/upsert'
 import { execWithSudo } from '../system/exec'
+import { ensureHomebrew } from './homebrew'
 
 export default async function(): Promise<void> {
   const OS = platformType().toLowerCase()
@@ -29,7 +30,7 @@ export default async function(): Promise<void> {
   // 1. Clone EM_SDK repo, install, and activate latest version
   if (filesystem.exists(EMSDK_PATH) === false) {
     spinner.start('Cloning emsdk repo')
-    await system.spawn(`git clone ${EMSDK_REPO} ${EMSDK_PATH}`)
+    await system.spawn(`git clone --depth 1 --single-branch -b main ${EMSDK_REPO} ${EMSDK_PATH}`)
     spinner.succeed()
   }
 
@@ -77,18 +78,14 @@ export default async function(): Promise<void> {
   if (filesystem.exists(BINARYEN_PATH) === false) {
     spinner.start('Cloning binaryen repo')
     await system.spawn(
-      `git clone --recursive ${BINARYEN_REPO} ${BINARYEN_PATH}`
+      `git clone --depth 1 --single-branch -b main --recursive ${BINARYEN_REPO} ${BINARYEN_PATH}`
     )
     spinner.succeed()
   }
 
   if (system.which('cmake') === null) {
     if (OS === 'darwin') {
-      if (system.which('brew') === null) {
-        print.error(`Homebrew is required to install necessary dependencies. Visit https://brew.sh/ to learn more about installing Homebrew.
-  If you don't want to use Homebrew, please install cmake manually before trying this command again.`)
-        process.exit(1);
-      }
+      await ensureHomebrew()
 
       spinner.start('Cmake required, installing with Homebrew')
       await system.exec('brew install cmake')

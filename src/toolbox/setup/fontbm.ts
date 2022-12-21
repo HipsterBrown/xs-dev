@@ -4,6 +4,7 @@ import upsert from '../patching/upsert'
 import { type as platformType } from 'os'
 import { exit } from 'process'
 import { execWithSudo } from '../system/exec'
+import { ensureHomebrew } from './homebrew'
 
 export default async function(): Promise<void> {
   const spinner = print.spin()
@@ -22,11 +23,7 @@ export default async function(): Promise<void> {
   // 1. install cmake
   if (system.which('cmake') === null) {
     if (OS === 'darwin') {
-      if (system.which('brew') === null) {
-        print.error(`Homebrew is required to install necessary dependencies. Visit https://brew.sh/ to learn more about installing Homebrew.
-  If you don't want to use Homebrew, please install cmake manually before trying this command again.`)
-        process.exit(1);
-      }
+      await ensureHomebrew()
 
       spinner.start('Cmake required, installing with Homebrew')
       await system.exec('brew install cmake')
