@@ -4,16 +4,17 @@ import upsert from '../patching/upsert'
 import { getProfilePath } from './constants'
 
 function getBrewPath(): string {
-  if (os.arch() === 'arm64') return '/opt/homebrew/bin/brew'
-  return '/usr/local/bin/brew'
+  if (os.arch() === 'arm64') return '/opt/homebrew/bin'
+  return '/usr/local/bin'
 }
 
 export async function ensureHomebrew(): Promise<void> {
   if (system.which('brew') === null) {
     const brewPath = getBrewPath()
-    const homebrewEval = `eval "$(${brewPath} shellenv)"`
+    const homebrewEval = `eval "$(${brewPath}/brew shellenv)"`
 
-    if (filesystem.exists(brewPath) === 'file') {
+    if (filesystem.exists(brewPath) === 'dir') {
+      print.debug(`Homebrew is on the system but not found in PATH. Running '${homebrewEval}' to attempt to fix PATH for this task`)
       await system.exec(homebrewEval, { shell: process.env.SHELL, stdout: process.env.stdout })
       return;
     }
