@@ -1,4 +1,4 @@
-import { filesystem, system } from 'gluegun'
+import { filesystem, print, system } from 'gluegun'
 import type { GluegunPrint } from 'gluegun'
 import { ensureHomebrew } from '../homebrew'
 
@@ -22,7 +22,11 @@ export async function installDeps(
         }
       }
     } else {
-      filesystem.symlink(maybePython3Path, maybePython3Path.slice(0, -1))
+      try {
+        filesystem.symlink(maybePython3Path, maybePython3Path.slice(0, -1))
+      } finally {
+        print.info('Using existing python3 for python')
+      }
     }
   }
 
