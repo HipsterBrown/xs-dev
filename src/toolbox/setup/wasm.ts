@@ -88,7 +88,7 @@ export default async function(): Promise<void> {
       await ensureHomebrew()
 
       spinner.start('Cmake required, installing with Homebrew')
-      await system.exec('brew install cmake')
+      await system.exec('brew install cmake', { shell: process.env.SHELL })
     }
 
     if (OS === 'linux') {

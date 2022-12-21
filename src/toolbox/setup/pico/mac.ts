@@ -8,7 +8,7 @@ export async function installDeps(
   await ensureHomebrew()
 
   spinner.start('Tapping ArmMbed formulae and installing arm-embed-gcc')
-  await system.exec('brew tap ArmMbed/homebrew-formulae')
-  await system.exec(`brew install arm-none-eabi-gcc libusb pkg-config`)
+  await system.exec('brew tap ArmMbed/homebrew-formulae', { shell: process.env.SHELL })
+  await system.exec(`brew install arm-none-eabi-gcc libusb pkg-config`, { shell: process.env.SHELL })
   spinner.succeed()
 }

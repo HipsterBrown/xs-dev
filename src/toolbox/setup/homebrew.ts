@@ -14,7 +14,6 @@ export async function ensureHomebrew(): Promise<void> {
     const homebrewEval = `eval "$(${brewPath}/brew shellenv)"`
 
     if (filesystem.exists(brewPath) === 'dir') {
-      print.debug(`Homebrew is on the system but not found in PATH. Running '${homebrewEval}' to attempt to fix PATH for this task`)
       process.env.PATH = `${brewPath}:${String(process.env.PATH)}`
       return;
     }
@@ -31,7 +30,7 @@ export async function ensureHomebrew(): Promise<void> {
         })
         const PROFILE_PATH = getProfilePath()
         await upsert(PROFILE_PATH, homebrewEval)
-        await system.exec(`source ${PROFILE_PATH}`, { shell: process.env.SHELL, stdout: process.stdout })
+        process.env.PATH = `${brewPath}:${String(process.env.PATH)}`
         return;
       } catch (error: unknown) {
         if (error instanceof Error) {

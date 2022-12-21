@@ -26,7 +26,7 @@ export default async function(): Promise<void> {
       await ensureHomebrew()
 
       spinner.start('Cmake required, installing with Homebrew')
-      await system.exec('brew install cmake')
+      await system.exec('brew install cmake', { shell: process.env.SHELL })
       spinner.succeed()
     }
     if (OS === 'linux') {
@@ -42,8 +42,10 @@ export default async function(): Promise<void> {
   // 2. install freetype
   if (OS === 'darwin') {
     if (system.which('freetype-config') === null) {
+      await ensureHomebrew()
+
       spinner.start('FreeType required, installing with Homebrew')
-      await system.exec('brew install freetype')
+      await system.exec('brew install freetype', { shell: process.env.SHELL })
       spinner.succeed()
     }
   }
@@ -60,7 +62,7 @@ export default async function(): Promise<void> {
   if (filesystem.exists(FONTBM_DIR) === false) {
     spinner.start(`Cloning fontbm repo (tag "${FONTBM_TAG}")`)
     await system.spawn(
-      `git clone ${FONTBM_REPO} --branch ${FONTBM_TAG} ${FONTBM_DIR}`
+      `git clone ${FONTBM_REPO} --depth 1 --single-branch --branch ${FONTBM_TAG} ${FONTBM_DIR}`
     )
     spinner.succeed()
   }
