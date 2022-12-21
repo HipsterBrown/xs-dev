@@ -84,7 +84,7 @@ export default async function (_args: SetupArgs): Promise<void> {
       print.info('If you do not have VS 2022 Community installed, xs-dev can install it for you using the Windows Package Manager Client (winget).')
       const response = await prompt.confirm('Would you like for xs-dev to install VS 2022 Community for you?')
 
-      if (response === false) {
+      if (!response) {
         print.info('Okay. Please manually install VS 2022 Community from https://www.visualstudio.com/downloads/ if necessary and then run "xs-dev setup" from the x86 Native Tools Command Prompt for VS 2022')
         process.exit(1)
       }
