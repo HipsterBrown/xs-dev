@@ -4,8 +4,9 @@ import upsert from '../patching/upsert'
 import { type as platformType } from 'os'
 import { exit } from 'process'
 import { execWithSudo } from '../system/exec'
+import { ensureHomebrew } from './homebrew'
 
-export default async function (): Promise<void> {
+export default async function(): Promise<void> {
   const spinner = print.spin()
   spinner.start('Beginning setup...')
 
@@ -22,11 +23,20 @@ export default async function (): Promise<void> {
   // 1. install cmake
   if (system.which('cmake') === null) {
     if (OS === 'darwin') {
+      try {
+        await ensureHomebrew()
+      } catch (error: unknown) {
+        if (error instanceof Error) {
+          print.info(`${error.message} cmake`)
+          process.exit(1);
+        }
+      }
+
       spinner.start('Cmake required, installing with Homebrew')
-   	  await system.exec('brew install cmake')
+      await system.exec('brew install cmake', { shell: process.env.SHELL })
       spinner.succeed()
-	}
-	if (OS === 'linux') {
+    }
+    if (OS === 'linux') {
       spinner.start('CMake required, installing with apt')
       await execWithSudo(
         'apt-get install --yes build-essential cmake',
@@ -39,8 +49,17 @@ export default async function (): Promise<void> {
   // 2. install freetype
   if (OS === 'darwin') {
     if (system.which('freetype-config') === null) {
+      try {
+        await ensureHomebrew()
+      } catch (error: unknown) {
+        if (error instanceof Error) {
+          print.info(`${error.message} freetype-config`)
+          process.exit(1);
+        }
+      }
+
       spinner.start('FreeType required, installing with Homebrew')
-      await system.exec('brew install freetype')
+      await system.exec('brew install freetype', { shell: process.env.SHELL })
       spinner.succeed()
     }
   }
@@ -57,7 +76,7 @@ export default async function (): Promise<void> {
   if (filesystem.exists(FONTBM_DIR) === false) {
     spinner.start(`Cloning fontbm repo (tag "${FONTBM_TAG}")`)
     await system.spawn(
-      `git clone ${FONTBM_REPO} --branch ${FONTBM_TAG} ${FONTBM_DIR}`
+      `git clone ${FONTBM_REPO} --depth 1 --single-branch --branch ${FONTBM_TAG} ${FONTBM_DIR}`
     )
     spinner.succeed()
   }
