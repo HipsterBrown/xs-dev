@@ -39,7 +39,6 @@ export async function ensureHomebrew(): Promise<void> {
       }
     }
 
-    print.info(`Visit https://brew.sh/ to learn more about installing Homebrew. If you don't want to use Homebrew, please install python, cmake, ninja, and dfu-util manually before trying this command again.`)
-    process.exit(1);
+    throw new Error(`Visit https://brew.sh/ to learn more about installing Homebrew. If you don't want to use Homebrew, please install the following packages manually before trying this command again: `)
   }
 }

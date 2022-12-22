@@ -85,7 +85,14 @@ export default async function(): Promise<void> {
 
   if (system.which('cmake') === null) {
     if (OS === 'darwin') {
-      await ensureHomebrew()
+      try {
+        await ensureHomebrew()
+      } catch (error: unknown) {
+        if (error instanceof Error) {
+          print.info(`${error.message} cmake`)
+          process.exit(1);
+        }
+      }
 
       spinner.start('Cmake required, installing with Homebrew')
       await system.exec('brew install cmake', { shell: process.env.SHELL })

@@ -23,7 +23,14 @@ export default async function(): Promise<void> {
   // 1. install cmake
   if (system.which('cmake') === null) {
     if (OS === 'darwin') {
-      await ensureHomebrew()
+      try {
+        await ensureHomebrew()
+      } catch (error: unknown) {
+        if (error instanceof Error) {
+          print.info(`${error.message} cmake`)
+          process.exit(1);
+        }
+      }
 
       spinner.start('Cmake required, installing with Homebrew')
       await system.exec('brew install cmake', { shell: process.env.SHELL })
@@ -42,7 +49,14 @@ export default async function(): Promise<void> {
   // 2. install freetype
   if (OS === 'darwin') {
     if (system.which('freetype-config') === null) {
-      await ensureHomebrew()
+      try {
+        await ensureHomebrew()
+      } catch (error: unknown) {
+        if (error instanceof Error) {
+          print.info(`${error.message} freetype-config`)
+          process.exit(1);
+        }
+      }
 
       spinner.start('FreeType required, installing with Homebrew')
       await system.exec('brew install freetype', { shell: process.env.SHELL })

@@ -1,4 +1,4 @@
-import { system, semver, print, filesystem } from 'gluegun'
+import { system, semver, print } from 'gluegun'
 import type { GluegunPrint } from 'gluegun'
 import { ensureHomebrew } from '../homebrew'
 
@@ -8,7 +8,14 @@ export async function installDeps(
 ): Promise<void> {
   spinner.stop()
 
-  await ensureHomebrew()
+  try {
+    await ensureHomebrew()
+  } catch (error: unknown) {
+    if (error instanceof Error) {
+      print.info(`${error.message} python 3, cmake, ninja, dfu-util`)
+      process.exit(1);
+    }
+  }
 
   if (
     system.which('python') === null ||
@@ -31,12 +38,6 @@ export async function installDeps(
           print.error('Apple Command Line Tools must be installed in order to install python from Homebrew. Please run `xcode-select --install` before trying again.')
           process.exit(1)
         }
-      }
-    } else {
-      try {
-        filesystem.symlink(maybePython3Path, maybePython3Path.slice(0, -1))
-      } catch (error) {
-        print.info('Using existing python3 for python')
       }
     }
   }

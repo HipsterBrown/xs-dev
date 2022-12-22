@@ -1,11 +1,18 @@
-import { filesystem, print, system } from 'gluegun'
+import { print, system } from 'gluegun'
 import type { GluegunPrint } from 'gluegun'
 import { ensureHomebrew } from '../homebrew'
 
 export async function installDeps(
   spinner: ReturnType<GluegunPrint['spin']>
 ): Promise<void> {
-  await ensureHomebrew()
+  try {
+    await ensureHomebrew()
+  } catch (error: unknown) {
+    if (error instanceof Error) {
+      print.info(`${error.message} python`)
+      process.exit(1);
+    }
+  }
 
   if (system.which('python') === null) {
     const maybePython3Path = system.which('python3')
@@ -20,12 +27,6 @@ export async function installDeps(
           spinner.fail('Apple Command Line Tools must be installed in order to install python from Homebrew. Please run `xcode-select --install` before trying again.')
           process.exit(1)
         }
-      }
-    } else {
-      try {
-        filesystem.symlink(maybePython3Path, maybePython3Path.slice(0, -1))
-      } catch (error) {
-        print.info('Using existing python3 for python')
       }
     }
   }
