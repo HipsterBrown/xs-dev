@@ -1,5 +1,11 @@
 # xs-dev
 
+## 0.20.0
+
+### Minor Changes
+
+- 3b2b12c: Add new "doctor" command and additional prompts during setup
+
 ## 0.19.3
 
 ### Patch Changes
