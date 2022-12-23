@@ -11,7 +11,7 @@ const finishedPromise = promisify(finished)
 
 const ESP_TOOL = 'https://github.com/igrr/esptool-ck/releases/download/0.4.13/esptool-0.4.13-win32.zip'
 const ESP_TOOL_VERSION = 'esptool-0.4.13-win32'
-const CYGWIN = 'https://www.dropbox.com/s/ub7xehxbf747eu1/cygwin.win32.zip?dl=1'
+const CYGWIN = `https://github.com/Moddable-OpenSource/tools/releases/download/v1.0.0/cygwin.win32.zip`
 
 export async function installPython(spinner: ReturnType<GluegunPrint['spin']>): Promise<void> {
   if (system.which('python') === null) {
