@@ -35,6 +35,7 @@ export const SIDEBAR = {
     { text: 'Setup', link: 'en/features/setup' },
     { text: 'Updates', link: 'en/features/update' },
     { text: 'Teardown', link: 'en/features/teardown' },
+    { text: 'Env Info', link: 'en/features/doctor' },
     { text: 'Device Discovery', link: 'en/features/scan' },
     { text: 'Project Creation', link: 'en/features/init' },
     { text: 'Build & Run', link: 'en/features/run' },
