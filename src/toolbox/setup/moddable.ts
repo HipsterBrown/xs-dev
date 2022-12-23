@@ -1,7 +1,7 @@
 import { type as platformType } from 'os'
 import { finished } from 'stream'
 import { promisify } from 'util'
-import { filesystem } from 'gluegun'
+import { filesystem, system } from 'gluegun'
 import { Octokit, RestEndpointMethodTypes } from '@octokit/rest'
 import { Extract as ZipExtract } from 'unzip-stream'
 import axios from 'axios'
@@ -38,6 +38,22 @@ export function moddableExists(): boolean {
     releaseTools === 'dir' &&
     debugTools === 'dir'
   )
+}
+
+export async function getModdableVersion(): Promise<string | null> {
+  if (moddableExists()) {
+    const tags = await system.run('git tag -l --sort=-taggerdate', { cwd: process.env.MODDABLE })
+    const tag = tags.split('\n').shift()
+    if (tag === undefined) return null
+
+    const tagCommit = await system.run(`git rev-list -n 1 ${tag}`, { cwd: process.env.MODDABLE })
+    const latestCommit = await system.run(`git rev-parse HEAD`, { cwd: process.env.MODDABLE })
+    if (tagCommit === latestCommit) return tag
+
+    const currentBranch = await system.run(`git branch --show-current`, { cwd: process.env.MODDABLE })
+    return `branch: ${currentBranch.trim()}, commit: ${latestCommit}`
+  }
+  return null;
 }
 
 type ExtractFromArray<Item extends readonly unknown[]> = Item extends Readonly<
