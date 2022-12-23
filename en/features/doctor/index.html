@@ -27,23 +27,23 @@
 	}
 </script>
 
-		<!-- Page Metadata --><link rel="canonical" href="https://hipsterbrown.github.io/xs-dev/en/features/scan">
+		<!-- Page Metadata --><link rel="canonical" href="https://hipsterbrown.github.io/xs-dev/en/features/doctor">
 
 <!-- OpenGraph Tags -->
-<meta property="og:title" content="Scan 🚀 xs-dev Documentation">
+<meta property="og:title" content="Doctor 🚀 xs-dev Documentation">
 <meta property="og:type" content="article">
-<meta property="og:url" content="https://hipsterbrown.github.io/xs-dev/en/features/scan">
+<meta property="og:url" content="https://hipsterbrown.github.io/xs-dev/en/features/doctor">
 <meta property="og:locale" content="en_US">
-<meta name="description" property="og:description" content="Discover connected device targets">
+<meta name="description" property="og:description" content="Display the current environment setup information, including valid target devices">
 <meta property="og:site_name" content="xs-dev Documentation">
 
 <!-- Twitter Tags -->
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:site" content="hipsterbrown">
-<meta name="twitter:title" content="Scan 🚀 xs-dev Documentation">
-<meta name="twitter:description" content="Discover connected device targets">
+<meta name="twitter:title" content="Doctor 🚀 xs-dev Documentation">
+<meta name="twitter:description" content="Display the current environment setup information, including valid target devices">
 
-		<title>Scan 🚀 xs-dev Documentation</title>
+		<title>Doctor 🚀 xs-dev Documentation</title>
 		
 	<link rel="stylesheet" href="/xs-dev/assets/0232e3c5.3fcf43f8.css" />
 <link rel="stylesheet" href="/xs-dev/assets/b23d8e2b.9ab7a0b0.css" /><script>/** @license Copyright 2020 Google LLC (BSD-3-Clause) */
@@ -243,23 +243,34 @@ var x = new DOMParser()
 			<div id="grid-main" class="astro-25HWSR6M">
 				<article id="article" class="content astro-QZ65LDSP">
 	<section class="main-section astro-QZ65LDSP">
-		<h1 class="content-title astro-QZ65LDSP" id="overview">Scan</h1>
-		<h1 id="discovery-available-devices">Discovery available devices</h1>
-<p>This command will use the <a href="https://github.com/espressif/esptool"><code>esptool.py</code></a> and/or <a href="https://github.com/raspberrypi/picotool"><code>picotool</code></a> command line tools to find available device targets connected over USB to the local dev environment.</p>
-<pre is:raw="" class="astro-code" style="background-color: #0d1117; overflow-x: auto;"><code><span class="line"><span style="color: #c9d1d9">xs-dev scan</span></span></code></pre>
-<p>This will provide info with the port address, device name, and discovered features:</p>
-<pre is:raw="" class="astro-code" style="background-color: #0d1117; overflow-x: auto;"><code><span class="line"><span style="color: #c9d1d9">✔ Found the following available devices!</span></span>
-<span class="line"><span style="color: #c9d1d9">  Port                         Device                      Features</span></span>
-<span class="line"><span style="color: #c9d1d9">  /dev/cu.usbserial-0001       ESP8266EX                   WiFi</span></span>
-<span class="line"><span style="color: #c9d1d9">  /dev/cu.usbserial-DN02N5XK   ESP32-D0WDQ6 (revision 0)   WiFi, BT, Dual Core, Coding Scheme None</span></span></code></pre>
-<p>The port can be used with the <a href="./run"><code>run</code></a> command to specify a device, if multiple are connected:</p>
-<pre is:raw="" class="astro-code" style="background-color: #0d1117; overflow-x: auto;"><code><span class="line"><span style="color: #c9d1d9">xs-dev run --port /dev/cu.usbserial-0001 --device esp8266</span></span></code></pre>
+		<h1 class="content-title astro-QZ65LDSP" id="overview">Doctor</h1>
+		<h2 id="display-the-current-environment-setup-information">Display the current environment setup information</h2>
+<p>The <code>doctor</code> command can help determine what the current developer environment has available to support the various Moddable device targets and tooling.</p>
+<pre is:raw="" class="astro-code" style="background-color: #0d1117; overflow-x: auto;"><code><span class="line"><span style="color: #c9d1d9">xs-dev doctor</span></span></code></pre>
+<p>This should output something like this:</p>
+<pre is:raw="" class="astro-code" style="background-color: #0d1117; overflow-x: auto;"><code><span class="line"><span style="color: #c9d1d9">xs-dev environment info:</span></span>
+<span class="line"><span style="color: #c9d1d9">  CLI Version                0.19.3</span></span>
+<span class="line"><span style="color: #c9d1d9">  OS                         Darwin</span></span>
+<span class="line"><span style="color: #c9d1d9">  Arch                       arm64</span></span>
+<span class="line"><span style="color: #c9d1d9">  NodeJS Version             v16.14.0 (/path/to/node)</span></span>
+<span class="line"><span style="color: #c9d1d9">  Python Version             3.10.9 (/path/to/python)</span></span>
+<span class="line"><span style="color: #c9d1d9">  Moddable SDK Version       3.5.0 (/path/to/moddable)</span></span>
+<span class="line"><span style="color: #c9d1d9">  Supported target devices   mac, esp32, esp8266, pico</span></span>
+<span class="line"><span style="color: #c9d1d9">  ESP32 IDF Directory        /path/to/esp32/esp-idf</span></span>
+<span class="line"><span style="color: #c9d1d9">  ESP8266 Base Directory     /path/to/esp</span></span>
+<span class="line"><span style="color: #c9d1d9">  Pico SDK Directory         /path/to/pico/pico-sdk</span></span>
+<span class="line"><span style="color: #c9d1d9"></span></span>
+<span class="line"><span style="color: #c9d1d9">If this is related to an error when using the CLI, please create an issue at "https://github.com/hipsterbrown/xs-dev/issues/new" with the above info.</span></span></code></pre>
+<p><strong>Aliases</strong></p>
+<pre is:raw="" class="astro-code" style="background-color: #0d1117; overflow-x: auto;"><code><span class="line"><span style="color: #c9d1d9">xs-dev dr</span></span></code></pre>
+<p>OR</p>
+<pre is:raw="" class="astro-code" style="background-color: #0d1117; overflow-x: auto;"><code><span class="line"><span style="color: #c9d1d9">xs-dev info</span></span></code></pre>
 	</section>
 	<nav class="block sm:hidden astro-QZ65LDSP">
 		<h2 class="heading astro-OGRD34LS">More</h2>
 <ul class="astro-OGRD34LS">
 	<li class="header-link depth-2 astro-OGRD34LS">
-			<a class="edit-on-github astro-OGRD34LS" href="https://github.com/hipsterbrown/xs-dev/blob/main/docs/src/pages/xs-dev/en/features/scan.md" target="_blank">
+			<a class="edit-on-github astro-OGRD34LS" href="https://github.com/hipsterbrown/xs-dev/blob/main/docs/src/pages/xs-dev/en/features/doctor.md" target="_blank">
 				<svg aria-hidden="true" focusable="false" data-prefix="fas" data-icon="pen" class="svg-inline--fa fa-pen fa-w-16 astro-OGRD34LS" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" height="1em" width="1em">
 					<path fill="currentColor" d="M290.74 93.24l128.02 128.02-277.99 277.99-114.14 12.6C11.35 513.54-1.56 500.62.14 485.34l12.7-114.22 277.9-277.88zm207.2-19.06l-60.11-60.11c-18.75-18.75-49.16-18.75-67.91 0l-56.55 56.55 128.02 128.02 56.55-56.55c18.75-18.76 18.75-49.16 0-67.91z" class="astro-OGRD34LS"></path>
 				</svg>
@@ -281,11 +292,11 @@ var x = new DOMParser()
 			<aside id="grid-right" class="grid-sidebar astro-25HWSR6M" title="Table of Contents">
 				<nav class="sidebar-nav astro-ADMMAF3B" aria-labelledby="grid-right">
 	<div class="sidebar-nav-inner astro-ADMMAF3B">
-		<script>(self.Astro=self.Astro||{}).media=(s,a)=>{const t=async()=>{await(await s())()};if(a.value){const e=matchMedia(a.value);e.matches?t():e.addEventListener("change",t,{once:!0})}},window.dispatchEvent(new Event("astro:media"));</script><astro-island uid="Z1m2Q28" component-url="/xs-dev/TableOfContents.8d481d17.js" component-export="default" renderer-url="/xs-dev/client.633ce0b2.js" props="{&quot;headings&quot;:[1,&quot;[[0,{\&quot;depth\&quot;:[0,1],\&quot;slug\&quot;:[0,\&quot;discovery-available-devices\&quot;],\&quot;text\&quot;:[0,\&quot;Discovery available devices\&quot;]}]]&quot;],&quot;class&quot;:[0,&quot;astro-ADMMAF3B&quot;]}" ssr="" client="media" before-hydration-url="/xs-dev/chunks/astro_scripts/before-hydration.js.6e450f4c.js" opts="{&quot;name&quot;:&quot;TableOfContents&quot;,&quot;value&quot;:&quot;(min-width: 50em)&quot;}" await-children=""><h2 class="heading">On this page</h2><ul><li class="header-link depth-2"><a href="#overview">Overview</a></li></ul></astro-island>
+		<script>(self.Astro=self.Astro||{}).media=(s,a)=>{const t=async()=>{await(await s())()};if(a.value){const e=matchMedia(a.value);e.matches?t():e.addEventListener("change",t,{once:!0})}},window.dispatchEvent(new Event("astro:media"));</script><astro-island uid="NlOEM" component-url="/xs-dev/TableOfContents.8d481d17.js" component-export="default" renderer-url="/xs-dev/client.633ce0b2.js" props="{&quot;headings&quot;:[1,&quot;[[0,{\&quot;depth\&quot;:[0,2],\&quot;slug\&quot;:[0,\&quot;display-the-current-environment-setup-information\&quot;],\&quot;text\&quot;:[0,\&quot;Display the current environment setup information\&quot;]}]]&quot;],&quot;class&quot;:[0,&quot;astro-ADMMAF3B&quot;]}" ssr="" client="media" before-hydration-url="/xs-dev/chunks/astro_scripts/before-hydration.js.6e450f4c.js" opts="{&quot;name&quot;:&quot;TableOfContents&quot;,&quot;value&quot;:&quot;(min-width: 50em)&quot;}" await-children=""><h2 class="heading">On this page</h2><ul><li class="header-link depth-2"><a href="#overview">Overview</a></li><li class="header-link depth-2"><a href="#display-the-current-environment-setup-information">Display the current environment setup information</a></li></ul></astro-island>
 		<h2 class="heading astro-OGRD34LS">More</h2>
 <ul class="astro-OGRD34LS">
 	<li class="header-link depth-2 astro-OGRD34LS">
-			<a class="edit-on-github astro-OGRD34LS" href="https://github.com/hipsterbrown/xs-dev/blob/main/docs/src/pages/xs-dev/en/features/scan.md" target="_blank">
+			<a class="edit-on-github astro-OGRD34LS" href="https://github.com/hipsterbrown/xs-dev/blob/main/docs/src/pages/xs-dev/en/features/doctor.md" target="_blank">
 				<svg aria-hidden="true" focusable="false" data-prefix="fas" data-icon="pen" class="svg-inline--fa fa-pen fa-w-16 astro-OGRD34LS" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" height="1em" width="1em">
 					<path fill="currentColor" d="M290.74 93.24l128.02 128.02-277.99 277.99-114.14 12.6C11.35 513.54-1.56 500.62.14 485.34l12.7-114.22 277.9-277.88zm207.2-19.06l-60.11-60.11c-18.75-18.75-49.16-18.75-67.91 0l-56.55 56.55 128.02 128.02 56.55-56.55c18.75-18.76 18.75-49.16 0-67.91z" class="astro-OGRD34LS"></path>
 				</svg>
