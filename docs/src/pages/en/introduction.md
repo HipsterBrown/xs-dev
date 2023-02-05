@@ -10,7 +10,7 @@ CLI for automating the setup and usage of [Moddable XS tools](https://github.com
 
 The Moddable SDK and associated dev board tooling is incredibly empowering for embedded JS hardware development, however the set up process can be tedious to follow when getting started. This project aims to streamline the installation and environment configuration requirements across platforms in just a few commands.
 
-**This project is a work in progress and should be considered pre-1.0.**
+**This project is a work in progress and currently pre-1.0, so there may be breaking changes.**
 
 **Features:**
 
@@ -21,17 +21,20 @@ The Moddable SDK and associated dev board tooling is incredibly empowering for e
 - [X] [Project creation](./features/init)
 - [X] [Run a project or example](./features/run)
 - [X] [SDK module management](./features/include)
+- [X] [Get dev environment info](./features/doctor)
 - [ ] Third-party dependency management ([coming soon](https://github.com/HipsterBrown/xs-dev/issues/49))
 
 **Platform support:**
 
 - [X] Mac
-- [ ] Windows ([coming soon](https://github.com/HipsterBrown/xs-dev/pull/44))
+- [-] Windows (currently in beta)
 - [X] Linux
 
 ## Requirements
 
-[Node.js >= v12](https://nodejs.org/en/)
+[Node.js >= v14](https://nodejs.org/en/)
+
+_If you've never installed Node.js before, check out the [getting started guide for xs-dev](/xs-dev/en/guide/00-prepare#nodejs-package-manager-optional)._
 
 **On Linux:**
 
