@@ -1,4 +1,5 @@
-<!DOCTYPE html><html dir="ltr" lang="en-us" class="initial astro-25HWSR6M">
+<!DOCTYPE html>
+<html dir="ltr" lang="en-us" class="initial astro-OUAMJN2I">
 	<head>
 		<!-- Global Metadata --><meta charset="utf-8">
 <meta name="viewport" content="width=device-width">
@@ -26,13 +27,12 @@
 		root.classList.remove('theme-dark');
 	}
 </script>
-
-		<!-- Page Metadata --><link rel="canonical" href="https://hipsterbrown.github.io/xs-dev/en/features/setup">
+		<!-- Page Metadata --><link rel="canonical" href="https://hipsterbrown.github.io/xs-dev/en/features/setup/">
 
 <!-- OpenGraph Tags -->
 <meta property="og:title" content="Setup 🚀 xs-dev Documentation">
 <meta property="og:type" content="article">
-<meta property="og:url" content="https://hipsterbrown.github.io/xs-dev/en/features/setup">
+<meta property="og:url" content="https://hipsterbrown.github.io/xs-dev/en/features/setup/">
 <meta property="og:locale" content="en_US">
 <meta name="description" property="og:description" content="xs-dev platform setup">
 <meta property="og:site_name" content="xs-dev Documentation">
@@ -42,11 +42,10 @@
 <meta name="twitter:site" content="hipsterbrown">
 <meta name="twitter:title" content="Setup 🚀 xs-dev Documentation">
 <meta name="twitter:description" content="xs-dev platform setup">
-
 		<title>Setup 🚀 xs-dev Documentation</title>
 		
-	<link rel="stylesheet" href="/xs-dev/assets/0232e3c5.3fcf43f8.css" />
-<link rel="stylesheet" href="/xs-dev/assets/b23d8e2b.9ab7a0b0.css" /><script>/** @license Copyright 2020 Google LLC (BSD-3-Clause) */
+	<link rel="stylesheet" href="/xs-dev/_astro/doctor.00ca979d.css" />
+<link rel="stylesheet" href="/xs-dev/_astro/doctor.1e2e41f0.css" /><script>/** @license Copyright 2020 Google LLC (BSD-3-Clause) */
 /** Bundled JS generated from "@astrojs/lit/client-shim.js" */
 var N = Object.defineProperty;
 var i = (t, n) => () => (t && (n = t((t = 0))), n);
@@ -56,7 +55,7 @@ var b = (t, n) => {
 function s() {
 	if (d === void 0) {
 		let t = document.createElement('div');
-		(t.innerHTML = '<div><template shadowroot="open"></template></div>'),
+		(t.innerHTML = '<div><template shadowroot="open" shadowrootmode="open"></template></div>'),
 			(d = !!t.firstElementChild.shadowRoot);
 	}
 	return d;
@@ -128,98 +127,98 @@ async function g() {
 	window.addEventListener('DOMContentLoaded', () => t(document.body), { once: true });
 }
 var x = new DOMParser()
-	.parseFromString('<p><template shadowroot="open"></template></p>', 'text/html', {
-		includeShadowRoots: !0,
-	})
+	.parseFromString(
+		'<p><template shadowroot="open" shadowrootmode="open"></template></p>',
+		'text/html',
+		{
+			includeShadowRoots: !0,
+		}
+	)
 	.querySelector('p');
 (!x || !x.shadowRoot) && g();
 </script></head>
 
-	<body class="astro-25HWSR6M">
-		<header class="astro-2AZDRB5S">
-	<a href="#article" class="sr-only focus:not-sr-only skiplink astro-DGYJY3T3"><span class="astro-DGYJY3T3">Skip to Content</span></a>
-
-
-	<nav class="nav-wrapper astro-2AZDRB5S" title="Top Navigation">
-		<div class="menu-toggle astro-2AZDRB5S">
-			<style>astro-island,astro-slot{display:contents}</style><script>(self.Astro=self.Astro||{}).idle=t=>{const e=async()=>{await(await t())()};"requestIdleCallback"in window?window.requestIdleCallback(e):setTimeout(e,200)},window.dispatchEvent(new Event("astro:idle"));var d;{const l={0:t=>t,1:t=>JSON.parse(t,n),2:t=>new RegExp(t),3:t=>new Date(t),4:t=>new Map(JSON.parse(t,n)),5:t=>new Set(JSON.parse(t,n)),6:t=>BigInt(t),7:t=>new URL(t)},n=(t,r)=>{if(t===""||!Array.isArray(r))return r;const[e,i]=r;return e in l?l[e](i):void 0};customElements.get("astro-island")||customElements.define("astro-island",(d=class extends HTMLElement{constructor(){super(...arguments);this.hydrate=()=>{if(!this.hydrator||this.parentElement?.closest("astro-island[ssr]"))return;const r=this.querySelectorAll("astro-slot"),e={},i=this.querySelectorAll("template[data-astro-template]");for(const s of i)!s.closest(this.tagName)?.isSameNode(this)||(e[s.getAttribute("data-astro-template")||"default"]=s.innerHTML,s.remove());for(const s of r)!s.closest(this.tagName)?.isSameNode(this)||(e[s.getAttribute("name")||"default"]=s.innerHTML);const o=this.hasAttribute("props")?JSON.parse(this.getAttribute("props"),n):{};this.hydrator(this)(this.Component,o,e,{client:this.getAttribute("client")}),this.removeAttribute("ssr"),window.removeEventListener("astro:hydrate",this.hydrate),window.dispatchEvent(new CustomEvent("astro:hydrate"))}}connectedCallback(){!this.hasAttribute("await-children")||this.firstChild?this.childrenConnectedCallback():new MutationObserver((r,e)=>{e.disconnect(),this.childrenConnectedCallback()}).observe(this,{childList:!0})}async childrenConnectedCallback(){window.addEventListener("astro:hydrate",this.hydrate),await import(this.getAttribute("before-hydration-url")),this.start()}start(){const r=JSON.parse(this.getAttribute("opts")),e=this.getAttribute("client");if(Astro[e]===void 0){window.addEventListener(`astro:${e}`,()=>this.start(),{once:!0});return}Astro[e](async()=>{const i=this.getAttribute("renderer-url"),[o,{default:s}]=await Promise.all([import(this.getAttribute("component-url")),i?import(i):()=>()=>{}]),a=this.getAttribute("component-export")||"default";if(!a.includes("."))this.Component=o[a];else{this.Component=o;for(const c of a.split("."))this.Component=this.Component[c]}return this.hydrator=s,this.hydrate},r,this)}attributeChangedCallback(){this.hydrator&&this.hydrate()}},d.observedAttributes=["props"],d))}</script><astro-island uid="1S87p9" component-url="/xs-dev/SidebarToggle.e0ac4cc9.js" component-export="default" renderer-url="/xs-dev/client.633ce0b2.js" props="{&quot;class&quot;:[0,&quot;astro-2AZDRB5S&quot;]}" ssr="" client="idle" before-hydration-url="/xs-dev/chunks/astro_scripts/before-hydration.js.6e450f4c.js" opts="{&quot;name&quot;:&quot;SidebarToggle&quot;,&quot;value&quot;:true}" await-children=""><button type="button" aria-pressed="false" id="menu-toggle"><svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path></svg><span class="sr-only">Toggle sidebar</span></button></astro-island>
+	<body class="astro-OUAMJN2I">
+		<header class="astro-2W66RQV5">
+	<a href="#article" class="sr-only focus:not-sr-only skiplink astro-DMGOOZ7Y"><span class="astro-DMGOOZ7Y">Skip to Content</span></a>
+	<nav class="nav-wrapper astro-2W66RQV5" title="Top Navigation">
+		<div class="menu-toggle astro-2W66RQV5">
+			<style>astro-island,astro-slot{display:contents}</style><script>(self.Astro=self.Astro||{}).idle=t=>{const e=async()=>{await(await t())()};"requestIdleCallback"in window?window.requestIdleCallback(e):setTimeout(e,200)},window.dispatchEvent(new Event("astro:idle"));var l;{const c={0:t=>t,1:t=>JSON.parse(t,o),2:t=>new RegExp(t),3:t=>new Date(t),4:t=>new Map(JSON.parse(t,o)),5:t=>new Set(JSON.parse(t,o)),6:t=>BigInt(t),7:t=>new URL(t),8:t=>new Uint8Array(JSON.parse(t)),9:t=>new Uint16Array(JSON.parse(t)),10:t=>new Uint32Array(JSON.parse(t))},o=(t,s)=>{if(t===""||!Array.isArray(s))return s;const[e,n]=s;return e in c?c[e](n):void 0};customElements.get("astro-island")||customElements.define("astro-island",(l=class extends HTMLElement{constructor(){super(...arguments);this.hydrate=()=>{if(!this.hydrator||this.parentElement&&this.parentElement.closest("astro-island[ssr]"))return;const s=this.querySelectorAll("astro-slot"),e={},n=this.querySelectorAll("template[data-astro-template]");for(const r of n){const i=r.closest(this.tagName);!i||!i.isSameNode(this)||(e[r.getAttribute("data-astro-template")||"default"]=r.innerHTML,r.remove())}for(const r of s){const i=r.closest(this.tagName);!i||!i.isSameNode(this)||(e[r.getAttribute("name")||"default"]=r.innerHTML)}const a=this.hasAttribute("props")?JSON.parse(this.getAttribute("props"),o):{};this.hydrator(this)(this.Component,a,e,{client:this.getAttribute("client")}),this.removeAttribute("ssr"),window.removeEventListener("astro:hydrate",this.hydrate),window.dispatchEvent(new CustomEvent("astro:hydrate"))}}connectedCallback(){!this.hasAttribute("await-children")||this.firstChild?this.childrenConnectedCallback():new MutationObserver((s,e)=>{e.disconnect(),this.childrenConnectedCallback()}).observe(this,{childList:!0})}async childrenConnectedCallback(){window.addEventListener("astro:hydrate",this.hydrate);let s=this.getAttribute("before-hydration-url");s&&await import(s),this.start()}start(){const s=JSON.parse(this.getAttribute("opts")),e=this.getAttribute("client");if(Astro[e]===void 0){window.addEventListener(`astro:${e}`,()=>this.start(),{once:!0});return}Astro[e](async()=>{const n=this.getAttribute("renderer-url"),[a,{default:r}]=await Promise.all([import(this.getAttribute("component-url")),n?import(n):()=>()=>{}]),i=this.getAttribute("component-export")||"default";if(!i.includes("."))this.Component=a[i];else{this.Component=a;for(const d of i.split("."))this.Component=this.Component[d]}return this.hydrator=r,this.hydrate},s,this)}attributeChangedCallback(){this.hydrator&&this.hydrate()}},l.observedAttributes=["props"],l))}</script><astro-island uid="1eoDGm" component-url="/xs-dev/_astro/SidebarToggle.37479fc4.js" component-export="default" renderer-url="/xs-dev/_astro/client.8b22872a.js" props="{&quot;class&quot;:[0,&quot;astro-2W66RQV5&quot;]}" ssr="" client="idle" before-hydration-url="/xs-dev/_astro/astro_scripts/before-hydration.js.bbbe4f51.js" opts="{&quot;name&quot;:&quot;SidebarToggle&quot;,&quot;value&quot;:true}" await-children=""><button type="button" aria-pressed="false" id="menu-toggle"><svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path></svg><span class="sr-only">Toggle sidebar</span></button></astro-island>
 		</div>
-		<div class="logo flex astro-2AZDRB5S">
-			<a href="/xs-dev/" class="astro-2AZDRB5S">
-				<h1 class="astro-2AZDRB5S">xs-dev Documentation</h1>
+		<div class="logo flex astro-2W66RQV5">
+			<a href="/xs-dev/" class="astro-2W66RQV5">
+				<h1 class="astro-2W66RQV5">xs-dev Documentation</h1>
 			</a>
 		</div>
-		<div style="flex-grow: 1;" class="astro-2AZDRB5S"></div>
+		<div style="flex-grow: 1;" class="astro-2W66RQV5"></div>
 		
 	</nav>
-  <astro-island uid="1clLna" component-url="/xs-dev/Search.90355ada.js" component-export="default" renderer-url="/xs-dev/client.633ce0b2.js" props="{&quot;class&quot;:[0,&quot;astro-2AZDRB5S&quot;]}" ssr="" client="idle" before-hydration-url="/xs-dev/chunks/astro_scripts/before-hydration.js.6e450f4c.js" opts="{&quot;name&quot;:&quot;Search&quot;,&quot;value&quot;:true}" await-children=""><div class="flex flex-column SearchContainer"><form method="GET" id="search-form"><div role="search" class="flex flex-row"><input type="search" id="search" name="search" aria-label="search documentation content" placeholder="search documentation content" class="SearchContainer-input" /><button type="submit" class="SearchContainer-button">Search</button></div></form><ul class="SearchContainer-list undefined" aria-live="assertive" aria-atomic="true"></ul></div></astro-island>
+  <astro-island uid="Z23BDKl" component-url="/xs-dev/_astro/Search.e830f3db.js" component-export="default" renderer-url="/xs-dev/_astro/client.8b22872a.js" props="{&quot;class&quot;:[0,&quot;astro-2W66RQV5&quot;]}" ssr="" client="idle" before-hydration-url="/xs-dev/_astro/astro_scripts/before-hydration.js.bbbe4f51.js" opts="{&quot;name&quot;:&quot;Search&quot;,&quot;value&quot;:true}" await-children=""><div class="flex flex-column SearchContainer"><form method="GET" id="search-form"><div role="search" class="flex flex-row"><input type="search" id="search" name="search" aria-label="search documentation content" placeholder="search documentation content" class="SearchContainer-input" /><button type="submit" class="SearchContainer-button">Search</button></div></form><ul class="SearchContainer-list undefined" aria-live="assertive" aria-atomic="true"></ul></div></astro-island>
 </header>
-
-
-		<main class="layout astro-25HWSR6M">
-			<aside id="grid-left" class="grid-sidebar astro-25HWSR6M" title="Site Navigation">
-				<nav aria-labelledby="grid-left" class="astro-6BSITCTN">
-	<ul class="nav-groups astro-6BSITCTN">
-		<li class="astro-6BSITCTN">
-				<div class="nav-group astro-6BSITCTN">
-					<h2 class="nav-group-title astro-6BSITCTN"></h2>
-					<ul class="astro-6BSITCTN">
+		<main class="layout astro-OUAMJN2I">
+			<aside id="grid-left" class="grid-sidebar astro-OUAMJN2I" title="Site Navigation">
+				<nav aria-labelledby="grid-left" class="astro-KQNE5HRN">
+	<ul class="nav-groups astro-KQNE5HRN">
+		<li class="astro-KQNE5HRN">
+				<div class="nav-group astro-KQNE5HRN">
+					<h2 class="nav-group-title astro-KQNE5HRN"></h2>
+					<ul class="astro-KQNE5HRN">
 						
 					</ul>
 				</div>
-			</li><li class="astro-6BSITCTN">
-				<div class="nav-group astro-6BSITCTN">
-					<h2 class="nav-group-title astro-6BSITCTN">Features</h2>
-					<ul class="astro-6BSITCTN">
-						<li class="nav-link astro-6BSITCTN">
-								<a href="/xs-dev/en/introduction" aria-current="false" class="astro-6BSITCTN">
+			</li><li class="astro-KQNE5HRN">
+				<div class="nav-group astro-KQNE5HRN">
+					<h2 class="nav-group-title astro-KQNE5HRN">Features</h2>
+					<ul class="astro-KQNE5HRN">
+						<li class="nav-link astro-KQNE5HRN">
+								<a href="/xs-dev/en/introduction" aria-current="false" class="astro-KQNE5HRN">
 									Introduction
 								</a>
-							</li><li class="nav-link astro-6BSITCTN">
-								<a href="/xs-dev/en/features/setup" aria-current="false" class="astro-6BSITCTN">
+							</li><li class="nav-link astro-KQNE5HRN">
+								<a href="/xs-dev/en/features/setup" aria-current="false" class="astro-KQNE5HRN">
 									Setup
 								</a>
-							</li><li class="nav-link astro-6BSITCTN">
-								<a href="/xs-dev/en/features/update" aria-current="false" class="astro-6BSITCTN">
+							</li><li class="nav-link astro-KQNE5HRN">
+								<a href="/xs-dev/en/features/update" aria-current="false" class="astro-KQNE5HRN">
 									Updates
 								</a>
-							</li><li class="nav-link astro-6BSITCTN">
-								<a href="/xs-dev/en/features/teardown" aria-current="false" class="astro-6BSITCTN">
+							</li><li class="nav-link astro-KQNE5HRN">
+								<a href="/xs-dev/en/features/teardown" aria-current="false" class="astro-KQNE5HRN">
 									Teardown
 								</a>
-							</li><li class="nav-link astro-6BSITCTN">
-								<a href="/xs-dev/en/features/doctor" aria-current="false" class="astro-6BSITCTN">
+							</li><li class="nav-link astro-KQNE5HRN">
+								<a href="/xs-dev/en/features/doctor" aria-current="false" class="astro-KQNE5HRN">
 									Env Info
 								</a>
-							</li><li class="nav-link astro-6BSITCTN">
-								<a href="/xs-dev/en/features/scan" aria-current="false" class="astro-6BSITCTN">
+							</li><li class="nav-link astro-KQNE5HRN">
+								<a href="/xs-dev/en/features/scan" aria-current="false" class="astro-KQNE5HRN">
 									Device Discovery
 								</a>
-							</li><li class="nav-link astro-6BSITCTN">
-								<a href="/xs-dev/en/features/init" aria-current="false" class="astro-6BSITCTN">
+							</li><li class="nav-link astro-KQNE5HRN">
+								<a href="/xs-dev/en/features/init" aria-current="false" class="astro-KQNE5HRN">
 									Project Creation
 								</a>
-							</li><li class="nav-link astro-6BSITCTN">
-								<a href="/xs-dev/en/features/run" aria-current="false" class="astro-6BSITCTN">
+							</li><li class="nav-link astro-KQNE5HRN">
+								<a href="/xs-dev/en/features/run" aria-current="false" class="astro-KQNE5HRN">
 									Build &amp; Run
 								</a>
-							</li><li class="nav-link astro-6BSITCTN">
-								<a href="/xs-dev/en/features/include" aria-current="false" class="astro-6BSITCTN">
+							</li><li class="nav-link astro-KQNE5HRN">
+								<a href="/xs-dev/en/features/include" aria-current="false" class="astro-KQNE5HRN">
 									SDK Module Management
 								</a>
 							</li>
 					</ul>
 				</div>
-			</li><li class="astro-6BSITCTN">
-				<div class="nav-group astro-6BSITCTN">
-					<h2 class="nav-group-title astro-6BSITCTN">Guide</h2>
-					<ul class="astro-6BSITCTN">
-						<li class="nav-link astro-6BSITCTN">
-								<a href="/xs-dev/en/guide/00-prepare" aria-current="false" class="astro-6BSITCTN">
+			</li><li class="astro-KQNE5HRN">
+				<div class="nav-group astro-KQNE5HRN">
+					<h2 class="nav-group-title astro-KQNE5HRN">Guide</h2>
+					<ul class="astro-KQNE5HRN">
+						<li class="nav-link astro-KQNE5HRN">
+								<a href="/xs-dev/en/guide/00-prepare" aria-current="false" class="astro-KQNE5HRN">
 									00. Prepare
 								</a>
-							</li><li class="nav-link astro-6BSITCTN">
-								<a href="/xs-dev/en/guide/01-hello-console" aria-current="false" class="astro-6BSITCTN">
+							</li><li class="nav-link astro-KQNE5HRN">
+								<a href="/xs-dev/en/guide/01-hello-console" aria-current="false" class="astro-KQNE5HRN">
 									01. Hello Console
 								</a>
 							</li>
@@ -237,14 +236,12 @@ var x = new DOMParser()
 		}
 	});
 </script>
-
-
 			</aside>
-			<div id="grid-main" class="astro-25HWSR6M">
-				<article id="article" class="content astro-QZ65LDSP">
-	<section class="main-section astro-QZ65LDSP">
-		<h1 class="content-title astro-QZ65LDSP" id="overview">Setup</h1>
-		<h1 id="moddable-platform-setup">Moddable Platform Setup</h1>
+			<div id="grid-main" class="astro-OUAMJN2I">
+				<article id="article" class="content astro-J75B3YUS">
+  <section class="main-section astro-J75B3YUS">
+    <h1 class="content-title astro-J75B3YUS" id="overview">Setup</h1>
+    <h1 id="moddable-platform-setup">Moddable Platform Setup</h1>
 <p>This command downloads the <a href="https://github.com/Moddable-OpenSource/moddable/blob/public/documentation/tools/tools.md">Moddable developer tooling</a> for the current OS (Windows support coming soon).</p>
 <p><a href="/en/introduction#installation">After installing the CLI</a>, call the <code>setup</code> command:</p>
 <pre is:raw="" class="astro-code" style="background-color: #0d1117; overflow-x: auto;"><code><span class="line"><span style="color: #c9d1d9">xs-dev setup</span></span></code></pre>
@@ -270,55 +267,47 @@ var x = new DOMParser()
 <p><strong>Supported tools:</strong></p>
 <p><a href="https://github.com/vladimirgamalyan/fontbm"><code>fontbm</code></a>: BMFont compatible, cross-platform (Linux/macOS/Windows) command line bitmap font generator (FreeType2 based render)</p>
 <pre is:raw="" class="astro-code" style="background-color: #0d1117; overflow-x: auto;"><code><span class="line"><span style="color: #c9d1d9">xs-dev setup --tool fontbm</span></span></code></pre>
-	</section>
-	<nav class="block sm:hidden astro-QZ65LDSP">
-		<h2 class="heading astro-OGRD34LS">More</h2>
-<ul class="astro-OGRD34LS">
-	<li class="header-link depth-2 astro-OGRD34LS">
-			<a class="edit-on-github astro-OGRD34LS" href="https://github.com/hipsterbrown/xs-dev/blob/main/docs/src/pages/xs-dev/en/features/setup.md" target="_blank">
-				<svg aria-hidden="true" focusable="false" data-prefix="fas" data-icon="pen" class="svg-inline--fa fa-pen fa-w-16 astro-OGRD34LS" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" height="1em" width="1em">
-					<path fill="currentColor" d="M290.74 93.24l128.02 128.02-277.99 277.99-114.14 12.6C11.35 513.54-1.56 500.62.14 485.34l12.7-114.22 277.9-277.88zm207.2-19.06l-60.11-60.11c-18.75-18.75-49.16-18.75-67.91 0l-56.55 56.55 128.02 128.02 56.55-56.55c18.75-18.76 18.75-49.16 0-67.91z" class="astro-OGRD34LS"></path>
+  </section>
+  <nav class="block sm:hidden astro-J75B3YUS">
+    <h2 class="heading astro-BYIKQF6W">More</h2>
+<ul class="astro-BYIKQF6W">
+	<li class="header-link depth-2 astro-BYIKQF6W">
+			<a class="edit-on-github astro-BYIKQF6W" href="https://github.com/hipsterbrown/xs-dev/blob/main/docs/src/pages/xs-dev/en/features/setup.md" target="_blank">
+				<svg aria-hidden="true" focusable="false" data-prefix="fas" data-icon="pen" class="svg-inline--fa fa-pen fa-w-16 astro-BYIKQF6W" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" height="1em" width="1em">
+					<path fill="currentColor" d="M290.74 93.24l128.02 128.02-277.99 277.99-114.14 12.6C11.35 513.54-1.56 500.62.14 485.34l12.7-114.22 277.9-277.88zm207.2-19.06l-60.11-60.11c-18.75-18.75-49.16-18.75-67.91 0l-56.55 56.55 128.02 128.02 56.55-56.55c18.75-18.76 18.75-49.16 0-67.91z" class="astro-BYIKQF6W"></path>
 				</svg>
-				<span class="astro-OGRD34LS">Edit this page</span>
+				<span class="astro-BYIKQF6W">Edit this page</span>
 			</a>
 		</li>
 	
 </ul>
-<div style="margin: 2rem 0; text-align: center;" class="astro-OGRD34LS">
-	<script>(self.Astro=self.Astro||{}).visible=(s,c,n)=>{const r=async()=>{await(await s())()};let i=new IntersectionObserver(e=>{for(const t of e)if(!!t.isIntersecting){i.disconnect(),r();break}});for(let e=0;e<n.children.length;e++){const t=n.children[e];i.observe(t)}},window.dispatchEvent(new Event("astro:visible"));</script><astro-island uid="zqxbj" component-url="/xs-dev/ThemeToggleButton.db35a559.js" component-export="default" renderer-url="/xs-dev/client.633ce0b2.js" props="{&quot;class&quot;:[0,&quot;astro-OGRD34LS&quot;]}" ssr="" client="visible" before-hydration-url="/xs-dev/chunks/astro_scripts/before-hydration.js.6e450f4c.js" opts="{&quot;name&quot;:&quot;ThemeToggleButton&quot;,&quot;value&quot;:true}" await-children=""><div class="theme-toggle"><label class><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20" fill="currentColor"><path fillRule="evenodd" d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0zm-.464 4.95l.707.707a1 1 0 001.414-1.414l-.707-.707a1 1 0 00-1.414 1.414zm2.12-10.607a1 1 0 010 1.414l-.706.707a1 1 0 11-1.414-1.414l.707-.707a1 1 0 011.414 0zM17 11a1 1 0 100-2h-1a1 1 0 100 2h1zm-7 4a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zM5.05 6.464A1 1 0 106.465 5.05l-.708-.707a1 1 0 00-1.414 1.414l.707.707zm1.414 8.486l-.707.707a1 1 0 01-1.414-1.414l.707-.707a1 1 0 011.414 1.414zM4 11a1 1 0 100-2H3a1 1 0 000 2h1z" clipRule="evenodd"></path></svg><input type="radio" name="theme-toggle" value="light" title="Use light theme" aria-label="Use light theme" /></label><label class><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20" fill="currentColor"><path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z"></path></svg><input type="radio" name="theme-toggle" value="dark" title="Use dark theme" aria-label="Use dark theme" /></label></div></astro-island>
+<div style="margin: 2rem 0; text-align: center;" class="astro-BYIKQF6W">
+	<script>(self.Astro=self.Astro||{}).visible=(s,c,n)=>{const r=async()=>{await(await s())()};let i=new IntersectionObserver(e=>{for(const t of e)if(!!t.isIntersecting){i.disconnect(),r();break}});for(let e=0;e<n.children.length;e++){const t=n.children[e];i.observe(t)}},window.dispatchEvent(new Event("astro:visible"));</script><astro-island uid="Zy8c6H" component-url="/xs-dev/_astro/ThemeToggleButton.3f6ac45b.js" component-export="default" renderer-url="/xs-dev/_astro/client.8b22872a.js" props="{&quot;class&quot;:[0,&quot;astro-BYIKQF6W&quot;]}" ssr="" client="visible" before-hydration-url="/xs-dev/_astro/astro_scripts/before-hydration.js.bbbe4f51.js" opts="{&quot;name&quot;:&quot;ThemeToggleButton&quot;,&quot;value&quot;:true}" await-children=""><div class="theme-toggle"><label class><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20" fill="currentColor"><path fillRule="evenodd" d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0zm-.464 4.95l.707.707a1 1 0 001.414-1.414l-.707-.707a1 1 0 00-1.414 1.414zm2.12-10.607a1 1 0 010 1.414l-.706.707a1 1 0 11-1.414-1.414l.707-.707a1 1 0 011.414 0zM17 11a1 1 0 100-2h-1a1 1 0 100 2h1zm-7 4a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zM5.05 6.464A1 1 0 106.465 5.05l-.708-.707a1 1 0 00-1.414 1.414l.707.707zm1.414 8.486l-.707.707a1 1 0 01-1.414-1.414l.707-.707a1 1 0 011.414 1.414zM4 11a1 1 0 100-2H3a1 1 0 000 2h1z" clipRule="evenodd"></path></svg><input type="radio" name="theme-toggle" value="light" title="Use light theme" aria-label="Use light theme" /></label><label class><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20" fill="currentColor"><path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z"></path></svg><input type="radio" name="theme-toggle" value="dark" title="Use dark theme" aria-label="Use dark theme" /></label></div></astro-island>
 </div>
-
-
-	</nav>
+  </nav>
 </article>
-
-
 			</div>
-			<aside id="grid-right" class="grid-sidebar astro-25HWSR6M" title="Table of Contents">
-				<nav class="sidebar-nav astro-ADMMAF3B" aria-labelledby="grid-right">
-	<div class="sidebar-nav-inner astro-ADMMAF3B">
-		<script>(self.Astro=self.Astro||{}).media=(s,a)=>{const t=async()=>{await(await s())()};if(a.value){const e=matchMedia(a.value);e.matches?t():e.addEventListener("change",t,{once:!0})}},window.dispatchEvent(new Event("astro:media"));</script><astro-island uid="ZiHivy" component-url="/xs-dev/TableOfContents.8d481d17.js" component-export="default" renderer-url="/xs-dev/client.633ce0b2.js" props="{&quot;headings&quot;:[1,&quot;[[0,{\&quot;depth\&quot;:[0,1],\&quot;slug\&quot;:[0,\&quot;moddable-platform-setup\&quot;],\&quot;text\&quot;:[0,\&quot;Moddable Platform Setup\&quot;]}],[0,{\&quot;depth\&quot;:[0,2],\&quot;slug\&quot;:[0,\&quot;target-branch\&quot;],\&quot;text\&quot;:[0,\&quot;Target Branch\&quot;]}],[0,{\&quot;depth\&quot;:[0,2],\&quot;slug\&quot;:[0,\&quot;device-setup\&quot;],\&quot;text\&quot;:[0,\&quot;Device Setup\&quot;]}],[0,{\&quot;depth\&quot;:[0,2],\&quot;slug\&quot;:[0,\&quot;additional-related-tooling\&quot;],\&quot;text\&quot;:[0,\&quot;Additional related tooling\&quot;]}]]&quot;],&quot;class&quot;:[0,&quot;astro-ADMMAF3B&quot;]}" ssr="" client="media" before-hydration-url="/xs-dev/chunks/astro_scripts/before-hydration.js.6e450f4c.js" opts="{&quot;name&quot;:&quot;TableOfContents&quot;,&quot;value&quot;:&quot;(min-width: 50em)&quot;}" await-children=""><h2 class="heading">On this page</h2><ul><li class="header-link depth-2"><a href="#overview">Overview</a></li><li class="header-link depth-2"><a href="#target-branch">Target Branch</a></li><li class="header-link depth-2"><a href="#device-setup">Device Setup</a></li><li class="header-link depth-2"><a href="#additional-related-tooling">Additional related tooling</a></li></ul></astro-island>
-		<h2 class="heading astro-OGRD34LS">More</h2>
-<ul class="astro-OGRD34LS">
-	<li class="header-link depth-2 astro-OGRD34LS">
-			<a class="edit-on-github astro-OGRD34LS" href="https://github.com/hipsterbrown/xs-dev/blob/main/docs/src/pages/xs-dev/en/features/setup.md" target="_blank">
-				<svg aria-hidden="true" focusable="false" data-prefix="fas" data-icon="pen" class="svg-inline--fa fa-pen fa-w-16 astro-OGRD34LS" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" height="1em" width="1em">
-					<path fill="currentColor" d="M290.74 93.24l128.02 128.02-277.99 277.99-114.14 12.6C11.35 513.54-1.56 500.62.14 485.34l12.7-114.22 277.9-277.88zm207.2-19.06l-60.11-60.11c-18.75-18.75-49.16-18.75-67.91 0l-56.55 56.55 128.02 128.02 56.55-56.55c18.75-18.76 18.75-49.16 0-67.91z" class="astro-OGRD34LS"></path>
+			<aside id="grid-right" class="grid-sidebar astro-OUAMJN2I" title="Table of Contents">
+				<nav class="sidebar-nav astro-ROIVMLUZ" aria-labelledby="grid-right">
+	<div class="sidebar-nav-inner astro-ROIVMLUZ">
+		<script>(self.Astro=self.Astro||{}).media=(s,a)=>{const t=async()=>{await(await s())()};if(a.value){const e=matchMedia(a.value);e.matches?t():e.addEventListener("change",t,{once:!0})}},window.dispatchEvent(new Event("astro:media"));</script><astro-island uid="Z1yHT6y" component-url="/xs-dev/_astro/TableOfContents.a9ab4cc2.js" component-export="default" renderer-url="/xs-dev/_astro/client.8b22872a.js" props="{&quot;headings&quot;:[1,&quot;[[0,{\&quot;depth\&quot;:[0,1],\&quot;slug\&quot;:[0,\&quot;moddable-platform-setup\&quot;],\&quot;text\&quot;:[0,\&quot;Moddable Platform Setup\&quot;]}],[0,{\&quot;depth\&quot;:[0,2],\&quot;slug\&quot;:[0,\&quot;target-branch\&quot;],\&quot;text\&quot;:[0,\&quot;Target Branch\&quot;]}],[0,{\&quot;depth\&quot;:[0,2],\&quot;slug\&quot;:[0,\&quot;device-setup\&quot;],\&quot;text\&quot;:[0,\&quot;Device Setup\&quot;]}],[0,{\&quot;depth\&quot;:[0,2],\&quot;slug\&quot;:[0,\&quot;additional-related-tooling\&quot;],\&quot;text\&quot;:[0,\&quot;Additional related tooling\&quot;]}]]&quot;],&quot;class&quot;:[0,&quot;astro-ROIVMLUZ&quot;]}" ssr="" client="media" before-hydration-url="/xs-dev/_astro/astro_scripts/before-hydration.js.bbbe4f51.js" opts="{&quot;name&quot;:&quot;TableOfContents&quot;,&quot;value&quot;:&quot;(min-width: 50em)&quot;}" await-children=""><h2 class="heading">On this page</h2><ul><li class="header-link depth-2"><a href="#overview">Overview</a></li><li class="header-link depth-2"><a href="#target-branch">Target Branch</a></li><li class="header-link depth-2"><a href="#device-setup">Device Setup</a></li><li class="header-link depth-2"><a href="#additional-related-tooling">Additional related tooling</a></li></ul></astro-island>
+		<h2 class="heading astro-BYIKQF6W">More</h2>
+<ul class="astro-BYIKQF6W">
+	<li class="header-link depth-2 astro-BYIKQF6W">
+			<a class="edit-on-github astro-BYIKQF6W" href="https://github.com/hipsterbrown/xs-dev/blob/main/docs/src/pages/xs-dev/en/features/setup.md" target="_blank">
+				<svg aria-hidden="true" focusable="false" data-prefix="fas" data-icon="pen" class="svg-inline--fa fa-pen fa-w-16 astro-BYIKQF6W" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" height="1em" width="1em">
+					<path fill="currentColor" d="M290.74 93.24l128.02 128.02-277.99 277.99-114.14 12.6C11.35 513.54-1.56 500.62.14 485.34l12.7-114.22 277.9-277.88zm207.2-19.06l-60.11-60.11c-18.75-18.75-49.16-18.75-67.91 0l-56.55 56.55 128.02 128.02 56.55-56.55c18.75-18.76 18.75-49.16 0-67.91z" class="astro-BYIKQF6W"></path>
 				</svg>
-				<span class="astro-OGRD34LS">Edit this page</span>
+				<span class="astro-BYIKQF6W">Edit this page</span>
 			</a>
 		</li>
 	
 </ul>
-<div style="margin: 2rem 0; text-align: center;" class="astro-OGRD34LS">
-	<astro-island uid="zqxbj" component-url="/xs-dev/ThemeToggleButton.db35a559.js" component-export="default" renderer-url="/xs-dev/client.633ce0b2.js" props="{&quot;class&quot;:[0,&quot;astro-OGRD34LS&quot;]}" ssr="" client="visible" before-hydration-url="/xs-dev/chunks/astro_scripts/before-hydration.js.6e450f4c.js" opts="{&quot;name&quot;:&quot;ThemeToggleButton&quot;,&quot;value&quot;:true}" await-children=""><div class="theme-toggle"><label class><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20" fill="currentColor"><path fillRule="evenodd" d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0zm-.464 4.95l.707.707a1 1 0 001.414-1.414l-.707-.707a1 1 0 00-1.414 1.414zm2.12-10.607a1 1 0 010 1.414l-.706.707a1 1 0 11-1.414-1.414l.707-.707a1 1 0 011.414 0zM17 11a1 1 0 100-2h-1a1 1 0 100 2h1zm-7 4a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zM5.05 6.464A1 1 0 106.465 5.05l-.708-.707a1 1 0 00-1.414 1.414l.707.707zm1.414 8.486l-.707.707a1 1 0 01-1.414-1.414l.707-.707a1 1 0 011.414 1.414zM4 11a1 1 0 100-2H3a1 1 0 000 2h1z" clipRule="evenodd"></path></svg><input type="radio" name="theme-toggle" value="light" title="Use light theme" aria-label="Use light theme" /></label><label class><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20" fill="currentColor"><path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z"></path></svg><input type="radio" name="theme-toggle" value="dark" title="Use dark theme" aria-label="Use dark theme" /></label></div></astro-island>
+<div style="margin: 2rem 0; text-align: center;" class="astro-BYIKQF6W">
+	<astro-island uid="Zy8c6H" component-url="/xs-dev/_astro/ThemeToggleButton.3f6ac45b.js" component-export="default" renderer-url="/xs-dev/_astro/client.8b22872a.js" props="{&quot;class&quot;:[0,&quot;astro-BYIKQF6W&quot;]}" ssr="" client="visible" before-hydration-url="/xs-dev/_astro/astro_scripts/before-hydration.js.bbbe4f51.js" opts="{&quot;name&quot;:&quot;ThemeToggleButton&quot;,&quot;value&quot;:true}" await-children=""><div class="theme-toggle"><label class><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20" fill="currentColor"><path fillRule="evenodd" d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0zm-.464 4.95l.707.707a1 1 0 001.414-1.414l-.707-.707a1 1 0 00-1.414 1.414zm2.12-10.607a1 1 0 010 1.414l-.706.707a1 1 0 11-1.414-1.414l.707-.707a1 1 0 011.414 0zM17 11a1 1 0 100-2h-1a1 1 0 100 2h1zm-7 4a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zM5.05 6.464A1 1 0 106.465 5.05l-.708-.707a1 1 0 00-1.414 1.414l.707.707zm1.414 8.486l-.707.707a1 1 0 01-1.414-1.414l.707-.707a1 1 0 011.414 1.414zM4 11a1 1 0 100-2H3a1 1 0 000 2h1z" clipRule="evenodd"></path></svg><input type="radio" name="theme-toggle" value="light" title="Use light theme" aria-label="Use light theme" /></label><label class><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20" fill="currentColor"><path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z"></path></svg><input type="radio" name="theme-toggle" value="dark" title="Use dark theme" aria-label="Use dark theme" /></label></div></astro-island>
 </div>
-
-
 	</div>
 </nav>
-
-
 			</aside>
 		</main>
 	</body></html>
