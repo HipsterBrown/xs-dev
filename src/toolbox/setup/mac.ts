@@ -10,12 +10,12 @@ import {
   getProfilePath,
 } from './constants'
 import upsert from '../patching/upsert'
-import { downloadReleaseTools, fetchLatestRelease } from './moddable'
+import { downloadReleaseTools, fetchLatestRelease, MissingReleaseAssetError } from './moddable'
 import { SetupArgs } from './types'
 
 const chmodPromise = promisify(chmod)
 
-export default async function ({ targetBranch }: SetupArgs): Promise<void> {
+export default async function({ targetBranch }: SetupArgs): Promise<void> {
   print.info('Setting up the mac tools!')
 
   const BIN_PATH = filesystem.resolve(
@@ -78,16 +78,29 @@ export default async function ({ targetBranch }: SetupArgs): Promise<void> {
         filesystem.dir(BIN_PATH)
         filesystem.dir(DEBUG_BIN_PATH)
 
-        const isArm = os.arch() === 'arm64'
-        const assetName = isArm
-          ? 'moddable-tools-mac64arm.zip'
-          : 'moddable-tools-mac64.zip'
         spinner.info('Downloading release tools')
-        await downloadReleaseTools({
-          writePath: BIN_PATH,
-          assetName,
-          release,
-        })
+        try {
+          const universalAssetName = `moddable-tools-macuniversal.zip`
+          await downloadReleaseTools({
+            writePath: BIN_PATH,
+            assetName: universalAssetName,
+            release,
+          })
+        } catch (error: unknown) {
+          if (error instanceof MissingReleaseAssetError) {
+            const isArm = os.arch() === 'arm64'
+            const assetName = isArm
+              ? 'moddable-tools-mac64arm.zip'
+              : 'moddable-tools-mac64.zip'
+            await downloadReleaseTools({
+              writePath: BIN_PATH,
+              assetName,
+              release,
+            })
+          } else {
+            throw error;
+          }
+        }
         const tools = filesystem.list(BIN_PATH) ?? []
         await Promise.all(
           tools.map(async (tool) => {

@@ -7,12 +7,13 @@ import {
   fetchLatestRelease,
   moddableExists,
   downloadReleaseTools,
+  MissingReleaseAssetError,
 } from '../setup/moddable'
 import { SetupArgs } from '../setup/types'
 
 const chmodPromise = promisify(chmod)
 
-export default async function ({ targetBranch }: SetupArgs): Promise<void> {
+export default async function({ targetBranch }: SetupArgs): Promise<void> {
   print.info('Checking for SDK changes')
 
   // 0. ensure Moddable exists
@@ -62,17 +63,28 @@ export default async function ({ targetBranch }: SetupArgs): Promise<void> {
     filesystem.dir(BIN_PATH)
     filesystem.dir(DEBUG_BIN_PATH)
 
-    const isArm = os.arch() === 'arm64'
-    const assetName = isArm
-      ? 'moddable-tools-mac64arm.zip'
-      : 'moddable-tools-mac64.zip'
-
-    spinner.info('Downloading release tools')
-    await downloadReleaseTools({
-      writePath: BIN_PATH,
-      assetName,
-      release: latestRelease,
-    })
+    try {
+      const universalAssetName = `moddable-tools-macuniversal.zip`
+      await downloadReleaseTools({
+        writePath: BIN_PATH,
+        assetName: universalAssetName,
+        release: latestRelease,
+      })
+    } catch (error: unknown) {
+      if (error instanceof MissingReleaseAssetError) {
+        const isArm = os.arch() === 'arm64'
+        const assetName = isArm
+          ? 'moddable-tools-mac64arm.zip'
+          : 'moddable-tools-mac64.zip'
+        await downloadReleaseTools({
+          writePath: BIN_PATH,
+          assetName,
+          release: latestRelease,
+        })
+      } else {
+        throw error;
+      }
+    }
 
     spinner.info('Updating tool permissions')
     const tools = filesystem.list(BIN_PATH) ?? []
