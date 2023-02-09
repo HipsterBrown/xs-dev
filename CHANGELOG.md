@@ -1,5 +1,11 @@
 # xs-dev
 
+## 0.21.0
+
+### Minor Changes
+
+- ac8ae34: Try downloading unversial mac binary from new SDK releases
+
 ## 0.20.0
 
 ### Minor Changes
