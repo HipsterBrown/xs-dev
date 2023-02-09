@@ -14,14 +14,14 @@ The Moddable SDK and associated dev board tooling is incredibly empowering for e
 
 **Features:**
 
-- [X] [Moddable SDK setup](./features/setup)
-- [X] [SDK updates](./features/update)
-- [X] [Teardown](./features/teardown)
-- [X] [Device discovery](./features/scan)
-- [X] [Project creation](./features/init)
-- [X] [Run a project or example](./features/run)
-- [X] [SDK module management](./features/include)
-- [X] [Get dev environment info](./features/doctor)
+- [X] [Moddable SDK setup](/xs-dev/en/features/setup)
+- [X] [SDK updates](/xs-dev/en/features/update)
+- [X] [Teardown](/xs-dev/en/features/teardown)
+- [X] [Device discovery](/xs-dev/en/features/scan)
+- [X] [Project creation](/xs-dev/en/features/init)
+- [X] [Run a project or example](/xs-dev/en/features/run)
+- [X] [SDK module management](/xs-dev/en/features/include)
+- [X] [Get dev environment info](/xs-dev/en/features/doctor)
 - [ ] Third-party dependency management ([coming soon](https://github.com/HipsterBrown/xs-dev/issues/49))
 
 **Platform support:**
