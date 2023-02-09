@@ -74,6 +74,12 @@ export async function fetchLatestRelease(): Promise<GitHubRelease> {
   return latestRelease
 }
 
+export class MissingReleaseAssetError extends Error {
+  constructor(assetName: string) {
+    super(`Unabled to find release asset matching ${assetName}`);
+  }
+}
+
 interface DownloadToolsArgs {
   writePath: string
   assetName: string
@@ -88,7 +94,7 @@ export async function downloadReleaseTools({
   const moddableTools = release.assets.find(({ name }) => name === assetName)
 
   if (moddableTools === undefined) {
-    throw new Error(`Unable to find release asset matching ${assetName}`)
+    throw new MissingReleaseAssetError(assetName);
   }
 
   const zipWriter = ZipExtract({
