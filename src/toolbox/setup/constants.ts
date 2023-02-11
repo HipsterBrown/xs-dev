@@ -9,6 +9,7 @@ export const HOME_DIR = filesystem.homedir()
 export const INSTALL_DIR = isWindows ? filesystem.resolve(HOME_DIR, 'xs-dev') : filesystem.resolve(HOME_DIR, '.local', 'share')
 export const INSTALL_PATH =
   process.env.MODDABLE ?? filesystem.resolve(INSTALL_DIR, 'moddable')
+export const TEMP_PATH = filesystem.resolve(INSTALL_DIR, "xs-dev-temp")
 export const EXPORTS_FILE_PATH = isWindows ? 
 filesystem.resolve(INSTALL_DIR, "Moddable.bat") :
 filesystem.resolve(
