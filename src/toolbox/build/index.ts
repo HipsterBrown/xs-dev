@@ -19,6 +19,7 @@ export interface BuildArgs {
   mode: 'development' | 'production'
   deployStatus: DeployStatus
   outputDir: string
+  config?: Record<string, string>
 }
 
 export async function build({
@@ -31,6 +32,7 @@ export async function build({
   mode,
   deployStatus,
   outputDir,
+  config = {}
 }: BuildArgs): Promise<void> {
   const OS = platformType().toLowerCase() as Device
 
@@ -212,9 +214,14 @@ export async function build({
   if (mode === 'development') configArgs.push('-d')
   if (mode === 'production') configArgs.push('-i')
 
+  Object.entries(config).forEach(([element, value]) => {
+    configArgs.push(`${element}="${value}"`)
+  })
+
   await system.exec(`mcconfig ${configArgs.join(' ')}`, {
     cwd: projectPath,
     process,
+    shell: true
   })
 
   if (deployStatus === 'push') {

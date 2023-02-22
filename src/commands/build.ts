@@ -14,6 +14,7 @@ interface BuildOptions {
   mode?: Mode
   output?: string
   deploy?: boolean
+  config?: Record<string, string>
 }
 
 const command: GluegunCommand<XSDevToolbox> = {
@@ -30,6 +31,7 @@ const command: GluegunCommand<XSDevToolbox> = {
       mode = (process.env.NODE_ENV as Mode) ?? 'development',
       output = '',
       deploy = false,
+      config = {}
     }: BuildOptions = parameters.options
     const targetPlatform: string = DEVICE_ALIAS[device] ?? device
     const projectPath = filesystem.resolve(parameters.first ?? '.')
@@ -47,6 +49,7 @@ const command: GluegunCommand<XSDevToolbox> = {
         output !== ''
           ? filesystem.resolve(output)
           : filesystem.resolve(String(process.env.MODDABLE), 'build'),
+      config
     })
   },
 }

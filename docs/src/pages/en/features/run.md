@@ -62,6 +62,13 @@ xs-dev run --port /dev/cu.usbserial-0001 --device esp8266
 
 _This value can be discovered using the [`scan`](./scan) command._
 
+## Set `mc/config` arguments
+
+Use the `--config` flag to provide [config arguments](https://github.com/Moddable-OpenSource/moddable/blob/public/documentation/tools/tools.md#arguments) to the `mc/config` module. This mechanism is often used to configure Wi-Fi credentials when running on a device:
+
+```
+xs-dev run --example network/http/httpgetjson --device esp32 --config.ssid=mySSID --config.password="a secret"
+```
 
 ## Building projects for release
 
