@@ -19,7 +19,7 @@ export interface BuildArgs {
   mode: 'development' | 'production'
   deployStatus: DeployStatus
   outputDir: string
-  config?: object
+  config?: Record<string, string>
 }
 
 export async function build({
@@ -214,8 +214,8 @@ export async function build({
   if (mode === 'development') configArgs.push('-d')
   if (mode === 'production') configArgs.push('-i')
 
-  Object.keys(config).forEach(element => {
-    configArgs.push(`${element}="${config[element as keyof typeof config] as string}"`)
+  Object.entries(config).forEach(([element, value]) => {
+    configArgs.push(`${element}="${value}"`)
   })
 
   await system.exec(`mcconfig ${configArgs.join(' ')}`, {

@@ -13,7 +13,7 @@ interface RunOptions {
   listDevices?: boolean
   mode?: Mode
   output?: string
-  config?: object
+  config?: Record<string, string>
 }
 
 const command: GluegunCommand<XSDevToolbox> = {

@@ -14,7 +14,7 @@ interface BuildOptions {
   mode?: Mode
   output?: string
   deploy?: boolean
-  config?: object
+  config?: Record<string, string>
 }
 
 const command: GluegunCommand<XSDevToolbox> = {
