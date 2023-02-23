@@ -1,5 +1,11 @@
 # xs-dev
 
+## 0.22.0
+
+### Minor Changes
+
+- 6175bec: Adds "--config" flag to build and run commands for setting "mc/config"
+
 ## 0.21.0
 
 ### Minor Changes
