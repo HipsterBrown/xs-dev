@@ -1,3 +1,7 @@
+
+
+### [0.22.2](https://github.com/HipsterBrown/xs-dev/compare/v0.22.0...vnull) (2023-02-24)
+
 # xs-dev
 
 ## 0.22.0
