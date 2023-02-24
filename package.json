@@ -24,7 +24,8 @@
     "ci:version:changeset": "changeset version",
     "ci:version": "pnpm ci:version:changeset && pnpm ci:version:install",
     "ci:version:install": "pnpm install --frozen-lockfile=false",
-    "ci:publish": "changeset publish"
+    "ci:publish": "changeset publish",
+    "release": "release-it"
   },
   "files": [
     "tsconfig.json",
@@ -57,6 +58,7 @@
     "@astrojs/sitemap": "^1.0.1",
     "@astrojs/tailwind": "^3.0.1",
     "@changesets/cli": "^2.19.0",
+    "@release-it/conventional-changelog": "^5.1.1",
     "@types/jest": "^27.4.0",
     "@types/node": "^18.11.19",
     "@types/serve-handler": "^6.1.1",
@@ -78,6 +80,7 @@
     "preact": "^10.7.3",
     "preact-render-to-string": "^5.2.0",
     "prettier": "^2.5.1",
+    "release-it": "^15.6.0",
     "rollup": "^2.78.1",
     "tailwindcss": "^3.0.24",
     "ts-jest": "^27.1.2",
@@ -104,6 +107,20 @@
       "ansi-regex@>=3.0.0 <3.0.1": ">=3.0.1",
       "ansi-regex@>=4.0.0 <4.1.1": ">=4.1.1",
       "minimatch@<3.0.5": ">=3.0.5"
+    }
+  },
+  "release-it": {
+    "git": {
+      "commitMessage": "chore: release v${version} [skip ci]"
+    },
+    "github": {
+      "release": true
+    },
+    "plugins": {
+      "@release-it/conventional-changelog": {
+        "preset": "conventionalcommits",
+        "infile": "CHANGELOG.md"
+      }
     }
   }
 }
