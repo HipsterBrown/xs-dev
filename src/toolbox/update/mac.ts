@@ -2,7 +2,7 @@ import os from 'os'
 import { promisify } from 'util'
 import { chmod } from 'fs'
 import { print, system, filesystem } from 'gluegun'
-import { INSTALL_PATH, MODDABLE_REPO } from '../setup/constants'
+import { INSTALL_PATH, MODDABLE_REPO, XSBUG_LOG_PATH } from '../setup/constants'
 import {
   fetchLatestRelease,
   moddableExists,
@@ -108,6 +108,11 @@ export default async function({ targetBranch }: SetupArgs): Promise<void> {
         )
       })
     )
+    if (system.which('npm') !== null) {
+      spinner.start('Installing xsbug-log dependencies')
+      await system.exec('npm install', { cwd: XSBUG_LOG_PATH })
+      spinner.succeed();
+    }
     spinner.succeed(
       'Moddable SDK successfully updated! Start the xsbug.app and run the "helloworld example": xs-dev run --example helloworld'
     )
@@ -159,6 +164,11 @@ export default async function({ targetBranch }: SetupArgs): Promise<void> {
       ),
       stdout: process.stdout,
     })
+    if (system.which('npm') !== null) {
+      spinner.start('Installing xsbug-log dependencies')
+      await system.exec('npm install', { cwd: XSBUG_LOG_PATH })
+      spinner.succeed();
+    }
     spinner.succeed(
       'Moddable SDK successfully updated! Start the xsbug.app and run the "helloworld example": xs-dev run --example helloworld'
     )
