@@ -11,6 +11,7 @@ interface RunOptions {
   example?: string
   listExamples?: boolean
   listDevices?: boolean
+  log?: boolean
   mode?: Mode
   output?: string
   config?: Record<string, string>
@@ -27,6 +28,7 @@ const command: GluegunCommand<XSDevToolbox> = {
       example,
       listExamples = false,
       listDevices = false,
+      log = false,
       mode = (process.env.NODE_ENV as Mode) ?? 'development',
       output = filesystem.resolve(String(process.env.MODDABLE), 'build'),
       config = {}
@@ -38,6 +40,7 @@ const command: GluegunCommand<XSDevToolbox> = {
       port,
       listExamples,
       listDevices,
+      log,
       example,
       targetPlatform,
       projectPath,
