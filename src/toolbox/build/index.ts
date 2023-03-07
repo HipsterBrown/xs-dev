@@ -225,7 +225,9 @@ export async function build({
   if (log) {
     const logOutput = spawn('mcconfig', configArgs, { cwd: projectPath, stdio: 'inherit', shell: true });
     logOutput.on('close', (exitCode) => {
-      if (exitCode !== null) process.exit(exitCode);
+      if (exitCode !== null) {
+        process.exit(exitCode)
+      }
     })
   } else {
     await system.exec(`mcconfig ${configArgs.join(' ')}`, {
