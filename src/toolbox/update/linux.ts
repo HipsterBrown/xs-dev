@@ -2,7 +2,7 @@ import os from 'os'
 import { promisify } from 'util'
 import { chmod } from 'fs'
 import { print, system, filesystem } from 'gluegun'
-import { INSTALL_PATH, MODDABLE_REPO } from '../setup/constants'
+import { INSTALL_PATH, MODDABLE_REPO, XSBUG_LOG_PATH } from '../setup/constants'
 import { SetupArgs } from '../setup/types'
 import {
   fetchLatestRelease,
@@ -13,7 +13,7 @@ import { execWithSudo } from '../system/exec'
 
 const chmodPromise = promisify(chmod)
 
-export default async function ({ targetBranch }: SetupArgs): Promise<void> {
+export default async function({ targetBranch }: SetupArgs): Promise<void> {
   // 0. ensure Moddable exists
   if (!moddableExists()) {
     print.error(
@@ -128,6 +128,11 @@ export default async function ({ targetBranch }: SetupArgs): Promise<void> {
       cwd: BUILD_DIR,
       stdout: process.stdout,
     })
+    if (system.which('npm') !== null) {
+      spinner.start('Installing xsbug-log dependencies')
+      await system.exec('npm install', { cwd: XSBUG_LOG_PATH })
+      spinner.succeed();
+    }
     spinner.succeed(
       'Moddable SDK successfully updated! Start the xsbug.app and run the "helloworld example": xs-dev run --example helloworld'
     )
@@ -170,6 +175,12 @@ export default async function ({ targetBranch }: SetupArgs): Promise<void> {
       stdout: process.stdout,
     })
     spinner.succeed()
+
+    if (system.which('npm') !== null) {
+      spinner.start('Installing xsbug-log dependencies')
+      await system.exec('npm install', { cwd: XSBUG_LOG_PATH })
+      spinner.succeed();
+    }
 
     print.success(
       'Moddable SDK successfully updated! Start the xsbug.app and run the "helloworld example": xs-dev run --example helloworld'

@@ -8,6 +8,7 @@ import {
   EXPORTS_FILE_PATH,
   MODDABLE_REPO,
   getProfilePath,
+  XSBUG_LOG_PATH,
 } from './constants'
 import upsert from '../patching/upsert'
 import { execWithSudo } from '../system/exec'
@@ -16,7 +17,7 @@ import { fetchLatestRelease, downloadReleaseTools } from './moddable'
 
 const chmodPromise = promisify(chmod)
 
-export default async function ({ targetBranch }: SetupArgs): Promise<void> {
+export default async function({ targetBranch }: SetupArgs): Promise<void> {
   print.info('Setting up Linux tools!')
 
   const BIN_PATH = filesystem.resolve(
@@ -162,6 +163,12 @@ export default async function ({ targetBranch }: SetupArgs): Promise<void> {
     stdout: process.stdout,
   })
   spinner.succeed()
+
+  if (system.which('npm') !== null) {
+    spinner.start('Installing xsbug-log dependencies')
+    await system.exec('npm install', { cwd: XSBUG_LOG_PATH })
+    spinner.succeed();
+  }
 
   // 7. Profit?
   print.success(

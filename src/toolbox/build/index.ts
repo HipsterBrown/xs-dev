@@ -1,4 +1,5 @@
-import { type as platformType } from 'os'
+import { spawn } from 'node:child_process'
+import { type as platformType } from 'node:os'
 import handler from 'serve-handler'
 import { createServer } from 'http'
 import { filesystem, print, prompt, system } from 'gluegun'
@@ -14,6 +15,7 @@ export interface BuildArgs {
   example?: string
   listExamples: boolean
   listDevices: boolean
+  log?: boolean
   projectPath: string
   targetPlatform: string
   mode: 'development' | 'production'
@@ -27,6 +29,7 @@ export async function build({
   port,
   example,
   listExamples,
+  log = false,
   projectPath,
   targetPlatform,
   mode,
@@ -213,25 +216,36 @@ export async function build({
   ]
   if (mode === 'development') configArgs.push('-d')
   if (mode === 'production') configArgs.push('-i')
+  if (log) configArgs.push('-l')
 
   Object.entries(config).forEach(([element, value]) => {
     configArgs.push(`${element}="${value}"`)
   })
 
-  await system.exec(`mcconfig ${configArgs.join(' ')}`, {
-    cwd: projectPath,
-    process,
-    shell: true
-  })
-
-  if (deployStatus === 'push') {
-    await system.exec(
-      `mcconfig -t deploy -p ${targetPlatform} -o ${outputDir}`,
-      {
-        cwd: projectPath,
-        process,
+  if (log) {
+    const logOutput = spawn('mcconfig', configArgs, { cwd: projectPath, stdio: 'inherit', shell: true });
+    logOutput.on('close', (exitCode) => {
+      if (exitCode !== null) {
+        process.exit(exitCode)
       }
-    )
+    })
+  } else {
+    await system.exec(`mcconfig ${configArgs.join(' ')}`, {
+      cwd: projectPath,
+      stdout: process.stdout,
+      stdin: process.stdin,
+      shell: true,
+    })
+
+    if (deployStatus === 'push') {
+      await system.exec(
+        `mcconfig -t deploy -p ${targetPlatform} -o ${outputDir}`,
+        {
+          cwd: projectPath,
+          process,
+        }
+      )
+    }
   }
 
   spinner.stop()
@@ -253,7 +267,7 @@ export async function build({
         'Started server on port 8080, go to http://localhost:8080 in your browser to view the simulator'
       )
     })
-  } else {
+  } else if (!log) {
     process.exit(0)
   }
 }

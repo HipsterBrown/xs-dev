@@ -7,6 +7,7 @@ import {
   INSTALL_DIR,
   EXPORTS_FILE_PATH,
   MODDABLE_REPO,
+  XSBUG_LOG_PATH,
   getProfilePath,
 } from './constants'
 import upsert from '../patching/upsert'
@@ -38,7 +39,6 @@ export default async function({ targetBranch }: SetupArgs): Promise<void> {
     'makefiles',
     'mac'
   )
-
   const PROFILE_PATH = getProfilePath()
 
   // 0. ensure xcode command line tools are available (?)
@@ -170,6 +170,13 @@ export default async function({ targetBranch }: SetupArgs): Promise<void> {
     } else {
       spinner.info('xsbug.app symlink already exists')
     }
+  }
+
+  // 5. install xsbug-log dependencies
+  if (system.which('npm') !== null) {
+    spinner.start('Installing xsbug-log dependencies')
+    await system.exec('npm install', { cwd: XSBUG_LOG_PATH })
+    spinner.succeed();
   }
 
   spinner.succeed(
