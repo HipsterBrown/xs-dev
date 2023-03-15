@@ -28,6 +28,10 @@ A symlink for [`xsbug.app`](https://github.com/Moddable-OpenSource/moddable/blob
 
 The [`moddable` git repo](https://github.com/Moddable-OpenSource/moddable) is cloned into `~/.local/share` instead of a new/existing `~/Projects` directory.
 
+**Environment config:**
+
+This command will create (and update) an environment configuration file called `~/.local/share/xs-dev-export.sh` (on Mac & Linux) or `Moddable.bat` (on Windows). This file will be placed in the shell setup file (`.profile`, `.zshrc`, `.bashrc`, etc on Mac & Linux) or the custom command prompt (on Windows), to set environment variables and call other "exports" files for embedded tooling.
+
 ## Target Branch
 
 The default behavior of this command for Moddable developer tooling pulls the [latest release tooling](https://github.com/Moddable-OpenSource/moddable/releases) and source code for the associated tagged branch. This provides a known-working state for the SDK and avoids needing to build the tooling on the local machine. 
