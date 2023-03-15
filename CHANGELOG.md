@@ -1,5 +1,7 @@
 
 
+* feat: automatically source environment variables into process (#112) (cb61ca1)
+
 * feat(run): add --log flag to show debug output in terminal (#108) (9b24a93)
 
 ### [0.22.2](https://github.com/HipsterBrown/xs-dev/compare/v0.22.0...vnull) (2023-02-24)
