@@ -45,10 +45,7 @@ const command: GluegunCommand<XSDevToolbox> = {
       projectPath,
       mode,
       deployStatus: deploy ? 'push' : 'none',
-      outputDir:
-        output !== ''
-          ? filesystem.resolve(output)
-          : filesystem.resolve(String(process.env.MODDABLE), 'build'),
+      outputDir: output,
       config
     })
   },

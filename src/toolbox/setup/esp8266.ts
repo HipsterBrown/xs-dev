@@ -15,6 +15,7 @@ import { installDeps as installWindowsDeps } from './esp8266/windows'
 import { ensureModdableCommandPrompt } from './windows'
 import { DEVICE_ALIAS } from '../prompt/devices'
 import { Device } from '../../types'
+import { sourceEnvironment } from '../system/exec'
 
 const finishedPromise = promisify(finished)
 
@@ -30,6 +31,8 @@ export default async function(): Promise<void> {
   const RTOS_PATH = filesystem.resolve(ESP_DIR, 'ESP8266_RTOS_SDK')
   const TOOLCHAIN_PATH = filesystem.resolve(ESP_DIR, 'toolchain')
   const ARDUINO_CORE_PATH = filesystem.resolve(ESP_DIR, 'esp8266-2.3.0')
+
+  await sourceEnvironment()
 
   const spinner = print.spin()
   spinner.start('Setting up esp8266 tools')

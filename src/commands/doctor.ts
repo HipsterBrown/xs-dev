@@ -2,6 +2,7 @@ import type { GluegunCommand } from 'gluegun'
 import os from 'os'
 import { DEVICE_ALIAS } from '../toolbox/prompt/devices'
 import { getModdableVersion, moddableExists } from '../toolbox/setup/moddable'
+import { sourceEnvironment } from '../toolbox/system/exec'
 import { detectPython, getPythonVersion } from '../toolbox/system/python'
 import { Device } from '../types'
 
@@ -11,6 +12,8 @@ const command: GluegunCommand = {
   alias: ['dr', 'info'],
   description: 'Display the current environment setup information, including valid target devices.',
   run: async ({ print, meta, filesystem, system }) => {
+    await sourceEnvironment()
+
     const supportedDevices = []
 
     if (moddableExists()) {
@@ -46,6 +49,7 @@ const command: GluegunCommand = {
       ['CLI Version', meta.version()],
       ['OS', os.type()],
       ['Arch', os.arch()],
+      ['Shell', process.env.SHELL ?? 'Unknown'],
       ['NodeJS Version', `${process.version} (${system.which('node') ?? 'path not found'})`],
       ['Python Version', `${pythonVersion} (${pythonPath})`],
       ['Moddable SDK Version', `${moddableVersion} (${moddablePath})`],

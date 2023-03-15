@@ -3,6 +3,7 @@ import { findBySerialNumber } from 'usb'
 import type { GluegunCommand } from 'gluegun'
 import type { XSDevToolbox } from '../types'
 import { parseScanResult } from '../toolbox/scan/parse'
+import { sourceEnvironment } from '../toolbox/system/exec'
 
 // eslint-disable-next-line
 function sleep(timeout: number) {
@@ -21,6 +22,8 @@ const command: GluegunCommand<XSDevToolbox> = {
       process.exit(0)
     }
 
+    await sourceEnvironment()
+
     if (system.which('esptool.py') === null) {
       print.warning(
         'esptool.py required to scan for Espressif devices. Setup environment for ESP8266 or ESP32:\n xs-dev setup --device esp32\n xs-dev setup --device esp8266.'
@@ -37,7 +40,7 @@ const command: GluegunCommand<XSDevToolbox> = {
       try {
         await system.exec('picotool reboot -fa')
         await sleep(1000)
-      } catch {}
+      } catch { }
     }
 
     const ports = await SerialPort.list()
@@ -62,7 +65,7 @@ const command: GluegunCommand<XSDevToolbox> = {
             return await system
               .exec(`esptool.py --port ${port.path} read_mac`)
               .then((buffer) => [buffer, port.path])
-          } catch {}
+          } catch { }
           return [undefined, port.path]
         })
     )

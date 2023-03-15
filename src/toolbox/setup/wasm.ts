@@ -3,7 +3,7 @@ import { type as platformType } from 'os'
 import { INSTALL_DIR, EXPORTS_FILE_PATH } from './constants'
 import { moddableExists } from './moddable'
 import upsert from '../patching/upsert'
-import { execWithSudo } from '../system/exec'
+import { execWithSudo, sourceEnvironment } from '../system/exec'
 import { ensureHomebrew } from './homebrew'
 
 export default async function(): Promise<void> {
@@ -13,6 +13,8 @@ export default async function(): Promise<void> {
   const WASM_DIR = filesystem.resolve(INSTALL_DIR, 'wasm')
   const EMSDK_PATH = filesystem.resolve(WASM_DIR, 'emsdk')
   const BINARYEN_PATH = filesystem.resolve(WASM_DIR, 'binaryen')
+
+  await sourceEnvironment()
 
   const spinner = print.spin({ stream: process.stdout })
   spinner.start('Setting up wasm simulator tools')
