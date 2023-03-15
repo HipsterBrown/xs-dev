@@ -6,7 +6,7 @@ layout: ../../../layouts/MainLayout.astro
 
 # Manage modules from Moddable
 
-The Moddable SdK ships with many first-party modules to support various features, peripherals, sensors, etc. The `include` command will update the project `manifest.json` with the selected module:
+The Moddable SDK ships with many first-party modules to support various features, peripherals, sensors, etc. The `include` command will update the project `manifest.json` with the selected module:
 
 ```
 xs-dev include network/wifi
