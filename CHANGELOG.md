@@ -1,5 +1,7 @@
 
 
+* docs: fix edit on github link path (efcbb8d)
+
 * feat: automatically source environment variables into process (#112) (cb61ca1)
 
 * feat(run): add --log flag to show debug output in terminal (#108) (9b24a93)
