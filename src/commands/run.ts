@@ -30,7 +30,7 @@ const command: GluegunCommand<XSDevToolbox> = {
       listDevices = false,
       log = false,
       mode = (process.env.NODE_ENV as Mode) ?? 'development',
-      output = filesystem.resolve(String(process.env.MODDABLE), 'build'),
+      output,
       config = {}
     }: RunOptions = parameters.options
     const targetPlatform: string = DEVICE_ALIAS[device] ?? device

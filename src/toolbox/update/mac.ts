@@ -10,11 +10,14 @@ import {
   MissingReleaseAssetError,
 } from '../setup/moddable'
 import { SetupArgs } from '../setup/types'
+import { sourceEnvironment } from '../system/exec'
 
 const chmodPromise = promisify(chmod)
 
 export default async function({ targetBranch }: SetupArgs): Promise<void> {
   print.info('Checking for SDK changes')
+
+  await sourceEnvironment()
 
   // 0. ensure Moddable exists
   if (!moddableExists()) {

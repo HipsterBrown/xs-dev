@@ -1,4 +1,7 @@
+import { type as platformType } from 'node:os';
 import { system, print } from 'gluegun'
+import { EXPORTS_FILE_PATH } from '../setup/constants';
+import { Device } from '../../types';
 
 function ensureAskPass(): void {
   const SUDO_ASKPASS = system.which('ssh-askpass')
@@ -32,4 +35,24 @@ export async function execWithSudo(
   }
 
   await system.exec(`sudo --askpass --preserve-env ${command}`, options)
+}
+
+/**
+ * Set updated env from user shell as process.env
+ */
+export async function sourceEnvironment(): Promise<void> {
+  const OS = platformType().toLowerCase() as Device
+
+  if (OS !== 'windows_nt') {
+    try {
+      const result = await system.spawn(`source ${EXPORTS_FILE_PATH} && env`, {
+        shell: process.env.SHELL,
+      })
+      if (result.stdout !== null) {
+        process.env = Object.fromEntries(result.stdout.split('\n').map((field: string) => field.split('=')))
+      }
+    } catch (error) {
+      console.warn('Unable to source the environment settings:', error)
+    }
+  }
 }

@@ -9,11 +9,14 @@ import {
   moddableExists,
   downloadReleaseTools,
 } from '../setup/moddable'
-import { execWithSudo } from '../system/exec'
+import { execWithSudo, sourceEnvironment } from '../system/exec'
 
 const chmodPromise = promisify(chmod)
 
 export default async function({ targetBranch }: SetupArgs): Promise<void> {
+
+  await sourceEnvironment()
+
   // 0. ensure Moddable exists
   if (!moddableExists()) {
     print.error(

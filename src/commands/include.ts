@@ -1,5 +1,6 @@
 import type { GluegunCommand } from 'gluegun'
 import { collectChoicesFromTree } from '../toolbox/prompt/choices'
+import { sourceEnvironment } from '../toolbox/system/exec'
 
 interface IncludeOptions {
   device?: string
@@ -16,6 +17,9 @@ const command: GluegunCommand = {
       )
       process.exit(1)
     }
+
+    await sourceEnvironment()
+
     const modulesPath = filesystem.resolve(
       String(process.env.MODDABLE),
       'modules'
@@ -52,7 +56,7 @@ const command: GluegunCommand = {
     print.info(`Adding "${String(moduleName)}" to manifest includes`)
     const modulePath = `$(MODDABLE)/modules/${String(moduleName)}/manifest.json`
     await patching.update(manifestPath, (manifestIn) => {
-      let  manifest = manifestIn
+      let manifest = manifestIn
       if (device !== "") {
         manifest.platforms ??= {}
         manifest.platforms[device] ??= {}

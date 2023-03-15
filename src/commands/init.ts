@@ -1,5 +1,6 @@
 import type { GluegunCommand } from 'gluegun'
 import { collectChoicesFromTree } from '../toolbox/prompt/choices'
+import { sourceEnvironment } from '../toolbox/system/exec'
 
 interface InitOptions {
   typescript?: boolean
@@ -38,6 +39,9 @@ const command: GluegunCommand = {
         )
         process.exit(0)
       }
+
+      await sourceEnvironment()
+
       if (example !== false) {
         // find example project
         const exampleProjectPath = filesystem.resolve(
@@ -55,14 +59,14 @@ const command: GluegunCommand = {
           const filteredChoices = choices.filter((choice) =>
             choice.includes(String(example))
           )
-          ;({ example: selectedExample } = await prompt.ask([
-            {
-              type: 'autocomplete',
-              name: 'example',
-              message: 'Here are the available examples templates:',
-              choices: filteredChoices.length > 0 ? filteredChoices : choices,
-            },
-          ]))
+            ; ({ example: selectedExample } = await prompt.ask([
+              {
+                type: 'autocomplete',
+                name: 'example',
+                message: 'Here are the available examples templates:',
+                choices: filteredChoices.length > 0 ? filteredChoices : choices,
+              },
+            ]))
         }
 
         // copy files into new project directory

@@ -7,6 +7,7 @@ import { collectChoicesFromTree } from '../prompt/choices'
 import { moddableExists } from '../setup/moddable'
 import { DEVICE_ALIAS } from '../prompt/devices'
 import { Device } from '../../types'
+import { sourceEnvironment } from '../system/exec'
 
 export type DeployStatus = 'none' | 'run' | 'push'
 
@@ -20,7 +21,7 @@ export interface BuildArgs {
   targetPlatform: string
   mode: 'development' | 'production'
   deployStatus: DeployStatus
-  outputDir: string
+  outputDir?: string
   config?: Record<string, string>
 }
 
@@ -39,12 +40,16 @@ export async function build({
 }: BuildArgs): Promise<void> {
   const OS = platformType().toLowerCase() as Device
 
+  await sourceEnvironment()
+
   if (!moddableExists()) {
     print.error(
       `Moddable tooling required. Run 'xs-dev setup --device ${DEVICE_ALIAS[OS]}' before trying again.`
     )
     process.exit(1)
   }
+
+  outputDir ??= filesystem.resolve(String(process.env.MODDABLE), 'build')
 
   if (listDevices) {
     const choices = [

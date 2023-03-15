@@ -7,6 +7,7 @@ import { installDeps as installMacDeps } from './esp32/mac'
 import { installDeps as installLinuxDeps } from './esp32/linux'
 import { installDeps as installWinDeps } from './esp32/windows'
 import { setEnv, ensureModdableCommandPrompt } from './windows'
+import { sourceEnvironment } from '../system/exec'
 
 export default async function(): Promise<void> {
   const OS = platformType().toLowerCase()
@@ -15,6 +16,8 @@ export default async function(): Promise<void> {
   const ESP_BRANCH = 'v4.4.2'
   const ESP32_DIR = filesystem.resolve(INSTALL_DIR, 'esp32')
   const IDF_PATH = filesystem.resolve(ESP32_DIR, 'esp-idf')
+
+  await sourceEnvironment()
 
   const spinner = print.spin()
   spinner.start('Setting up esp32 tools')

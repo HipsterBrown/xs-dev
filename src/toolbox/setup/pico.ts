@@ -5,6 +5,7 @@ import upsert from '../patching/upsert'
 import { installDeps as installMacDeps } from './pico/mac'
 import { installDeps as installLinuxDeps } from './pico/linux'
 import { moddableExists } from './moddable'
+import { sourceEnvironment } from '../system/exec'
 
 export default async function(): Promise<void> {
   const OS = platformType().toLowerCase()
@@ -18,6 +19,8 @@ export default async function(): Promise<void> {
   const PICOTOOL_BUILD_DIR = filesystem.resolve(PICOTOOL_PATH, 'build')
   const PICO_SDK_BUILD_DIR = filesystem.resolve(PICO_SDK_DIR, 'build')
   const PIOASM_PATH = filesystem.resolve(PICO_SDK_BUILD_DIR, 'pioasm', 'pioasm')
+
+  await sourceEnvironment()
 
   const spinner = print.spin()
   spinner.start('Starting pico tooling setup')
