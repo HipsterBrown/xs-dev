@@ -1,5 +1,7 @@
 
 
+* fix(exec): defensively check sourceEnvironment results object (1987bf8)
+
 * docs: fix edit on github link path (efcbb8d)
 
 * feat: automatically source environment variables into process (#112) (cb61ca1)
