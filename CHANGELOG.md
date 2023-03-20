@@ -1,5 +1,7 @@
 
 
+* fix(exec): check for buffer response from stdout, convert to string (#113) (a553e23)
+
 * fix(exec): defensively check sourceEnvironment results object (1987bf8)
 
 * docs: fix edit on github link path (efcbb8d)
