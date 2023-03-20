@@ -60,3 +60,23 @@ This will keep running until the `Ctrl+C` keys are entered in the terminal sessi
 
 Use the `--list-examples` flag with the `run` command to search the extensive list of available examples to run in the simulator: `xs-dev run --list-examples`
 
+## Troubleshooting
+
+When attempting to run the Hello World example, if you continually see the following error (even after starting a new terminal session):
+
+```
+Moddable tooling required. Run 'xs-dev setup --device <computer os here>' before trying again.
+```
+
+There may be an issue with the terminal shell or command prompt using the correct [environment configuration](/xs-dev/en/features/setup#overview) for xs-dev.
+
+- [Learn about Terminal profiles on MacOS](https://support.apple.com/guide/terminal/default-startup-terminal-window-profiles-trml5856b1f2/mac)
+- [Learn about shell initialization files and user profiles on Linux](https://www.tecmint.com/understanding-shell-initialization-files-and-user-profiles-linux/)
+- [Learn about Windows Terminal startup settings](https://learn.microsoft.com/en-us/windows/terminal/customize-settings/startup)
+
+On "Unix-like" environments (MacOS, Linux), the `env` command should contain a reference to the `MODDABLE` environment variable:
+
+```
+env | grep MODDABLE
+```
+The above command should return something like `MODDABLE=/Users/<username>/.local/share/moddable` to indicate where the Moddable SDK has been installed in the filesystem.

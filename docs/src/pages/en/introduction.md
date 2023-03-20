@@ -30,6 +30,10 @@ The Moddable SDK and associated dev board tooling is incredibly empowering for e
 - [-] Windows (currently in beta)
 - [X] Linux
 
+**Check out the getting started video from the Moddable team**
+
+<iframe width="560" height="315" src="https://www.youtube-nocookie.com/embed/1gxFWBnDl18" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
+
 ## Requirements
 
 [Node.js >= v14](https://nodejs.org/en/)
@@ -69,3 +73,4 @@ pnpm update -g xs-dev
 ```
 yarn global upgrade xs-dev
 ```
+
