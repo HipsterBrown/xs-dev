@@ -48,8 +48,8 @@ export async function sourceEnvironment(): Promise<void> {
       const result = await system.spawn(`source ${EXPORTS_FILE_PATH} && env`, {
         shell: process.env.SHELL,
       })
-      if (typeof result.stdout === 'string') {
-        const localEnv = Object.fromEntries(result.stdout.split('\n').map((field: string) => field?.split('=')))
+      if (typeof result.stdout === 'string' || result.stdout instanceof Buffer) {
+        const localEnv = Object.fromEntries(result.stdout.toString().split('\n').map((field: string) => field?.split('=')))
         if ('PATH' in localEnv) process.env = localEnv
       }
     } catch (error) {
