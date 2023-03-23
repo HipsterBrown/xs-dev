@@ -49,6 +49,16 @@ Node comes with [npm](https://docs.npmjs.com/cli/v8/commands/npm) as the include
 - [pnpm](https://pnpm.io/installation)
 - [yarn](https://yarnpkg.com/)
 
+### Troubleshooting
+
+If you encounter an `EACCES` error after setting up NodeJS and attempt to install a package, like the following:
+
+```
+Error: EACCES: permission denied, mkdir
+```
+
+Check out the [npm docs](https://docs.npmjs.com/resolving-eacces-permissions-errors-when-installing-packages-globally) to learn about to resolve it: https://docs.npmjs.com/resolving-eacces-permissions-errors-when-installing-packages-globally
+
 ## Linux Permissions
 
 Setup commands rely on [`ssh-askpass`](https://packages.ubuntu.com/bionic/ssh-askpass) to prompt for permission when installing other tools and dependencies.

@@ -29,7 +29,7 @@ const command: GluegunCommand<XSDevToolbox> = {
       listExamples = false,
       listDevices = false,
       mode = (process.env.NODE_ENV as Mode) ?? 'development',
-      output = '',
+      output,
       deploy = false,
       config = {}
     }: BuildOptions = parameters.options
