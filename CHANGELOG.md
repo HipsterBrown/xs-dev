@@ -1,5 +1,7 @@
 
 
+* fix(build): unset default output (#115) (ba29c6a)
+
 * fix(exec): check for buffer response from stdout, convert to string (#113) (a553e23)
 
 * fix(exec): defensively check sourceEnvironment results object (1987bf8)
