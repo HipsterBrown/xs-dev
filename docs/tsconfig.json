@@ -11,7 +11,10 @@
     "isolatedModules": true,
     "noEmit": true,
     // Add type definitions for our Vite runtime.
-    "types": ["vite/client"],
-    "jsx": "preserve"
+    "types": [
+      "vite/client"
+    ],
+    "jsx": "preserve",
+    "jsxImportSource": "solid-js"
   }
 }
