@@ -1,5 +1,7 @@
 
 
+* chore(docs): migrate preact components to solid-js (#116) (efbac68)
+
 * fix(build): unset default output (#115) (ba29c6a)
 
 * fix(exec): check for buffer response from stdout, convert to string (#113) (a553e23)
