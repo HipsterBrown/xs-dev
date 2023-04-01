@@ -9,6 +9,7 @@ import { sourceEnvironment } from '../system/exec'
 
 export default async function(): Promise<void> {
   const OS = platformType().toLowerCase()
+  const PICO_BRANCH = "1.5.0"
   const PICO_SDK_REPO = 'https://github.com/raspberrypi/pico-sdk'
   const PICO_EXAMPLES_REPO = 'https://github.com/raspberrypi/pico-examples'
   const PICOTOOL_REPO = 'https://github.com/raspberrypi/picotool'
@@ -64,7 +65,7 @@ export default async function(): Promise<void> {
   // 2. Install the pico sdk, examples, and picotool:
   if (filesystem.exists(PICO_SDK_DIR) === false) {
     spinner.start('Cloning pico-sdk repo')
-    await system.exec(`git clone --depth 1 --single-branch -b master ${PICO_SDK_REPO} ${PICO_SDK_DIR}`, {
+    await system.exec(`git clone --depth 1 --single-branch -b ${PICO_BRANCH} ${PICO_SDK_REPO} ${PICO_SDK_DIR}`, {
       stdout: process.stdout,
     })
     await system.exec(`git submodule update --init`, {
@@ -77,7 +78,7 @@ export default async function(): Promise<void> {
   if (filesystem.exists(PICO_EXAMPLES_PATH) === false) {
     spinner.start('Cloning pico-exmples repo')
     await system.exec(
-      `git clone --depth 1 --single-branch -b master ${PICO_EXAMPLES_REPO} ${PICO_EXAMPLES_PATH}`,
+      `git clone --depth 1 --single-branch -b sdk-${PICO_BRANCH} ${PICO_EXAMPLES_REPO} ${PICO_EXAMPLES_PATH}`,
       { stdout: process.stdout }
     )
     spinner.succeed()
