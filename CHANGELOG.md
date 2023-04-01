@@ -1,5 +1,7 @@
 
 
+* fix(pico): pin branch for sdk, examples (#118) (aed4780)
+
 * chore(docs): migrate preact components to solid-js (#116) (efbac68)
 
 * fix(build): unset default output (#115) (ba29c6a)
