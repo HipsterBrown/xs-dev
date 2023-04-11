@@ -1,5 +1,7 @@
 
 
+* feat(setup): add --source-repo flag for custom SDK repo config (#119) (f137467)
+
 * fix(pico): pin branch for sdk, examples (#118) (aed4780)
 
 * chore(docs): migrate preact components to solid-js (#116) (efbac68)
