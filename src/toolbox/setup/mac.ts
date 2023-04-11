@@ -6,17 +6,16 @@ import {
   INSTALL_PATH,
   INSTALL_DIR,
   EXPORTS_FILE_PATH,
-  MODDABLE_REPO,
   XSBUG_LOG_PATH,
   getProfilePath,
 } from './constants'
 import upsert from '../patching/upsert'
 import { downloadReleaseTools, fetchLatestRelease, MissingReleaseAssetError } from './moddable'
-import { SetupArgs } from './types'
+import { PlatformSetupArgs } from './types'
 
 const chmodPromise = promisify(chmod)
 
-export default async function({ targetBranch }: SetupArgs): Promise<void> {
+export default async function({ sourceRepo, targetBranch }: PlatformSetupArgs): Promise<void> {
   print.info('Setting up the mac tools!')
 
   const BIN_PATH = filesystem.resolve(
@@ -72,7 +71,7 @@ export default async function({ targetBranch }: SetupArgs): Promise<void> {
         spinner.start('Getting latest Moddable-OpenSource/moddable release')
         const release = await fetchLatestRelease()
         await system.spawn(
-          `git clone ${MODDABLE_REPO} ${INSTALL_PATH} --depth 1 --branch ${release.tag_name} --single-branch`
+          `git clone ${sourceRepo} ${INSTALL_PATH} --depth 1 --branch ${release.tag_name} --single-branch`
         )
 
         filesystem.dir(BIN_PATH)
@@ -122,11 +121,10 @@ export default async function({ targetBranch }: SetupArgs): Promise<void> {
             )
           })
         )
-      }
-      if (targetBranch === 'public') {
-        spinner.start('Cloning Moddable-OpenSource/moddable repo')
+      } else {
+        spinner.start(`Cloning ${sourceRepo} repo`)
         await system.spawn(
-          `git clone ${MODDABLE_REPO} ${INSTALL_PATH} --depth 1 --branch ${targetBranch} --single-branch`
+          `git clone ${sourceRepo} ${INSTALL_PATH} --depth 1 --branch ${targetBranch} --single-branch`
         )
       }
       spinner.succeed()
@@ -146,7 +144,7 @@ export default async function({ targetBranch }: SetupArgs): Promise<void> {
   await upsert(EXPORTS_FILE_PATH, `export PATH="${BIN_PATH}:$PATH"`)
 
   // 3. cd into makefiles dir for platform, run `make`
-  if (targetBranch === 'public') {
+  if (targetBranch !== 'latest-release') {
     try {
       spinner.start('Building platform tooling')
       await system.exec('make', { cwd: BUILD_DIR, stdout: process.stdout })

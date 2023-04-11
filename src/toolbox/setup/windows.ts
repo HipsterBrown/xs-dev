@@ -8,14 +8,13 @@ import {
 import {
   INSTALL_PATH,
   INSTALL_DIR,
-  MODDABLE_REPO,
   EXPORTS_FILE_PATH,
   XSBUG_LOG_PATH
 } from './constants'
 import upsert from '../patching/upsert'
 import ws from 'windows-shortcuts'
 import { promisify } from 'util'
-import { SetupArgs } from './types'
+import { PlatformSetupArgs } from './types'
 
 const wsPromise = promisify(ws.create)
 
@@ -48,7 +47,7 @@ export async function ensureModdableCommandPrompt(spinner: ReturnType<GluegunPri
   }
 }
 
-export default async function(_args: SetupArgs): Promise<void> {
+export default async function({ sourceRepo }: PlatformSetupArgs): Promise<void> {
   const BIN_PATH = filesystem.resolve(
     INSTALL_PATH,
     'build',
@@ -147,8 +146,8 @@ export default async function(_args: SetupArgs): Promise<void> {
     spinner.info('Moddable repo already installed')
   } else {
     try {
-      spinner.start('Cloning Moddable-OpenSource/moddable repo')
-      await system.spawn(`git clone ${MODDABLE_REPO} ${INSTALL_PATH}`)
+      spinner.start(`Cloning ${sourceRepo} repo`)
+      await system.spawn(`git clone ${sourceRepo} ${INSTALL_PATH}`)
       spinner.succeed()
     } catch (error) {
       spinner.fail(`Error cloning moddable repo: ${String(error)}`)

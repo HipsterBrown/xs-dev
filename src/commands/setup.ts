@@ -3,12 +3,15 @@ import { type as platformType } from 'os'
 import type { Device, XSDevToolbox } from '../types'
 import setupFontbm from '../toolbox/setup/fontbm'
 import { DEVICE_ALIAS } from '../toolbox/prompt/devices'
+import { MODDABLE_REPO } from '../toolbox/setup/constants'
+import { SetupArgs } from '../toolbox/setup/types'
 
 interface SetupOptions {
   device?: Device
   listDevices?: boolean
   tool?: string
-  targetBranch?: 'public' | 'latest-release'
+  targetBranch?: SetupArgs['targetBranch']
+  sourceRepo?: string
 }
 
 const command: GluegunCommand<XSDevToolbox> = {
@@ -22,6 +25,7 @@ const command: GluegunCommand<XSDevToolbox> = {
       listDevices = false,
       tool,
       targetBranch = 'latest-release',
+      sourceRepo = MODDABLE_REPO,
     }: SetupOptions = parameters.options
     let target: Device = device ?? currentPlatform
 
@@ -58,8 +62,12 @@ const command: GluegunCommand<XSDevToolbox> = {
       await setupFontbm()
       return
     }
-
-    await setup[target]({ targetBranch })
+    const platformDevices: Device[] = ['mac', 'darwin', 'windows_nt', 'win', 'lin', 'linux']
+    if (platformDevices.includes(target)) {
+      await setup[target]({ targetBranch, sourceRepo })
+    } else {
+      await setup[target]({ targetBranch })
+    }
   },
 }
 
