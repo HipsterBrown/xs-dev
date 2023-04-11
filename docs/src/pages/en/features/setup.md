@@ -36,10 +36,16 @@ This command will create (and update) an environment configuration file called `
 
 The default behavior of this command for Moddable developer tooling pulls the [latest release tooling](https://github.com/Moddable-OpenSource/moddable/releases) and source code for the associated tagged branch. This provides a known-working state for the SDK and avoids needing to build the tooling on the local machine. 
 
-To override this behavior, use the `--target-branch` flag to select `public`; this fetches the latest commit off that main branch and runs the build to generate the associated tools.
+To override this behavior, use the `--target-branch` flag to select `public`; this fetches the latest commit off that main branch and runs the build to generate the associated tools. This can be set to any branch name, however `public` is the main public branch for the Moddable-OpenSource repo.
 
 ```
 xs-dev setup --target-branch public
+```
+
+When combined with the `--source-repo` flag, it's possible to get the SDK repo from another source instead of the default GitHub repo.
+
+```
+xs-dev setup --source-repo https://my-sdk.moddable-git.not-real --target-branch main
 ```
 
 _This will only work for the `mac`, `windows`, and `linux` device options, which are the respective defaults for the operating system on which the command is run._

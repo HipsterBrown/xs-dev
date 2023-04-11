@@ -1,5 +1,5 @@
 import type { GluegunToolbox } from 'gluegun'
-import type { SetupArgs } from './toolbox/setup/types'
+import type { PlatformSetupArgs, SetupArgs } from './toolbox/setup/types'
 import type { BuildArgs } from './toolbox/build/index'
 
 export type Device =
@@ -18,7 +18,7 @@ export type Device =
 export interface XSDevToolbox extends GluegunToolbox {
   setup: Record<
     Device,
-    (() => Promise<void>) | ((args: SetupArgs) => Promise<void>)
+    (() => Promise<void>) | ((args: SetupArgs | PlatformSetupArgs) => Promise<void>)
   >
   update: Record<
     Device,
