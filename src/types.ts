@@ -14,6 +14,7 @@ export type Device =
   | 'esp32'
   | 'wasm'
   | 'pico'
+  | 'nrf52'
 
 export interface XSDevToolbox extends GluegunToolbox {
   setup: Record<

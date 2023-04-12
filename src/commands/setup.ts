@@ -35,6 +35,7 @@ const command: GluegunCommand<XSDevToolbox> = {
         'esp32',
         'pico',
         'wasm',
+        'nrf52',
         DEVICE_ALIAS[currentPlatform],
       ]
       const { device: selectedDevice } = await prompt.ask([
