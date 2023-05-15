@@ -20,8 +20,6 @@ import { installPython } from './nrf52/windows'
 
 const finishedPromise = promisify(finished)
 
-// https://developer.arm.com/-/media/Files/downloads/gnu/12.2.rel1/binrel/arm-gnu-toolchain-12.2.rel1-mingw-w64-i686-arm-none-eabi.zip
-
 const ARCH_ALIAS: Record<string, string> = {
   darwin_arm64: 'darwin-arm64',
   darwin_x64: 'darwin-x86_64',

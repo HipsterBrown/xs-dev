@@ -25,6 +25,11 @@ const command: GluegunCommand = {
     filesystem.remove(filesystem.resolve(INSTALL_DIR, 'nrf52'))
 
     if (platformType() === 'Darwin') {
+      const NC_PREFS_BACKUP = filesystem.resolve(INSTALL_DIR, 'ejectfix', 'com.apple.ncprefs.plist')
+      if (filesystem.exists(NC_PREFS_BACKUP) === 'file') {
+        filesystem.copy(NC_PREFS_BACKUP, filesystem.resolve(process.env.HOME ?? '~', 'Library', 'Preferences', 'com.apple.ncprefs.plist'), { overwrite: true })
+      }
+      filesystem.remove(filesystem.resolve(INSTALL_DIR, 'ejectfix'))
       filesystem.remove('/Applications/xsbug.app')
     }
 

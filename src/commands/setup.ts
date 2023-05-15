@@ -2,6 +2,7 @@ import type { GluegunCommand } from 'gluegun'
 import { type as platformType } from 'os'
 import type { Device, XSDevToolbox } from '../types'
 import setupFontbm from '../toolbox/setup/fontbm'
+import setupEjectfix from '../toolbox/setup/ejectfix'
 import { DEVICE_ALIAS } from '../toolbox/prompt/devices'
 import { MODDABLE_REPO } from '../toolbox/setup/constants'
 import { SetupArgs } from '../toolbox/setup/types'
@@ -9,7 +10,7 @@ import { SetupArgs } from '../toolbox/setup/types'
 interface SetupOptions {
   device?: Device
   listDevices?: boolean
-  tool?: string
+  tool?: 'fontbm' | 'ejectfix'
   targetBranch?: SetupArgs['targetBranch']
   sourceRepo?: string
 }
@@ -56,11 +57,12 @@ const command: GluegunCommand<XSDevToolbox> = {
     }
 
     if (tool !== undefined) {
-      if (tool !== 'fontbm') {
+      if (!['fontbm', 'ejectfix'].includes(tool)) {
         print.warning(`Unknown tool ${tool}`)
-        process.exit(0)
+        process.exit(1)
       }
-      await setupFontbm()
+      if (tool === 'fontbm') await setupFontbm()
+      if (tool === 'ejectfix') await setupEjectfix()
       return
     }
     const platformDevices: Device[] = ['mac', 'darwin', 'windows_nt', 'win', 'lin', 'linux']
