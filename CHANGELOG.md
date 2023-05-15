@@ -1,5 +1,7 @@
 
 
+* chore: add cname to gh pages deployment (4461d4b)
+
 * feat(setup): add --source-repo flag for custom SDK repo config (#119) (f137467)
 
 * fix(pico): pin branch for sdk, examples (#118) (aed4780)
