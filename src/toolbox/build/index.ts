@@ -217,7 +217,7 @@ export async function build({
 
   spinner.start(
     `Building${deployStatus !== 'none' ? ' and deploying project' : ''
-    } ${projectPath} on ${targetPlatform}`
+    } ${projectPath} on ${targetPlatform}\n`
   )
 
   const configArgs = [
@@ -242,12 +242,20 @@ export async function build({
       }
     })
   } else {
-    await system.exec(`mcconfig ${configArgs.join(' ')}`, {
-      cwd: projectPath,
-      stdout: process.stdout,
-      stdin: process.stdin,
-      shell: true,
+    process.on('SIGINT', () => {
+      void system.exec(`pkill serial2xsbug`)
     })
+    try {
+      await system.exec(`mcconfig ${configArgs.join(' ')}`, {
+        cwd: projectPath,
+        stdio: 'inherit',
+        shell: true,
+      })
+    } catch (error) {
+      if (error instanceof Error && !error.message.includes('exit code 2')) {
+        print.error(error)
+      }
+    }
 
     if (deployStatus === 'push') {
       await system.exec(
