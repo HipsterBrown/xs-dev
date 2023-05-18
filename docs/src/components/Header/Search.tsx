@@ -16,7 +16,7 @@ const SearchForm: Component = () => {
   }
 
   onMount(async () => {
-    const content = await fetch('/xs-dev/search-index.json')
+    const content = await fetch('/search-index.json')
       .then((res) => res.json())
     const options = { keys: ['title', 'description', 'content'] }
     fuse = new Fuse(content, options)
