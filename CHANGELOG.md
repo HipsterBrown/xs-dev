@@ -1,5 +1,7 @@
 
 
+* chore: update docs paths for new domain name (5c44bd5)
+
 * chore: add cname to gh pages deployment (4461d4b)
 
 * feat(setup): add --source-repo flag for custom SDK repo config (#119) (f137467)
