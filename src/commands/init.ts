@@ -76,7 +76,7 @@ const command: GluegunCommand = {
             selectedExample
           )
           info(`Generating project directory from ${selectedExample}`)
-          filesystem.copy(selectedExamplePath, name)
+          filesystem.copy(selectedExamplePath, name, { overwrite })
         } else {
           warning('Please select an example template to use.')
           process.exit(0)

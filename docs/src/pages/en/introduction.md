@@ -34,9 +34,15 @@ The Moddable SDK and associated dev board tooling is incredibly empowering for e
 
 <iframe width="560" height="315" src="https://www.youtube-nocookie.com/embed/1gxFWBnDl18" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
 
+**Read through the starter guide for a detailed walkthrough**
+
+0. [Prepare for embedded JS development](/en/guide/00-prepare)
+1. [Hello Console](/en/guide/01-hello-console)
+2. [Guiding light](/en/guide/02-blinky)
+
 ## Requirements
 
-[Node.js >= v14](https://nodejs.org/en/)
+[Node.js >= v16](https://nodejs.org/en/)
 
 _If you've never installed Node.js before, check out the [getting started guide for xs-dev](/xs-dev/en/guide/00-prepare#nodejs-package-manager-optional)._
 

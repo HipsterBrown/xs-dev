@@ -33,7 +33,7 @@ A local plain text editor is generally required for creating and editing your Ja
 
 These are not the only available editors, so feel free to do your own research and pick what feels right to you!
 
-## NodeJS Package Manager (optional)
+## NodeJS & Package Manager (optional)
 
 While [NodeJS](https://nodejs.org/en/) is not required for [Moddable XS](https://github.com/Moddable-OpenSource/moddable) projects, it is a dependency for installing and using the [`xs-dev` CLI](https://hipsterbrown.github.io/xs-dev/en/introduction/).
 
@@ -42,6 +42,7 @@ Node can be [downloaded directly from the website](https://nodejs.org/en/downloa
 - [Volta](https://volta.sh/)
 - [fnm](https://github.com/Schniz/fnm)
 - [asdf](https://asdf-vm.com/guide/getting-started.html#_4-install-a-plugin)
+- [rtx](https://github.com/jdxcode/rtx#installation)
 - [`pnpm env`](https://pnpm.io/cli/env)
 
 Node comes with [npm](https://docs.npmjs.com/cli/v8/commands/npm) as the included package manager, but there are other options available if needed:
@@ -62,3 +63,19 @@ Check out the [npm docs](https://docs.npmjs.com/resolving-eacces-permissions-err
 ## Linux Permissions
 
 Setup commands rely on [`ssh-askpass`](https://packages.ubuntu.com/bionic/ssh-askpass) to prompt for permission when installing other tools and dependencies.
+
+## Choose your hardware adventure
+
+Hardware is not required to get started with xs-dev, or even to run some code, since there are [simulated devices available with the Moddable SDK](https://github.com/Moddable-OpenSource/moddable/blob/public/documentation/tools/tools.md#simulator).
+
+Simulators are fun and everything, but controlling hardware with JavaScript is even better! `xs-dev` supports a few popular hardware platforms through [Moddable](https://github.com/Moddable-OpenSource/moddable):
+
+- [ESP8266](https://github.com/Moddable-OpenSource/moddable/blob/public/documentation/devices/esp8266.md)
+- [ESP32](https://github.com/Moddable-OpenSource/moddable/blob/public/documentation/devices/esp32.md)
+- [Raspberry Pi Pico](https://github.com/Moddable-OpenSource/moddable/blob/public/documentation/devices/pico.md)
+
+Each platform has a variety of features and form factors to support whatever you might dream up. This guide will do its best to provide code and diagrams that match the expectations of your chosen device(s) but cannot promise comprehensive coverage of every piece of hardware in existence.
+
+If you run into issues or have a question, please [start a discussion in the GitHub repo](https://github.com/HipsterBrown/xs-dev/discussions).
+
+Once you feel ready, [move on the first step of installing the CLI and the Moddable SDK](/en/guide/01-hello-console).

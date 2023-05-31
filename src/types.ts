@@ -18,7 +18,8 @@ export type Device =
 export interface XSDevToolbox extends GluegunToolbox {
   setup: Record<
     Device,
-    (() => Promise<void>) | ((args: SetupArgs | PlatformSetupArgs) => Promise<void>)
+    | (() => Promise<void>)
+    | ((args: SetupArgs | PlatformSetupArgs) => Promise<void>)
   >
   update: Record<
     Device,

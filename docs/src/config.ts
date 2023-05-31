@@ -43,5 +43,6 @@ export const SIDEBAR = {
     { text: 'Guide', header: true },
     { text: '00. Prepare', link: 'en/guide/00-prepare' },
     { text: '01. Hello Console', link: 'en/guide/01-hello-console' },
+    { text: '02. Guiding Light', link: 'en/guide/02-blinky' },
   ],
 }
