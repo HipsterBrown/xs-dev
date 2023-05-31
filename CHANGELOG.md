@@ -1,5 +1,7 @@
 
 
+* docs: update starter guide with blinky step, fix init overwrite (cfc700e)
+
 * chore: update docs paths for new domain name (5c44bd5)
 
 * chore: add cname to gh pages deployment (4461d4b)
