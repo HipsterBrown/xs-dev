@@ -1,5 +1,7 @@
 
 
+* fix(setup): install pico extras (#123) (a00181b)
+
 * docs: update starter guide with blinky step, fix init overwrite (cfc700e)
 
 * chore: update docs paths for new domain name (5c44bd5)
