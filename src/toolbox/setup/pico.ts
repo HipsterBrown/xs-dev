@@ -16,7 +16,7 @@ export default async function(): Promise<void> {
   const PICOTOOL_REPO = 'https://github.com/raspberrypi/picotool'
   const PICO_ROOT = process.env.PICO_ROOT ?? filesystem.resolve(INSTALL_DIR, 'pico')
   const PICO_SDK_DIR = filesystem.resolve(PICO_ROOT, 'pico-sdk')
-  const PICO_EXTRAS_PATH = filesystem.resolve(PICO_ROOT, 'pico-extras')
+  const PICO_EXTRAS_DIR = filesystem.resolve(PICO_ROOT, 'pico-extras')
   const PICO_EXAMPLES_PATH = filesystem.resolve(PICO_ROOT, 'pico-examples')
   const PICOTOOL_PATH = filesystem.resolve(PICO_ROOT, 'picotool')
   const PICOTOOL_BUILD_DIR = filesystem.resolve(PICOTOOL_PATH, 'build')
@@ -77,10 +77,10 @@ export default async function(): Promise<void> {
     spinner.succeed()
   }
 
-  if (filesystem.exists(PICO_EXTRAS_PATH) === false) {
+  if (filesystem.exists(PICO_EXTRAS_DIR) === false) {
     spinner.start('Cloning pico-extras repo')
     await system.exec(
-      `git clone --depth 1 --single-branch -b sdk-${PICO_BRANCH} ${PICO_EXTRAS_REPO} ${PICO_EXTRAS_PATH}`,
+      `git clone --depth 1 --single-branch -b sdk-${PICO_BRANCH} ${PICO_EXTRAS_REPO} ${PICO_EXTRAS_DIR}`,
       { stdout: process.stdout }
     )
     spinner.succeed()
@@ -103,13 +103,21 @@ export default async function(): Promise<void> {
     spinner.succeed()
   }
 
-  // 3. Set the PICO_SDK_PATH environment variable to point to the Pico SDK directory
+  // 3. Set the PICO_SDK_PATH environment variable to point to the Pico SDK directory and PICO_EXTRAS_DIR to the Pico extras directory
   if (process.env.PICO_SDK_DIR === undefined) {
     spinner.info('Setting PICO_SDK_DIR')
     process.env.PICO_SDK_DIR = PICO_SDK_DIR
     await upsert(EXPORTS_FILE_PATH, `export PICO_SDK_DIR=${PICO_SDK_DIR}`)
   } else {
     spinner.info(`Using existing $PICO_SDK_DIR: ${process.env.PICO_SDK_DIR}`)
+  }
+
+  if (process.env.PICO_EXTRAS_DIR === undefined) {
+    spinner.info('Setting PICO_EXTRAS_DIR')
+    process.env.PICO_EXTRAS_DIR = PICO_EXTRAS_DIR
+    await upsert(EXPORTS_FILE_PATH, `export PICO_EXTRAS_DIR=${PICO_EXTRAS_DIR}`)
+  } else {
+    spinner.info(`Using existing $PICO_EXTRAS_DIR: ${process.env.PICO_EXTRAS_DIR}`)
   }
 
   // 4. Build some pico tools:
