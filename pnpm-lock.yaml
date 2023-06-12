@@ -82,9 +82,6 @@ devDependencies:
   '@typescript-eslint/parser':
     specifier: ^4.33.0
     version: 4.33.0(eslint@7.32.0)(typescript@4.7.3)
-  '@webcomponents/template-shadowroot':
-    specifier: ^0.1.0
-    version: 0.1.0
   astro:
     specifier: 2.5.0
     version: 2.5.0(@types/node@18.11.19)
@@ -106,9 +103,6 @@ devDependencies:
   eslint-plugin-promise:
     specifier: ^5.2.0
     version: 5.2.0(eslint@7.32.0)
-  fuse.js:
-    specifier: ^6.6.2
-    version: 6.6.2
   jest:
     specifier: ^27.4.7
     version: 27.4.7(ts-node@10.9.1)
@@ -2393,10 +2387,6 @@ packages:
 
   /@vscode/l10n@0.0.13:
     resolution: {integrity: sha512-A3uY356uOU9nGa+TQIT/i3ziWUgJjVMUrGGXSrtRiTwklyCFjGVWIOHoEIHbJpiyhDkJd9kvIWUOfXK1IkK8XQ==}
-    dev: true
-
-  /@webcomponents/template-shadowroot@0.1.0:
-    resolution: {integrity: sha512-ry84Vft6xtRBbd4M/ptRodbOLodV5AD15TYhyRghCRgIcJJKmYmJ2v2BaaWxygENwh6Uq3zTfGPmlckKT/GXsQ==}
     dev: true
 
   /JSONStream@1.3.5:
@@ -4917,11 +4907,6 @@ packages:
 
   /functions-have-names@1.2.3:
     resolution: {integrity: sha512-xckBUXyTIqT97tq2x2AMb+g163b5JFysYk0x4qxNFwbfQkmNZoiRHb6sPzI9/QV33WeuvVYBUIiD4NzNIyqaRQ==}
-    dev: true
-
-  /fuse.js@6.6.2:
-    resolution: {integrity: sha512-cJaJkxCCxC8qIIcPBF9yGxY0W/tVZS3uEISDxhYIdtk8OL93pe+6Zj7LjCqVV4dzbqcriOZ+kQ/NE4RXZHsIGA==}
-    engines: {node: '>=10'}
     dev: true
 
   /gensync@1.0.0-beta.2:
