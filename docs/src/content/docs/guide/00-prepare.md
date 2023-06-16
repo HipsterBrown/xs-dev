@@ -77,4 +77,4 @@ Each platform has a variety of features and form factors to support whatever you
 
 If you run into issues or have a question, please [start a discussion in the GitHub repo](https://github.com/HipsterBrown/xs-dev/discussions).
 
-Once you feel ready, [move on the first step of installing the CLI and the Moddable SDK](/en/guide/01-hello-console).
+Once you feel ready, [move on the first step of installing the CLI and the Moddable SDK](/guide/01-hello-console/).

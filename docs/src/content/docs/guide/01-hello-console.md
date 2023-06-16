@@ -7,7 +7,7 @@ description: How to set up the basic development environment and run your first 
 
 ## Install the CLI
 
-`xs-dev` can be installed globally using the [NodeJS package manager of your choice](./00-prepare#nodejs-package-manager-optional).
+`xs-dev` can be installed globally using the [NodeJS package manager of your choice](http://localhost:3000/guide/00-prepare#nodejs--package-manager-optional).
 
 ```
 npm install -g xs-dev
@@ -23,7 +23,7 @@ yarn global add xs-dev
 
 ## Setup system tooling
 
-As specified in the [setup documentation](../features/setup), the [Moddable SDK and associated tooling](https://github.com/Moddable-OpenSource/moddable/blob/public/documentation/tools/tools.md) is installed using the following command:
+As specified in the [setup documentation](/features/setup/), the [Moddable SDK and associated tooling](https://github.com/Moddable-OpenSource/moddable/blob/public/documentation/tools/tools.md) is installed using the following command:
 
 ```
 xs-dev setup
@@ -53,7 +53,7 @@ As a next step, try running the "helloworld example" in the Moddable Command Pro
 
 To start a new terminal session, you can either execute your shell of choice (`bash`/`zsh`/`fish`), create a new terminal window / tab, or start the Moddable Command Prompt on Windows. This will ensure the expected tooling is available in your session [PATH](https://en.wikipedia.org/wiki/PATH_(variable)).
 
-You can [run any Moddable example included in the SDK](../features/run#moddable-examples). The "Hello World" example provides the simplest program to get started and can be run in the [simulator](https://github.com/Moddable-OpenSource/moddable/blob/public/documentation/tools/tools.md#simulator):
+You can [run any Moddable example included in the SDK](/features/run#moddable-examples). The "Hello World" example provides the simplest program to get started and can be run in the [simulator](https://github.com/Moddable-OpenSource/moddable/blob/public/documentation/tools/tools.md#simulator):
 
 ```
 xs-dev run --example helloworld
@@ -61,7 +61,7 @@ xs-dev run --example helloworld
 
 This will start up the debugger and simulator:
 
-![Moddable simulator app and debugger app running on MacOS](/run-hello-world.png)
+![Moddable simulator app and debugger app running on MacOS](../../../assets/run-hello-world.png)
 
 This will keep running until interrupted using the `Ctrl+C` keys in the terminal session or both apps are quit.
 
@@ -69,7 +69,7 @@ This will keep running until interrupted using the `Ctrl+C` keys in the terminal
 
 Use the `--list-examples` flag with the `run` command to search the extensive list of available examples to run in the simulator: `xs-dev run --list-examples`
 
-When you're ready to move on, it's time to [create your first project and control some hardware](/en/guide/02-blinky).
+When you're ready to move on, it's time to [create your first project and control some hardware](/guide/02-blinky).
 
 ## Troubleshooting
 
@@ -79,7 +79,7 @@ When attempting to run the Hello World example, if you continually see the follo
 Moddable tooling required. Run 'xs-dev setup --device <computer os here>' before trying again.
 ```
 
-There may be an issue with the terminal shell or command prompt using the correct [environment configuration](/xs-dev/en/features/setup#overview) for xs-dev.
+There may be an issue with the terminal shell or command prompt using the correct [environment configuration](/features/setup#overview) for xs-dev.
 
 - [Learn about Terminal profiles on MacOS](https://support.apple.com/guide/terminal/default-startup-terminal-window-profiles-trml5856b1f2/mac)
 - [Learn about shell initialization files and user profiles on Linux](https://www.tecmint.com/understanding-shell-initialization-files-and-user-profiles-linux/)
@@ -92,7 +92,7 @@ env | grep MODDABLE
 ```
 The above command should return something like `MODDABLE=/Users/<username>/.local/share/moddable` to indicate where the Moddable SDK has been installed in the filesystem.
 
-Running [`xs-dev doctor` command](/en/features/doctor) will display relevant info about the development environment, which can be helpful for debugging and sharing in support issues:
+Running [`xs-dev doctor` command](/features/doctor) will display relevant info about the development environment, which can be helpful for debugging and sharing in support issues:
 
 ```
 xs-dev environment info:

@@ -7,7 +7,7 @@ description: Initialize a new project and start to interact with some hardware!
 
 ## Project creation
 
-The [`init` command](/en/features/init) will create a new directory with the name provided and saffold the starting files based on a template or example:
+The [`init` command](/features/init) will create a new directory with the name provided and saffold the starting files based on a template or example:
 
 ```
 xs-dev init guiding-light
@@ -20,7 +20,7 @@ Generating Moddable project: guiding-light
 Run the project using: cd guiding-light && xs-dev run
 ```
 
-The `guiding-light` directory should contain `main.js` and `manifest.json` files. `main.js` contains that was run from the [Hello Console example](/en/guide/02-hello-console):
+The `guiding-light` directory should contain `main.js` and `manifest.json` files. `main.js` contains that was run from the [Hello Console example](/guide/01-hello-console#run-the-hello-world-example):
 
 ```javascript
 debugger;
@@ -53,15 +53,15 @@ The [`include` field](https://github.com/Moddable-OpenSource/moddable/blob/publi
 
 The [`modules` field](https://github.com/Moddable-OpenSource/moddable/blob/public/documentation/tools/manifest.md#modules) should contain a mapping of every module to include in the build. The `*` key means the module (or list of modules) can be imported and referenced by their file name. A custom key can be used as an alias to reference when importing the assigned module.
 
-Executing `xs-dev run` should provide the same experience as the [Hello Console guide](/en/guide/01-hello-console).
+Executing `xs-dev run` should provide the same experience as the [Hello Console guide](/guide/01-hello-console).
 
-_Quick tip: check out all the available simulators by using the [`--list-devices` flag](/en/features/run#select-a-device-target) with the `run` command and typing "simulator" to filter the list._
+_Quick tip: check out all the available simulators by using the [`--list-devices` flag](/features/run#select-a-device-target) with the `run` command and typing "simulator" to filter the list._
 
 ## Down to the metal
 
-At this point, we have our [chosen hardware in hand](/en/guide/00-prepare#choose-your-hardware-adventure) and need to set up the dev environment to start running code on the device. 
+At this point, we have our [chosen hardware in hand](/guide/00-prepare#choose-your-hardware-adventure) and need to set up the dev environment to start running code on the device. 
 
-Just like the [previous step](/en/guide/01-hello-console#setup-system-tooling), the `setup` command will automate the installation and building of tooling required for the target device. The `--list-devices` flag will provide an interactive list of supported device platforms:
+Just like the [previous step](/guide/01-hello-console#setup-system-tooling), the `setup` command will automate the installation and building of tooling required for the target device. The `--list-devices` flag will provide an interactive list of supported device platforms:
 
 ```
 ❯ xs-dev setup --list-devices
@@ -101,7 +101,7 @@ Now that we know we can run code on our device, it is time to shed a little ligh
 xs-dev include io
 ```
 
-The [`include` command](/en/features/include) updates the `manifest.json` to (you guessed it) _include_ the required module(s) from the Moddable SDK. In this case, the `io` module provides the complete set of ECMA-419 APIs for the supported device platform. The `manifest.json` should look like this:
+The [`include` command](/features/include) updates the `manifest.json` to (you guessed it) _include_ the required module(s) from the Moddable SDK. In this case, the `io` module provides the complete set of ECMA-419 APIs for the supported device platform. The `manifest.json` should look like this:
 
 ```json
 {
