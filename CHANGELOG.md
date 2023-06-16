@@ -1,5 +1,7 @@
 
 
+## [0.25.7](https://github.com/HipsterBrown/xs-dev/compare/v0.25.6...v0.25.7) (2023-06-16)
+
 ### [0.25.6](https://github.com/HipsterBrown/xs-dev/compare/v0.25.5...v0.25.6) (2023-06-16)
 
 * docs: migrate astro theme to starlight (#127) (c27007e)
