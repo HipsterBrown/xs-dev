@@ -1,5 +1,7 @@
 
 
+### [0.25.6](https://github.com/HipsterBrown/xs-dev/compare/v0.25.5...v0.25.6) (2023-06-16)
+
 * docs: migrate astro theme to starlight (#127) (c27007e)
 
 * fix(setup): install pico extras (#123) (a00181b)
