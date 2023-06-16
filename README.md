@@ -12,7 +12,7 @@ The Moddable SDK and associated dev board tooling is incredibly empowering for e
 
 [Node.js >= v16](https://nodejs.org/en/)
 
-_If you've never installed Node.js before, check out the [getting started guide for xs-dev](https://hipsterbrown.github.io/xs-dev/en/guide/00-prepare#nodejs-package-manager-optional)._
+_If you've never installed Node.js before, check out the [getting started guide for xs-dev](https://hipsterbrown.github.io/xs-dev/guide/00-prepare#nodejs-package-manager-optional)._
 
 **On Linux:**
 
