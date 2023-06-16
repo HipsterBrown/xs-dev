@@ -56,7 +56,9 @@ jobs:
       - name: Release It
         run: |
           npm config set //registry.npmjs.org/:_authToken $NPM_TOKEN
-          pnpm run release -- --npm.skipChecks
+          pnpm release --npm.skipChecks
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+
