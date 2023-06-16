@@ -322,12 +322,12 @@
   <div class="container astro-QBRJPK3X">
               <div class="content astro-XR5N24GR"><p><strong>How to set up the basic development environment and run your first program</strong></p>
 <h2 id="install-the-cli">Install the CLI</h2>
-<p><code>xs-dev</code> can be installed globally using the <a href="./00-prepare#nodejs-package-manager-optional">NodeJS package manager of your choice</a>.</p>
+<p><code>xs-dev</code> can be installed globally using the <a href="http://localhost:3000/guide/00-prepare#nodejs--package-manager-optional">NodeJS package manager of your choice</a>.</p>
 <pre is:raw="" class="astro-code css-variables" style="background-color: var(--astro-code-color-background); overflow-x: auto;" tabindex="0"><code><span class="line"><span style="color: var(--astro-code-color-text)">npm install -g xs-dev</span></span></code></pre>
 <pre is:raw="" class="astro-code css-variables" style="background-color: var(--astro-code-color-background); overflow-x: auto;" tabindex="0"><code><span class="line"><span style="color: var(--astro-code-color-text)">pnpm install -g xs-dev</span></span></code></pre>
 <pre is:raw="" class="astro-code css-variables" style="background-color: var(--astro-code-color-background); overflow-x: auto;" tabindex="0"><code><span class="line"><span style="color: var(--astro-code-color-text)">yarn global add xs-dev</span></span></code></pre>
 <h2 id="setup-system-tooling">Setup system tooling</h2>
-<p>As specified in the <a href="../features/setup">setup documentation</a>, the <a href="https://github.com/Moddable-OpenSource/moddable/blob/public/documentation/tools/tools.md">Moddable SDK and associated tooling</a> is installed using the following command:</p>
+<p>As specified in the <a href="/features/setup/">setup documentation</a>, the <a href="https://github.com/Moddable-OpenSource/moddable/blob/public/documentation/tools/tools.md">Moddable SDK and associated tooling</a> is installed using the following command:</p>
 <pre is:raw="" class="astro-code css-variables" style="background-color: var(--astro-code-color-background); overflow-x: auto;" tabindex="0"><code><span class="line"><span style="color: var(--astro-code-color-text)">xs-dev setup</span></span></code></pre>
 <p>This will determine the correct tooling to install based on your operating system.</p>
 <p><strong><a href="https://github.com/HipsterBrown/xs-dev/pull/63">Windows support is currently in beta</a></strong></p>
@@ -341,18 +341,18 @@
 <span class="line"><span style="color: var(--astro-code-color-text)">As a next step, try running the "helloworld example" in the Moddable Command Prompt: xs-dev run --example helloworld'</span></span></code></pre>
 <h2 id="run-the-hello-world-example">Run the Hello World example</h2>
 <p>To start a new terminal session, you can either execute your shell of choice (<code>bash</code>/<code>zsh</code>/<code>fish</code>), create a new terminal window / tab, or start the Moddable Command Prompt on Windows. This will ensure the expected tooling is available in your session <a href="https://en.wikipedia.org/wiki/PATH_(variable)">PATH</a>.</p>
-<p>You can <a href="../features/run#moddable-examples">run any Moddable example included in the SDK</a>. The “Hello World” example provides the simplest program to get started and can be run in the <a href="https://github.com/Moddable-OpenSource/moddable/blob/public/documentation/tools/tools.md#simulator">simulator</a>:</p>
+<p>You can <a href="/features/run#moddable-examples">run any Moddable example included in the SDK</a>. The “Hello World” example provides the simplest program to get started and can be run in the <a href="https://github.com/Moddable-OpenSource/moddable/blob/public/documentation/tools/tools.md#simulator">simulator</a>:</p>
 <pre is:raw="" class="astro-code css-variables" style="background-color: var(--astro-code-color-background); overflow-x: auto;" tabindex="0"><code><span class="line"><span style="color: var(--astro-code-color-text)">xs-dev run --example helloworld</span></span></code></pre>
 <p>This will start up the debugger and simulator:</p>
-<p><img src="/run-hello-world.png" alt="Moddable simulator app and debugger app running on MacOS"></p>
+<p><img alt="Moddable simulator app and debugger app running on MacOS"  src="/_astro/run-hello-world.2bc2aa07_Z27JXN6.webp" width="1000" height="611" loading="lazy" decoding="async"></p>
 <p>This will keep running until interrupted using the <code>Ctrl+C</code> keys in the terminal session or both apps are quit.</p>
 <h2 id="keep-exploring">Keep exploring!</h2>
 <p>Use the <code>--list-examples</code> flag with the <code>run</code> command to search the extensive list of available examples to run in the simulator: <code>xs-dev run --list-examples</code></p>
-<p>When you’re ready to move on, it’s time to <a href="/en/guide/02-blinky">create your first project and control some hardware</a>.</p>
+<p>When you’re ready to move on, it’s time to <a href="/guide/02-blinky">create your first project and control some hardware</a>.</p>
 <h2 id="troubleshooting">Troubleshooting</h2>
 <p>When attempting to run the Hello World example, if you continually see the following error (even after starting a new terminal session):</p>
 <pre is:raw="" class="astro-code css-variables" style="background-color: var(--astro-code-color-background); overflow-x: auto;" tabindex="0"><code><span class="line"><span style="color: var(--astro-code-color-text)">Moddable tooling required. Run 'xs-dev setup --device &#x3C;computer os here>' before trying again.</span></span></code></pre>
-<p>There may be an issue with the terminal shell or command prompt using the correct <a href="/xs-dev/en/features/setup#overview">environment configuration</a> for xs-dev.</p>
+<p>There may be an issue with the terminal shell or command prompt using the correct <a href="/features/setup#overview">environment configuration</a> for xs-dev.</p>
 <ul>
 <li><a href="https://support.apple.com/guide/terminal/default-startup-terminal-window-profiles-trml5856b1f2/mac">Learn about Terminal profiles on MacOS</a></li>
 <li><a href="https://www.tecmint.com/understanding-shell-initialization-files-and-user-profiles-linux/">Learn about shell initialization files and user profiles on Linux</a></li>
@@ -361,7 +361,7 @@
 <p>On “Unix-like” environments (MacOS, Linux), the <code>env</code> command should contain a reference to the <code>MODDABLE</code> environment variable:</p>
 <pre is:raw="" class="astro-code css-variables" style="background-color: var(--astro-code-color-background); overflow-x: auto;" tabindex="0"><code><span class="line"><span style="color: var(--astro-code-color-text)">env | grep MODDABLE</span></span></code></pre>
 <p>The above command should return something like <code>MODDABLE=/Users/&#x3C;username>/.local/share/moddable</code> to indicate where the Moddable SDK has been installed in the filesystem.</p>
-<p>Running <a href="/en/features/doctor"><code>xs-dev doctor</code> command</a> will display relevant info about the development environment, which can be helpful for debugging and sharing in support issues:</p>
+<p>Running <a href="/features/doctor"><code>xs-dev doctor</code> command</a> will display relevant info about the development environment, which can be helpful for debugging and sharing in support issues:</p>
 <pre is:raw="" class="astro-code css-variables" style="background-color: var(--astro-code-color-background); overflow-x: auto;" tabindex="0"><code><span class="line"><span style="color: var(--astro-code-color-text)">xs-dev environment info:</span></span>
 <span class="line"><span style="color: var(--astro-code-color-text)">  CLI Version                0.19.3</span></span>
 <span class="line"><span style="color: var(--astro-code-color-text)">  OS                         Darwin</span></span>
@@ -380,7 +380,7 @@
     </a>
     <p>
       Last updated:
-      <time datetime="2023-06-16T13:07:54.000Z">
+      <time datetime="2023-06-16T15:00:52.000Z">
         Jun 16, 2023
       </time>
     </p>
