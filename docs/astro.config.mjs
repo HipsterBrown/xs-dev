@@ -12,6 +12,8 @@ export default defineConfig({
         src: '/src/assets/Chip.svg'
       },
       social: {
+        twitter: 'https://twitter.com/hipsterbrown',
+        mastodon: 'https://toot.cafe/@hipsterbrown',
         github: 'https://github.com/hipsterbrown/xs-dev',
       },
       editLink: {
