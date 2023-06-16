@@ -1,5 +1,7 @@
 
 
+* docs: migrate astro theme to starlight (#127) (c27007e)
+
 * fix(setup): install pico extras (#123) (a00181b)
 
 * docs: update starter guide with blinky step, fix init overwrite (cfc700e)
