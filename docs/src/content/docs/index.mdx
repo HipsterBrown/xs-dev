@@ -1,0 +1,66 @@
+---
+title: Welcome to xs-dev!
+description: CLI for automating the setup and usage of Moddable XS tools
+template: splash
+hero:
+  title: Welcome to xs-dev!
+  tagline: CLI for automating the setup and usage of Moddable XS
+  image:
+    file: ../../assets/Logo.svg
+  actions:
+    - text: Check out the starting guide
+      link: /guide/00-prepare/
+      icon: right-arrow
+      variant: primary
+    - text: Explore the various features
+      link: /features/setup/
+      icon: magnifier
+      variant: secondary
+---
+
+import { Card, CardGrid, Tabs, TabItem } from '@astrojs/starlight/components';
+import YoutubeEmbed from '../../components/YoutubeEmbed.astro';
+
+## Quick intro
+
+**Check out the getting started video from the Moddable team**
+
+<YoutubeEmbed  videoid="1gxFWBnDl18" playLabel="Play Video: Getting started with Moddable using xs-dev" />
+
+## Installation
+
+Install the package globally with the JS package manager of your choice:
+
+<Tabs>
+  <TabItem label="npm">
+        ```
+        npm install -g xs-dev
+        ```
+  </TabItem>
+  <TabItem label="pnpm">
+        ```
+        pnpm install -g xs-dev
+        ```
+  </TabItem>
+  <TabItem label="yarn">
+        ```
+        yarn global add xs-dev
+        ```
+  </TabItem>
+</Tabs>
+
+
+## Get involved
+
+<CardGrid>
+  <Card title="Community" icon="information">
+    <a href="https://github.com/HipsterBrown/xs-dev/discussions">
+      Start a discussion on GitHub
+    </a>
+  </Card>
+  <Card title="Chat" icon="laptop">
+    <a href="https://app.gitter.im/#/room/#embedded-javascript_moddable:gitter.im">
+      Join the conversation on Gitter
+    </a>
+  </Card>
+</CardGrid>
