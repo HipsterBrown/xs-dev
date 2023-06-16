@@ -3,7 +3,7 @@ title: 'Introduction to xs-dev (legacy page)'
 head:
   - tag: meta
     attrs:
-        content: "3;url=/"
+        content: "0;url=/"
         http-equiv: refresh
 ---
 
