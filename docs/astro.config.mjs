@@ -8,6 +8,9 @@ export default defineConfig({
     starlight({
       title: 'xs-dev',
       description: 'CLI for automating the setup and usage of Moddable XS tools',
+      logo: {
+        src: '/src/assets/Chip.svg'
+      },
       social: {
         github: 'https://github.com/hipsterbrown/xs-dev',
       },
