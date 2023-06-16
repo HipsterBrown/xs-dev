@@ -18,7 +18,7 @@ hero:
       variant: secondary
 ---
 
-import { Card, CardGrid } from '@astrojs/starlight/components';
+import { Card, CardGrid, Tabs, TabItem } from '@astrojs/starlight/components';
 import YoutubeEmbed from '../../components/YoutubeEmbed.astro';
 
 ## Quick intro
@@ -31,14 +31,36 @@ import YoutubeEmbed from '../../components/YoutubeEmbed.astro';
 
 Install the package globally with the JS package manager of your choice:
 
-```
-npm install -g xs-dev
-```
+<Tabs>
+  <TabItem label="npm">
+        ```
+        npm install -g xs-dev
+        ```
+  </TabItem>
+  <TabItem label="pnpm">
+        ```
+        pnpm install -g xs-dev
+        ```
+  </TabItem>
+  <TabItem label="yarn">
+        ```
+        yarn global add xs-dev
+        ```
+  </TabItem>
+</Tabs>
 
-```
-pnpm install -g xs-dev
-```
 
-```
-yarn global add xs-dev
-```
+## Get involved
+
+<CardGrid>
+  <Card title="Community" icon="information">
+    <a href="https://github.com/HipsterBrown/xs-dev/discussions">
+      Start a discussion on GitHub
+    </a>
+  </Card>
+  <Card title="Chat" icon="laptop">
+    <a href="https://app.gitter.im/#/room/#embedded-javascript_moddable:gitter.im">
+      Join the conversation on Gitter
+    </a>
+  </Card>
+</CardGrid>

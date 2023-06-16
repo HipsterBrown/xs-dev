@@ -169,6 +169,8 @@ Tried adding some `trace` calls to log the state to the debugger or updating the
 
 _Coming soon: react to digital input by pressing some buttons_
 
+In the meantime, check out the [many examples available in the Moddable SDK](https://github.com/Moddable-OpenSource/moddable/tree/public/examples).
+
 ## Troubleshooting
 
 If you're working with a device that doesn't have an on-board LED or encounter an error while trying to use the `device.pin.led` value, the [pin specifier](https://419.ecma-international.org/#-9-io-class-pattern-pin-specifier) can be set to a custom value based on the device datasheet or pinout diagram, like [this one for the Pico](https://pico.pinout.xyz/). The pin value can match the on-board LED or [an external LED](https://www.sparkfun.com/products/12062) connected to a GPIO, most likely by using a [breadboard](https://learn.sparkfun.com/tutorials/how-to-use-a-breadboard#building-your-first-breadboard-circuit).
