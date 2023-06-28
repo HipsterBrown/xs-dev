@@ -9,7 +9,7 @@ import { sourceEnvironment } from '../system/exec'
 
 export default async function(): Promise<void> {
   const OS = platformType().toLowerCase()
-  const ESP_BRANCH = 'v4.4.2'
+  const ESP_BRANCH = 'v4.4.3'
   const ESP32_DIR = filesystem.resolve(INSTALL_DIR, 'esp32')
   const IDF_PATH = filesystem.resolve(ESP32_DIR, 'esp-idf')
 
