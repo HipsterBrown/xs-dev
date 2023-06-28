@@ -1,5 +1,12 @@
 
 
+## [0.25.13](https://github.com/HipsterBrown/xs-dev/compare/v0.25.12...v0.25.13) (2023-06-28)
+
+
+### Bug Fixes
+
+* **setup/esp32:** update esp-idf version from 4.4.2 to 4.4.3 ([#134](https://github.com/HipsterBrown/xs-dev/issues/134)) ([83eba8a](https://github.com/HipsterBrown/xs-dev/commit/83eba8a352b3d82f738ce2fb0a788ad5f3f9b23b))
+
 ## [0.25.12](https://github.com/HipsterBrown/xs-dev/compare/v0.25.11...v0.25.12) (2023-06-16)
 
 ## [0.25.11](https://github.com/HipsterBrown/xs-dev/compare/v0.25.10...v0.25.11) (2023-06-16)
