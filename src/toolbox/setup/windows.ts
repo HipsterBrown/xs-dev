@@ -15,6 +15,7 @@ import upsert from '../patching/upsert'
 import ws from 'windows-shortcuts'
 import { promisify } from 'util'
 import { PlatformSetupArgs } from './types'
+import { downloadReleaseTools, fetchLatestRelease } from './moddable'
 
 const wsPromise = promisify(ws.create)
 
@@ -47,13 +48,20 @@ export async function ensureModdableCommandPrompt(spinner: ReturnType<GluegunPri
   }
 }
 
-export default async function({ sourceRepo }: PlatformSetupArgs): Promise<void> {
+export default async function({ sourceRepo, targetBranch }: PlatformSetupArgs): Promise<void> {
   const BIN_PATH = filesystem.resolve(
     INSTALL_PATH,
     'build',
     'bin',
     'win',
     'release'
+  )
+  const DEBUG_BIN_PATH = filesystem.resolve(
+    INSTALL_PATH,
+    'build',
+    'bin',
+    'win',
+    'debug'
   )
   const BUILD_DIR = filesystem.resolve(
     INSTALL_PATH,
@@ -146,9 +154,42 @@ export default async function({ sourceRepo }: PlatformSetupArgs): Promise<void> 
     spinner.info('Moddable repo already installed')
   } else {
     try {
-      spinner.start(`Cloning ${sourceRepo} repo`)
-      await system.spawn(`git clone ${sourceRepo} ${INSTALL_PATH}`)
-      spinner.succeed()
+      if (targetBranch === 'latest-release') {
+        spinner.start(`Getting latest Moddable-OpenSource/moddable release`)
+        const release = await fetchLatestRelease()
+        await system.spawn(
+          `git clone ${sourceRepo} ${INSTALL_PATH} --depth 1 --branch ${release.tag_name} --single-branch`
+        )
+
+        filesystem.dir(BIN_PATH)
+        filesystem.dir(DEBUG_BIN_PATH)
+
+        spinner.info('Downloading release tools')
+        
+        const assetName = `moddable-tools-win64.zip`
+        await downloadReleaseTools({
+          writePath: BIN_PATH,
+          assetName,
+          release
+        })
+        
+        const tools = filesystem.list(BIN_PATH) ?? []
+        await Promise.all(
+          tools.map(async (tool) => {
+            await filesystem.copyAsync(
+              filesystem.resolve(BIN_PATH, tool),
+              filesystem.resolve(DEBUG_BIN_PATH, tool)
+            )
+          })
+        )
+
+        spinner.succeed()
+      } else {
+        spinner.start(`Cloning ${sourceRepo} repo`)
+        await system.spawn(
+          `git clone ${sourceRepo} ${INSTALL_PATH} --depth 1 --branch ${targetBranch} --single-branch`
+        )
+      }
     } catch (error) {
       spinner.fail(`Error cloning moddable repo: ${String(error)}`)
       process.exit(1)
@@ -166,14 +207,16 @@ export default async function({ sourceRepo }: PlatformSetupArgs): Promise<void> 
     spinner.fail(error.toString())
   }
 
-  // 3. build tools
-  try {
-    spinner.start(`Building Moddable SDK tools`)
-    await system.exec(`build.bat`, { cwd: BUILD_DIR, stdout: process.stdout })
-    spinner.succeed()
-  } catch (error) {
-    spinner.fail(`Error building Moddable SDK tools: ${String(error)}`)
-    process.exit(1)
+  // 3. build tools if needed
+  if (targetBranch !== 'latest-release') {
+    try {
+      spinner.start(`Building Moddable SDK tools`)
+      await system.exec(`build.bat`, { cwd: BUILD_DIR, stdout: process.stdout })
+      spinner.succeed()
+    } catch (error) {
+      spinner.fail(`Error building Moddable SDK tools: ${String(error)}`)
+      process.exit(1)
+    }
   }
 
   // 4. create Windows shortcut
