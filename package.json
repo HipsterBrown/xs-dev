@@ -1,6 +1,6 @@
 {
   "name": "xs-dev",
-  "version": "0.25.13",
+  "version": "0.26.0",
   "description": "CLI for automating the setup and usage of Moddable XS tools",
   "types": "build/types/types.d.ts",
   "bin": {

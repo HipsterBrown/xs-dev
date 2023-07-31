@@ -1,5 +1,12 @@
 
 
+## [0.26.0](https://github.com/HipsterBrown/xs-dev/compare/v0.25.13...v0.26.0) (2023-07-31)
+
+
+### Features
+
+* **setup:** use versioned release artifacts in Windows "xs-dev setup" ([#136](https://github.com/HipsterBrown/xs-dev/issues/136)) ([73e6a25](https://github.com/HipsterBrown/xs-dev/commit/73e6a255e961cf8c27f4fb2fd3c11e9a0e773078))
+
 ## [0.25.13](https://github.com/HipsterBrown/xs-dev/compare/v0.25.12...v0.25.13) (2023-06-28)
 
 
