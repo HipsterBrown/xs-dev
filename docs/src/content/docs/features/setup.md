@@ -19,6 +19,12 @@ This process mostly automates the instructions provided by [Moddable's "Getting 
 
 [Homebrew](https://brew.sh/) is assumed to be installed.
 
+[XZ utils](https://tukaani.org/xz/) are required to install the CLI due to a dependency for decompressing the ARM toolchain used for nrf52 development. It can be installed with homebrew:
+
+```
+brew install xz
+```
+
 The [Xcode Command Line tools](https://developer.apple.com/xcode/) are required; `setup` will check for their existence before continuing.
 
 A symlink for [`xsbug.app`](https://github.com/Moddable-OpenSource/moddable/blob/public/documentation/xs/xsbug.md) is created in `/Applications` for easy access through Launchpad.

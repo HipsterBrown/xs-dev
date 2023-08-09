@@ -61,7 +61,7 @@ Check out the [npm docs](https://docs.npmjs.com/resolving-eacces-permissions-err
 
 ## Linux Permissions
 
-Setup commands rely on [`ssh-askpass`](https://packages.ubuntu.com/bionic/ssh-askpass) to prompt for permission when installing other tools and dependencies.
+Setup commands rely on [`ssh-askpass`](https://packages.ubuntu.com/focal/ssh-askpass) to prompt for permission when installing other tools and dependencies.
 
 ## Choose your hardware adventure
 
