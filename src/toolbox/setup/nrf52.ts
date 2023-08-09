@@ -11,7 +11,7 @@ import { Extract as ZipExtract } from 'unzip-stream'
 import { createUnxz } from 'node-liblzma'
 import { Device } from '../../types'
 import { DEVICE_ALIAS } from '../prompt/devices'
-import { sourceEnvironment } from '../system/exec'
+import { execWithSudo, sourceEnvironment } from '../system/exec'
 import { EXPORTS_FILE_PATH, INSTALL_DIR } from './constants'
 import { moddableExists } from './moddable'
 import { ensureModdableCommandPrompt, setEnv } from './windows'
@@ -110,6 +110,14 @@ export default async function(): Promise<void> {
       await installPython(spinner)
     } catch (error) { // Command Prompt restart needed
       process.exit(1)
+    }
+  }
+
+  if (OS === 'linux') {
+    try {
+      await execWithSudo('adduser $USER dialout', { process })
+    } catch (_error) {
+      print.warning(`Unable to provide ttyUSB0 permission to the current user. Please run "sudo adduser <username> dialout" before trying to attempting to build projects for your nrf52 device.`)
     }
   }
 
