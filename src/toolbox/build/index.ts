@@ -163,11 +163,17 @@ export async function build({
       String(process.env.MODDABLE),
       'examples'
     )
+    const contributedProjectPath = filesystem.resolve(
+      String(process.env.MODDABLE),
+      'contributed'
+    )
     const examples = filesystem.inspectTree(exampleProjectPath)?.children
+    const contributed = filesystem.inspectTree(contributedProjectPath)?.children
     const choices =
       examples !== undefined
         ? examples.map((example) => collectChoicesFromTree(example)).flat()
         : []
+    if (contributed !== undefined) choices.push(...contributed.map(project => collectChoicesFromTree(project)).flat())
     const { example: selectedExample } = await prompt.ask([
       {
         type: 'autocomplete',
@@ -192,7 +198,12 @@ export async function build({
       'examples',
       example
     )
-    if (filesystem.exists(exampleProjectPath) === false) {
+    const contributedProjectPath = filesystem.resolve(
+      String(process.env.MODDABLE),
+      'contributed',
+      example
+    )
+    if (filesystem.exists(exampleProjectPath) === false && filesystem.exists(contributedProjectPath) === false) {
       print.error('Example project does not exist.')
       print.info(`Lookup the available examples: xs-dev run --list-examples`)
       process.exit(1)
@@ -200,13 +211,13 @@ export async function build({
     if (
       filesystem.exists(
         filesystem.resolve(exampleProjectPath, 'manifest.json')
-      ) === false
+      ) === false && filesystem.exists(filesystem.resolve(contributedProjectPath, 'manifest.json')) === false
     ) {
       print.error('Example project must contain a manifest.json.')
       print.info(`Lookup the available examples: xs-dev run --list-examples`)
       process.exit(1)
     }
-    projectPath = exampleProjectPath
+    projectPath = filesystem.exists(exampleProjectPath) === 'dir' ? exampleProjectPath : contributedProjectPath
   }
 
   if (port !== undefined) {
