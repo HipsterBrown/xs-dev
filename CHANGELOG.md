@@ -1,5 +1,12 @@
 
 
+## [0.27.0](https://github.com/HipsterBrown/xs-dev/compare/v0.26.0...v0.27.0) (2023-08-11)
+
+
+### Features
+
+* add support for moddable four + nrf52 device setup ([#138](https://github.com/HipsterBrown/xs-dev/issues/138)) ([85b5e73](https://github.com/HipsterBrown/xs-dev/commit/85b5e735156afff62ac9789f0a2538032083034d))
+
 ## [0.26.0](https://github.com/HipsterBrown/xs-dev/compare/v0.25.13...v0.26.0) (2023-07-31)
 
 
