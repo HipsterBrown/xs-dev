@@ -123,6 +123,6 @@ export default async function(): Promise<void> {
 
   spinner.succeed(`
   Successfully set up nrf52 platform support for Moddable!
-  Test out the setup by starting a new ${isWindows ? 'Moddable Command Prompt' : 'terminal session'}, plugging in your device, and running: xs-dev-nrf52 run --example helloworld --device nrf52
+  Test out the setup by starting a new ${isWindows ? 'Moddable Command Prompt' : 'terminal session'}, plugging in your device, and running: xs-dev run --example helloworld --device nrf52
   `)
 }
