@@ -307,6 +307,8 @@
 <p>This process mostly automates the instructions provided by <a href="https://github.com/Moddable-OpenSource/moddable/blob/public/documentation/Moddable%20SDK%20-%20Getting%20Started.md">Moddable’s “Getting Started” documentation</a> with a few exceptions.</p>
 <p><strong>On macOS:</strong></p>
 <p><a href="https://brew.sh/">Homebrew</a> is assumed to be installed.</p>
+<p><a href="https://tukaani.org/xz/">XZ utils</a> are required to install the CLI due to a dependency for decompressing the ARM toolchain used for nrf52 development. It can be installed with homebrew:</p>
+<pre is:raw="" class="astro-code css-variables" style="background-color: var(--astro-code-color-background); overflow-x: auto;" tabindex="0"><code><span class="line"><span style="color: var(--astro-code-color-text)">brew install xz</span></span></code></pre>
 <p>The <a href="https://developer.apple.com/xcode/">Xcode Command Line tools</a> are required; <code>setup</code> will check for their existence before continuing.</p>
 <p>A symlink for <a href="https://github.com/Moddable-OpenSource/moddable/blob/public/documentation/xs/xsbug.md"><code>xsbug.app</code></a> is created in <code>/Applications</code> for easy access through Launchpad.</p>
 <p><strong>On Unix environments:</strong></p>
@@ -329,7 +331,9 @@
 <p>There are some utilities that are not included in the Moddable SDK or other platform tooling but can be helpful with some common development tasks. The <code>--tool</code> flag allows for installing one of these related tools, which may not be easily done from a typical package manager.</p>
 <p><strong>Supported tools:</strong></p>
 <p><a href="https://github.com/vladimirgamalyan/fontbm"><code>fontbm</code></a>: BMFont compatible, cross-platform (Linux/macOS/Windows) command line bitmap font generator (FreeType2 based render)</p>
-<pre is:raw="" class="astro-code css-variables" style="background-color: var(--astro-code-color-background); overflow-x: auto;" tabindex="0"><code><span class="line"><span style="color: var(--astro-code-color-text)">xs-dev setup --tool fontbm</span></span></code></pre></div>
+<pre is:raw="" class="astro-code css-variables" style="background-color: var(--astro-code-color-background); overflow-x: auto;" tabindex="0"><code><span class="line"><span style="color: var(--astro-code-color-text)">xs-dev setup --tool fontbm</span></span></code></pre>
+<p><code>ejectfix</code>: not a downloadable tool, rather a environment preference to disable the <code>DISK NOT EJECTED PROPERLY</code> notification while working with the nrf52 on MacOS. This will automate the process described by <a href="https://blog.adafruit.com/2021/05/11/how-to-tone-down-macos-big-surs-circuitpy-eject-notifications/">the Adafruit blog</a>:</p>
+<pre is:raw="" class="astro-code css-variables" style="background-color: var(--astro-code-color-background); overflow-x: auto;" tabindex="0"><code><span class="line"><span style="color: var(--astro-code-color-text)">xs-dev setup --tool ejectfix</span></span></code></pre></div>
               <footer class="astro-R6E7ZT6Q">
   <div class="meta flex astro-R6E7ZT6Q">
     <a href="https://github.com/hipsterbrown/xs-dev/blob/main/docs/src/content/docs/features/setup.md" class="flex astro-FBC6YAHV">
@@ -338,8 +342,8 @@
     </a>
     <p>
       Last updated:
-      <time datetime="2023-07-31T16:14:19.000Z">
-        Jul 31, 2023
+      <time datetime="2023-08-11T19:27:26.000Z">
+        Aug 11, 2023
       </time>
     </p>
   </div>
