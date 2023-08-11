@@ -14,9 +14,24 @@ The Moddable SDK and associated dev board tooling is incredibly empowering for e
 
 _If you've never installed Node.js before, check out the [getting started guide for xs-dev](https://hipsterbrown.github.io/xs-dev/guide/00-prepare#nodejs-package-manager-optional)._
 
+[XZ utils](https://tukaani.org/xz/) are required to install the CLI due to a dependency for decompressing the ARM toolchain used for nrf52 development.
+
+It can be installed with Homebrew on MacOS:
+
+```
+brew install xz
+```
+
+Or as `xz-utils` on Linux distributions like [Ubunutu](https://packages.ubuntu.com/search?keywords=xz-utils):
+
+```
+apt-get install xz-utils
+```
+
 **On Linux:**
 
-Setup commands rely on [`ssh-askpass`](https://packages.ubuntu.com/bionic/ssh-askpass) to prompt for permission when installing other tools and dependencies.
+Setup commands rely on [`ssh-askpass`](https://packages.ubuntu.com/focal/ssh-askpass) to prompt for permission when installing other tools and dependencies.
+
 
 ## Install
 

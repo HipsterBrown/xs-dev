@@ -12,4 +12,5 @@ export const DEVICE_ALIAS: Record<Device | 'esp8266', string> = Object.freeze({
   esp32: 'esp32',
   wasm: 'wasm',
   pico: 'pico',
+  nrf52: 'nrf52'
 })

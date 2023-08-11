@@ -97,9 +97,16 @@ export async function build({
       'pico/tiny2040',
       'pico/xiao_rp2040',
       'pico/pro_micro',
+      'nrf52/moddable_four',
+      'nrf52/dk',
+      'nrf52/sparkfun',
+      'nrf52/makerdiary',
+      'nrf52/xiao',
+      'nrf52/itsybitsy',
       'simulator/moddable_one',
       'simulator/moddable_two',
       'simulator/moddable_three',
+      'simulator/moddable_four',
       'simulator/m5stickc',
       'simulator/m5paper',
       'simulator/nodemcu',
@@ -156,11 +163,17 @@ export async function build({
       String(process.env.MODDABLE),
       'examples'
     )
+    const contributedProjectPath = filesystem.resolve(
+      String(process.env.MODDABLE),
+      'contributed'
+    )
     const examples = filesystem.inspectTree(exampleProjectPath)?.children
+    const contributed = filesystem.inspectTree(contributedProjectPath)?.children
     const choices =
       examples !== undefined
         ? examples.map((example) => collectChoicesFromTree(example)).flat()
         : []
+    if (contributed !== undefined) choices.push(...contributed.map(project => collectChoicesFromTree(project)).flat())
     const { example: selectedExample } = await prompt.ask([
       {
         type: 'autocomplete',
@@ -185,7 +198,12 @@ export async function build({
       'examples',
       example
     )
-    if (filesystem.exists(exampleProjectPath) === false) {
+    const contributedProjectPath = filesystem.resolve(
+      String(process.env.MODDABLE),
+      'contributed',
+      example
+    )
+    if (filesystem.exists(exampleProjectPath) === false && filesystem.exists(contributedProjectPath) === false) {
       print.error('Example project does not exist.')
       print.info(`Lookup the available examples: xs-dev run --list-examples`)
       process.exit(1)
@@ -193,13 +211,13 @@ export async function build({
     if (
       filesystem.exists(
         filesystem.resolve(exampleProjectPath, 'manifest.json')
-      ) === false
+      ) === false && filesystem.exists(filesystem.resolve(contributedProjectPath, 'manifest.json')) === false
     ) {
       print.error('Example project must contain a manifest.json.')
       print.info(`Lookup the available examples: xs-dev run --list-examples`)
       process.exit(1)
     }
-    projectPath = exampleProjectPath
+    projectPath = filesystem.exists(exampleProjectPath) === 'dir' ? exampleProjectPath : contributedProjectPath
   }
 
   if (port !== undefined) {
@@ -210,7 +228,7 @@ export async function build({
 
   spinner.start(
     `Building${deployStatus !== 'none' ? ' and deploying project' : ''
-    } ${projectPath} on ${targetPlatform}`
+    } ${projectPath} on ${targetPlatform}\n`
   )
 
   const configArgs = [
@@ -235,12 +253,20 @@ export async function build({
       }
     })
   } else {
-    await system.exec(`mcconfig ${configArgs.join(' ')}`, {
-      cwd: projectPath,
-      stdout: process.stdout,
-      stdin: process.stdin,
-      shell: true,
+    process.on('SIGINT', () => {
+      void system.exec(`pkill serial2xsbug`)
     })
+    try {
+      await system.exec(`mcconfig ${configArgs.join(' ')}`, {
+        cwd: projectPath,
+        stdio: 'inherit',
+        shell: true,
+      })
+    } catch (error) {
+      if (error instanceof Error && !error.message.includes('exit code 2')) {
+        print.error(error)
+      }
+    }
 
     if (deployStatus === 'push') {
       await system.exec(
