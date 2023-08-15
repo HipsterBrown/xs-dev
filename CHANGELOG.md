@@ -1,5 +1,7 @@
 
 
+## [0.27.1](https://github.com/HipsterBrown/xs-dev/compare/v0.27.0...v0.27.1) (2023-08-15)
+
 ## [0.27.0](https://github.com/HipsterBrown/xs-dev/compare/v0.26.0...v0.27.0) (2023-08-11)
 
 
