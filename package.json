@@ -54,7 +54,7 @@
     "windows-shortcuts": "^0.1.6"
   },
   "devDependencies": {
-    "@astrojs/starlight": "^0.1.3",
+    "@astrojs/starlight": "^0.7.2",
     "@babel/core": ">=7.20.12 <8.0.0",
     "@changesets/cli": "^2.19.0",
     "@justinribeiro/lite-youtube": "^1.5.0",
@@ -66,7 +66,7 @@
     "@types/unzip-stream": "^0.3.1",
     "@typescript-eslint/eslint-plugin": "^4.33.0",
     "@typescript-eslint/parser": "^4.33.0",
-    "astro": "2.5.0",
+    "astro": "2.10.7",
     "eslint": "^7.32.0",
     "eslint-config-prettier": "^8.3.0",
     "eslint-config-standard-with-typescript": "^21.0.1",
