@@ -38,6 +38,10 @@ export default defineConfig({
           label: 'Guide',
           autogenerate: { directory: 'guide' },
         },
+        {
+          label: 'Troubleshooting',
+          link: '/troubleshooting',
+        }
       ],
     }),
   ],

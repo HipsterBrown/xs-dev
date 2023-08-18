@@ -26,9 +26,6 @@ dependencies:
   gluegun:
     specifier: ^5.1.2
     version: 5.1.2
-  node-liblzma:
-    specifier: ^1.1.9
-    version: 1.1.9
   serialport:
     specifier: ^10.3.0
     version: 10.3.0
@@ -50,6 +47,11 @@ dependencies:
   windows-shortcuts:
     specifier: ^0.1.6
     version: 0.1.6
+
+optionalDependencies:
+  node-liblzma:
+    specifier: ^1.1.9
+    version: 1.1.9
 
 devDependencies:
   '@astrojs/starlight':
@@ -7595,7 +7597,9 @@ packages:
 
   /node-addon-api@4.2.0:
     resolution: {integrity: sha512-eazsqzwG2lskuzBqCGPi7Ac2UgOoMz8JVOXVhTvvPDYhthvNpefx8jWD8Np7Gv+2Sz0FlPWZk0nJV0z598Wn8Q==}
+    requiresBuild: true
     dev: false
+    optional: true
 
   /node-addon-api@4.3.0:
     resolution: {integrity: sha512-73sE9+3UaLYYFmDsFZnqCInzPyh3MqIwZO9cw58yIqAZhONrrabrYyYe3TuIqtIiOuTXVhsGau8hcrhhwSsDIQ==}
@@ -7643,6 +7647,7 @@ packages:
       node-addon-api: 4.2.0
       node-gyp-build: 4.3.0
     dev: false
+    optional: true
 
   /node-releases@2.0.12:
     resolution: {integrity: sha512-QzsYKWhXTWx8h1kIvqfnC++o0pEmpRQA/aenALsL2F4pqNVr7YzcdMlDij5WBnwftRbJCNJL/O7zdKaxKPHqgQ==}
