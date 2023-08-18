@@ -1,5 +1,12 @@
 
 
+## [0.27.2](https://github.com/HipsterBrown/xs-dev/compare/v0.27.1...v0.27.2) (2023-08-18)
+
+
+### Bug Fixes
+
+* **nrf52:** make node-lzma an optional dep, handle dynamic import ([#140](https://github.com/HipsterBrown/xs-dev/issues/140)) ([f227830](https://github.com/HipsterBrown/xs-dev/commit/f2278308aca851bd7fce6692ab350e039a6be5e5))
+
 ## [0.27.1](https://github.com/HipsterBrown/xs-dev/compare/v0.27.0...v0.27.1) (2023-08-15)
 
 ## [0.27.0](https://github.com/HipsterBrown/xs-dev/compare/v0.26.0...v0.27.0) (2023-08-11)
