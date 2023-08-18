@@ -6,9 +6,6 @@ import { finished } from 'stream'
 import { extract } from 'tar-fs'
 import { promisify } from 'util'
 import { Extract as ZipExtract } from 'unzip-stream'
-// eslint-disable-next-line @typescript-eslint/prefer-ts-expect-error
-// @ts-ignore
-import { createUnxz } from 'node-liblzma'
 import { Device } from '../../types'
 import { DEVICE_ALIAS } from '../prompt/devices'
 import { execWithSudo, sourceEnvironment } from '../system/exec'
@@ -53,6 +50,18 @@ export default async function(): Promise<void> {
 
   if (isWindows) {
     await ensureModdableCommandPrompt(spinner)
+  }
+
+  let createUnxz: any;
+  if (!isWindows) {
+    try {
+      // eslint-disable-next-line @typescript-eslint/prefer-ts-expect-error
+      // @ts-ignore
+      ({ createUnxz } = await import('node-liblzma'))
+    } catch (error) {
+      spinner.fail("Unable to extract Arm Embedded Toolchain without XZ utils (https://tukaani.org/xz/). Please install that dependency on your system and reinstall xs-dev before attempting this setup again. See https://xs-dev.js.org/troubleshooting for more info.")
+      process.exit(1)
+    }
   }
 
   spinner.info('Ensuring nrf52 directory')
