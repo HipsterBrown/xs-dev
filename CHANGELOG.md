@@ -1,5 +1,12 @@
 
 
+## [0.27.3](https://github.com/HipsterBrown/xs-dev/compare/v0.27.2...v0.27.3) (2023-08-23)
+
+
+### Bug Fixes
+
+* **setup:** fix ESP8266 setup on Windows ([#141](https://github.com/HipsterBrown/xs-dev/issues/141)) ([3ecd6fe](https://github.com/HipsterBrown/xs-dev/commit/3ecd6fe1abec38a3b914b1b9520a47f5ba51fddb))
+
 ## [0.27.2](https://github.com/HipsterBrown/xs-dev/compare/v0.27.1...v0.27.2) (2023-08-18)
 
 
