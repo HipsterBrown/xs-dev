@@ -22,7 +22,7 @@ const finishedPromise = promisify(finished)
 export default async function(): Promise<void> {
   const OS = platformType().toLowerCase() as Device
   const isWindows = OS === "windows_nt"
-  const TOOLCHAIN = `https://github.com/Moddable-OpenSource/tools/releases/download/v1.0.0/esp8266.toolchain.${isWindows ? 'win32' : OS}.tgz`
+  const TOOLCHAIN = `https://github.com/Moddable-OpenSource/tools/releases/download/v1.0.0/esp8266.toolchain.${isWindows ? 'win32' : OS}.${isWindows ? 'zip' : 'tgz'}`
   const ARDUINO_CORE =
     'https://github.com/esp8266/Arduino/releases/download/2.3.0/esp8266-2.3.0.zip'
   const ESP_RTOS_REPO = 'https://github.com/espressif/ESP8266_RTOS_SDK.git'
@@ -57,13 +57,22 @@ export default async function(): Promise<void> {
   if (filesystem.exists(TOOLCHAIN_PATH) === false) {
     spinner.start('Downloading xtensa toolchain')
 
-    const writer = extract(ESP_DIR, { readable: true })
-    const gunzip = createGunzip()
-    const response = await axios.get(TOOLCHAIN, {
-      responseType: 'stream',
-    })
-    response.data.pipe(gunzip).pipe(writer)
-    await finishedPromise(writer)
+    if (isWindows) {
+      const writer = ZipExtract({ path: ESP_DIR })
+      const response = await axios.get(TOOLCHAIN, {
+        responseType: 'stream'
+      })
+      response.data.pipe(writer)
+      await finishedPromise(writer)
+    } else {
+      const writer = extract(ESP_DIR, { readable: true })
+      const gunzip = createGunzip()
+      const response = await axios.get(TOOLCHAIN, {
+        responseType: 'stream',
+      })
+      response.data.pipe(gunzip).pipe(writer)
+      await finishedPromise(writer)
+    }
     spinner.succeed()
   }
 
