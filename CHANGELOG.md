@@ -1,5 +1,12 @@
 
 
+## [0.27.4](https://github.com/HipsterBrown/xs-dev/compare/v0.27.3...v0.27.4) (2023-08-26)
+
+
+### Bug Fixes
+
+* remove dep on debug tools dir, ignore empty git tag ([#142](https://github.com/HipsterBrown/xs-dev/issues/142)) ([2117b02](https://github.com/HipsterBrown/xs-dev/commit/2117b02096d5af300348f878e12827b83325c1fe))
+
 ## [0.27.3](https://github.com/HipsterBrown/xs-dev/compare/v0.27.2...v0.27.3) (2023-08-23)
 
 
