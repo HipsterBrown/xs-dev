@@ -245,8 +245,16 @@ export async function build({
     configArgs.push(`${element}="${value}"`)
   })
 
+  const canUseMCPack = system.which('mcpack') !== null && filesystem.exists(filesystem.resolve(projectPath, 'package.json')) === 'file'
+  let rootCommand = 'mcconfig'
+
+  if (canUseMCPack) {
+    rootCommand = 'mcpack'
+    configArgs.unshift('mcconfig')
+  }
+
   if (log) {
-    const logOutput = spawn('mcconfig', configArgs, { cwd: projectPath, stdio: 'inherit', shell: true });
+    const logOutput = spawn(rootCommand, configArgs, { cwd: projectPath, stdio: 'inherit', shell: true });
     logOutput.on('close', (exitCode) => {
       if (exitCode !== null) {
         process.exit(exitCode)
@@ -257,7 +265,7 @@ export async function build({
       void system.exec(`pkill serial2xsbug`)
     })
     try {
-      await system.exec(`mcconfig ${configArgs.join(' ')}`, {
+      await system.exec(`${rootCommand} ${configArgs.join(' ')}`, {
         cwd: projectPath,
         stdio: 'inherit',
         shell: true,
