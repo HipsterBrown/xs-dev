@@ -35,8 +35,7 @@ export function moddableExists(): boolean {
   return (
     process.env.MODDABLE !== undefined &&
     filesystem.exists(process.env.MODDABLE) === 'dir' &&
-    releaseTools === 'dir' &&
-    debugTools === 'dir'
+    (releaseTools === 'dir' || debugTools === 'dir')
   )
 }
 
@@ -44,11 +43,12 @@ export async function getModdableVersion(): Promise<string | null> {
   if (moddableExists()) {
     const tags = await system.run('git tag -l --sort=-taggerdate', { cwd: process.env.MODDABLE })
     const tag = tags.split('\n').shift()
-    if (tag === undefined) return null
-
-    const tagCommit = await system.run(`git rev-list -n 1 ${tag}`, { cwd: process.env.MODDABLE })
     const latestCommit = await system.run(`git rev-parse HEAD`, { cwd: process.env.MODDABLE })
-    if (tagCommit === latestCommit) return tag
+
+    if (tag !== undefined && tag.length > 0) {
+      const tagCommit = await system.run(`git rev-list -n 1 ${tag}`, { cwd: process.env.MODDABLE })
+      if (tagCommit === latestCommit) return tag
+    }
 
     const currentBranch = await system.run(`git branch --show-current`, { cwd: process.env.MODDABLE })
     return `branch: ${currentBranch.trim()}, commit: ${latestCommit}`
