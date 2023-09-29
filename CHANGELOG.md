@@ -1,5 +1,12 @@
 
 
+## [0.27.5](https://github.com/HipsterBrown/xs-dev/compare/v0.27.4...v0.27.5) (2023-09-29)
+
+
+### Bug Fixes
+
+* **setup/nrf52:** create the decompression stream when needed ([#147](https://github.com/HipsterBrown/xs-dev/issues/147)) ([f2e9b92](https://github.com/HipsterBrown/xs-dev/commit/f2e9b92486b4837a2ad0c25f35297b171b8e94e5))
+
 ## [0.27.4](https://github.com/HipsterBrown/xs-dev/compare/v0.27.3...v0.27.4) (2023-08-26)
 
 
