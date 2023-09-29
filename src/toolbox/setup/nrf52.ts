@@ -71,11 +71,10 @@ export default async function(): Promise<void> {
     spinner.start('Downloading GNU Arm Embedded Toolchain')
 
     const writer = isWindows ? ZipExtract({ path: NRF52_DIR }) : extract(NRF52_DIR, { readable: true })
-    const unxz = createUnxz()
     const response = await axios.get(TOOLCHAIN_DOWNLOAD, {
       responseType: 'stream',
     })
-    const stream = isWindows ? response.data : response.data.pipe(unxz)
+    const stream = isWindows ? response.data : response.data.pipe(createUnxz())
     stream.pipe(writer)
     await finishedPromise(writer)
     spinner.succeed()

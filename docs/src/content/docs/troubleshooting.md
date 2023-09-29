@@ -11,7 +11,7 @@ Other error messages can include:
 
 If you encounter an error message related to lzma or node-lzma, this is likely due to a missing system dependency required to setup the tooling to program nrf52-based devices. This is only required on MacOS and Linux development environments.
 
-To resolve this, install the [XS Utils](https://tukaani.org/xz/) for your system.
+To resolve this, install the [XZ Utils](https://tukaani.org/xz/) for your system.
 
 On MacOS, [Homebrew](https://brew.sh) can be used:
 
