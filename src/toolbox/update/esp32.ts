@@ -1,7 +1,7 @@
-import { print, filesystem, system, patching } from 'gluegun'
+import { print, filesystem, system, patching, semver } from 'gluegun'
 import { type as platformType } from 'os'
 import { INSTALL_DIR, EXPORTS_FILE_PATH } from '../setup/constants'
-import { moddableExists } from '../setup/moddable'
+import { getModdableVersion, moddableExists } from '../setup/moddable'
 import upsert from '../patching/upsert'
 import { installDeps as installMacDeps } from '../setup/esp32/mac'
 import { installDeps as installLinuxDeps } from '../setup/esp32/linux'
@@ -9,7 +9,8 @@ import { sourceEnvironment } from '../system/exec'
 
 export default async function(): Promise<void> {
   const OS = platformType().toLowerCase()
-  const ESP_BRANCH = 'v4.4.3'
+  const ESP_BRANCH_V4 = 'v4.4.3'
+  const ESP_BRANCH_V5 = 'v5.1.1'
   const ESP32_DIR = filesystem.resolve(INSTALL_DIR, 'esp32')
   const IDF_PATH = filesystem.resolve(ESP32_DIR, 'esp-idf')
 
@@ -41,8 +42,10 @@ export default async function(): Promise<void> {
   // 2. update local esp-idf repo
   if (filesystem.exists(IDF_PATH) === 'dir') {
     spinner.start('Updating esp-idf repo')
+    const moddableVersion = await getModdableVersion() ?? ''
+    const branch = (moddableVersion.includes("branch") || semver.satisfies(moddableVersion ?? '', '>= 4.2.x')) ? ESP_BRANCH_V5 : ESP_BRANCH_V4
     await system.spawn(`git fetch --all --tags`, { cwd: IDF_PATH })
-    await system.spawn(`git checkout ${ESP_BRANCH}`, { cwd: IDF_PATH })
+    await system.spawn(`git checkout ${branch}`, { cwd: IDF_PATH })
     await system.spawn(`git submodule update --init --recursive`, {
       cwd: IDF_PATH,
     })

@@ -35,7 +35,8 @@ export function moddableExists(): boolean {
   return (
     process.env.MODDABLE !== undefined &&
     filesystem.exists(process.env.MODDABLE) === 'dir' &&
-    (releaseTools === 'dir' || debugTools === 'dir')
+    (releaseTools === 'dir' ||
+      debugTools === 'dir')
   )
 }
 
