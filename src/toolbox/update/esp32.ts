@@ -9,8 +9,8 @@ import { sourceEnvironment } from '../system/exec'
 
 export default async function(): Promise<void> {
   const OS = platformType().toLowerCase()
-  const ESP_BRANCH_v4 = 'v4.4.3'
-  const ESP_BRANCH_v5 = 'v5.1.1'
+  const ESP_BRANCH_V4 = 'v4.4.3'
+  const ESP_BRANCH_V5 = 'v5.1.1'
   const ESP32_DIR = filesystem.resolve(INSTALL_DIR, 'esp32')
   const IDF_PATH = filesystem.resolve(ESP32_DIR, 'esp-idf')
 
@@ -42,8 +42,8 @@ export default async function(): Promise<void> {
   // 2. update local esp-idf repo
   if (filesystem.exists(IDF_PATH) === 'dir') {
     spinner.start('Updating esp-idf repo')
-    const moddableVersion = await getModdableVersion()
-    const branch = (moddableVersion?.includes("branch") || semver.satisfies(moddableVersion ?? '', '>= 4.2.x')) ? ESP_BRANCH_v5 : ESP_BRANCH_v4
+    const moddableVersion = await getModdableVersion() ?? ''
+    const branch = (moddableVersion.includes("branch") || semver.satisfies(moddableVersion ?? '', '>= 4.2.x')) ? ESP_BRANCH_V5 : ESP_BRANCH_V4
     await system.spawn(`git fetch --all --tags`, { cwd: IDF_PATH })
     await system.spawn(`git checkout ${branch}`, { cwd: IDF_PATH })
     await system.spawn(`git submodule update --init --recursive`, {

@@ -13,8 +13,8 @@ export default async function(): Promise<void> {
   const OS = platformType().toLowerCase()
   const isWindows = OS === "windows_nt"
   const ESP_IDF_REPO = 'https://github.com/espressif/esp-idf.git'
-  const ESP_BRANCH_v4 = 'v4.4.3'
-  const ESP_BRANCH_v5 = 'v5.1.1'
+  const ESP_BRANCH_V4 = 'v4.4.3'
+  const ESP_BRANCH_V5 = 'v5.1.1'
   const ESP32_DIR = filesystem.resolve(INSTALL_DIR, 'esp32')
   const IDF_PATH = filesystem.resolve(ESP32_DIR, 'esp-idf')
 
@@ -42,8 +42,8 @@ export default async function(): Promise<void> {
   // 2. clone esp-idf into ~/.local/share/esp32/esp-idf
   if (filesystem.exists(IDF_PATH) === false) {
     spinner.start('Cloning esp-idf repo')
-    const moddableVersion = await getModdableVersion()
-    const branch = (moddableVersion?.includes("branch") || semver.satisfies(moddableVersion ?? '', '>= 4.2.x')) ? ESP_BRANCH_v5 : ESP_BRANCH_v4
+    const moddableVersion = await getModdableVersion() ?? ''
+    const branch = (moddableVersion.includes("branch") || semver.satisfies(moddableVersion ?? '', '>= 4.2.x')) ? ESP_BRANCH_V5 : ESP_BRANCH_V4
     await system.spawn(
       `git clone --depth 1 --single-branch -b ${branch} --recursive ${ESP_IDF_REPO} ${IDF_PATH}`
     )
