@@ -1,5 +1,12 @@
 
 
+## [0.28.0](https://github.com/HipsterBrown/xs-dev/compare/v0.27.5...v0.28.0) (2023-10-12)
+
+
+### Features
+
+* add support for ESP-IDF v5 & mcpack ([#149](https://github.com/HipsterBrown/xs-dev/issues/149)) ([0200d56](https://github.com/HipsterBrown/xs-dev/commit/0200d56f92adc609b926ff98b2a024277d4a3809))
+
 ## [0.27.5](https://github.com/HipsterBrown/xs-dev/compare/v0.27.4...v0.27.5) (2023-09-29)
 
 
