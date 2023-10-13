@@ -7,7 +7,7 @@ description: Initialize a new project and start to interact with some hardware!
 
 ## Project creation
 
-The [`init` command](/features/init) will create a new directory with the name provided and saffold the starting files based on a template or example:
+The [`init` command](/features/init) will create a new directory with the name provided and scaffold the starting files based on a template or example:
 
 ```
 xs-dev init guiding-light
@@ -120,19 +120,19 @@ With that configured, the `main.js` file can be updated with the following code:
 ```javascript
 const Digital = device.io.Digital;
 const led = new Digital({
-   pin: device.pin.led,
-   mode: Digital.Output,
+  pin: device.pin.led,
+  mode: Digital.Output,
 });
 led.write(1);
 
 let state = 0;
 System.setInterval(() => {
-	led.write(state);
-	if (state === 0) {
-        state = 1;
-    } else {
-        state = 0;
-    }
+  led.write(state);
+  if (state === 0) {
+    state = 1;
+  } else {
+    state = 0;
+  }
 }, 200);
 ```
 
@@ -141,8 +141,8 @@ Using the [global `device` variable](https://419.ecma-international.org/#-16-hos
 ```javascript
 const Digital = device.io.Digital;
 const led = new Digital({
-   pin: device.pin.led,
-   mode: Digital.Output,
+  pin: device.pin.led,
+  mode: Digital.Output,
 });
 led.write(1);
 ```
@@ -152,12 +152,12 @@ To make the light blink, the next value to be written is stored as the `state` v
 ```javascript
 let state = 0;
 System.setInterval(() => {
-	led.write(state);
-	if (state === 0) {
-        state = 1;
-    } else {
-        state = 0;
-    }
+  led.write(state);
+  if (state === 0) {
+    state = 1;
+  } else {
+    state = 0;
+  }
 }, 200);
 ```
 
