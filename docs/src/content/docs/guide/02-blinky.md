@@ -7,7 +7,7 @@ description: Initialize a new project and start to interact with some hardware!
 
 ## Project creation
 
-The [`init` command](/features/init) will create a new directory with the name provided and saffold the starting files based on a template or example:
+The [`init` command](/features/init) will create a new directory with the name provided and scaffold the starting files based on a template or example:
 
 ```
 xs-dev init guiding-light
