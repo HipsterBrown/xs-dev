@@ -1,5 +1,12 @@
 
 
+## [0.28.1](https://github.com/HipsterBrown/xs-dev/compare/v0.28.0...v0.28.1) (2023-12-08)
+
+
+### Bug Fixes
+
+* **setup/esp32:** update a package name in linux.ts ([#152](https://github.com/HipsterBrown/xs-dev/issues/152)) ([357d7e0](https://github.com/HipsterBrown/xs-dev/commit/357d7e04ca9b2e0e00d645a390d774f71be5efbf))
+
 ## [0.28.0](https://github.com/HipsterBrown/xs-dev/compare/v0.27.5...v0.28.0) (2023-10-12)
 
 
