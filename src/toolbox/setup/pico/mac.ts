@@ -8,13 +8,20 @@ export async function installDeps(
     await ensureHomebrew()
   } catch (error: unknown) {
     if (error instanceof Error) {
-      print.info(`${error.message} arm-none-eabi-gcc, libusb, pkg-config`)
+      print.info(`${error.message} gcc-arm-embedded, libusb, pkg-config`)
       process.exit(1);
     }
   }
 
-  spinner.start('Tapping ArmMbed formulae and installing arm-embed-gcc')
-  await system.exec('brew tap ArmMbed/homebrew-formulae', { shell: process.env.SHELL })
-  await system.exec(`brew install arm-none-eabi-gcc libusb pkg-config`, { shell: process.env.SHELL })
+  if (system.which('arm-none-eabi-gcc') !== null) {
+    spinner.start('Removing outdated arm gcc dependency')
+    await system.exec('brew untap ArmMbed/homebrew-formulae')
+    await system.exec('brew uninstall arm-none-eabi-gcc')
+    spinner.succeed()
+  }
+
+  spinner.start('Installing pico tools dependencies')
+  await system.exec(`brew install libusb pkg-config`, { shell: process.env.SHELL })
+  await system.exec(`brew install --cask gcc-arm-embedded`, { shell: process.env.SHELL })
   spinner.succeed()
 }
