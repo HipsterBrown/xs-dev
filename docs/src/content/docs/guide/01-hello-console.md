@@ -7,7 +7,7 @@ description: How to set up the basic development environment and run your first 
 
 ## Install the CLI
 
-`xs-dev` can be installed globally using the [NodeJS package manager of your choice](http://localhost:3000/guide/00-prepare#nodejs--package-manager-optional).
+`xs-dev` can be installed globally using the [NodeJS package manager of your choice](/guide/00-prepare#nodejs--package-manager-optional).
 
 ```
 npm install -g xs-dev
