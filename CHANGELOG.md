@@ -1,5 +1,12 @@
 
 
+### [0.30.1](https://github.com/HipsterBrown/xs-dev/compare/v0.30.0...v0.30.1) (2024-01-04)
+
+
+### Bug Fixes
+
+* update dependencies to address security audit ([c7ca519](https://github.com/HipsterBrown/xs-dev/commit/c7ca51937c670313efadbbdddb57fc3f965f7218))
+
 ## [0.30.0](https://github.com/HipsterBrown/xs-dev/compare/v0.29.0...v0.30.0) (2024-01-04)
 
 
