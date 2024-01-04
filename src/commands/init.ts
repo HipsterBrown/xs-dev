@@ -88,11 +88,12 @@ const command: GluegunCommand = {
 
         const includes = [
           io
-            ? '"$(MODDABLE)/modules/io/manifest.json"'
+            ? ['"$(MODDABLE)/modules/io/manifest.json"', '"$(MODDABLE)/examples/manifest_net.json"']
             : '"$(MODDABLE)/examples/manifest_base.json"',
           typescript && '"$(MODDABLE)/examples/manifest_typings.json"',
         ]
           .filter(Boolean)
+          .flat()
           .join(',\n\t')
 
         const defines: String = asyncMain
