@@ -1,5 +1,12 @@
 
 
+## [0.30.0](https://github.com/HipsterBrown/xs-dev/compare/v0.29.0...v0.30.0) (2024-01-04)
+
+
+### Features
+
+* **pico:** add update command, use new gcc-arm-embedded cask on mac ([#157](https://github.com/HipsterBrown/xs-dev/issues/157)) ([0b63a23](https://github.com/HipsterBrown/xs-dev/commit/0b63a2331e7cbf3ede109502b9d31e45d2bba2c7))
+
 ## [0.29.0](https://github.com/HipsterBrown/xs-dev/compare/v0.28.1...v0.29.0) (2024-01-04)
 
 
