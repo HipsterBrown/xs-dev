@@ -59,7 +59,7 @@ The `--port` flag accepts a path to port for connected device (defaults to: `UPL
 xs-dev run --port /dev/cu.usbserial-0001 --device esp8266
 ```
 
-_This value can be discovered using the [`scan`](./scan) command._
+_This value can be discovered using the [`scan`](/features/scan) command._
 
 ## Display debugger output in the terminal
 

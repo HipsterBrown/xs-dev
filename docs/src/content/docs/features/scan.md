@@ -20,7 +20,7 @@ This will provide info with the port address, device name, and discovered featur
   /dev/cu.usbserial-DN02N5XK   ESP32-D0WDQ6 (revision 0)   WiFi, BT, Dual Core, Coding Scheme None
 ```
 
-The port can be used with the [`run`](./run) command to specify a device, if multiple are connected:
+The port can be used with the [`run`](/features/run) command to specify a device, if multiple are connected:
 
 ```
 xs-dev run --port /dev/cu.usbserial-0001 --device esp8266

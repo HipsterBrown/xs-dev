@@ -27,7 +27,7 @@ trace('hello world')
 A local plain text editor is generally required for creating and editing your JavaScript projects. You can download one of the following free applications with either built-in or third-party support for JavaScript:
 
 - [Visual Studio Code](https://code.visualstudio.com/)
-- [Neovim](http://www.sublimetext.com/) / [Vim](https://www.vim.org/)
+- [Neovim](https://neovim.io) / [Vim](https://www.vim.org/)
 - [Sublime Text](http://www.sublimetext.com/)
 
 These are not the only available editors, so feel free to do your own research and pick what feels right to you!

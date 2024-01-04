@@ -5,7 +5,7 @@ description: Stay up to date with the latest tooling
 
 # SDK & Tooling Updates
 
-Stay up to date with the latest tooling from Moddable and supported device targets. As with the [`setup`](./setup) command, the current dev environment (Mac or Linux) is the default selected target:
+Stay up to date with the latest tooling from Moddable and supported device targets. As with the [`setup`](/features/setup) command, the current dev environment (Mac or Linux) is the default selected target:
 
 ```
 xs-dev update
