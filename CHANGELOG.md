@@ -1,5 +1,12 @@
 
 
+## [0.29.0](https://github.com/HipsterBrown/xs-dev/compare/v0.28.1...v0.29.0) (2024-01-04)
+
+
+### Features
+
+* **esp32:** update esp-idf version to support latest Moddable SDK ([#156](https://github.com/HipsterBrown/xs-dev/issues/156)) ([11c9ff5](https://github.com/HipsterBrown/xs-dev/commit/11c9ff5b2aa89cbabb5b811e3c0fec759a83cb24))
+
 ## [0.28.1](https://github.com/HipsterBrown/xs-dev/compare/v0.28.0...v0.28.1) (2023-12-08)
 
 
