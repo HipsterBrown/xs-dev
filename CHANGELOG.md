@@ -1,5 +1,12 @@
 
 
+### [0.30.2](https://github.com/HipsterBrown/xs-dev/compare/v0.30.1...v0.30.2) (2024-01-04)
+
+
+### Bug Fixes
+
+* **init:** include manifest_net with io template ([b41cfde](https://github.com/HipsterBrown/xs-dev/commit/b41cfdec8f192ec2a2ec414998b87d5d02e1cd63))
+
 ### [0.30.1](https://github.com/HipsterBrown/xs-dev/compare/v0.30.0...v0.30.1) (2024-01-04)
 
 
