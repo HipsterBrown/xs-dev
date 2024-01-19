@@ -1,5 +1,12 @@
 
 
+### [0.30.3](https://github.com/HipsterBrown/xs-dev/compare/v0.30.2...v0.30.3) (2024-01-19)
+
+
+### Bug Fixes
+
+* **info:** verify moddable sdk git repo, include nrf52 support ([#160](https://github.com/HipsterBrown/xs-dev/issues/160)) ([7302cd5](https://github.com/HipsterBrown/xs-dev/commit/7302cd5446612a309d7f939f792a0be71d1719cf))
+
 ### [0.30.2](https://github.com/HipsterBrown/xs-dev/compare/v0.30.1...v0.30.2) (2024-01-04)
 
 
