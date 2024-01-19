@@ -40,8 +40,12 @@ export function moddableExists(): boolean {
   )
 }
 
+function isGitRepo(path: string): boolean {
+  return filesystem.exists(filesystem.resolve(path, '.git')) === 'dir';
+}
+
 export async function getModdableVersion(): Promise<string | null> {
-  if (moddableExists()) {
+  if (moddableExists() && isGitRepo(process.env.MODDABLE ?? '')) {
     const tags = await system.run('git tag -l --sort=-taggerdate', { cwd: process.env.MODDABLE })
     const tag = tags.split('\n').shift()
     const latestCommit = await system.run(`git rev-parse HEAD`, { cwd: process.env.MODDABLE })

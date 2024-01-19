@@ -37,6 +37,15 @@ const command: GluegunCommand = {
     if (typeof process.env.PICO_SDK_PATH === 'string' && filesystem.exists(process.env.PICO_SDK_PATH) === 'dir' && system.which('picotool') !== null && filesystem.exists(process.env.PIOASM ?? '') === 'file') {
       supportedDevices.push('pico')
     }
+    if (typeof process.env.NRF_ROOT === 'string' &&
+      filesystem.exists(process.env.NRF_ROOT) === 'dir' &&
+      ((typeof process.env.NRF_SDK_DIR === 'string' &&
+        filesystem.exists(process.env.NRF_SDK_DIR) === 'dir') ||
+        (typeof process.env.NRF52_SDK_PATH === 'string' &&
+          filesystem.exists(process.env.NRF52_SDK_PATH) === 'dir'))
+    ) {
+      supportedDevices.push('nrf52')
+    }
 
     const pythonVersion = await getPythonVersion() ?? 'Unavailable'
     const pythonPath = system.which(detectPython() ?? '') ?? 'n/a'
@@ -58,6 +67,7 @@ const command: GluegunCommand = {
       supportedDevices.includes('esp8266') ? ['ESP8266 Base Directory', String(process.env.ESP_BASE)] : [],
       supportedDevices.includes('wasm') ? ['Wasm EMSDK Directory', String(process.env.ESMDK)] : [],
       supportedDevices.includes('pico') ? ['Pico SDK Directory', String(process.env.PICO_SDK_PATH)] : [],
+      supportedDevices.includes('nrf52') ? ['NRF52 SDK Directory', String(process.env.NRF_SDK_DIR ?? process.env.NRF52_SDK_PATH)] : [],
     ].filter(tuple => tuple.length !== 0))
 
     print.highlight(`\nIf this is related to an error when using the CLI, please create an issue at "https://github.com/hipsterbrown/xs-dev/issues/new" with the above info.`)
