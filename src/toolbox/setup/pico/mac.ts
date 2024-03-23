@@ -1,5 +1,5 @@
 import { GluegunPrint, print, system } from 'gluegun'
-import { ensureHomebrew } from '../homebrew';
+import { ensureHomebrew, formulaeExists } from '../homebrew';
 
 export async function installDeps(
   spinner: ReturnType<GluegunPrint['spin']>
@@ -13,7 +13,7 @@ export async function installDeps(
     }
   }
 
-  if (system.which('arm-none-eabi-gcc') !== null) {
+  if (system.which('arm-none-eabi-gcc') !== null && (await formulaeExists('arm-none-eabi-gcc'))) {
     spinner.start('Removing outdated arm gcc dependency')
     await system.exec('brew untap ArmMbed/homebrew-formulae')
     await system.exec('brew uninstall arm-none-eabi-gcc')

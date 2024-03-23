@@ -42,3 +42,16 @@ export async function ensureHomebrew(): Promise<void> {
     throw new Error(`Visit https://brew.sh/ to learn more about installing Homebrew. If you don't want to use Homebrew, please install the following packages manually before trying this command again: `)
   }
 }
+
+interface SpawnResult {
+  stdout: null | string;
+  status: number;
+  error: null | Error;
+}
+
+export async function formulaeExists(formulae: string): Promise<boolean> {
+  if (system.which('brew') === null) return false
+
+  const result: SpawnResult = await system.spawn(`brew list ${formulae}`, { shell: process.env.SHELL })
+  return result.status === 0;
+}
