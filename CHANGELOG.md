@@ -1,5 +1,12 @@
 
 
+### [0.30.4](https://github.com/HipsterBrown/xs-dev/compare/v0.30.3...v0.30.4) (2024-03-23)
+
+
+### Bug Fixes
+
+* **setup/pico:** verify source of arm-gcc before removing ([1c8e8b3](https://github.com/HipsterBrown/xs-dev/commit/1c8e8b39624ab62755141794172bdae9e2167037))
+
 ### [0.30.3](https://github.com/HipsterBrown/xs-dev/compare/v0.30.2...v0.30.3) (2024-01-19)
 
 
