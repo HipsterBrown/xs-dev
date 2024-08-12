@@ -1,5 +1,12 @@
 
 
+## [0.31.0](https://github.com/HipsterBrown/xs-dev/compare/v0.30.5...v0.31.0) (2024-08-12)
+
+
+### Features
+
+* **update:** use v5.3 tag of esp-idf ([#166](https://github.com/HipsterBrown/xs-dev/issues/166)) ([eb7f7c4](https://github.com/HipsterBrown/xs-dev/commit/eb7f7c4ed01c197b193889eb467473107f2a4482))
+
 ### [0.30.5](https://github.com/HipsterBrown/xs-dev/compare/v0.30.4...v0.30.5) (2024-07-29)
 
 ### [0.30.4](https://github.com/HipsterBrown/xs-dev/compare/v0.30.3...v0.30.4) (2024-03-23)
