@@ -105,3 +105,37 @@ If you want to immediately deploy the release build, use the `--deploy` flag:
 ```
 xs-dev build --deploy --device esp32
 ```
+
+## Connect to running debugger sessions
+
+To conveniently restart a debugging session without redeploying the project, the `debug` command takes the same flags as the `run` command to invoke [`mcconfig`](https://github.com/Moddable-OpenSource/moddable/blob/public/documentation/tools/tools.md#mcconfig) to launch xsbug or the terminal debugger for the selected device or simulator.
+
+```
+xs-dev debug --device esp32
+```
+
+It even works with example projects:
+
+```
+xs-dev debug --example helloworld
+```
+
+The output directory can also be set using the `--output` flag, overriding the default path of `$MODDABLE/build`, where `$MODDABLE` is the location of the Moddable tooling repo on your local filesystem.
+
+```
+xs-dev debug --output ./dist --device esp32
+```
+
+## Cleaning up build artifacts
+
+The Moddable build tooling will do it's best to avoid repeating work to ensure quick incremental updates when recompiling programs or skipping compilation entirely if no changes have been made to the source code and config files. Whether it is to force a full recompile of your project or to make space on your development machine, the `clean` command is here to help! It takes the same flags as the `build` and `run` commands (except for "port" and "deploy") to invoke [`mcconfig`](https://github.com/Moddable-OpenSource/moddable/blob/public/documentation/tools/tools.md#mcconfig) with the required `clean` target.
+
+```
+xs-dev clean --device esp32
+```
+
+The output directory can also be set using the `--output` flag, overriding the default path of `$MODDABLE/build`, where `$MODDABLE` is the location of the Moddable tooling repo on your local filesystem.
+
+```
+xs-dev clean --output ./dist --device esp32
+```
