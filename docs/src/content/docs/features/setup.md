@@ -75,12 +75,6 @@ There are some utilities that are not included in the Moddable SDK or other plat
 
 **Supported tools:**
 
-[`fontbm`](https://github.com/vladimirgamalyan/fontbm): BMFont compatible, cross-platform (Linux/macOS/Windows) command line bitmap font generator (FreeType2 based render)
-
-```
-xs-dev setup --tool fontbm
-```
-
 `ejectfix`: not a downloadable tool, rather a environment preference to disable the `DISK NOT EJECTED PROPERLY` notification while working with the nrf52 on MacOS. This will automate the process described by [the Adafruit blog](https://blog.adafruit.com/2021/05/11/how-to-tone-down-macos-big-surs-circuitpy-eject-notifications/):
 
 ```
