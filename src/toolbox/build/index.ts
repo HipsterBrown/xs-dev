@@ -9,7 +9,7 @@ import { DEVICE_ALIAS } from '../prompt/devices'
 import { Device } from '../../types'
 import { sourceEnvironment } from '../system/exec'
 
-export type DeployStatus = 'none' | 'run' | 'push'
+export type DeployStatus = 'none' | 'run' | 'push' | 'clean'
 
 export interface BuildArgs {
   port?: string
@@ -226,15 +226,19 @@ export async function build({
 
   const spinner = print.spin()
 
-  spinner.start(
-    `Building${deployStatus !== 'none' ? ' and deploying project' : ''
-    } ${projectPath} on ${targetPlatform}\n`
-  )
+  if (deployStatus !== 'clean') {
+    spinner.start(
+      `Building${deployStatus !== 'none' ? ' and deploying project' : ''
+      } ${projectPath} on ${targetPlatform}\n`
+    )
+  } else {
+    spinner.start(`Cleaning up build artifacts for project ${projectPath} on ${targetPlatform}\n`)
+  }
 
   const configArgs = [
     '-m',
     `-p ${targetPlatform}`,
-    `-t ${deployStatus === 'run' ? 'all' : 'build'}`,
+    `-t ${deployStatus === 'run' ? 'all' : deployStatus === 'clean' ? 'clean' : 'build'}`,
     `-o ${outputDir}`,
   ]
   if (mode === 'development') configArgs.push('-d')
