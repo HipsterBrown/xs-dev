@@ -1,5 +1,12 @@
 
 
+## [0.32.0](https://github.com/HipsterBrown/xs-dev/compare/v0.31.2...v0.32.0) (2024-08-13)
+
+
+### Features
+
+* add clean and debug commands ([#169](https://github.com/HipsterBrown/xs-dev/issues/169)) ([4a0c77c](https://github.com/HipsterBrown/xs-dev/commit/4a0c77cfe805666c611b27af338987f334134535))
+
 ### [0.31.2](https://github.com/HipsterBrown/xs-dev/compare/v0.31.1...v0.31.2) (2024-08-13)
 
 
