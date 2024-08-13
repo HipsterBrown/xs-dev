@@ -9,7 +9,7 @@ import { DEVICE_ALIAS } from '../prompt/devices'
 import { Device } from '../../types'
 import { sourceEnvironment } from '../system/exec'
 
-export type DeployStatus = 'none' | 'run' | 'push' | 'clean'
+export type DeployStatus = 'none' | 'run' | 'push' | 'clean' | 'debug'
 
 export interface BuildArgs {
   port?: string
@@ -24,6 +24,14 @@ export interface BuildArgs {
   outputDir?: string
   config?: Record<string, string>
 }
+
+const DEPLOY_TARGET: Readonly<Record<DeployStatus, string>> = Object.freeze({
+  clean: 'clean',
+  debug: 'xsbug',
+  none: 'build',
+  push: 'build',
+  run: 'all',
+})
 
 export async function build({
   listDevices,
@@ -226,19 +234,24 @@ export async function build({
 
   const spinner = print.spin()
 
-  if (deployStatus !== 'clean') {
-    spinner.start(
-      `Building${deployStatus !== 'none' ? ' and deploying project' : ''
-      } ${projectPath} on ${targetPlatform}\n`
-    )
-  } else {
-    spinner.start(`Cleaning up build artifacts for project ${projectPath} on ${targetPlatform}\n`)
+  switch (deployStatus) {
+    case 'clean':
+      spinner.start(`Cleaning up build artifacts for project ${projectPath} on ${targetPlatform}\n`)
+      break;
+    case 'debug':
+      spinner.start(`Connecting to running debug session for ${projectPath} on ${targetPlatform}\n`)
+      break;
+    default:
+      spinner.start(
+        `Building${deployStatus !== 'none' ? ' and deploying project' : ''
+        } ${projectPath} on ${targetPlatform}\n`
+      )
   }
 
   const configArgs = [
     '-m',
     `-p ${targetPlatform}`,
-    `-t ${deployStatus === 'run' ? 'all' : deployStatus === 'clean' ? 'clean' : 'build'}`,
+    `-t ${DEPLOY_TARGET[deployStatus]}`,
     `-o ${outputDir}`,
   ]
   if (mode === 'development') configArgs.push('-d')
