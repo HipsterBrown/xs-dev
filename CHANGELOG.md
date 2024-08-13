@@ -1,5 +1,12 @@
 
 
+### [0.31.2](https://github.com/HipsterBrown/xs-dev/compare/v0.31.1...v0.31.2) (2024-08-13)
+
+
+### Bug Fixes
+
+* remove fontbm tool setup ([#168](https://github.com/HipsterBrown/xs-dev/issues/168)) ([e6a389d](https://github.com/HipsterBrown/xs-dev/commit/e6a389df01ef1ee5fb4e565386260b49898e56b1))
+
 ### [0.31.1](https://github.com/HipsterBrown/xs-dev/compare/v0.31.0...v0.31.1) (2024-08-13)
 
 ## [0.31.0](https://github.com/HipsterBrown/xs-dev/compare/v0.30.5...v0.31.0) (2024-08-12)
