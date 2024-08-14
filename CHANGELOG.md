@@ -1,5 +1,12 @@
 
 
+### [0.32.2](https://github.com/HipsterBrown/xs-dev/compare/v0.32.1...v0.32.2) (2024-08-14)
+
+
+### Bug Fixes
+
+* **scan:** source esp_idf before checking for esptool.py ([#171](https://github.com/HipsterBrown/xs-dev/issues/171)) ([e9e1ca8](https://github.com/HipsterBrown/xs-dev/commit/e9e1ca84167c850c6bd8c82526789385851ac40a))
+
 ### [0.32.1](https://github.com/HipsterBrown/xs-dev/compare/v0.32.0...v0.32.1) (2024-08-14)
 
 
