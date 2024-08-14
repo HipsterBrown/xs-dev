@@ -98,9 +98,6 @@ export default async function(): Promise<void> {
   // 6. append 'source $IDF_PATH/export.sh' to shell profile
   if (isWindows) {
     await upsert(EXPORTS_FILE_PATH, `pushd %IDF_PATH% && call "%IDF_TOOLS_PATH%\\idf_cmd_init.bat" && popd`)
-  } else {
-    spinner.info('Sourcing esp-idf environment')
-    await upsert(EXPORTS_FILE_PATH, `source $IDF_PATH/export.sh 1> /dev/null`)
   }
 
   spinner.succeed(`

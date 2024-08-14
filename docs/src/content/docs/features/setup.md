@@ -35,7 +35,7 @@ The [`moddable` git repo](https://github.com/Moddable-OpenSource/moddable) is cl
 
 **Environment config:**
 
-This command will create (and update) an environment configuration file called `~/.local/share/xs-dev-export.sh` (on Mac & Linux) or `Moddable.bat` (on Windows). This file will be placed in the shell setup file (`.profile`, `.zshrc`, `.bashrc`, etc on Mac & Linux) or the custom command prompt (on Windows), to set environment variables and call other "exports" files for embedded tooling.
+This command will create (and update) an environment configuration file called `~/.local/share/xs-dev-export.sh` (on Mac & Linux) or `Moddable.bat` (on Windows). This file will be sourced by `xs-dev` when running commands (on Mac & Linux) or through the custom command prompt (on Windows), to set environment variables and call other "exports" files for embedded tooling.
 
 ## Target Branch
 
