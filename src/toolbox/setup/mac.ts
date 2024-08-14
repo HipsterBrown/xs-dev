@@ -7,7 +7,6 @@ import {
   INSTALL_DIR,
   EXPORTS_FILE_PATH,
   XSBUG_LOG_PATH,
-  getProfilePath,
 } from './constants'
 import upsert from '../patching/upsert'
 import { downloadReleaseTools, fetchLatestRelease, MissingReleaseAssetError } from './moddable'
@@ -38,7 +37,6 @@ export default async function({ sourceRepo, targetBranch }: PlatformSetupArgs): 
     'makefiles',
     'mac'
   )
-  const PROFILE_PATH = getProfilePath()
 
   // 0. ensure xcode command line tools are available (?)
   try {
@@ -137,8 +135,6 @@ export default async function({ sourceRepo, targetBranch }: PlatformSetupArgs): 
   // 2. configure MODDABLE env variable, add release binaries dir to PATH
   process.env.MODDABLE = INSTALL_PATH
   process.env.PATH = `${String(process.env.PATH)}:${BIN_PATH}`
-
-  await upsert(PROFILE_PATH, `source ${EXPORTS_FILE_PATH}`)
 
   await upsert(EXPORTS_FILE_PATH, `export MODDABLE=${process.env.MODDABLE}`)
   await upsert(EXPORTS_FILE_PATH, `export PATH="${BIN_PATH}:$PATH"`)

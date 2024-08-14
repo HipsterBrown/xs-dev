@@ -6,7 +6,6 @@ import {
   INSTALL_DIR,
   INSTALL_PATH,
   EXPORTS_FILE_PATH,
-  getProfilePath,
   XSBUG_LOG_PATH,
 } from './constants'
 import upsert from '../patching/upsert'
@@ -39,7 +38,6 @@ export default async function({ sourceRepo, targetBranch }: PlatformSetupArgs): 
     'makefiles',
     'lin'
   )
-  const PROFILE_PATH = getProfilePath()
 
   const spinner = print.spin()
   spinner.start('Beginning setup...')
@@ -110,8 +108,6 @@ export default async function({ sourceRepo, targetBranch }: PlatformSetupArgs): 
   // 4. Setup the MODDABLE environment variable
   process.env.MODDABLE = INSTALL_PATH
   process.env.PATH = `${String(process.env.PATH)}:${BIN_PATH}`
-
-  await upsert(PROFILE_PATH, `source ${EXPORTS_FILE_PATH}`)
 
   await upsert(EXPORTS_FILE_PATH, `export MODDABLE=${process.env.MODDABLE}`)
   await upsert(EXPORTS_FILE_PATH, `export PATH="${BIN_PATH}:$PATH"`)
