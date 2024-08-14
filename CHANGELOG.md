@@ -1,5 +1,12 @@
 
 
+### [0.32.1](https://github.com/HipsterBrown/xs-dev/compare/v0.32.0...v0.32.1) (2024-08-14)
+
+
+### Bug Fixes
+
+* **setup:** remove xs-dev-export.sh sourcing from shell profile ([#170](https://github.com/HipsterBrown/xs-dev/issues/170)) ([268f180](https://github.com/HipsterBrown/xs-dev/commit/268f180bdfd023b3d56f3310107c079cfce6b4f8))
+
 ## [0.32.0](https://github.com/HipsterBrown/xs-dev/compare/v0.31.2...v0.32.0) (2024-08-13)
 
 
