@@ -3,7 +3,7 @@ import { findBySerialNumber } from 'usb'
 import type { GluegunCommand } from 'gluegun'
 import type { XSDevToolbox } from '../types'
 import { parseScanResult } from '../toolbox/scan/parse'
-import { sourceEnvironment } from '../toolbox/system/exec'
+import { sourceEnvironment, sourceIdf } from '../toolbox/system/exec'
 
 // eslint-disable-next-line
 function sleep(timeout: number) {
@@ -16,21 +16,27 @@ const command: GluegunCommand<XSDevToolbox> = {
   name: 'scan',
   description: 'Look for available devices',
   run: async (toolbox) => {
-    const { parameters, print, system } = toolbox
+    const { filesystem, parameters, print, system } = toolbox
     if (parameters.options.help !== undefined) {
       print.printCommands(toolbox, ['scan'])
       process.exit(0)
     }
 
+    const spinner = print.spin()
+
     await sourceEnvironment()
+
+    if (typeof process.env.IDF_PATH === 'string' && filesystem.exists(process.env.IDF_PATH) === 'dir') {
+      spinner.start(`Found ESP_IDF, sourcing environment...`)
+      await sourceIdf()
+      spinner.stop()
+    }
 
     if (system.which('esptool.py') === null) {
       print.warning(
         'esptool.py required to scan for Espressif devices. Setup environment for ESP8266 or ESP32:\n xs-dev setup --device esp32\n xs-dev setup --device esp8266.'
       )
     }
-
-    const spinner = print.spin()
 
     spinner.start('Scanning for devices...')
 
