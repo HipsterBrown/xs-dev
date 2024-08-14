@@ -57,3 +57,24 @@ export async function sourceEnvironment(): Promise<void> {
     }
   }
 }
+
+/**
+ * Set updated env from user shell as process.env
+ */
+export async function sourceIdf(): Promise<void> {
+  const OS = platformType().toLowerCase() as Device
+
+  if (OS !== 'windows_nt') {
+    try {
+      const result = await system.spawn(`source $IDF_PATH/export.sh 1> /dev/null && env`, {
+        shell: process.env.SHELL,
+      })
+      if (typeof result.stdout === 'string' || result.stdout instanceof Buffer) {
+        const localEnv = Object.fromEntries(result.stdout.toString().split('\n').map((field: string) => field?.split('=')))
+        if ('PATH' in localEnv) process.env = localEnv
+      }
+    } catch (error) {
+      console.warn('Unable to source the ESP IDF settings:', error)
+    }
+  }
+}
