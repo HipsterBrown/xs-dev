@@ -1,5 +1,12 @@
 
 
+### [0.32.3](https://github.com/HipsterBrown/xs-dev/compare/v0.32.2...v0.32.3) (2024-08-15)
+
+
+### Bug Fixes
+
+* **esp32:** source IDF python env when building, running project ([#172](https://github.com/HipsterBrown/xs-dev/issues/172)) ([e67db2f](https://github.com/HipsterBrown/xs-dev/commit/e67db2f9a0b618484c02e97217a81ffcc93393f4))
+
 ### [0.32.2](https://github.com/HipsterBrown/xs-dev/compare/v0.32.1...v0.32.2) (2024-08-14)
 
 
