@@ -38,14 +38,14 @@ export async function execWithSudo(
 }
 
 /**
- * Set updated env from user shell as process.env
+ * Utility for updating in-memory process.env after running a command
  */
-export async function sourceEnvironment(): Promise<void> {
+async function updateProcessEnv(command: string): Promise<void> {
   const OS = platformType().toLowerCase() as Device
 
   if (OS !== 'windows_nt') {
     try {
-      const result = await system.spawn(`source ${EXPORTS_FILE_PATH} && env`, {
+      const result = await system.spawn(`${command} && env`, {
         shell: process.env.SHELL,
       })
       if (typeof result.stdout === 'string' || result.stdout instanceof Buffer) {
@@ -53,7 +53,7 @@ export async function sourceEnvironment(): Promise<void> {
         if ('PATH' in localEnv) process.env = localEnv
       }
     } catch (error) {
-      console.warn('Unable to source the environment settings:', error)
+      console.warn('Unable to update environment:', error)
     }
   }
 }
@@ -61,20 +61,20 @@ export async function sourceEnvironment(): Promise<void> {
 /**
  * Set updated env from user shell as process.env
  */
-export async function sourceIdf(): Promise<void> {
-  const OS = platformType().toLowerCase() as Device
+export async function sourceEnvironment(): Promise<void> {
+  await updateProcessEnv(`source ${EXPORTS_FILE_PATH}`)
+}
 
-  if (OS !== 'windows_nt') {
-    try {
-      const result = await system.spawn(`source $IDF_PATH/export.sh 1> /dev/null && env`, {
-        shell: process.env.SHELL,
-      })
-      if (typeof result.stdout === 'string' || result.stdout instanceof Buffer) {
-        const localEnv = Object.fromEntries(result.stdout.toString().split('\n').map((field: string) => field?.split('=')))
-        if ('PATH' in localEnv) process.env = localEnv
-      }
-    } catch (error) {
-      console.warn('Unable to source the ESP IDF settings:', error)
-    }
-  }
+/**
+ * Set updated env from IDF_PATH/export.sh as process.env
+ */
+export async function sourceIdf(): Promise<void> {
+  await updateProcessEnv(`source $IDF_PATH/export.sh 1> /dev/null`)
+}
+
+/**
+ * Set updated env from IDF_PYTHON_ENV_PATH as process.env
+ */
+export async function sourceIdfPythonEnv(): Promise<void> {
+  await updateProcessEnv(`source ${process.env.IDF_PYTHON_ENV_PATH ?? ''}/bin/activate`)
 }

@@ -7,7 +7,7 @@ import { collectChoicesFromTree } from '../prompt/choices'
 import { moddableExists } from '../setup/moddable'
 import { DEVICE_ALIAS } from '../prompt/devices'
 import { Device } from '../../types'
-import { sourceEnvironment } from '../system/exec'
+import { sourceEnvironment, sourceIdfPythonEnv } from '../system/exec'
 
 export type DeployStatus = 'none' | 'run' | 'push' | 'clean' | 'debug'
 
@@ -143,6 +143,8 @@ export async function build({
       if (typeof process.env.IDF_PATH !== 'string' || filesystem.exists(process.env.IDF_PATH) !== 'dir') {
         print.error('The current environment does not appear to be set up for the ESP32 build target. Please run `xs-dev setup --device esp32` before trying again.')
         process.exit(1)
+      } else {
+        await sourceIdfPythonEnv()
       }
     } else if (targetPlatform.includes('esp')) {
       if (typeof process.env.ESP_BASE !== 'string' || filesystem.exists(process.env.ESP_BASE) !== 'dir') {
