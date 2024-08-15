@@ -14,6 +14,7 @@ if (wantsCompiled || !devMode) {
   // hook into ts-node so we can run typescript on the fly
   require('ts-node').register({
     project: `${__dirname}/../tsconfig.json`,
+    files: true,
   })
   // run the CLI with the current process arguments
   require(`${__dirname}/../src/cli`).run(process.argv)
