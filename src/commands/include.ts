@@ -9,6 +9,7 @@ interface IncludeOptions {
 const command: GluegunCommand = {
   name: 'include',
   description: 'Name or select Moddable module to add to project manifest',
+  // eslint-disable-next-line @typescript-eslint/no-misused-promises
   run: async ({ prompt, filesystem, patching, print, parameters }) => {
     const manifestPath = filesystem.resolve(process.cwd(), 'manifest.json')
     if (filesystem.exists(manifestPath) === false) {
@@ -62,17 +63,20 @@ const command: GluegunCommand = {
         manifest.platforms[device] ??= {}
         manifest = manifest.platforms[device]
       }
-      if (!("include" in manifest))
+      if (!("include" in manifest)) {
         manifest.include = []
-      if (typeof manifest.include === "string")
+      }
+      if (typeof manifest.include === "string") {
         manifest.include = [manifest.include]
+      }
       if (manifest.include.includes(modulePath) === false) {
         manifest.include.push(
           modulePath
         )
       }
-      if (manifest.include.length === 1)
+      if (manifest.include.length === 1) {
         manifest.include = manifest.include[0]
+      }
       return manifestIn
     })
     print.success('Done!')

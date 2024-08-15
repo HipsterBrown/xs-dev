@@ -15,6 +15,7 @@ function sleep(timeout: number) {
 const command: GluegunCommand<XSDevToolbox> = {
   name: 'scan',
   description: 'Look for available devices',
+  // eslint-disable-next-line @typescript-eslint/no-misused-promises
   run: async (toolbox) => {
     const { filesystem, parameters, print, system } = toolbox
     if (parameters.options.help !== undefined) {

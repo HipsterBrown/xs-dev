@@ -52,12 +52,12 @@ export default async function(): Promise<void> {
       spinner.start('Installing latest EMSDK')
       print.debug(EMSDK_PATH)
       await system.exec('./emsdk install latest', {
-        process: process,
+        process,
         cwd: EMSDK_PATH,
         stdout: process.stdout,
       })
       await system.exec('./emsdk activate latest', {
-        process: process,
+        process,
         cwd: EMSDK_PATH,
         stdout: process.stdout,
       })

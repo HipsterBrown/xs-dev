@@ -6,7 +6,7 @@ import { filesystem, print, prompt, system } from 'gluegun'
 import { collectChoicesFromTree } from '../prompt/choices'
 import { moddableExists } from '../setup/moddable'
 import { DEVICE_ALIAS } from '../prompt/devices'
-import { Device } from '../../types'
+import type { Device } from '../../types'
 import { sourceEnvironment, sourceIdfPythonEnv } from '../system/exec'
 
 export type DeployStatus = 'none' | 'run' | 'push' | 'clean' | 'debug'

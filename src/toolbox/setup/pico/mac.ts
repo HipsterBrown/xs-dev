@@ -1,4 +1,4 @@
-import { GluegunPrint, print, system } from 'gluegun'
+import { type GluegunPrint, print, system } from 'gluegun'
 import { ensureHomebrew, formulaeExists } from '../homebrew';
 
 export async function installDeps(

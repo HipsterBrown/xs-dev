@@ -10,6 +10,7 @@ const command: GluegunCommand = {
   name: 'teardown',
   description:
     'Remove all installed git repos and toolchains, unset environment changes',
+  // eslint-disable-next-line @typescript-eslint/no-misused-promises
   run: async ({ print, filesystem, patching }) => {
     const PROFILE_PATH = getProfilePath()
     const spinner = print.spin()

@@ -7,7 +7,7 @@ interface InspectTreeResult {
 export function collectChoicesFromTree(
   fd: InspectTreeResult,
   results: string[] = [],
-  root: string = ''
+  root = ''
 ): string[] {
   if (
     fd.type === 'dir' &&

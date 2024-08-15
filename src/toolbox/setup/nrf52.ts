@@ -2,11 +2,11 @@ import axios from 'axios'
 import { createWriteStream } from 'fs'
 import { filesystem, print } from 'gluegun'
 import { arch, type as platformType } from 'os'
-import { finished } from 'stream'
+import { finished, type Transform } from 'stream'
 import { extract } from 'tar-fs'
 import { promisify } from 'util'
 import { Extract as ZipExtract } from 'unzip-stream'
-import { Device } from '../../types'
+import type { Device } from '../../types'
 import { DEVICE_ALIAS } from '../prompt/devices'
 import { execWithSudo, sourceEnvironment } from '../system/exec'
 import { EXPORTS_FILE_PATH, INSTALL_DIR } from './constants'
@@ -52,11 +52,9 @@ export default async function(): Promise<void> {
     await ensureModdableCommandPrompt(spinner)
   }
 
-  let createUnxz: any;
+  let createUnxz: (() => Transform) | (() => void) = () => { void 0 }
   if (!isWindows) {
     try {
-      // eslint-disable-next-line @typescript-eslint/prefer-ts-expect-error
-      // @ts-ignore
       ({ createUnxz } = await import('node-liblzma'))
     } catch (error) {
       spinner.fail("Unable to extract Arm Embedded Toolchain without XZ utils (https://tukaani.org/xz/). Please install that dependency on your system and reinstall xs-dev before attempting this setup again. See https://xs-dev.js.org/troubleshooting for more info.")
