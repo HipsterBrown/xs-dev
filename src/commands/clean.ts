@@ -18,6 +18,7 @@ interface CleanOptions {
 const command: GluegunCommand<XSDevToolbox> = {
   name: 'clean',
   description: 'Remove build artifacts for project',
+  // eslint-disable-next-line @typescript-eslint/no-misused-promises
   run: async ({ parameters, filesystem, build }) => {
     const currentPlatform: Device = platformType().toLowerCase() as Device
     const {

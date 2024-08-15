@@ -19,12 +19,12 @@ export async function installDeps(
 
   if (
     system.which('python') === null ||
-    // get python verion, check if v3
+    // get python version, check if v3
     semver.satisfies(
-      (await system.exec('python --version', { trim: true }))
-        .toString()
+      ((await system.exec('python --version', { trim: true }))
+        .toString() as string)
         .split(' ')
-        .pop(),
+        .pop() ?? '',
       '>= 3.x.x'
     )
   ) {

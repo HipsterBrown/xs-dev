@@ -1,8 +1,9 @@
-import { GluegunCommand } from 'gluegun'
+import type { GluegunCommand } from 'gluegun'
 
 const command: GluegunCommand = {
   name: 'xs-dev',
   description: 'CLI for automating the setup and usage of Moddable XS tools',
+  // eslint-disable-next-line @typescript-eslint/no-misused-promises
   run: async (toolbox) => {
     const { print } = toolbox
 

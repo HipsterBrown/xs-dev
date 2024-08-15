@@ -1,7 +1,7 @@
 import { type as platformType } from 'node:os';
 import { system, print } from 'gluegun'
 import { EXPORTS_FILE_PATH } from '../setup/constants';
-import { Device } from '../../types';
+import type { Device } from '../../types';
 
 function ensureAskPass(): void {
   const SUDO_ASKPASS = system.which('ssh-askpass')
@@ -30,7 +30,7 @@ export async function execWithSudo(
     if (error.toString().includes('password') === false) {
       ensureAskPass()
     } else {
-      throw error
+      throw error as Error
     }
   }
 
@@ -49,7 +49,7 @@ async function updateProcessEnv(command: string): Promise<void> {
         shell: process.env.SHELL,
       })
       if (typeof result.stdout === 'string' || result.stdout instanceof Buffer) {
-        const localEnv = Object.fromEntries(result.stdout.toString().split('\n').map((field: string) => field?.split('=')))
+        const localEnv = Object.fromEntries((result.stdout.toString() as string).split('\n').map((field: string) => field?.split('=')))
         if ('PATH' in localEnv) process.env = localEnv
       }
     } catch (error) {

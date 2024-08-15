@@ -9,7 +9,7 @@ import {
   downloadReleaseTools,
   MissingReleaseAssetError,
 } from '../setup/moddable'
-import { SetupArgs } from '../setup/types'
+import type { SetupArgs } from '../setup/types'
 import { sourceEnvironment } from '../system/exec'
 
 const chmodPromise = promisify(chmod)
@@ -85,7 +85,7 @@ export default async function({ targetBranch }: SetupArgs): Promise<void> {
           release: latestRelease,
         })
       } else {
-        throw error;
+        throw error as Error;
       }
     }
 

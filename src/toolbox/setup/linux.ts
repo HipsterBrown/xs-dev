@@ -10,7 +10,7 @@ import {
 } from './constants'
 import upsert from '../patching/upsert'
 import { execWithSudo } from '../system/exec'
-import { PlatformSetupArgs } from './types'
+import type { PlatformSetupArgs } from './types'
 import { fetchLatestRelease, downloadReleaseTools } from './moddable'
 
 const chmodPromise = promisify(chmod)

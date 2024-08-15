@@ -20,6 +20,7 @@ interface RunOptions {
 const command: GluegunCommand<XSDevToolbox> = {
   name: 'run',
   description: 'Build and launch project on target device or simulator',
+  // eslint-disable-next-line @typescript-eslint/no-misused-promises
   run: async ({ parameters, filesystem, build }) => {
     const currentPlatform: Device = platformType().toLowerCase() as Device
     const {

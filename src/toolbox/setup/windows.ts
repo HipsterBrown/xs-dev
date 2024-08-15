@@ -1,5 +1,5 @@
 import {
-  GluegunPrint,
+  type GluegunPrint,
   print,
   filesystem,
   system,
@@ -14,7 +14,7 @@ import {
 import upsert from '../patching/upsert'
 import ws from 'windows-shortcuts'
 import { promisify } from 'util'
-import { PlatformSetupArgs } from './types'
+import type { PlatformSetupArgs } from './types'
 import { downloadReleaseTools, fetchLatestRelease } from './moddable'
 
 const wsPromise = promisify(ws.create)
@@ -23,7 +23,7 @@ const SHORTCUT = filesystem.resolve(INSTALL_DIR, "Moddable Command Prompt.lnk")
 
 export async function setEnv(name: string, permanentValue: string, envValue?: string): Promise<void> {
   await upsert(EXPORTS_FILE_PATH, `set "${name}=${permanentValue}"`)
-  process.env[name] = envValue !== undefined ? envValue : permanentValue
+  process.env[name] = envValue ?? permanentValue
 }
 
 export async function addToPath(path: string): Promise<void> {
@@ -165,14 +165,14 @@ export default async function({ sourceRepo, targetBranch }: PlatformSetupArgs): 
         filesystem.dir(DEBUG_BIN_PATH)
 
         spinner.info('Downloading release tools')
-        
+
         const assetName = `moddable-tools-win64.zip`
         await downloadReleaseTools({
           writePath: BIN_PATH,
           assetName,
           release
         })
-        
+
         const tools = filesystem.list(BIN_PATH) ?? []
         await Promise.all(
           tools.map(async (tool) => {
@@ -204,7 +204,7 @@ export default async function({ sourceRepo, targetBranch }: PlatformSetupArgs): 
     await setEnv('ISMODDABLECOMMANDPROMPT', '1')
     spinner.succeed()
   } catch (error) {
-    spinner.fail(error.toString())
+    spinner.fail(error.toString() as string)
   }
 
   // 3. build tools if needed

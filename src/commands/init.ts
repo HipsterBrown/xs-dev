@@ -14,11 +14,12 @@ const command: GluegunCommand = {
   name: 'init',
   alias: ['i'],
   description: 'Scaffold a new Moddable XS project',
+  // eslint-disable-next-line @typescript-eslint/no-misused-promises
   run: async (toolbox) => {
     const {
       parameters,
       filesystem,
-      template: { generate },
+      template,
       print: { warning, info, success },
       prompt,
     } = toolbox
@@ -96,17 +97,17 @@ const command: GluegunCommand = {
           .flat()
           .join(',\n\t')
 
-        const defines: String = asyncMain
+        const defines: string = asyncMain
           ? ',\n  defines: {\n    async_main: 1\n  }'
           : ''
 
-        await generate({
+        await template.generate({
           template: 'manifest.json.ejs',
           target: `${name}/manifest.json`,
           props: { includes, defines },
         })
 
-        await generate({
+        await template.generate({
           template: 'main.js.ejs',
           target: `${name}/main.${typescript ? 'ts' : 'js'}`,
         })

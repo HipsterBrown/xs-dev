@@ -14,7 +14,7 @@ import { installDeps as installLinuxDeps } from './esp8266/linux'
 import { installDeps as installWindowsDeps } from './esp8266/windows'
 import { ensureModdableCommandPrompt } from './windows'
 import { DEVICE_ALIAS } from '../prompt/devices'
-import { Device } from '../../types'
+import type { Device } from '../../types'
 import { sourceEnvironment } from '../system/exec'
 
 const finishedPromise = promisify(finished)

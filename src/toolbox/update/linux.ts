@@ -3,7 +3,7 @@ import { promisify } from 'util'
 import { chmod } from 'fs'
 import { print, system, filesystem } from 'gluegun'
 import { INSTALL_PATH, MODDABLE_REPO, XSBUG_LOG_PATH } from '../setup/constants'
-import { SetupArgs } from '../setup/types'
+import type { SetupArgs } from '../setup/types'
 import {
   fetchLatestRelease,
   moddableExists,

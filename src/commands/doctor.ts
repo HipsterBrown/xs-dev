@@ -4,13 +4,14 @@ import { DEVICE_ALIAS } from '../toolbox/prompt/devices'
 import { getModdableVersion, moddableExists } from '../toolbox/setup/moddable'
 import { sourceEnvironment } from '../toolbox/system/exec'
 import { detectPython, getPythonVersion } from '../toolbox/system/python'
-import { Device } from '../types'
+import type { Device } from '../types'
 
 
 const command: GluegunCommand = {
   name: 'doctor',
   alias: ['dr', 'info'],
   description: 'Display the current environment setup information, including valid target devices.',
+  // eslint-disable-next-line @typescript-eslint/no-misused-promises
   run: async ({ print, meta, filesystem, system }) => {
     await sourceEnvironment()
 

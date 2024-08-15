@@ -20,6 +20,7 @@ interface BuildOptions {
 const command: GluegunCommand<XSDevToolbox> = {
   name: 'build',
   description: 'Build project for release to target device',
+  // eslint-disable-next-line @typescript-eslint/no-misused-promises
   run: async ({ parameters, filesystem, build }) => {
     const currentPlatform: Device = platformType().toLowerCase() as Device
     const {

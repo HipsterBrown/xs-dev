@@ -4,7 +4,7 @@ import type { Device, XSDevToolbox } from '../types'
 import setupEjectfix from '../toolbox/setup/ejectfix'
 import { DEVICE_ALIAS } from '../toolbox/prompt/devices'
 import { MODDABLE_REPO } from '../toolbox/setup/constants'
-import { SetupArgs } from '../toolbox/setup/types'
+import type { SetupArgs } from '../toolbox/setup/types'
 
 interface SetupOptions {
   device?: Device
@@ -18,6 +18,7 @@ const command: GluegunCommand<XSDevToolbox> = {
   name: 'setup',
   description:
     'Download and build Moddable tooling for various platform targets',
+  // eslint-disable-next-line @typescript-eslint/no-misused-promises
   run: async ({ parameters, setup, prompt, print }) => {
     const currentPlatform: Device = platformType().toLowerCase() as Device
     const {

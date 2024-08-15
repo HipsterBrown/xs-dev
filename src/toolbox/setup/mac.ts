@@ -10,7 +10,7 @@ import {
 } from './constants'
 import upsert from '../patching/upsert'
 import { downloadReleaseTools, fetchLatestRelease, MissingReleaseAssetError } from './moddable'
-import { PlatformSetupArgs } from './types'
+import type { PlatformSetupArgs } from './types'
 
 const chmodPromise = promisify(chmod)
 
@@ -95,7 +95,7 @@ export default async function({ sourceRepo, targetBranch }: PlatformSetupArgs): 
               release,
             })
           } else {
-            throw error;
+            throw error as Error;
           }
         }
         const tools = filesystem.list(BIN_PATH) ?? []

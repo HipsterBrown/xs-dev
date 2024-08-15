@@ -19,6 +19,7 @@ interface DebugOptions {
 const command: GluegunCommand<XSDevToolbox> = {
   name: 'debug',
   description: 'Connect to running debugging session on target device or simulator',
+  // eslint-disable-next-line @typescript-eslint/no-misused-promises
   run: async ({ parameters, filesystem, build }) => {
     const currentPlatform: Device = platformType().toLowerCase() as Device
     const {

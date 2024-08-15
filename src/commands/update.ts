@@ -10,6 +10,7 @@ interface UpdateOptions {
 const command: GluegunCommand<XSDevToolbox> = {
   name: 'update',
   description: 'Check and update Moddable tooling for various platform targets',
+  // eslint-disable-next-line @typescript-eslint/no-misused-promises
   run: async ({ parameters, update }) => {
     const currentPlatform: Device = platformType().toLowerCase() as Device
     const {

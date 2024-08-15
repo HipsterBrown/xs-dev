@@ -2,11 +2,11 @@ import { type as platformType } from 'os'
 import { finished } from 'stream'
 import { promisify } from 'util'
 import { filesystem, system } from 'gluegun'
-import { Octokit, RestEndpointMethodTypes } from '@octokit/rest'
+import { Octokit, type RestEndpointMethodTypes } from '@octokit/rest'
 import { Extract as ZipExtract } from 'unzip-stream'
 import axios from 'axios'
 import { INSTALL_PATH } from './constants'
-import { Device } from '../../types'
+import type { Device } from '../../types'
 import { DEVICE_ALIAS } from '../prompt/devices'
 
 const finishedPromise = promisify(finished)

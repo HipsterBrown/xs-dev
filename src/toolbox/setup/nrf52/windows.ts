@@ -1,4 +1,4 @@
-import { GluegunPrint, print, system } from "gluegun"
+import { type GluegunPrint, print, system } from "gluegun"
 
 export async function installPython(spinner: ReturnType<GluegunPrint['spin']>): Promise<void> {
   if (system.which('python') === null) {
