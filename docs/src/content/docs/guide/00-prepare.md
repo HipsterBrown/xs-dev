@@ -38,11 +38,11 @@ While [NodeJS](https://nodejs.org/en/) is not required for [Moddable XS](https:/
 
 Node can be [downloaded directly from the website](https://nodejs.org/en/download/), however using one of the following version managers can help with quickly switching to recommended versions of the tooling in the future:
 
+- [mise](https://mise.jdx.dev/getting-started.html#_1-install-mise-cli)
+- [`pnpm env`](https://pnpm.io/cli/env)
 - [Volta](https://volta.sh/)
 - [fnm](https://github.com/Schniz/fnm)
 - [asdf](https://asdf-vm.com/guide/getting-started.html#_4-install-a-plugin)
-- [rtx](https://github.com/jdxcode/rtx#installation)
-- [`pnpm env`](https://pnpm.io/cli/env)
 
 Node comes with [npm](https://docs.npmjs.com/cli/v8/commands/npm) as the included package manager, but there are other options available if needed:
 
