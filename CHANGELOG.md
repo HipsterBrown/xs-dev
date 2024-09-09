@@ -1,5 +1,7 @@
 
 
+### [0.32.5](https://github.com/HipsterBrown/xs-dev/compare/v0.32.4...v0.32.5) (2024-09-09)
+
 ### [0.32.4](https://github.com/HipsterBrown/xs-dev/compare/v0.32.3...v0.32.4) (2024-09-09)
 
 
