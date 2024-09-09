@@ -8,3 +8,5 @@ build/
 .vscode
 !src/toolbox/build/
 .npmrc
+
+.env
