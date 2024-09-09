@@ -1,3 +1,15 @@
+# v0.32.6 (Mon Sep 09 2024)
+
+#### 🚀 Enhancement
+
+- chore: replace release-it with auto [#177](https://github.com/HipsterBrown/xs-dev/pull/177) ([@HipsterBrown](https://github.com/HipsterBrown))
+
+#### Authors: 1
+
+- Nick Hehr ([@HipsterBrown](https://github.com/HipsterBrown))
+
+---
+
 
 
 ### [0.32.5](https://github.com/HipsterBrown/xs-dev/compare/v0.32.4...v0.32.5) (2024-09-09)
