@@ -9,6 +9,18 @@
   "imageSize": 100,
   "commit": true,
   "commitConvention": "none",
-  "contributors": [],
+  "contributors": [
+    {
+      "login": "HipsterBrown",
+      "name": "Nick Hehr",
+      "avatar_url": "https://avatars.githubusercontent.com/u/3051193?v=4",
+      "profile": "https://hipsterbrown.com/",
+      "contributions": [
+        "doc",
+        "infra",
+        "code"
+      ]
+    }
+  ],
   "contributorsPerLine": 7
 }
