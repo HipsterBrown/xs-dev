@@ -1,8 +1,6 @@
 name: Changesets
 on:
   push:
-    branches:
-      - main
     paths-ignore:
       - 'docs/**'
 
@@ -44,12 +42,7 @@ jobs:
 
       - name: Release It
         run: |
-          npm config set //registry.npmjs.org/:_authToken $NPM_TOKEN
-          pnpm release --npm.skipChecks
+          pnpm release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
-
-
-
-

@@ -25,7 +25,7 @@
     "ci:version": "pnpm ci:version:changeset && pnpm ci:version:install",
     "ci:version:install": "pnpm install --frozen-lockfile=false",
     "ci:publish": "changeset publish",
-    "release": "release-it"
+    "release": "auto shipit"
   },
   "files": [
     "tsconfig.json",
@@ -57,10 +57,13 @@
   },
   "devDependencies": {
     "@astrojs/starlight": "^0.25.4",
+    "@auto-it/all-contributors": "^11.2.1",
+    "@auto-it/conventional-commits": "^11.2.1",
+    "@auto-it/first-time-contributor": "^11.2.1",
+    "@auto-it/magic-zero": "^11.2.1",
     "@babel/core": ">=7.20.12 <8.0.0",
     "@changesets/cli": "^2.19.0",
     "@justinribeiro/lite-youtube": "^1.5.0",
-    "@release-it/conventional-changelog": "^5.1.1",
     "@types/jest": "^27.4.0",
     "@types/node": "^18.11.19",
     "@types/serve-handler": "^6.1.1",
@@ -69,6 +72,7 @@
     "@typescript-eslint/eslint-plugin": "^8.1.0",
     "@typescript-eslint/parser": "^8.1.0",
     "astro": "4.13.3",
+    "auto": "^11.2.1",
     "eslint": "^8.57.0",
     "eslint-config-love": "^62.0.0",
     "eslint-config-prettier": "^8.3.0",
@@ -78,7 +82,6 @@
     "eslint-plugin-promise": "^7.1.0",
     "jest": "^29.7.0",
     "prettier": "^3.3.3",
-    "release-it": "^15.11.0",
     "rollup": "^2.78.1",
     "solid-js": "^1.4.3",
     "tailwindcss": "^3.0.24",
@@ -106,65 +109,20 @@
       "minimatch@<3.0.5": ">=3.0.5"
     }
   },
-  "release-it": {
-    "git": {
-      "commitMessage": "chore: release v${version} [skip ci]"
-    },
-    "github": {
-      "release": true,
-      "comments": true
-    },
-    "plugins": {
-      "@release-it/conventional-changelog": {
-        "preset": "conventionalcommits",
-        "infile": "CHANGELOG.md",
-        "types": [
-          {
-            "section": "Features",
-            "type": "feat"
-          },
-          {
-            "section": "Bug fixes",
-            "type": "fix"
-          },
-          {
-            "section": "Documentation",
-            "type": "docs"
-          },
-          {
-            "section": "Styles",
-            "type": "style"
-          },
-          {
-            "section": "Code refactoring",
-            "type": "refactor"
-          },
-          {
-            "section": "Performance improvements",
-            "type": "perf"
-          },
-          {
-            "section": "Tests",
-            "type": "test"
-          },
-          {
-            "section": "Builds",
-            "type": "build"
-          },
-          {
-            "section": "Continuous integrations",
-            "type": "ci"
-          },
-          {
-            "section": "Chores",
-            "type": "chore"
-          },
-          {
-            "section": "Reverts",
-            "type": "revert"
-          }
-        ]
-      }
-    }
+  "author": "HipsterBrown <headhipster@hipsterbrown.com>",
+  "auto": {
+    "plugins": [
+      "magic-zero",
+      "npm",
+      "all-contributors",
+      [
+        "conventional-commits",
+        {
+          "preset": "conventionalcommits"
+        }
+      ],
+      "first-time-contributor",
+      "released"
+    ]
   }
 }
