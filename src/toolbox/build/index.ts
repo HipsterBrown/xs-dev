@@ -141,7 +141,9 @@ export async function build({
       examples !== undefined
         ? examples.map((example) => collectChoicesFromTree(example)).flat()
         : []
-    if (contributed !== undefined) choices.push(...contributed.flatMap(project => collectChoicesFromTree(project)))
+    if (contributed !== undefined) {
+      choices.push(...contributed.flatMap(project => collectChoicesFromTree(project)))
+    }
     const { example: selectedExample } = await prompt.ask([
       {
         type: 'autocomplete',
@@ -214,9 +216,15 @@ export async function build({
     `-t ${DEPLOY_TARGET[deployStatus]}`,
     `-o ${outputDir}`,
   ]
-  if (mode === 'development') configArgs.push('-d')
-  if (mode === 'production') configArgs.push('-i')
-  if (log) configArgs.push('-l')
+  if (mode === 'development') {
+    configArgs.push('-d')
+  }
+  if (mode === 'production') {
+    configArgs.push('-i')
+  }
+  if (log) {
+    configArgs.push('-l')
+  }
 
   Object.entries(config).forEach(([element, value]) => {
     configArgs.push(`${element}="${value}"`)

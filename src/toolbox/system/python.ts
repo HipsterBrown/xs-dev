@@ -8,6 +8,8 @@ export function detectPython(): string | null {
 
 export async function getPythonVersion(): Promise<string | null> {
   const python = detectPython()
-  if (python !== null) return (await system.run(`${python} --version`)).split(' ').pop()?.trim() ?? null
+  if (python !== null) {
+    return (await system.run(`${python} --version`)).split(' ').pop()?.trim() ?? null
+  }
   return null
 }

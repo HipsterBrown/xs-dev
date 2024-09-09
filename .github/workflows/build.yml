@@ -13,7 +13,7 @@ env:
   CI: true
   PNPM_CACHE_FOLDER: .pnpm-store
 jobs:
-  lint:
+  format_and_lint:
     runs-on: ubuntu-latest
 
     steps:
@@ -35,33 +35,8 @@ jobs:
       - name: Install dependencies
         run: pnpm install
 
-      - name: Lint code
-        run: pnpm run lint
-
-  format:
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v4
-        with:
-          version: 9.x.x
-          run_install: false
-
-      - name: Setup Node
-        uses: actions/setup-node@v4
-        with:
-          node-version: 18
-          cache: 'pnpm'
-
-      - name: Install dependencies
-        run: pnpm install
-
-      - name: Format code
-        run: pnpm run format
+      - name: Format and lint code
+        run: pnpm run format && pnpm run lint
 
   compile:
     runs-on: ubuntu-latest
