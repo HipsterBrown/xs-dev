@@ -117,6 +117,13 @@ export async function build({
         process.exit(1)
       }
     }
+
+    if (targetPlatform.includes('nrf52') && !startsWithSimulator) {
+      if (typeof process.env.NRF_ROOT !== 'string' || typeof process.env.NRF_SDK_DIR !== 'string' || filesystem.exists(process.env.NRF_ROOT) !== 'dir' || filesystem.exists(process.env.NRF_SDK_DIR) !== 'dir') {
+        print.error('The current environment does not appear to be set up for the nrf52 build target. Please run `xs-dev setup --device nrf52` before trying again.')
+        process.exit(1)
+      }
+    }
   }
 
   if (listExamples) {
