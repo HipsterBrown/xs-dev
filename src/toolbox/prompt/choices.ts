@@ -17,10 +17,9 @@ export function collectChoicesFromTree(
   } else if (fd.type === 'dir') {
     results.concat(
       fd.children
-        .map((child) =>
+        .flatMap((child) =>
           collectChoicesFromTree(child, results, `${root}${fd.name}/`)
         )
-        .flat()
     )
   }
   return results.flat()

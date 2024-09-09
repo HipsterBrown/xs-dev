@@ -60,67 +60,17 @@ export async function build({
   outputDir ??= filesystem.resolve(String(process.env.MODDABLE), 'build')
 
   if (listDevices) {
-    const choices = [
-      'esp',
-      'esp/moddable_zero',
-      'esp/moddable_one',
-      'esp/moddable_three',
-      'esp/nodemcu',
-      'esp32',
-      'esp32/moddable_two',
-      'esp32/nodemcu',
-      'esp32/m5stack',
-      'esp32/m5stack_core2',
-      'esp32/m5stack_fire',
-      'esp32/m5stick_c',
-      'esp32/m5stick_cplus',
-      'esp32/m5atom_echo',
-      'esp32/m5atom_lite',
-      'esp32/m5atom_matrix',
-      'esp32/m5atom_u',
-      'esp32/m5paper',
-      'esp32/m5core_ink',
-      'esp32/heltec_wifi_kit_32',
-      'esp32/esp32_thing',
-      'esp32/esp32_thing_plus',
-      'esp32/wrover_kit',
-      'esp32/kaluga',
-      'esp32/saola_wroom',
-      'esp32/saola_wrover',
-      'esp32/esp32s3',
-      'esp32/esp32c3',
-      'esp32/c3_32s_kit',
-      'esp32/c3_32s_kit_2m',
-      'wasm',
-      'pico',
-      'pico/pico_w',
-      'pico/ili9341',
-      'pico/pico_display',
-      'pico/pico_display_2',
-      'pico/pico_lcd_1.3',
-      'pico/itsybitsy',
-      'pico/lilygo_t_display',
-      'pico/picosystem',
-      'pico/qtpy',
-      'pico/tiny2040',
-      'pico/xiao_rp2040',
-      'pico/pro_micro',
-      'nrf52/moddable_four',
-      'nrf52/dk',
-      'nrf52/sparkfun',
-      'nrf52/makerdiary',
-      'nrf52/xiao',
-      'nrf52/itsybitsy',
-      'simulator/moddable_one',
-      'simulator/moddable_two',
-      'simulator/moddable_three',
-      'simulator/moddable_four',
-      'simulator/m5stickc',
-      'simulator/m5paper',
-      'simulator/nodemcu',
-      'simulator/pico_display',
-      'simulator/pico_display_2',
-    ]
+    const deviceTargetsPath = filesystem.resolve(String(process.env.MODDABLE), 'build', 'devices')
+    const simulatorsPath = filesystem.resolve(String(process.env.MODDABLE), 'build', 'simulators')
+    const devices = filesystem.inspectTree(deviceTargetsPath)?.children ?? []
+    const deviceTargets = devices.flatMap(dev => {
+      const targets = dev.children
+        .filter(c => c.name === 'targets')
+        .flatMap(c => c.children.flatMap(dir => collectChoicesFromTree(dir, [], `${dev.name}/`)))
+      return [dev.name].concat(targets)
+    })
+    const simulators = filesystem.inspectTree(simulatorsPath)?.children?.flatMap(sim => collectChoicesFromTree(sim, [], `simulator/`)) ?? []
+    const choices = deviceTargets.concat(simulators, 'wasm', DEVICE_ALIAS[OS])
     const { device: selectedDevice } = await prompt.ask([
       {
         type: 'autocomplete',
@@ -139,30 +89,38 @@ export async function build({
   }
 
   if (targetPlatform !== '') {
-    if (targetPlatform.includes('esp32')) {
+    const startsWithSimulator = targetPlatform.startsWith('simulator')
+    if (targetPlatform.includes('esp32') && !startsWithSimulator) {
       if (typeof process.env.IDF_PATH !== 'string' || filesystem.exists(process.env.IDF_PATH) !== 'dir') {
         print.error('The current environment does not appear to be set up for the ESP32 build target. Please run `xs-dev setup --device esp32` before trying again.')
         process.exit(1)
       } else {
         await sourceIdfPythonEnv()
       }
-    } else if (targetPlatform.includes('esp')) {
+    } else if (targetPlatform.includes('esp') && !startsWithSimulator) {
       if (typeof process.env.ESP_BASE !== 'string' || filesystem.exists(process.env.ESP_BASE) !== 'dir') {
         print.error('The current environment does not appear to be set up for the ESP8266 build target. Please run `xs-dev setup --device esp8266` before trying again.')
         process.exit(1)
       }
     }
 
-    if (targetPlatform.includes('wasm')) {
+    if (targetPlatform.includes('wasm') && !startsWithSimulator) {
       if (!(process.env.PATH ?? '').includes('binaryen') || filesystem.exists(process.env.EMSDK ?? '') !== 'dir' || filesystem.exists(process.env.EMSDK_NODE ?? '') !== 'file' || filesystem.exists(process.env.EMSDK_PYTHON ?? '') !== 'file') {
         print.error('The current environment does not appear to be set up for the wasm build target. Please run `xs-dev setup --device wasm` before trying again.')
         process.exit(1)
       }
     }
 
-    if (targetPlatform.includes('pico')) {
+    if (targetPlatform.includes('pico') && !startsWithSimulator) {
       if (typeof process.env.PICO_SDK_PATH !== 'string' || filesystem.exists(process.env.PICO_SDK_PATH) !== 'dir' || system.which('picotool') === null || filesystem.exists(process.env.PIOASM ?? '') !== 'file') {
         print.error('The current environment does not appear to be set up for the pico build target. Please run `xs-dev setup --device pico` before trying again.')
+        process.exit(1)
+      }
+    }
+
+    if (targetPlatform.includes('nrf52') && !startsWithSimulator) {
+      if (typeof process.env.NRF_ROOT !== 'string' || typeof process.env.NRF_SDK_DIR !== 'string' || filesystem.exists(process.env.NRF_ROOT) !== 'dir' || filesystem.exists(process.env.NRF_SDK_DIR) !== 'dir') {
+        print.error('The current environment does not appear to be set up for the nrf52 build target. Please run `xs-dev setup --device nrf52` before trying again.')
         process.exit(1)
       }
     }
@@ -183,7 +141,7 @@ export async function build({
       examples !== undefined
         ? examples.map((example) => collectChoicesFromTree(example)).flat()
         : []
-    if (contributed !== undefined) choices.push(...contributed.map(project => collectChoicesFromTree(project)).flat())
+    if (contributed !== undefined) choices.push(...contributed.flatMap(project => collectChoicesFromTree(project)))
     const { example: selectedExample } = await prompt.ask([
       {
         type: 'autocomplete',
