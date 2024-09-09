@@ -1,5 +1,12 @@
 
 
+### [0.32.4](https://github.com/HipsterBrown/xs-dev/compare/v0.32.3...v0.32.4) (2024-09-09)
+
+
+### Bug Fixes
+
+* **build/run:** dynamically create list of device targets ([#176](https://github.com/HipsterBrown/xs-dev/issues/176)) ([107db40](https://github.com/HipsterBrown/xs-dev/commit/107db40d87f19ba8e3d6dcc6da43cf7b2309354c))
+
 ### [0.32.3](https://github.com/HipsterBrown/xs-dev/compare/v0.32.2...v0.32.3) (2024-08-15)
 
 
