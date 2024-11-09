@@ -1,18 +1,15 @@
-import type { GluegunCommand } from 'gluegun'
 import os from 'os'
+import { buildCommand } from '@stricli/core'
+import { LocalContext } from '../cli'
 import { DEVICE_ALIAS } from '../toolbox/prompt/devices'
 import { getModdableVersion, moddableExists } from '../toolbox/setup/moddable'
 import { sourceEnvironment } from '../toolbox/system/exec'
 import { detectPython, getPythonVersion } from '../toolbox/system/python'
 import type { Device } from '../types'
 
-
-const command: GluegunCommand = {
-  name: 'doctor',
-  alias: ['dr', 'info'],
-  description: 'Display the current environment setup information, including valid target devices.',
-  // eslint-disable-next-line @typescript-eslint/no-misused-promises
-  run: async ({ print, meta, filesystem, system }) => {
+const command = buildCommand({
+  async func(this: LocalContext) {
+    const { print, filesystem, system, currentVersion } = this
     await sourceEnvironment()
 
     const supportedDevices = []
@@ -56,7 +53,7 @@ const command: GluegunCommand = {
 
     print.info('xs-dev environment info:')
     print.table([
-      ['CLI Version', meta.version()],
+      ['CLI Version', currentVersion],
       ['OS', os.type()],
       ['Arch', os.arch()],
       ['Shell', process.env.SHELL ?? 'Unknown'],
@@ -72,7 +69,13 @@ const command: GluegunCommand = {
     ].filter(tuple => tuple.length !== 0))
 
     print.highlight(`\nIf this is related to an error when using the CLI, please create an issue at "https://github.com/hipsterbrown/xs-dev/issues/new" with the above info.`)
+  },
+  docs: {
+    brief: 'Display the current environment setup information, including valid target devices.',
+  },
+  parameters: {
+    flags: {}
   }
-}
+})
 
 export default command

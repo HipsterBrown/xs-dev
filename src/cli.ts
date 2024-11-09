@@ -17,29 +17,11 @@ import setup from './commands/setup'
 import teardown from './commands/teardown'
 import update from './commands/update'
 
-export type LocalContext = CommandContext & Pick<GluegunToolbox, 'filesystem' | 'strings' | 'print' | 'system' | 'semver' | 'http' | 'patching' | 'prompt' | 'packageManager'>;
-// const routes = buildRouteMap({
-//   routes: {
-//     subdir: subdirCommand,
-//     nested: nestedRoutes,
-//     install: buildInstallCommand("sticli-app", { bash: "__sticli-app_bash_complete" }),
-//     uninstall: buildUninstallCommand("sticli-app", { bash: true }),
-//   },
-//   docs: {
-//     brief: description,
-//     hideRoute: {
-//       install: true,
-//       uninstall: true,
-//     },
-//   },
-// });
-
-// export const app = buildApplication(routes, {
-//   name,
-//   versionInfo: {
-//     currentVersion: version,
-//   },
-// });
+export type LocalContext = CommandContext &
+  Pick<GluegunToolbox, 'filesystem' | 'strings' | 'print' | 'system' | 'semver' | 'http' | 'patching' | 'prompt' | 'packageManager'> &
+{
+  currentVersion: string;
+}
 
 const commands = buildRouteMap({
   routes: {
@@ -70,15 +52,7 @@ const commands = buildRouteMap({
         flags: {}
       },
     }),
-    doctor: buildCommand({
-      func: doctor.run,
-      docs: {
-        brief: doctor.description ?? '',
-      },
-      parameters: {
-        flags: {}
-      },
-    }),
+    doctor,
     include: buildCommand({
       func: include.run,
       docs: {
@@ -152,6 +126,10 @@ const commands = buildRouteMap({
       },
     }),
   },
+  aliases: {
+    dr: 'doctor',
+    info: 'doctor',
+  },
   docs: {
     brief: description,
   }
@@ -167,21 +145,19 @@ const app = buildApplication<LocalContext>(commands, {
 /**
  * Create the cli and kick it off
  */
-runApp(app, process.argv.slice(2), { process, filesystem, strings, print, system, semver, http, patching, prompt, packageManager }).catch(console.error)
-// async function run(argv: string[]): Promise<GluegunToolbox> {
-//   // create a CLI runtime
-//   const cli = build()
-//     .brand('xs-dev')
-//     .src(__dirname)
-//     .help() // provides default for help, h, --help, -h
-//     .version() // provides default for version, v, --version, -v
-//     .checkForUpdates(25)
-//     .create()
-//   // enable the following method if you'd like to skip loading one of these core extensions
-//   // this can improve performance if they're not necessary for your project:
-//   // .exclude(['meta', 'strings', 'print', 'filesystem', 'semver', 'system', 'prompt', 'http', 'template', 'patching', 'package-manager'])
-//   // and run it
-//   return await cli.run(argv)
-// }
-
-// module.exports = { run }
+runApp(app,
+  process.argv.slice(2),
+  {
+    process,
+    filesystem,
+    strings,
+    print,
+    system,
+    semver,
+    http,
+    patching,
+    prompt,
+    packageManager,
+    currentVersion: version
+  }
+).catch(console.error)
