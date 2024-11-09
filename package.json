@@ -3,6 +3,9 @@
   "version": "0.32.6",
   "description": "CLI for automating the setup and usage of Moddable XS tools",
   "types": "build/types/types.d.ts",
+  "engines": {
+    "node": ">=20"
+  },
   "bin": {
     "xs-dev": "bin/xs-dev"
   },
@@ -42,6 +45,7 @@
   },
   "dependencies": {
     "@octokit/rest": "^19.0.3",
+    "@stricli/core": "^1.1.0",
     "axios": "^1.2.1",
     "gluegun": "^5.1.2",
     "serialport": "^10.3.0",

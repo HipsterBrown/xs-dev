@@ -17,6 +17,9 @@ importers:
       '@octokit/rest':
         specifier: ^19.0.3
         version: 19.0.3
+      '@stricli/core':
+        specifier: ^1.1.0
+        version: 1.1.0
       axios:
         specifier: '>=1.6.0'
         version: 1.6.4
@@ -1296,6 +1299,9 @@ packages:
 
   '@sinonjs/fake-timers@10.3.0':
     resolution: {integrity: sha512-V4BG07kuYSUkTCSBHG8G8TNhM+F19jXFWnQtzj+we8DrkpSBCee9Z3Ms8yiGer/dlmhe35/Xdgyo3/0rQKg7YA==}
+
+  '@stricli/core@1.1.0':
+    resolution: {integrity: sha512-2dLUunRqYRvfaoYXhOWqLJzOl8H1RjTdOAYyXkls7MMwcA11gABqJuNZZSxOSqwTLDKjTfJkmgyaZCU7bfEX5w==}
 
   '@tsconfig/node10@1.0.8':
     resolution: {integrity: sha512-6XFfSQmMgq0CFLY1MslA/CPUfhIL919M1rMsa5lP2P097N2Wd1sSX0tx1u4olM16fLNhtHZpRhedZJphNJqmZg==}
@@ -7273,6 +7279,8 @@ snapshots:
   '@sinonjs/fake-timers@10.3.0':
     dependencies:
       '@sinonjs/commons': 3.0.1
+
+  '@stricli/core@1.1.0': {}
 
   '@tsconfig/node10@1.0.8': {}
 
