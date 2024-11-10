@@ -1,16 +1,23 @@
 import type { GluegunCommand } from 'gluegun'
+import { buildCommand } from '@stricli/core'
+import { LocalContext } from '../cli'
 import { collectChoicesFromTree } from '../toolbox/prompt/choices'
 import { sourceEnvironment } from '../toolbox/system/exec'
+import { DEVICE_ALIAS } from '../toolbox/prompt/devices'
+import { Device } from '../types'
 
 interface IncludeOptions {
-  device?: string
+  device?: Device
 }
 
-const command: GluegunCommand = {
-  name: 'include',
-  description: 'Name or select Moddable module to add to project manifest',
-  // eslint-disable-next-line @typescript-eslint/no-misused-promises
-  run: async ({ prompt, filesystem, patching, print, parameters }) => {
+const deviceSet = new Set(Object.values(DEVICE_ALIAS))
+
+const command = buildCommand({
+  docs: {
+    brief: 'Name or select Moddable module to add to project manifest',
+  },
+  async func(this: LocalContext, flags: IncludeOptions, moduleName?: string) {
+    const { filesystem, patching, print, prompt } = this
     const manifestPath = filesystem.resolve(process.cwd(), 'manifest.json')
     if (filesystem.exists(manifestPath) === false) {
       print.error(
@@ -25,10 +32,9 @@ const command: GluegunCommand = {
       String(process.env.MODDABLE),
       'modules'
     )
-    let moduleName = parameters.first
     const {
       device = ""
-    }: IncludeOptions = parameters.options
+    } = flags
 
     if (
       moduleName === undefined ||
@@ -81,6 +87,25 @@ const command: GluegunCommand = {
     })
     print.success('Done!')
   },
-}
+  parameters: {
+    positional: {
+      kind: 'tuple',
+      parameters: [{
+        placeholder: 'moduleName',
+        brief: 'Name of the SDK module to include in the project manifest; omit to select interactively',
+        parse: String,
+        optional: true,
+      }]
+    },
+    flags: {
+      device: {
+        kind: 'enum',
+        values: [...deviceSet] as NonNullable<Device[]>,
+        brief: 'Target device or platform for the dependency',
+        optional: true,
+      }
+    }
+  }
+})
 
 export default command
