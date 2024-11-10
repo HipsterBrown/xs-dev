@@ -4,8 +4,9 @@ import type { GluegunToolbox } from 'gluegun'
 import { filesystem, strings, print, system, semver, http, patching, prompt, packageManager } from 'gluegun'
 // @ts-expect-error opaque import path, to be replaced by vendored solution
 import { buildGenerate } from 'gluegun/build/toolbox/template-tools'
-import { buildApplication, buildCommand, buildRouteMap, run as runApp, CommandContext } from '@stricli/core'
+import { buildApplication, buildRouteMap, run as runApp, CommandContext } from '@stricli/core'
 import { description, version, name } from '../package.json'
+
 import build from './commands/build'
 import clean from './commands/clean'
 import debug from './commands/debug'
@@ -38,15 +39,7 @@ const commands = buildRouteMap({
     scan,
     setup,
     teardown,
-    update: buildCommand({
-      func: update.run,
-      docs: {
-        brief: update.description ?? '',
-      },
-      parameters: {
-        flags: {}
-      },
-    }),
+    update,
   },
   aliases: {
     dr: 'doctor',
