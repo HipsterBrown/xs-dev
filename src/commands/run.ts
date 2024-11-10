@@ -1,6 +1,6 @@
 import { type as platformType } from 'node:os'
 import { buildCommand } from '@stricli/core'
-import { LocalContext } from '../cli'
+import type { LocalContext } from '../cli'
 import type { Device } from '../types'
 import { DEVICE_ALIAS } from '../toolbox/prompt/devices'
 
@@ -22,7 +22,7 @@ const command = buildCommand({
   docs: {
     brief: 'Build and launch project on target device or simulator',
   },
-  async func(this: LocalContext, flags: RunOptions, projectPath: string = '.') {
+  async func(this: LocalContext, flags: RunOptions, projectPath = '.') {
     const { filesystem } = this
     const { build } = await import('../toolbox/build/index')
     const currentPlatform: Device = platformType().toLowerCase() as Device

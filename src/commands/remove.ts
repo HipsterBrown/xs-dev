@@ -1,7 +1,7 @@
 import { buildCommand } from '@stricli/core'
-import { LocalContext } from '../cli'
+import type { LocalContext } from '../cli'
 import { DEVICE_ALIAS } from '../toolbox/prompt/devices'
-import { Device } from '../types'
+import type { Device } from '../types'
 
 interface RemoveOptions {
   device?: Device

@@ -1,6 +1,6 @@
 import { type as platformType } from 'node:os'
 import { buildCommand } from '@stricli/core'
-import { LocalContext } from '../cli'
+import type { LocalContext } from '../cli'
 import type { Device } from '../types'
 import { DEVICE_ALIAS } from '../toolbox/prompt/devices'
 
@@ -21,7 +21,7 @@ const command = buildCommand({
   docs: {
     brief: 'Connect to running debugging session on target device or simulator',
   },
-  async func(this: LocalContext, flags: DebugOptions, projectPath: string = '.') {
+  async func(this: LocalContext, flags: DebugOptions, projectPath = '.') {
     const { filesystem } = this
     const currentPlatform: Device = platformType().toLowerCase() as Device
     const {

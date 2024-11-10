@@ -2,7 +2,7 @@ import { setTimeout as sleep } from 'node:timers/promises'
 import { buildCommand } from '@stricli/core'
 import { SerialPort } from 'serialport'
 import { findBySerialNumber } from 'usb'
-import { LocalContext } from '../cli'
+import type { LocalContext } from '../cli'
 import { parseScanResult } from '../toolbox/scan/parse'
 import { sourceEnvironment, sourceIdf } from '../toolbox/system/exec'
 

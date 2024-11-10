@@ -1,6 +1,6 @@
 import { type as platformType } from 'node:os'
 import { buildCommand } from '@stricli/core'
-import { LocalContext } from '../cli'
+import type { LocalContext } from '../cli'
 import type { Device } from '../types'
 import { DEVICE_ALIAS } from '../toolbox/prompt/devices'
 
@@ -20,7 +20,7 @@ const command = buildCommand({
   docs: {
     brief: 'Remove build artifacts for project',
   },
-  async func(this: LocalContext, flags: CleanOptions, projectPath: string = '.') {
+  async func(this: LocalContext, flags: CleanOptions, projectPath = '.') {
     const { filesystem } = this
     const { build } = await import('../toolbox/build/index')
     const currentPlatform: Device = platformType().toLowerCase() as Device

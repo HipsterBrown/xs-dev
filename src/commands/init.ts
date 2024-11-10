@@ -1,5 +1,5 @@
 import { buildCommand } from '@stricli/core'
-import { LocalContext } from '../cli'
+import type { LocalContext } from '../cli'
 import { collectChoicesFromTree } from '../toolbox/prompt/choices'
 import { sourceEnvironment } from '../toolbox/system/exec'
 
@@ -43,7 +43,7 @@ const command = buildCommand({
 
       await sourceEnvironment()
 
-      if (example || listExamples) {
+      if (example !== undefined ?? listExamples) {
         // find example project
         const exampleProjectPath = filesystem.resolve(
           String(process.env.MODDABLE),

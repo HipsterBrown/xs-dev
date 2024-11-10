@@ -1,6 +1,6 @@
 import os from 'node:os'
 import { buildCommand } from '@stricli/core'
-import { LocalContext } from '../cli'
+import type { LocalContext } from '../cli'
 import { DEVICE_ALIAS } from '../toolbox/prompt/devices'
 import { getModdableVersion, moddableExists } from '../toolbox/setup/moddable'
 import { sourceEnvironment } from '../toolbox/system/exec'
