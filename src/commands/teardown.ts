@@ -1,17 +1,18 @@
-import { type as platformType } from 'os'
-import type { GluegunCommand } from 'gluegun'
+import { type as platformType } from 'node:os'
+import { buildCommand } from '@stricli/core'
+import { LocalContext } from '../cli'
 import {
   INSTALL_DIR,
   EXPORTS_FILE_PATH,
   getProfilePath,
 } from '../toolbox/setup/constants'
 
-const command: GluegunCommand = {
-  name: 'teardown',
-  description:
-    'Remove all installed git repos and toolchains, unset environment changes',
-  // eslint-disable-next-line @typescript-eslint/no-misused-promises
-  run: async ({ print, filesystem, patching }) => {
+const command = buildCommand({
+  docs: {
+    brief: 'Remove all installed git repos and toolchains, unset environment changes',
+  },
+  async func(this: LocalContext) {
+    const { filesystem, patching, print } = this
     const PROFILE_PATH = getProfilePath()
     const spinner = print.spin()
     spinner.start('Tearing down Moddable tools and platform dependencies')
@@ -40,6 +41,9 @@ const command: GluegunCommand = {
 
     spinner.succeed(`Clean up complete!`)
   },
-}
+  parameters: {
+    flags: {}
+  }
+})
 
 export default command
