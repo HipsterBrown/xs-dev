@@ -14,7 +14,7 @@ import { sourceEnvironment } from '../system/exec'
 
 const chmodPromise = promisify(chmod)
 
-export default async function({ targetBranch }: SetupArgs): Promise<void> {
+export default async function ({ targetBranch }: SetupArgs): Promise<void> {
   print.info('Checking for SDK changes')
 
   await sourceEnvironment()
@@ -22,7 +22,7 @@ export default async function({ targetBranch }: SetupArgs): Promise<void> {
   // 0. ensure Moddable exists
   if (!moddableExists()) {
     print.error(
-      'Moddable tooling required. Run `xs-dev setup` before trying again.'
+      'Moddable tooling required. Run `xs-dev setup` before trying again.',
     )
     process.exit(1)
   }
@@ -48,19 +48,19 @@ export default async function({ targetBranch }: SetupArgs): Promise<void> {
       'build',
       'bin',
       'mac',
-      'release'
+      'release',
     )
     const DEBUG_BIN_PATH = filesystem.resolve(
       INSTALL_PATH,
       'build',
       'bin',
       'mac',
-      'debug'
+      'debug',
     )
 
     filesystem.remove(process.env.MODDABLE)
     await system.spawn(
-      `git clone ${MODDABLE_REPO} ${INSTALL_PATH} --depth 1 --branch ${latestRelease.tag_name} --single-branch`
+      `git clone ${MODDABLE_REPO} ${INSTALL_PATH} --depth 1 --branch ${latestRelease.tag_name} --single-branch`,
     )
 
     filesystem.dir(BIN_PATH)
@@ -85,7 +85,7 @@ export default async function({ targetBranch }: SetupArgs): Promise<void> {
           release: latestRelease,
         })
       } else {
-        throw error as Error;
+        throw error as Error
       }
     }
 
@@ -99,7 +99,7 @@ export default async function({ targetBranch }: SetupArgs): Promise<void> {
             tool,
             'Contents',
             'MacOS',
-            'main'
+            'main',
           )
           await chmodPromise(mainPath, 0o751)
         } else {
@@ -107,17 +107,17 @@ export default async function({ targetBranch }: SetupArgs): Promise<void> {
         }
         await filesystem.copyAsync(
           filesystem.resolve(BIN_PATH, tool),
-          filesystem.resolve(DEBUG_BIN_PATH, tool)
+          filesystem.resolve(DEBUG_BIN_PATH, tool),
         )
-      })
+      }),
     )
     if (system.which('npm') !== null) {
       spinner.start('Installing xsbug-log dependencies')
       await system.exec('npm install', { cwd: XSBUG_LOG_PATH })
-      spinner.succeed();
+      spinner.succeed()
     }
     spinner.succeed(
-      'Moddable SDK successfully updated! Start the xsbug.app and run the "helloworld example": xs-dev run --example helloworld'
+      'Moddable SDK successfully updated! Start the xsbug.app and run the "helloworld example": xs-dev run --example helloworld',
     )
   }
 
@@ -127,7 +127,7 @@ export default async function({ targetBranch }: SetupArgs): Promise<void> {
     })
     const remoteRev: string = await system.exec(
       'git ls-remote origin refs/heads/public',
-      { cwd: process.env.MODDABLE }
+      { cwd: process.env.MODDABLE },
     )
 
     if (remoteRev.split('\t').shift() === currentRev.trim()) {
@@ -145,12 +145,12 @@ export default async function({ targetBranch }: SetupArgs): Promise<void> {
     const BUILD_DIR = filesystem.resolve(
       process.env.MODDABLE ?? '',
       'build',
-      'bin'
+      'bin',
     )
     const TMP_DIR = filesystem.resolve(
       process.env.MODDABLE ?? '',
       'build',
-      'tmp'
+      'tmp',
     )
     filesystem.remove(BUILD_DIR)
     filesystem.remove(TMP_DIR)
@@ -163,17 +163,17 @@ export default async function({ targetBranch }: SetupArgs): Promise<void> {
         String(process.env.MODDABLE),
         'build',
         'makefiles',
-        'mac'
+        'mac',
       ),
       stdout: process.stdout,
     })
     if (system.which('npm') !== null) {
       spinner.start('Installing xsbug-log dependencies')
       await system.exec('npm install', { cwd: XSBUG_LOG_PATH })
-      spinner.succeed();
+      spinner.succeed()
     }
     spinner.succeed(
-      'Moddable SDK successfully updated! Start the xsbug.app and run the "helloworld example": xs-dev run --example helloworld'
+      'Moddable SDK successfully updated! Start the xsbug.app and run the "helloworld example": xs-dev run --example helloworld',
     )
   }
 }

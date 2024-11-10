@@ -1,10 +1,11 @@
-import type { GluegunCommand } from 'gluegun'
-import { type as platformType } from 'os'
-import type { Device, XSDevToolbox } from '../types'
+import { type as platformType } from 'node:os'
+import { buildCommand } from '@stricli/core'
+import type { LocalContext } from '../cli'
+import type { Device } from '../types'
 import setupEjectfix from '../toolbox/setup/ejectfix'
 import { DEVICE_ALIAS } from '../toolbox/prompt/devices'
 import { MODDABLE_REPO } from '../toolbox/setup/constants'
-import type { SetupArgs } from '../toolbox/setup/types'
+import type { SetupArgs, PlatformSetupArgs } from '../toolbox/setup/types'
 
 interface SetupOptions {
   device?: Device
@@ -13,13 +14,12 @@ interface SetupOptions {
   targetBranch?: SetupArgs['targetBranch']
   sourceRepo?: string
 }
-
-const command: GluegunCommand<XSDevToolbox> = {
-  name: 'setup',
-  description:
-    'Download and build Moddable tooling for various platform targets',
-  // eslint-disable-next-line @typescript-eslint/no-misused-promises
-  run: async ({ parameters, setup, prompt, print }) => {
+const command = buildCommand({
+  docs: {
+    brief: 'Download and build Moddable tooling for various platform targets',
+  },
+  async func(this: LocalContext, flags: SetupOptions) {
+    const { prompt, print } = this
     const currentPlatform: Device = platformType().toLowerCase() as Device
     const {
       device,
@@ -27,7 +27,7 @@ const command: GluegunCommand<XSDevToolbox> = {
       tool,
       targetBranch = 'latest-release',
       sourceRepo = MODDABLE_REPO,
-    }: SetupOptions = parameters.options
+    } = flags
     let target: Device = device ?? currentPlatform
 
     if (device === undefined && listDevices) {
@@ -64,13 +64,59 @@ const command: GluegunCommand<XSDevToolbox> = {
       if (tool === 'ejectfix') await setupEjectfix()
       return
     }
-    const platformDevices: Device[] = ['mac', 'darwin', 'windows_nt', 'win', 'lin', 'linux']
+    const platformDevices: Device[] = [
+      'mac',
+      'darwin',
+      'windows_nt',
+      'win',
+      'lin',
+      'linux',
+    ]
+    const setup: (args: SetupArgs | PlatformSetupArgs) => Promise<void> =
+      await import(`../commands/setup.ts/${target}`)
     if (platformDevices.includes(target)) {
-      await setup[target]({ targetBranch, sourceRepo })
+      await setup({ targetBranch, sourceRepo })
     } else {
-      await setup[target]({ targetBranch })
+      await setup({ targetBranch })
     }
   },
-}
+  parameters: {
+    flags: {
+      device: {
+        kind: 'enum',
+        values: Object.keys(DEVICE_ALIAS) as NonNullable<Device[]>,
+        brief:
+          'Target device or platform SDK to set up; defaults to Moddable SDK for current OS; use --list-devices for interactive selection',
+        optional: true,
+      },
+      listDevices: {
+        kind: 'boolean',
+        brief:
+          'Select target device or platform SDK to set up from a list; defaults to false',
+        optional: true,
+      },
+      tool: {
+        kind: 'enum',
+        values: ['ejectfix'],
+        brief: 'Install additional tooling to support common development tasks',
+        optional: true,
+      },
+      targetBranch: {
+        kind: 'parsed',
+        parse: String,
+        brief:
+          'The remote branch or release to use as source for Moddable SDK set up; defaults to `latest-release`',
+        optional: true,
+      },
+      sourceRepo: {
+        kind: 'parsed',
+        parse: String,
+        brief:
+          'URL for remote repository to use as source for Moddable SDK set up; defaults to upstream project',
+        optional: true,
+      },
+    },
+  },
+})
 
 export default command

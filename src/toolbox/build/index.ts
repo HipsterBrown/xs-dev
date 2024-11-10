@@ -44,7 +44,7 @@ export async function build({
   mode,
   deployStatus,
   outputDir,
-  config = {}
+  config = {},
 }: BuildArgs): Promise<void> {
   const OS = platformType().toLowerCase() as Device
 
@@ -52,7 +52,7 @@ export async function build({
 
   if (!moddableExists()) {
     print.error(
-      `Moddable tooling required. Run 'xs-dev setup --device ${DEVICE_ALIAS[OS]}' before trying again.`
+      `Moddable tooling required. Run 'xs-dev setup --device ${DEVICE_ALIAS[OS]}' before trying again.`,
     )
     process.exit(1)
   }
@@ -60,16 +60,33 @@ export async function build({
   outputDir ??= filesystem.resolve(String(process.env.MODDABLE), 'build')
 
   if (listDevices) {
-    const deviceTargetsPath = filesystem.resolve(String(process.env.MODDABLE), 'build', 'devices')
-    const simulatorsPath = filesystem.resolve(String(process.env.MODDABLE), 'build', 'simulators')
+    const deviceTargetsPath = filesystem.resolve(
+      String(process.env.MODDABLE),
+      'build',
+      'devices',
+    )
+    const simulatorsPath = filesystem.resolve(
+      String(process.env.MODDABLE),
+      'build',
+      'simulators',
+    )
     const devices = filesystem.inspectTree(deviceTargetsPath)?.children ?? []
-    const deviceTargets = devices.flatMap(dev => {
+    const deviceTargets = devices.flatMap((dev) => {
       const targets = dev.children
-        .filter(c => c.name === 'targets')
-        .flatMap(c => c.children.flatMap(dir => collectChoicesFromTree(dir, [], `${dev.name}/`)))
+        .filter((c) => c.name === 'targets')
+        .flatMap((c) =>
+          c.children.flatMap((dir) =>
+            collectChoicesFromTree(dir, [], `${dev.name}/`),
+          ),
+        )
       return [dev.name].concat(targets)
     })
-    const simulators = filesystem.inspectTree(simulatorsPath)?.children?.flatMap(sim => collectChoicesFromTree(sim, [], `simulator/`)) ?? []
+    const simulators =
+      filesystem
+        .inspectTree(simulatorsPath)
+        ?.children?.flatMap((sim) =>
+          collectChoicesFromTree(sim, [], `simulator/`),
+        ) ?? []
     const choices = deviceTargets.concat(simulators, 'wasm', DEVICE_ALIAS[OS])
     const { device: selectedDevice } = await prompt.ask([
       {
@@ -91,36 +108,67 @@ export async function build({
   if (targetPlatform !== '') {
     const startsWithSimulator = targetPlatform.startsWith('simulator')
     if (targetPlatform.includes('esp32') && !startsWithSimulator) {
-      if (typeof process.env.IDF_PATH !== 'string' || filesystem.exists(process.env.IDF_PATH) !== 'dir') {
-        print.error('The current environment does not appear to be set up for the ESP32 build target. Please run `xs-dev setup --device esp32` before trying again.')
+      if (
+        typeof process.env.IDF_PATH !== 'string' ||
+        filesystem.exists(process.env.IDF_PATH) !== 'dir'
+      ) {
+        print.error(
+          'The current environment does not appear to be set up for the ESP32 build target. Please run `xs-dev setup --device esp32` before trying again.',
+        )
         process.exit(1)
       } else {
         await sourceIdfPythonEnv()
       }
     } else if (targetPlatform.includes('esp') && !startsWithSimulator) {
-      if (typeof process.env.ESP_BASE !== 'string' || filesystem.exists(process.env.ESP_BASE) !== 'dir') {
-        print.error('The current environment does not appear to be set up for the ESP8266 build target. Please run `xs-dev setup --device esp8266` before trying again.')
+      if (
+        typeof process.env.ESP_BASE !== 'string' ||
+        filesystem.exists(process.env.ESP_BASE) !== 'dir'
+      ) {
+        print.error(
+          'The current environment does not appear to be set up for the ESP8266 build target. Please run `xs-dev setup --device esp8266` before trying again.',
+        )
         process.exit(1)
       }
     }
 
     if (targetPlatform.includes('wasm') && !startsWithSimulator) {
-      if (!(process.env.PATH ?? '').includes('binaryen') || filesystem.exists(process.env.EMSDK ?? '') !== 'dir' || filesystem.exists(process.env.EMSDK_NODE ?? '') !== 'file' || filesystem.exists(process.env.EMSDK_PYTHON ?? '') !== 'file') {
-        print.error('The current environment does not appear to be set up for the wasm build target. Please run `xs-dev setup --device wasm` before trying again.')
+      if (
+        !(process.env.PATH ?? '').includes('binaryen') ||
+        filesystem.exists(process.env.EMSDK ?? '') !== 'dir' ||
+        filesystem.exists(process.env.EMSDK_NODE ?? '') !== 'file' ||
+        filesystem.exists(process.env.EMSDK_PYTHON ?? '') !== 'file'
+      ) {
+        print.error(
+          'The current environment does not appear to be set up for the wasm build target. Please run `xs-dev setup --device wasm` before trying again.',
+        )
         process.exit(1)
       }
     }
 
     if (targetPlatform.includes('pico') && !startsWithSimulator) {
-      if (typeof process.env.PICO_SDK_PATH !== 'string' || filesystem.exists(process.env.PICO_SDK_PATH) !== 'dir' || system.which('picotool') === null || filesystem.exists(process.env.PIOASM ?? '') !== 'file') {
-        print.error('The current environment does not appear to be set up for the pico build target. Please run `xs-dev setup --device pico` before trying again.')
+      if (
+        typeof process.env.PICO_SDK_PATH !== 'string' ||
+        filesystem.exists(process.env.PICO_SDK_PATH) !== 'dir' ||
+        system.which('picotool') === null ||
+        filesystem.exists(process.env.PIOASM ?? '') !== 'file'
+      ) {
+        print.error(
+          'The current environment does not appear to be set up for the pico build target. Please run `xs-dev setup --device pico` before trying again.',
+        )
         process.exit(1)
       }
     }
 
     if (targetPlatform.includes('nrf52') && !startsWithSimulator) {
-      if (typeof process.env.NRF_ROOT !== 'string' || typeof process.env.NRF_SDK_DIR !== 'string' || filesystem.exists(process.env.NRF_ROOT) !== 'dir' || filesystem.exists(process.env.NRF_SDK_DIR) !== 'dir') {
-        print.error('The current environment does not appear to be set up for the nrf52 build target. Please run `xs-dev setup --device nrf52` before trying again.')
+      if (
+        typeof process.env.NRF_ROOT !== 'string' ||
+        typeof process.env.NRF_SDK_DIR !== 'string' ||
+        filesystem.exists(process.env.NRF_ROOT) !== 'dir' ||
+        filesystem.exists(process.env.NRF_SDK_DIR) !== 'dir'
+      ) {
+        print.error(
+          'The current environment does not appear to be set up for the nrf52 build target. Please run `xs-dev setup --device nrf52` before trying again.',
+        )
         process.exit(1)
       }
     }
@@ -129,11 +177,11 @@ export async function build({
   if (listExamples) {
     const exampleProjectPath = filesystem.resolve(
       String(process.env.MODDABLE),
-      'examples'
+      'examples',
     )
     const contributedProjectPath = filesystem.resolve(
       String(process.env.MODDABLE),
-      'contributed'
+      'contributed',
     )
     const examples = filesystem.inspectTree(exampleProjectPath)?.children
     const contributed = filesystem.inspectTree(contributedProjectPath)?.children
@@ -142,7 +190,9 @@ export async function build({
         ? examples.map((example) => collectChoicesFromTree(example)).flat()
         : []
     if (contributed !== undefined) {
-      choices.push(...contributed.flatMap(project => collectChoicesFromTree(project)))
+      choices.push(
+        ...contributed.flatMap((project) => collectChoicesFromTree(project)),
+      )
     }
     const { example: selectedExample } = await prompt.ask([
       {
@@ -166,28 +216,37 @@ export async function build({
     const exampleProjectPath = filesystem.resolve(
       String(process.env.MODDABLE),
       'examples',
-      example
+      example,
     )
     const contributedProjectPath = filesystem.resolve(
       String(process.env.MODDABLE),
       'contributed',
-      example
+      example,
     )
-    if (filesystem.exists(exampleProjectPath) === false && filesystem.exists(contributedProjectPath) === false) {
+    if (
+      filesystem.exists(exampleProjectPath) === false &&
+      filesystem.exists(contributedProjectPath) === false
+    ) {
       print.error('Example project does not exist.')
       print.info(`Lookup the available examples: xs-dev run --list-examples`)
       process.exit(1)
     }
     if (
       filesystem.exists(
-        filesystem.resolve(exampleProjectPath, 'manifest.json')
-      ) === false && filesystem.exists(filesystem.resolve(contributedProjectPath, 'manifest.json')) === false
+        filesystem.resolve(exampleProjectPath, 'manifest.json'),
+      ) === false &&
+      filesystem.exists(
+        filesystem.resolve(contributedProjectPath, 'manifest.json'),
+      ) === false
     ) {
       print.error('Example project must contain a manifest.json.')
       print.info(`Lookup the available examples: xs-dev run --list-examples`)
       process.exit(1)
     }
-    projectPath = filesystem.exists(exampleProjectPath) === 'dir' ? exampleProjectPath : contributedProjectPath
+    projectPath =
+      filesystem.exists(exampleProjectPath) === 'dir'
+        ? exampleProjectPath
+        : contributedProjectPath
   }
 
   if (port !== undefined) {
@@ -198,15 +257,20 @@ export async function build({
 
   switch (deployStatus) {
     case 'clean':
-      spinner.start(`Cleaning up build artifacts for project ${projectPath} on ${targetPlatform}\n`)
-      break;
+      spinner.start(
+        `Cleaning up build artifacts for project ${projectPath} on ${targetPlatform}\n`,
+      )
+      break
     case 'debug':
-      spinner.start(`Connecting to running debug session for ${projectPath} on ${targetPlatform}\n`)
-      break;
+      spinner.start(
+        `Connecting to running debug session for ${projectPath} on ${targetPlatform}\n`,
+      )
+      break
     default:
       spinner.start(
-        `Building${deployStatus !== 'none' ? ' and deploying project' : ''
-        } ${projectPath} on ${targetPlatform}\n`
+        `Building${
+          deployStatus !== 'none' ? ' and deploying project' : ''
+        } ${projectPath} on ${targetPlatform}\n`,
       )
   }
 
@@ -230,7 +294,10 @@ export async function build({
     configArgs.push(`${element}="${value}"`)
   })
 
-  const canUseMCPack = system.which('mcpack') !== null && filesystem.exists(filesystem.resolve(projectPath, 'package.json')) === 'file'
+  const canUseMCPack =
+    system.which('mcpack') !== null &&
+    filesystem.exists(filesystem.resolve(projectPath, 'package.json')) ===
+      'file'
   let rootCommand = 'mcconfig'
 
   if (canUseMCPack) {
@@ -239,7 +306,11 @@ export async function build({
   }
 
   if (log) {
-    const logOutput = spawn(rootCommand, configArgs, { cwd: projectPath, stdio: 'inherit', shell: true });
+    const logOutput = spawn(rootCommand, configArgs, {
+      cwd: projectPath,
+      stdio: 'inherit',
+      shell: true,
+    })
     logOutput.on('close', (exitCode) => {
       if (exitCode !== null) {
         process.exit(exitCode)
@@ -267,7 +338,7 @@ export async function build({
         {
           cwd: projectPath,
           process,
-        }
+        },
       )
     }
   }
@@ -282,13 +353,13 @@ export async function build({
       'bin',
       'wasm',
       'debug',
-      buildName
+      buildName,
     )
     createServer((req, res) => {
       void handler(req, res, { public: debugPath })
     }).listen(8080, () => {
       print.info(
-        'Started server on port 8080, go to http://localhost:8080 in your browser to view the simulator'
+        'Started server on port 8080, go to http://localhost:8080 in your browser to view the simulator',
       )
     })
   } else if (!log) {

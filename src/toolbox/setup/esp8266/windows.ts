@@ -9,45 +9,58 @@ import { INSTALL_DIR } from '../constants'
 
 const finishedPromise = promisify(finished)
 
-const ESP_TOOL = 'https://github.com/igrr/esptool-ck/releases/download/0.4.13/esptool-0.4.13-win32.zip'
+const ESP_TOOL =
+  'https://github.com/igrr/esptool-ck/releases/download/0.4.13/esptool-0.4.13-win32.zip'
 const ESP_TOOL_VERSION = 'esptool-0.4.13-win32'
 const CYGWIN = `https://github.com/Moddable-OpenSource/tools/releases/download/v1.0.0/cygwin.win32.zip`
 
-export async function installPython(spinner: ReturnType<GluegunPrint['spin']>): Promise<void> {
+export async function installPython(
+  spinner: ReturnType<GluegunPrint['spin']>,
+): Promise<void> {
   if (system.which('python') === null) {
     // For some reason, system.which does not work with winget. This is a workaround for now.
     try {
       await system.exec('where winget')
     } catch (error) {
       print.error('Python is required.')
-      print.info('You can download and install Python from python.org/downloads')
-      print.info('Or xs-dev can manage installing Python and other dependencies using the Windows Package Manager Client (winget).')
-      print.info('You can install winget via the App Installer package in the Microsoft Store.')
-      print.info('Please install either Python or winget, then launch a new Command Prompt and re-run this setup.')
-      throw new Error("Python is required")
+      print.info(
+        'You can download and install Python from python.org/downloads',
+      )
+      print.info(
+        'Or xs-dev can manage installing Python and other dependencies using the Windows Package Manager Client (winget).',
+      )
+      print.info(
+        'You can install winget via the App Installer package in the Microsoft Store.',
+      )
+      print.info(
+        'Please install either Python or winget, then launch a new Command Prompt and re-run this setup.',
+      )
+      throw new Error('Python is required')
     }
 
     spinner.start('Installing python from winget')
     await system.exec('winget install -e --id Python.Python.3 --silent')
     spinner.succeed()
-    print.info('Python successfully installed. Please close this window and launch a new Moddable Command Prompt to refresh environment variables, then re-run this setup.')
-    throw new Error("Command Prompt restart needed")
+    print.info(
+      'Python successfully installed. Please close this window and launch a new Moddable Command Prompt to refresh environment variables, then re-run this setup.',
+    )
+    throw new Error('Command Prompt restart needed')
   }
 }
 
 export async function installDeps(
   spinner: ReturnType<GluegunPrint['spin']>,
-  ESP_DIR: string
+  ESP_DIR: string,
 ): Promise<void> {
   const ESP_TOOL_DIR = filesystem.resolve(ESP_DIR, ESP_TOOL_VERSION)
   const ESP_TOOL_EXE = filesystem.resolve(ESP_TOOL_DIR, 'esptool.exe')
   const ESP_TOOL_DESTINATION = filesystem.resolve(ESP_DIR, 'esptool.exe')
-  const CYGWIN_BIN = filesystem.resolve(ESP_DIR, "cygwin", "bin")
+  const CYGWIN_BIN = filesystem.resolve(ESP_DIR, 'cygwin', 'bin')
 
   spinner.start('Downloading ESP Tool')
   let writer = ZipExtract({ path: ESP_DIR })
   let response = await axios.get(ESP_TOOL, {
-    responseType: 'stream'
+    responseType: 'stream',
   })
   response.data.pipe(writer)
   await finishedPromise(writer)
@@ -58,20 +71,21 @@ export async function installDeps(
   spinner.start('Downloading Cygwin toolchain support package')
   writer = ZipExtract({ path: ESP_DIR })
   response = await axios.get(CYGWIN, {
-    responseType: 'stream'
+    responseType: 'stream',
   })
   response.data.pipe(writer)
   await finishedPromise(writer)
   spinner.succeed()
 
   spinner.start('Setting environment variables')
-  await setEnv("BASE_DIR", INSTALL_DIR)
+  await setEnv('BASE_DIR', INSTALL_DIR)
   await addToPath(CYGWIN_BIN)
   spinner.succeed()
 
   try {
     await installPython(spinner)
-  } catch (error) { // Command Prompt restart needed
+  } catch (error) {
+    // Command Prompt restart needed
     process.exit(1)
   }
 

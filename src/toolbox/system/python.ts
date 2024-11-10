@@ -1,4 +1,4 @@
-import { system } from "gluegun";
+import { system } from 'gluegun'
 
 export function detectPython(): string | null {
   if (system.which('python') !== null) return 'python'
@@ -9,7 +9,9 @@ export function detectPython(): string | null {
 export async function getPythonVersion(): Promise<string | null> {
   const python = detectPython()
   if (python !== null) {
-    return (await system.run(`${python} --version`)).split(' ').pop()?.trim() ?? null
+    return (
+      (await system.run(`${python} --version`)).split(' ').pop()?.trim() ?? null
+    )
   }
   return null
 }

@@ -3,14 +3,14 @@ import type { GluegunPrint } from 'gluegun'
 import { ensureHomebrew } from '../homebrew'
 
 export async function installDeps(
-  spinner: ReturnType<GluegunPrint['spin']>
+  spinner: ReturnType<GluegunPrint['spin']>,
 ): Promise<void> {
   try {
     await ensureHomebrew()
   } catch (error: unknown) {
     if (error instanceof Error) {
       print.info(`${error.message} python`)
-      process.exit(1);
+      process.exit(1)
     }
   }
 
@@ -24,7 +24,9 @@ export async function installDeps(
         spinner.succeed()
       } catch (error: unknown) {
         if (error instanceof Error && error.message.includes('xcode-select')) {
-          spinner.fail('Apple Command Line Tools must be installed in order to install python from Homebrew. Please run `xcode-select --install` before trying again.')
+          spinner.fail(
+            'Apple Command Line Tools must be installed in order to install python from Homebrew. Please run `xcode-select --install` before trying again.',
+          )
           process.exit(1)
         }
       }

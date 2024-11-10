@@ -2,7 +2,7 @@ import { filesystem, patching } from 'gluegun'
 
 export default async function (
   filePath: string,
-  newLine: string
+  newLine: string,
 ): Promise<void> {
   filesystem.file(filePath)
 

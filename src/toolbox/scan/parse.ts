@@ -85,7 +85,7 @@ function parsePicotoolLines(lines: string[], port: string): ScanResult {
 export function parseScanResult(
   scans: Array<
     [output: Buffer, port: string] | [output: undefined, port: string]
-  >
+  >,
 ): ScanResult {
   return scans.reduce<ScanResult>((result, [output, port]) => {
     if (typeof output === 'undefined') return result

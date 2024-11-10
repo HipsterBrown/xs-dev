@@ -1,7 +1,7 @@
-import { type as platformType } from 'node:os';
+import { type as platformType } from 'node:os'
 import { system, print } from 'gluegun'
-import { EXPORTS_FILE_PATH } from '../setup/constants';
-import type { Device } from '../../types';
+import { EXPORTS_FILE_PATH } from '../setup/constants'
+import type { Device } from '../../types'
 
 function ensureAskPass(): void {
   const SUDO_ASKPASS = system.which('ssh-askpass')
@@ -18,12 +18,12 @@ function ensureAskPass(): void {
  **/
 export async function execWithSudo(
   command: string,
-  options: Record<string, unknown> = {}
+  options: Record<string, unknown> = {},
 ): Promise<void> {
   try {
     await system.exec(
       `sudo --non-interactive --preserve-env ${command}`,
-      options
+      options,
     )
     return
   } catch (error) {
@@ -48,8 +48,15 @@ async function updateProcessEnv(command: string): Promise<void> {
       const result = await system.spawn(`${command} && env`, {
         shell: process.env.SHELL,
       })
-      if (typeof result.stdout === 'string' || result.stdout instanceof Buffer) {
-        const localEnv = Object.fromEntries((result.stdout.toString() as string).split('\n').map((field: string) => field?.split('=')))
+      if (
+        typeof result.stdout === 'string' ||
+        result.stdout instanceof Buffer
+      ) {
+        const localEnv = Object.fromEntries(
+          (result.stdout.toString() as string)
+            .split('\n')
+            .map((field: string) => field?.split('=')),
+        )
         if ('PATH' in localEnv) process.env = localEnv
       }
     } catch (error) {
@@ -76,5 +83,7 @@ export async function sourceIdf(): Promise<void> {
  * Set updated env from IDF_PYTHON_ENV_PATH as process.env
  */
 export async function sourceIdfPythonEnv(): Promise<void> {
-  await updateProcessEnv(`source ${process.env.IDF_PYTHON_ENV_PATH ?? ''}/bin/activate`)
+  await updateProcessEnv(
+    `source ${process.env.IDF_PYTHON_ENV_PATH ?? ''}/bin/activate`,
+  )
 }

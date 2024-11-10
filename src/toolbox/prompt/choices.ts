@@ -7,7 +7,7 @@ interface InspectTreeResult {
 export function collectChoicesFromTree(
   fd: InspectTreeResult,
   results: string[] = [],
-  root = ''
+  root = '',
 ): string[] {
   if (
     fd.type === 'dir' &&
@@ -16,10 +16,9 @@ export function collectChoicesFromTree(
     results.push(root + fd.name)
   } else if (fd.type === 'dir') {
     results.concat(
-      fd.children
-        .flatMap((child) =>
-          collectChoicesFromTree(child, results, `${root}${fd.name}/`)
-        )
+      fd.children.flatMap((child) =>
+        collectChoicesFromTree(child, results, `${root}${fd.name}/`),
+      ),
     )
   }
   return results.flat()

@@ -9,9 +9,9 @@ import { installDeps as installWinDeps } from './esp32/windows'
 import { setEnv, ensureModdableCommandPrompt } from './windows'
 import { sourceEnvironment } from '../system/exec'
 
-export default async function(): Promise<void> {
+export default async function (): Promise<void> {
   const OS = platformType().toLowerCase()
-  const isWindows = OS === "windows_nt"
+  const isWindows = OS === 'windows_nt'
   const ESP_IDF_REPO = 'https://github.com/espressif/esp-idf.git'
   const ESP_BRANCH_V4 = 'v4.4.3'
   const ESP_BRANCH_V5 = 'v5.3'
@@ -26,7 +26,7 @@ export default async function(): Promise<void> {
   // 0. ensure Moddable exists
   if (!moddableExists()) {
     spinner.fail(
-      'Moddable tooling required. Run `xs-dev setup` before trying again.'
+      'Moddable tooling required. Run `xs-dev setup` before trying again.',
     )
     process.exit(1)
   }
@@ -42,10 +42,14 @@ export default async function(): Promise<void> {
   // 2. clone esp-idf into ~/.local/share/esp32/esp-idf
   if (filesystem.exists(IDF_PATH) === false) {
     spinner.start('Cloning esp-idf repo')
-    const moddableVersion = await getModdableVersion() ?? ''
-    const branch = (moddableVersion.includes("branch") || semver.satisfies(moddableVersion ?? '', '>= 4.2.x')) ? ESP_BRANCH_V5 : ESP_BRANCH_V4
+    const moddableVersion = (await getModdableVersion()) ?? ''
+    const branch =
+      moddableVersion.includes('branch') ||
+      semver.satisfies(moddableVersion ?? '', '>= 4.2.x')
+        ? ESP_BRANCH_V5
+        : ESP_BRANCH_V4
     await system.spawn(
-      `git clone --depth 1 --single-branch -b ${branch} --recursive ${ESP_IDF_REPO} ${IDF_PATH}`
+      `git clone --depth 1 --single-branch -b ${branch} --recursive ${ESP_IDF_REPO} ${IDF_PATH}`,
     )
     spinner.succeed()
   }
@@ -68,7 +72,7 @@ export default async function(): Promise<void> {
   // 4. append IDF_PATH env export to shell profile
   if (isWindows) {
     spinner.info('Configuring IDF_PATH environment variable')
-    await setEnv("IDF_PATH", IDF_PATH)
+    await setEnv('IDF_PATH', IDF_PATH)
   } else {
     if (process.env.IDF_PATH === undefined) {
       spinner.info('Configuring $IDF_PATH')
@@ -97,12 +101,15 @@ export default async function(): Promise<void> {
 
   // 6. append 'source $IDF_PATH/export.sh' to shell profile
   if (isWindows) {
-    await upsert(EXPORTS_FILE_PATH, `pushd %IDF_PATH% && call "%IDF_TOOLS_PATH%\\idf_cmd_init.bat" && popd`)
+    await upsert(
+      EXPORTS_FILE_PATH,
+      `pushd %IDF_PATH% && call "%IDF_TOOLS_PATH%\\idf_cmd_init.bat" && popd`,
+    )
   }
 
   spinner.succeed(`
   Successfully set up esp32 platform support for Moddable!
   Test out the setup by starting a new ${isWindows ? 'Moddable Command Prompt' : 'terminal session'}, plugging in your device, and running: xs-dev run --example helloworld --device=esp32
-  If there is trouble finding the correct port, pass the "--port" flag to the above command with the ${isWindows ? "COM Port" : "path to the /dev.cu.*"} that matches your device.
+  If there is trouble finding the correct port, pass the "--port" flag to the above command with the ${isWindows ? 'COM Port' : 'path to the /dev.cu.*'} that matches your device.
   `)
 }

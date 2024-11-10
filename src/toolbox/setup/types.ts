@@ -3,5 +3,5 @@ export interface SetupArgs {
 }
 
 export interface PlatformSetupArgs extends SetupArgs {
-  sourceRepo: string;
+  sourceRepo: string
 }

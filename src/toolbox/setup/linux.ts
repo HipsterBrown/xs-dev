@@ -15,7 +15,10 @@ import { fetchLatestRelease, downloadReleaseTools } from './moddable'
 
 const chmodPromise = promisify(chmod)
 
-export default async function({ sourceRepo, targetBranch }: PlatformSetupArgs): Promise<void> {
+export default async function ({
+  sourceRepo,
+  targetBranch,
+}: PlatformSetupArgs): Promise<void> {
   print.info('Setting up Linux tools!')
 
   const BIN_PATH = filesystem.resolve(
@@ -23,20 +26,20 @@ export default async function({ sourceRepo, targetBranch }: PlatformSetupArgs): 
     'build',
     'bin',
     'lin',
-    'release'
+    'release',
   )
   const DEBUG_BIN_PATH = filesystem.resolve(
     INSTALL_PATH,
     'build',
     'bin',
     'lin',
-    'debug'
+    'debug',
   )
   const BUILD_DIR = filesystem.resolve(
     INSTALL_PATH,
     'build',
     'makefiles',
-    'lin'
+    'lin',
   )
 
   const spinner = print.spin()
@@ -51,7 +54,7 @@ export default async function({ sourceRepo, targetBranch }: PlatformSetupArgs): 
   spinner.start('Installing dependencies...')
   await execWithSudo(
     'apt-get install --yes gcc git wget make libncurses-dev flex bison gperf',
-    { stdout: process.stdout }
+    { stdout: process.stdout },
   )
   spinner.succeed()
 
@@ -70,7 +73,7 @@ export default async function({ sourceRepo, targetBranch }: PlatformSetupArgs): 
       spinner.start('Getting latest Moddable-OpenSource/moddable release')
       const release = await fetchLatestRelease()
       await system.spawn(
-        `git clone ${sourceRepo} ${INSTALL_PATH} --depth 1 --branch ${release.tag_name} --single-branch`
+        `git clone ${sourceRepo} ${INSTALL_PATH} --depth 1 --branch ${release.tag_name} --single-branch`,
       )
 
       filesystem.dir(BIN_PATH)
@@ -92,14 +95,14 @@ export default async function({ sourceRepo, targetBranch }: PlatformSetupArgs): 
           await chmodPromise(filesystem.resolve(BIN_PATH, tool), 0o751)
           await filesystem.copyAsync(
             filesystem.resolve(BIN_PATH, tool),
-            filesystem.resolve(DEBUG_BIN_PATH, tool)
+            filesystem.resolve(DEBUG_BIN_PATH, tool),
           )
-        })
+        }),
       )
     } else {
       spinner.start(`Cloning ${sourceRepo} repo`)
       await system.spawn(
-        `git clone ${sourceRepo} ${INSTALL_PATH} --depth 1 --branch ${targetBranch} --single-branch`
+        `git clone ${sourceRepo} ${INSTALL_PATH} --depth 1 --branch ${targetBranch} --single-branch`,
       )
     }
     spinner.succeed()
@@ -130,26 +133,26 @@ export default async function({ sourceRepo, targetBranch }: PlatformSetupArgs): 
         'tmp',
         'lin',
         'debug',
-        'simulator'
-      )
+        'simulator',
+      ),
     )
     await system.exec(
       `mcconfig -m -p x-lin ${filesystem.resolve(
         INSTALL_PATH,
         'tools',
         'xsbug',
-        'manifest.json'
+        'manifest.json',
       )}`,
-      { process }
+      { process },
     )
     await system.exec(
       `mcconfig -m -p x-lin ${filesystem.resolve(
         INSTALL_PATH,
         'tools',
         'mcsim',
-        'manifest.json'
+        'manifest.json',
       )}`,
-      { process }
+      { process },
     )
   }
   await execWithSudo('make install', {
@@ -161,11 +164,11 @@ export default async function({ sourceRepo, targetBranch }: PlatformSetupArgs): 
   if (system.which('npm') !== null) {
     spinner.start('Installing xsbug-log dependencies')
     await system.exec('npm install', { cwd: XSBUG_LOG_PATH })
-    spinner.succeed();
+    spinner.succeed()
   }
 
   // 7. Profit?
   print.success(
-    'Moddable SDK successfully set up! Start a new terminal session and run the "helloworld example": xs-dev run --example helloworld'
+    'Moddable SDK successfully set up! Start a new terminal session and run the "helloworld example": xs-dev run --example helloworld',
   )
 }
