@@ -5,7 +5,7 @@ import type { Device } from '../types'
 import setupEjectfix from '../toolbox/setup/ejectfix'
 import { DEVICE_ALIAS } from '../toolbox/prompt/devices'
 import { MODDABLE_REPO } from '../toolbox/setup/constants'
-import type { SetupArgs, PlatformSetupArgs } from '../toolbox/setup/types'
+import type { SetupArgs } from '../toolbox/setup/types'
 
 interface SetupOptions {
   device?: Device
@@ -28,7 +28,7 @@ const command = buildCommand({
       targetBranch = 'latest-release',
       sourceRepo = MODDABLE_REPO,
     } = flags
-    let target: Device = device ?? currentPlatform
+    let target: Device = device ?? DEVICE_ALIAS[currentPlatform]
 
     if (device === undefined && listDevices) {
       const choices = [
@@ -72,8 +72,7 @@ const command = buildCommand({
       'lin',
       'linux',
     ]
-    const setup: (args: SetupArgs | PlatformSetupArgs) => Promise<void> =
-      await import(`../commands/setup.ts/${target}`)
+    const { default: setup } = await import(`../toolbox/setup/${target}`)
     if (platformDevices.includes(target)) {
       await setup({ targetBranch, sourceRepo })
     } else {

@@ -9,7 +9,7 @@ import { sourceEnvironment } from '../system/exec'
 
 export default async function (): Promise<void> {
   const OS = platformType().toLowerCase()
-  const PICO_BRANCH = '1.5.0'
+  const PICO_BRANCH = '2.0.0'
   const PICO_EXTRAS_REPO = 'https://github.com/raspberrypi/pico-extras'
   const PICO_ROOT =
     process.env.PICO_ROOT ?? filesystem.resolve(INSTALL_DIR, 'pico')
