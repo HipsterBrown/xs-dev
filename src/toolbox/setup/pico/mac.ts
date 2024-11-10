@@ -1,19 +1,22 @@
 import { type GluegunPrint, print, system } from 'gluegun'
-import { ensureHomebrew, formulaeExists } from '../homebrew';
+import { ensureHomebrew, formulaeExists } from '../homebrew'
 
 export async function installDeps(
-  spinner: ReturnType<GluegunPrint['spin']>
+  spinner: ReturnType<GluegunPrint['spin']>,
 ): Promise<void> {
   try {
     await ensureHomebrew()
   } catch (error: unknown) {
     if (error instanceof Error) {
       print.info(`${error.message} gcc-arm-embedded, libusb, pkg-config`)
-      process.exit(1);
+      process.exit(1)
     }
   }
 
-  if (system.which('arm-none-eabi-gcc') !== null && (await formulaeExists('arm-none-eabi-gcc'))) {
+  if (
+    system.which('arm-none-eabi-gcc') !== null &&
+    (await formulaeExists('arm-none-eabi-gcc'))
+  ) {
     spinner.start('Removing outdated arm gcc dependency')
     await system.exec('brew untap ArmMbed/homebrew-formulae')
     await system.exec('brew uninstall arm-none-eabi-gcc')
@@ -21,7 +24,11 @@ export async function installDeps(
   }
 
   spinner.start('Installing pico tools dependencies')
-  await system.exec(`brew install libusb pkg-config`, { shell: process.env.SHELL })
-  await system.exec(`brew install --cask gcc-arm-embedded`, { shell: process.env.SHELL })
+  await system.exec(`brew install libusb pkg-config`, {
+    shell: process.env.SHELL,
+  })
+  await system.exec(`brew install --cask gcc-arm-embedded`, {
+    shell: process.env.SHELL,
+  })
   spinner.succeed()
 }

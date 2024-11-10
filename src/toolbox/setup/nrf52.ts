@@ -21,14 +21,15 @@ const ARCH_ALIAS: Record<string, string> = {
   darwin_arm64: 'darwin-arm64',
   darwin_x64: 'darwin-x86_64',
   linux_x64: 'x86_64',
-  windows_nt_x64: 'mingw-w64-i686'
+  windows_nt_x64: 'mingw-w64-i686',
 }
-export default async function(): Promise<void> {
+export default async function (): Promise<void> {
   const OS = platformType().toLowerCase() as Device
-  const isWindows = OS === "windows_nt"
+  const isWindows = OS === 'windows_nt'
   const TOOLCHAIN = `arm-gnu-toolchain-12.2.rel1-${ARCH_ALIAS[`${OS}_${arch()}`]}-arm-none-eabi`
   const TOOLCHAIN_DOWNLOAD = `https://developer.arm.com/-/media/Files/downloads/gnu/12.2.rel1/binrel/${TOOLCHAIN}.${isWindows ? 'zip' : 'tar.xz'}`
-  const ADAFRUIT_NRF52_BOOTLOADER_UF2CONV_DOWNLOAD = 'https://github.com/Moddable-OpenSource/tools/releases/download/v1.0.0/uf2conv.py'
+  const ADAFRUIT_NRF52_BOOTLOADER_UF2CONV_DOWNLOAD =
+    'https://github.com/Moddable-OpenSource/tools/releases/download/v1.0.0/uf2conv.py'
   const NRF5_SDK = 'nRF5_SDK_17.0.2_d674dde'
   const NRF5_SDK_DOWNLOAD = `https://github.com/Moddable-OpenSource/tools/releases/download/v1.0.0/${NRF5_SDK}-mod.zip`
   const NRF52_DIR = filesystem.resolve(INSTALL_DIR, 'nrf52')
@@ -43,7 +44,7 @@ export default async function(): Promise<void> {
 
   if (!moddableExists()) {
     spinner.fail(
-      `Moddable tooling required. Run 'xs-dev setup --device ${DEVICE_ALIAS[OS]}' before trying again.`
+      `Moddable tooling required. Run 'xs-dev setup --device ${DEVICE_ALIAS[OS]}' before trying again.`,
     )
     process.exit(1)
   }
@@ -52,12 +53,16 @@ export default async function(): Promise<void> {
     await ensureModdableCommandPrompt(spinner)
   }
 
-  let createUnxz: (() => Transform) | (() => void) = () => { void 0 }
+  let createUnxz: (() => Transform) | (() => void) = () => {
+    void 0
+  }
   if (!isWindows) {
     try {
-      ({ createUnxz } = await import('node-liblzma'))
+      ;({ createUnxz } = await import('node-liblzma'))
     } catch (error) {
-      spinner.fail("Unable to extract Arm Embedded Toolchain without XZ utils (https://tukaani.org/xz/). Please install that dependency on your system and reinstall xs-dev before attempting this setup again. See https://xs-dev.js.org/troubleshooting for more info.")
+      spinner.fail(
+        'Unable to extract Arm Embedded Toolchain without XZ utils (https://tukaani.org/xz/). Please install that dependency on your system and reinstall xs-dev before attempting this setup again. See https://xs-dev.js.org/troubleshooting for more info.',
+      )
       process.exit(1)
     }
   }
@@ -68,7 +73,9 @@ export default async function(): Promise<void> {
   if (filesystem.exists(TOOLCHAIN_PATH) === false) {
     spinner.start('Downloading GNU Arm Embedded Toolchain')
 
-    const writer = isWindows ? ZipExtract({ path: NRF52_DIR }) : extract(NRF52_DIR, { readable: true })
+    const writer = isWindows
+      ? ZipExtract({ path: NRF52_DIR })
+      : extract(NRF52_DIR, { readable: true })
     const response = await axios.get(TOOLCHAIN_DOWNLOAD, {
       responseType: 'stream',
     })
@@ -81,9 +88,12 @@ export default async function(): Promise<void> {
   if (filesystem.exists(UF2CONV_PATH) === false) {
     spinner.start('Downloading Adafruit nRF52 Bootloader')
     const writer = createWriteStream(UF2CONV_PATH, { mode: 0o755 })
-    const response = await axios.get(ADAFRUIT_NRF52_BOOTLOADER_UF2CONV_DOWNLOAD, {
-      responseType: 'stream',
-    })
+    const response = await axios.get(
+      ADAFRUIT_NRF52_BOOTLOADER_UF2CONV_DOWNLOAD,
+      {
+        responseType: 'stream',
+      },
+    )
     response.data.pipe(writer)
     await finishedPromise(writer)
     spinner.succeed()
@@ -101,11 +111,17 @@ export default async function(): Promise<void> {
   }
 
   if (OS === 'darwin' || OS === 'linux') {
-    if (process.env.NRF_ROOT === undefined || process.env.NRF_SDK_DIR === undefined) {
+    if (
+      process.env.NRF_ROOT === undefined ||
+      process.env.NRF_SDK_DIR === undefined
+    ) {
       spinner.info('Configuring $NRF_ROOT and $NRF_SDK_DIR')
       process.env.NRF_ROOT = NRF52_DIR
       process.env.NRF_SDK_DIR = NRF5_SDK_PATH
-      await upsert(EXPORTS_FILE_PATH, `export NRF_ROOT=${process.env.NRF_ROOT}\nexport NRF_SDK_DIR=${process.env.NRF_SDK_DIR}`)
+      await upsert(
+        EXPORTS_FILE_PATH,
+        `export NRF_ROOT=${process.env.NRF_ROOT}\nexport NRF_SDK_DIR=${process.env.NRF_SDK_DIR}`,
+      )
     }
   } else {
     process.env.NRF_ROOT = NRF52_DIR
@@ -114,7 +130,8 @@ export default async function(): Promise<void> {
     await setEnv('NRF52_SDK_PATH', NRF5_SDK_PATH)
     try {
       await installPython(spinner)
-    } catch (error) { // Command Prompt restart needed
+    } catch (error) {
+      // Command Prompt restart needed
       process.exit(1)
     }
   }
@@ -123,7 +140,9 @@ export default async function(): Promise<void> {
     try {
       await execWithSudo('adduser $USER dialout', { process })
     } catch (_error) {
-      print.warning(`Unable to provide ttyUSB0 permission to the current user. Please run "sudo adduser <username> dialout" before trying to attempting to build projects for your nrf52 device.`)
+      print.warning(
+        `Unable to provide ttyUSB0 permission to the current user. Please run "sudo adduser <username> dialout" before trying to attempting to build projects for your nrf52 device.`,
+      )
     }
   }
 

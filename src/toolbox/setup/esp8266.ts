@@ -19,9 +19,9 @@ import { sourceEnvironment } from '../system/exec'
 
 const finishedPromise = promisify(finished)
 
-export default async function(): Promise<void> {
+export default async function (): Promise<void> {
   const OS = platformType().toLowerCase() as Device
-  const isWindows = OS === "windows_nt"
+  const isWindows = OS === 'windows_nt'
   const TOOLCHAIN = `https://github.com/Moddable-OpenSource/tools/releases/download/v1.0.0/esp8266.toolchain.${isWindows ? 'win32' : OS}.${isWindows ? 'zip' : 'tgz'}`
   const ARDUINO_CORE =
     'https://github.com/esp8266/Arduino/releases/download/2.3.0/esp8266-2.3.0.zip'
@@ -40,7 +40,7 @@ export default async function(): Promise<void> {
   // 0. ensure Moddable exists
   if (!moddableExists()) {
     spinner.fail(
-      `Moddable tooling required. Run 'xs-dev setup --device ${DEVICE_ALIAS[OS]}' before trying again.`
+      `Moddable tooling required. Run 'xs-dev setup --device ${DEVICE_ALIAS[OS]}' before trying again.`,
     )
     process.exit(1)
   }
@@ -60,7 +60,7 @@ export default async function(): Promise<void> {
     if (isWindows) {
       const writer = ZipExtract({ path: ESP_DIR })
       const response = await axios.get(TOOLCHAIN, {
-        responseType: 'stream'
+        responseType: 'stream',
       })
       response.data.pipe(writer)
       await finishedPromise(writer)
@@ -92,7 +92,7 @@ export default async function(): Promise<void> {
   if (filesystem.exists(RTOS_PATH) === false) {
     spinner.start('Cloning esp8266 RTOS SDK repo')
     await system.spawn(
-      `git clone --depth 1 --single-branch -b ${ESP_BRANCH} ${ESP_RTOS_REPO} ${RTOS_PATH}`
+      `git clone --depth 1 --single-branch -b ${ESP_BRANCH} ${ESP_RTOS_REPO} ${RTOS_PATH}`,
     )
     spinner.succeed()
   }
@@ -110,7 +110,9 @@ export default async function(): Promise<void> {
     try {
       await installWindowsDeps(spinner, ESP_DIR)
     } catch (error) {
-      print.error(`Windows dependencies failed to install. Please review the information above.`)
+      print.error(
+        `Windows dependencies failed to install. Please review the information above.`,
+      )
       process.exit(1)
     }
   }

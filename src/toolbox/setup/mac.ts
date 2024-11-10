@@ -9,12 +9,19 @@ import {
   XSBUG_LOG_PATH,
 } from './constants'
 import upsert from '../patching/upsert'
-import { downloadReleaseTools, fetchLatestRelease, MissingReleaseAssetError } from './moddable'
+import {
+  downloadReleaseTools,
+  fetchLatestRelease,
+  MissingReleaseAssetError,
+} from './moddable'
 import type { PlatformSetupArgs } from './types'
 
 const chmodPromise = promisify(chmod)
 
-export default async function({ sourceRepo, targetBranch }: PlatformSetupArgs): Promise<void> {
+export default async function ({
+  sourceRepo,
+  targetBranch,
+}: PlatformSetupArgs): Promise<void> {
   print.info('Setting up the mac tools!')
 
   const BIN_PATH = filesystem.resolve(
@@ -22,20 +29,20 @@ export default async function({ sourceRepo, targetBranch }: PlatformSetupArgs): 
     'build',
     'bin',
     'mac',
-    'release'
+    'release',
   )
   const DEBUG_BIN_PATH = filesystem.resolve(
     INSTALL_PATH,
     'build',
     'bin',
     'mac',
-    'debug'
+    'debug',
   )
   const BUILD_DIR = filesystem.resolve(
     INSTALL_PATH,
     'build',
     'makefiles',
-    'mac'
+    'mac',
   )
 
   // 0. ensure xcode command line tools are available (?)
@@ -43,7 +50,7 @@ export default async function({ sourceRepo, targetBranch }: PlatformSetupArgs): 
     await system.exec('xcode-select -p')
   } catch (error) {
     print.error(
-      'Xcode command line tools are required to build the SDK: https://developer.apple.com/xcode/'
+      'Xcode command line tools are required to build the SDK: https://developer.apple.com/xcode/',
     )
     process.exit(1)
   }
@@ -69,7 +76,7 @@ export default async function({ sourceRepo, targetBranch }: PlatformSetupArgs): 
         spinner.start('Getting latest Moddable-OpenSource/moddable release')
         const release = await fetchLatestRelease()
         await system.spawn(
-          `git clone ${sourceRepo} ${INSTALL_PATH} --depth 1 --branch ${release.tag_name} --single-branch`
+          `git clone ${sourceRepo} ${INSTALL_PATH} --depth 1 --branch ${release.tag_name} --single-branch`,
         )
 
         filesystem.dir(BIN_PATH)
@@ -95,7 +102,7 @@ export default async function({ sourceRepo, targetBranch }: PlatformSetupArgs): 
               release,
             })
           } else {
-            throw error as Error;
+            throw error as Error
           }
         }
         const tools = filesystem.list(BIN_PATH) ?? []
@@ -107,7 +114,7 @@ export default async function({ sourceRepo, targetBranch }: PlatformSetupArgs): 
                 tool,
                 'Contents',
                 'MacOS',
-                'main'
+                'main',
               )
               await chmodPromise(mainPath, 0o751)
             } else {
@@ -115,14 +122,14 @@ export default async function({ sourceRepo, targetBranch }: PlatformSetupArgs): 
             }
             await filesystem.copyAsync(
               filesystem.resolve(BIN_PATH, tool),
-              filesystem.resolve(DEBUG_BIN_PATH, tool)
+              filesystem.resolve(DEBUG_BIN_PATH, tool),
             )
-          })
+          }),
         )
       } else {
         spinner.start(`Cloning ${sourceRepo} repo`)
         await system.spawn(
-          `git clone ${sourceRepo} ${INSTALL_PATH} --depth 1 --branch ${targetBranch} --single-branch`
+          `git clone ${sourceRepo} ${INSTALL_PATH} --depth 1 --branch ${targetBranch} --single-branch`,
         )
       }
       spinner.succeed()
@@ -155,7 +162,7 @@ export default async function({ sourceRepo, targetBranch }: PlatformSetupArgs): 
   try {
     filesystem.symlink(
       filesystem.resolve(BIN_PATH, 'xsbug.app'),
-      '/Applications/xsbug.app'
+      '/Applications/xsbug.app',
     )
   } catch (error) {
     if (!String(error).includes('exists')) {
@@ -170,10 +177,10 @@ export default async function({ sourceRepo, targetBranch }: PlatformSetupArgs): 
   if (system.which('npm') !== null) {
     spinner.start('Installing xsbug-log dependencies')
     await system.exec('npm install', { cwd: XSBUG_LOG_PATH })
-    spinner.succeed();
+    spinner.succeed()
   }
 
   spinner.succeed(
-    'Moddable SDK successfully set up! Start a new terminal session and run the "helloworld example": xs-dev run --example helloworld'
+    'Moddable SDK successfully set up! Start a new terminal session and run the "helloworld example": xs-dev run --example helloworld',
   )
 }

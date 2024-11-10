@@ -7,7 +7,7 @@ import { installDeps as installMacDeps } from '../setup/esp32/mac'
 import { installDeps as installLinuxDeps } from '../setup/esp32/linux'
 import { sourceEnvironment } from '../system/exec'
 
-export default async function(): Promise<void> {
+export default async function (): Promise<void> {
   const OS = platformType().toLowerCase()
   const ESP_BRANCH_V4 = 'v4.4.3'
   const ESP_BRANCH_V5 = 'v5.3'
@@ -22,7 +22,7 @@ export default async function(): Promise<void> {
   // 0. ensure Moddable exists
   if (!moddableExists()) {
     spinner.fail(
-      'Moddable tooling required. Run `xs-dev setup` before trying again.'
+      'Moddable tooling required. Run `xs-dev setup` before trying again.',
     )
     process.exit(1)
   }
@@ -34,7 +34,7 @@ export default async function(): Promise<void> {
     filesystem.exists(IDF_PATH) === false
   ) {
     spinner.fail(
-      'ESP32 tooling required. Run `xs-dev setup --device esp32` before trying again.'
+      'ESP32 tooling required. Run `xs-dev setup --device esp32` before trying again.',
     )
     process.exit(1)
   }
@@ -42,11 +42,20 @@ export default async function(): Promise<void> {
   // 2. update local esp-idf repo
   if (filesystem.exists(IDF_PATH) === 'dir') {
     spinner.start('Updating esp-idf repo')
-    const moddableVersion = await getModdableVersion() ?? ''
-    const branch = (moddableVersion.includes("branch") || semver.satisfies(moddableVersion ?? '', '>= 4.2.x')) ? ESP_BRANCH_V5 : ESP_BRANCH_V4
+    const moddableVersion = (await getModdableVersion()) ?? ''
+    const branch =
+      moddableVersion.includes('branch') ||
+      semver.satisfies(moddableVersion ?? '', '>= 4.2.x')
+        ? ESP_BRANCH_V5
+        : ESP_BRANCH_V4
 
-    if (branch === ESP_BRANCH_V5 && !semver.satisfies(moddableVersion ?? '', '>= 4.3.8')) {
-      spinner.fail('Latest Moddable SDK is required before updating ESP-IDF. Run `xs-dev update` before trying again.')
+    if (
+      branch === ESP_BRANCH_V5 &&
+      !semver.satisfies(moddableVersion ?? '', '>= 4.3.8')
+    ) {
+      spinner.fail(
+        'Latest Moddable SDK is required before updating ESP-IDF. Run `xs-dev update` before trying again.',
+      )
       process.exit(1)
     }
 
@@ -81,7 +90,7 @@ export default async function(): Promise<void> {
   await patching.replace(
     EXPORTS_FILE_PATH,
     `source $IDF_PATH/export.sh 1> /dev/null\n`,
-    ''
+    '',
   )
   await system.exec(`source ${EXPORTS_FILE_PATH}`, {
     shell: process.env.SHELL,
@@ -108,13 +117,13 @@ export default async function(): Promise<void> {
     process.env.MODDABLE ?? '',
     'build',
     'bin',
-    'esp32'
+    'esp32',
   )
   const TMP_DIR = filesystem.resolve(
     process.env.MODDABLE ?? '',
     'build',
     'tmp',
-    'esp32'
+    'esp32',
   )
   filesystem.remove(BUILD_DIR)
   filesystem.remove(TMP_DIR)

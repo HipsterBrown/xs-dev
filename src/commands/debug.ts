@@ -21,8 +21,12 @@ const command = buildCommand({
   docs: {
     brief: 'Connect to running debugging session on target device or simulator',
   },
-  // eslint-disable-next-line @typescript-eslint/no-inferrable-types
-  async func(this: LocalContext, flags: DebugOptions, projectPath: string = '.') {
+  async func(
+    this: LocalContext,
+    flags: DebugOptions,
+    // eslint-disable-next-line @typescript-eslint/no-inferrable-types
+    projectPath: string = '.',
+  ) {
     const { filesystem } = this
     const currentPlatform: Device = platformType().toLowerCase() as Device
     const {
@@ -62,20 +66,22 @@ const command = buildCommand({
           parse: String,
           default: '.',
           optional: true,
-        }
-      ]
+        },
+      ],
     },
     flags: {
       device: {
         kind: 'enum',
         values: Object.keys(DEVICE_ALIAS) as NonNullable<Device[]>,
-        brief: 'Target device or platform for the project, use --list-devices to select from interactive list; defaults to current OS simulator',
+        brief:
+          'Target device or platform for the project, use --list-devices to select from interactive list; defaults to current OS simulator',
         optional: true,
       },
       example: {
         kind: 'parsed',
         parse: String,
-        brief: 'Name of example project to run, use --list-examples to select from an interactive list',
+        brief:
+          'Name of example project to run, use --list-examples to select from an interactive list',
         optional: true,
       },
       listExamples: {
@@ -97,7 +103,8 @@ const command = buildCommand({
       output: {
         kind: 'parsed',
         parse: String,
-        brief: 'Output directory for build result; defaults to internal $MODDABLE build directory for project',
+        brief:
+          'Output directory for build result; defaults to internal $MODDABLE build directory for project',
         optional: true,
       },
     },
@@ -105,8 +112,8 @@ const command = buildCommand({
       d: 'device',
       m: 'mode',
       o: 'output',
-    }
-  }
+    },
+  },
 })
 
 export default command

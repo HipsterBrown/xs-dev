@@ -16,7 +16,10 @@ const command = buildCommand({
 
     await sourceEnvironment()
 
-    if (typeof process.env.IDF_PATH === 'string' && filesystem.exists(process.env.IDF_PATH) === 'dir') {
+    if (
+      typeof process.env.IDF_PATH === 'string' &&
+      filesystem.exists(process.env.IDF_PATH) === 'dir'
+    ) {
       spinner.start(`Found ESP_IDF, sourcing environment...`)
       await sourceIdf()
       spinner.stop()
@@ -24,7 +27,7 @@ const command = buildCommand({
 
     if (system.which('esptool.py') === null) {
       print.warning(
-        'esptool.py required to scan for Espressif devices. Setup environment for ESP8266 or ESP32:\n xs-dev setup --device esp32\n xs-dev setup --device esp8266.'
+        'esptool.py required to scan for Espressif devices. Setup environment for ESP8266 or ESP32:\n xs-dev setup --device esp32\n xs-dev setup --device esp8266.',
       )
     }
 
@@ -36,7 +39,7 @@ const command = buildCommand({
       try {
         await system.exec('picotool reboot -fa')
         await sleep(1000)
-      } catch { }
+      } catch {}
     }
 
     const ports = await SerialPort.list()
@@ -61,9 +64,9 @@ const command = buildCommand({
             return await system
               .exec(`esptool.py --port ${port.path} read_mac`)
               .then((buffer) => [buffer, port.path])
-          } catch { }
+          } catch {}
           return [undefined, port.path]
-        })
+        }),
     )
 
     const record = parseScanResult(result)
@@ -80,8 +83,8 @@ const command = buildCommand({
     }
   },
   parameters: {
-    flags: {}
-  }
+    flags: {},
+  },
 })
 
 export default command

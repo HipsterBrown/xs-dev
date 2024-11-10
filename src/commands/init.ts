@@ -8,7 +8,7 @@ interface InitOptions {
   io?: boolean
   example?: string
   listExamples?: boolean
-  overwrite?: boolean,
+  overwrite?: boolean
   asyncMain?: boolean
 }
 
@@ -36,7 +36,7 @@ const command = buildCommand({
     if (projectName !== undefined) {
       if (!overwrite && filesystem.isDirectory(projectName)) {
         warning(
-          `Directory called ${projectName} already exists. Please pass the --overwrite flag to replace an existing project.`
+          `Directory called ${projectName} already exists. Please pass the --overwrite flag to replace an existing project.`,
         )
         process.exit(0)
       }
@@ -47,7 +47,7 @@ const command = buildCommand({
         // find example project
         const exampleProjectPath = filesystem.resolve(
           String(process.env.MODDABLE),
-          'examples'
+          'examples',
         )
         const examples = filesystem.inspectTree(exampleProjectPath)?.children
         const choices =
@@ -58,23 +58,23 @@ const command = buildCommand({
 
         if (listExamples || selectedExample === undefined) {
           const filteredChoices = choices.filter((choice) =>
-            choice.includes(String(example))
+            choice.includes(String(example)),
           )
-            ; ({ example: selectedExample } = await prompt.ask([
-              {
-                type: 'autocomplete',
-                name: 'example',
-                message: 'Here are the available examples templates:',
-                choices: filteredChoices.length > 0 ? filteredChoices : choices,
-              },
-            ]))
+          ;({ example: selectedExample } = await prompt.ask([
+            {
+              type: 'autocomplete',
+              name: 'example',
+              message: 'Here are the available examples templates:',
+              choices: filteredChoices.length > 0 ? filteredChoices : choices,
+            },
+          ]))
         }
 
         // copy files into new project directory
         if (selectedExample !== '' && selectedExample !== undefined) {
           const selectedExamplePath = filesystem.resolve(
             exampleProjectPath,
-            selectedExample
+            selectedExample,
           )
           info(`Generating project directory from ${selectedExample}`)
           filesystem.copy(selectedExamplePath, projectName, { overwrite })
@@ -89,7 +89,10 @@ const command = buildCommand({
 
         const includes = [
           io
-            ? ['"$(MODDABLE)/modules/io/manifest.json"', '"$(MODDABLE)/examples/manifest_net.json"']
+            ? [
+                '"$(MODDABLE)/modules/io/manifest.json"',
+                '"$(MODDABLE)/examples/manifest_net.json"',
+              ]
             : '"$(MODDABLE)/examples/manifest_base.json"',
           typescript && '"$(MODDABLE)/examples/manifest_typings.json"',
         ]
@@ -118,33 +121,38 @@ const command = buildCommand({
       success(`Run the project using: cd ${projectName} && xs-dev run`)
     } else {
       warning(
-        'Name is required to generate project: xs-dev init my-project-name'
+        'Name is required to generate project: xs-dev init my-project-name',
       )
     }
   },
   parameters: {
     positional: {
       kind: 'tuple',
-      parameters: [{
-        placeholder: 'projectName',
-        parse: String,
-        brief: 'Name of the generated project directory',
-      }]
+      parameters: [
+        {
+          placeholder: 'projectName',
+          parse: String,
+          brief: 'Name of the generated project directory',
+        },
+      ],
     },
     flags: {
       typescript: {
         kind: 'boolean',
-        brief: 'Add TypeScript configuration to generated project; defaults to false',
+        brief:
+          'Add TypeScript configuration to generated project; defaults to false',
         optional: true,
       },
       io: {
         kind: 'boolean',
-        brief: 'Add ECMA-419 standard API support to generated project; defaults to false',
+        brief:
+          'Add ECMA-419 standard API support to generated project; defaults to false',
         optional: true,
       },
       example: {
         kind: 'parsed',
-        brief: 'Name or path of an example project as the base for the generated project; use --list-examples to select interactively',
+        brief:
+          'Name or path of an example project as the base for the generated project; use --list-examples to select interactively',
         parse: String,
         optional: true,
       },
@@ -155,16 +163,18 @@ const command = buildCommand({
       },
       overwrite: {
         kind: 'boolean',
-        brief: 'Replace any existing directories with the same name as the generated project; defaults to false',
+        brief:
+          'Replace any existing directories with the same name as the generated project; defaults to false',
         optional: true,
       },
       asyncMain: {
         kind: 'boolean',
-        brief: 'Add top-level await configuration to generated project; defaults to false',
+        brief:
+          'Add top-level await configuration to generated project; defaults to false',
         optional: true,
-      }
-    }
-  }
+      },
+    },
+  },
 })
 
 export default command

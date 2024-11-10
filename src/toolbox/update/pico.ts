@@ -7,11 +7,12 @@ import { installDeps as installLinuxDeps } from '../setup/pico/linux'
 import { moddableExists } from '../setup/moddable'
 import { sourceEnvironment } from '../system/exec'
 
-export default async function(): Promise<void> {
+export default async function (): Promise<void> {
   const OS = platformType().toLowerCase()
-  const PICO_BRANCH = "1.5.0"
+  const PICO_BRANCH = '1.5.0'
   const PICO_EXTRAS_REPO = 'https://github.com/raspberrypi/pico-extras'
-  const PICO_ROOT = process.env.PICO_ROOT ?? filesystem.resolve(INSTALL_DIR, 'pico')
+  const PICO_ROOT =
+    process.env.PICO_ROOT ?? filesystem.resolve(INSTALL_DIR, 'pico')
   const PICO_SDK_DIR = filesystem.resolve(PICO_ROOT, 'pico-sdk')
   const PICO_EXTRAS_DIR = filesystem.resolve(PICO_ROOT, 'pico-extras')
   const PICO_EXAMPLES_PATH = filesystem.resolve(PICO_ROOT, 'pico-examples')
@@ -27,7 +28,7 @@ export default async function(): Promise<void> {
   // 0. ensure pico instal directory and Moddable exists
   if (!moddableExists()) {
     spinner.fail(
-      'Moddable platform tooling required. Run `xs-dev setup` before trying again.'
+      'Moddable platform tooling required. Run `xs-dev setup` before trying again.',
     )
     process.exit(1)
   }
@@ -41,7 +42,7 @@ export default async function(): Promise<void> {
     filesystem.exists(PICOTOOL_PATH) === false
   ) {
     spinner.fail(
-      'Pico tooling required. Run `xs-dev setup --device pico` before trying again.'
+      'Pico tooling required. Run `xs-dev setup --device pico` before trying again.',
     )
     process.exit(1)
   } else {
@@ -86,17 +87,21 @@ export default async function(): Promise<void> {
     spinner.start('Updating pico-extras repo')
     await system.exec(
       `git clone --depth 1 --single-branch -b sdk-${PICO_BRANCH} ${PICO_EXTRAS_REPO} ${PICO_EXTRAS_DIR}`,
-      { stdout: process.stdout }
+      { stdout: process.stdout },
     )
     await system.spawn(`git fetch --all --tags`, { cwd: PICO_EXTRAS_DIR })
-    await system.spawn(`git checkout sdk-${PICO_BRANCH}`, { cwd: PICO_EXTRAS_DIR })
+    await system.spawn(`git checkout sdk-${PICO_BRANCH}`, {
+      cwd: PICO_EXTRAS_DIR,
+    })
     spinner.succeed()
   }
 
   if (filesystem.exists(PICO_EXAMPLES_PATH) === 'dir') {
     spinner.start('Updating pico-examples repo')
     await system.spawn(`git fetch --all --tags`, { cwd: PICO_EXAMPLES_PATH })
-    await system.spawn(`git checkout sdk-${PICO_BRANCH}`, { cwd: PICO_EXAMPLES_PATH })
+    await system.spawn(`git checkout sdk-${PICO_BRANCH}`, {
+      cwd: PICO_EXAMPLES_PATH,
+    })
     spinner.succeed()
   }
 
@@ -136,7 +141,6 @@ export default async function(): Promise<void> {
     cwd: PICOTOOL_BUILD_DIR,
   })
   spinner.succeed()
-
 
   spinner.succeed(`
 Successfully updated pico platform support for Moddable!

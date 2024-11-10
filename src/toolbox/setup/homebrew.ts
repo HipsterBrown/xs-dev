@@ -15,23 +15,28 @@ export async function ensureHomebrew(): Promise<void> {
 
     if (filesystem.exists(brewPath) === 'dir') {
       process.env.PATH = `${brewPath}:${String(process.env.PATH)}`
-      return;
+      return
     }
 
-    const shouldInstallBrew = await prompt.confirm(`The "brew" command is not available. Homebrew is required to install necessary dependencies. Would you like to setup Homebrew automatically?`)
+    const shouldInstallBrew = await prompt.confirm(
+      `The "brew" command is not available. Homebrew is required to install necessary dependencies. Would you like to setup Homebrew automatically?`,
+    )
 
     if (shouldInstallBrew) {
       try {
         print.info('Running Homebrew install script...')
-        await system.exec(`/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"`, {
-          shell: process.env.SHELL,
-          stdout: process.stdout,
-          stdin: process.stdin,
-        })
+        await system.exec(
+          `/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"`,
+          {
+            shell: process.env.SHELL,
+            stdout: process.stdout,
+            stdin: process.stdin,
+          },
+        )
         const PROFILE_PATH = getProfilePath()
         await upsert(PROFILE_PATH, homebrewEval)
         process.env.PATH = `${brewPath}:${String(process.env.PATH)}`
-        return;
+        return
       } catch (error: unknown) {
         if (error instanceof Error) {
           print.error(`Unable to install Homebrew: ${error.message}`)
@@ -39,19 +44,23 @@ export async function ensureHomebrew(): Promise<void> {
       }
     }
 
-    throw new Error(`Visit https://brew.sh/ to learn more about installing Homebrew. If you don't want to use Homebrew, please install the following packages manually before trying this command again: `)
+    throw new Error(
+      `Visit https://brew.sh/ to learn more about installing Homebrew. If you don't want to use Homebrew, please install the following packages manually before trying this command again: `,
+    )
   }
 }
 
 interface SpawnResult {
-  stdout: null | string;
-  status: number;
-  error: null | Error;
+  stdout: null | string
+  status: number
+  error: null | Error
 }
 
 export async function formulaeExists(formulae: string): Promise<boolean> {
   if (system.which('brew') === null) return false
 
-  const result: SpawnResult = await system.spawn(`brew list ${formulae}`, { shell: process.env.SHELL })
-  return result.status === 0;
+  const result: SpawnResult = await system.spawn(`brew list ${formulae}`, {
+    shell: process.env.SHELL,
+  })
+  return result.status === 0
 }

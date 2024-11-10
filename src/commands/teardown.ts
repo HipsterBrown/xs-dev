@@ -9,7 +9,8 @@ import {
 
 const command = buildCommand({
   docs: {
-    brief: 'Remove all installed git repos and toolchains, unset environment changes',
+    brief:
+      'Remove all installed git repos and toolchains, unset environment changes',
   },
   async func(this: LocalContext) {
     const { filesystem, patching, print } = this
@@ -27,9 +28,22 @@ const command = buildCommand({
     filesystem.remove(filesystem.resolve(INSTALL_DIR, 'nrf52'))
 
     if (platformType() === 'Darwin') {
-      const NC_PREFS_BACKUP = filesystem.resolve(INSTALL_DIR, 'ejectfix', 'com.apple.ncprefs.plist')
+      const NC_PREFS_BACKUP = filesystem.resolve(
+        INSTALL_DIR,
+        'ejectfix',
+        'com.apple.ncprefs.plist',
+      )
       if (filesystem.exists(NC_PREFS_BACKUP) === 'file') {
-        filesystem.copy(NC_PREFS_BACKUP, filesystem.resolve(process.env.HOME ?? '~', 'Library', 'Preferences', 'com.apple.ncprefs.plist'), { overwrite: true })
+        filesystem.copy(
+          NC_PREFS_BACKUP,
+          filesystem.resolve(
+            process.env.HOME ?? '~',
+            'Library',
+            'Preferences',
+            'com.apple.ncprefs.plist',
+          ),
+          { overwrite: true },
+        )
       }
       filesystem.remove(filesystem.resolve(INSTALL_DIR, 'ejectfix'))
       filesystem.remove('/Applications/xsbug.app')
@@ -42,8 +56,8 @@ const command = buildCommand({
     spinner.succeed(`Clean up complete!`)
   },
   parameters: {
-    flags: {}
-  }
+    flags: {},
+  },
 })
 
 export default command

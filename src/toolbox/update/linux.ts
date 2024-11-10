@@ -13,14 +13,13 @@ import { execWithSudo, sourceEnvironment } from '../system/exec'
 
 const chmodPromise = promisify(chmod)
 
-export default async function({ targetBranch }: SetupArgs): Promise<void> {
-
+export default async function ({ targetBranch }: SetupArgs): Promise<void> {
   await sourceEnvironment()
 
   // 0. ensure Moddable exists
   if (!moddableExists()) {
     print.error(
-      'Moddable tooling required. Run `xs-dev setup` before trying again.'
+      'Moddable tooling required. Run `xs-dev setup` before trying again.',
     )
     process.exit(1)
   }
@@ -31,7 +30,7 @@ export default async function({ targetBranch }: SetupArgs): Promise<void> {
     INSTALL_PATH,
     'build',
     'makefiles',
-    'lin'
+    'lin',
   )
 
   if (targetBranch === 'latest-release') {
@@ -55,19 +54,19 @@ export default async function({ targetBranch }: SetupArgs): Promise<void> {
       'build',
       'bin',
       'lin',
-      'release'
+      'release',
     )
     const DEBUG_BIN_PATH = filesystem.resolve(
       INSTALL_PATH,
       'build',
       'bin',
       'lin',
-      'debug'
+      'debug',
     )
 
     filesystem.remove(process.env.MODDABLE)
     await system.spawn(
-      `git clone ${MODDABLE_REPO} ${INSTALL_PATH} --depth 1 --branch ${latestRelease.tag_name} --single-branch`
+      `git clone ${MODDABLE_REPO} ${INSTALL_PATH} --depth 1 --branch ${latestRelease.tag_name} --single-branch`,
     )
 
     filesystem.dir(BIN_PATH)
@@ -92,9 +91,9 @@ export default async function({ targetBranch }: SetupArgs): Promise<void> {
         await chmodPromise(filesystem.resolve(BIN_PATH, tool), 0o751)
         await filesystem.copyAsync(
           filesystem.resolve(BIN_PATH, tool),
-          filesystem.resolve(DEBUG_BIN_PATH, tool)
+          filesystem.resolve(DEBUG_BIN_PATH, tool),
         )
-      })
+      }),
     )
 
     spinner.info('Reinstalling simulator')
@@ -106,26 +105,26 @@ export default async function({ targetBranch }: SetupArgs): Promise<void> {
         'tmp',
         'lin',
         'debug',
-        'simulator'
-      )
+        'simulator',
+      ),
     )
     await system.exec(
       `mcconfig -m -p x-lin ${filesystem.resolve(
         INSTALL_PATH,
         'tools',
         'xsbug',
-        'manifest.json'
+        'manifest.json',
       )}`,
-      { process }
+      { process },
     )
     await system.exec(
       `mcconfig -m -p x-lin ${filesystem.resolve(
         INSTALL_PATH,
         'tools',
         'mcsim',
-        'manifest.json'
+        'manifest.json',
       )}`,
-      { process }
+      { process },
     )
     await execWithSudo('make install', {
       cwd: BUILD_DIR,
@@ -134,10 +133,10 @@ export default async function({ targetBranch }: SetupArgs): Promise<void> {
     if (system.which('npm') !== null) {
       spinner.start('Installing xsbug-log dependencies')
       await system.exec('npm install', { cwd: XSBUG_LOG_PATH })
-      spinner.succeed();
+      spinner.succeed()
     }
     spinner.succeed(
-      'Moddable SDK successfully updated! Start the xsbug.app and run the "helloworld example": xs-dev run --example helloworld'
+      'Moddable SDK successfully updated! Start the xsbug.app and run the "helloworld example": xs-dev run --example helloworld',
     )
   }
 
@@ -147,7 +146,7 @@ export default async function({ targetBranch }: SetupArgs): Promise<void> {
     })
     const remoteRev: string = await system.exec(
       'git ls-remote origin refs/heads/public',
-      { cwd: process.env.MODDABLE }
+      { cwd: process.env.MODDABLE },
     )
 
     if (remoteRev.split('\t').shift() === currentRev.trim()) {
@@ -182,11 +181,11 @@ export default async function({ targetBranch }: SetupArgs): Promise<void> {
     if (system.which('npm') !== null) {
       spinner.start('Installing xsbug-log dependencies')
       await system.exec('npm install', { cwd: XSBUG_LOG_PATH })
-      spinner.succeed();
+      spinner.succeed()
     }
 
     print.success(
-      'Moddable SDK successfully updated! Start the xsbug.app and run the "helloworld example": xs-dev run --example helloworld'
+      'Moddable SDK successfully updated! Start the xsbug.app and run the "helloworld example": xs-dev run --example helloworld',
     )
   }
 }

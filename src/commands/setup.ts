@@ -64,8 +64,16 @@ const command = buildCommand({
       if (tool === 'ejectfix') await setupEjectfix()
       return
     }
-    const platformDevices: Device[] = ['mac', 'darwin', 'windows_nt', 'win', 'lin', 'linux']
-    const setup: (args: SetupArgs | PlatformSetupArgs) => Promise<void> = await import(`../commands/setup.ts/${target}`)
+    const platformDevices: Device[] = [
+      'mac',
+      'darwin',
+      'windows_nt',
+      'win',
+      'lin',
+      'linux',
+    ]
+    const setup: (args: SetupArgs | PlatformSetupArgs) => Promise<void> =
+      await import(`../commands/setup.ts/${target}`)
     if (platformDevices.includes(target)) {
       await setup({ targetBranch, sourceRepo })
     } else {
@@ -77,12 +85,14 @@ const command = buildCommand({
       device: {
         kind: 'enum',
         values: Object.keys(DEVICE_ALIAS) as NonNullable<Device[]>,
-        brief: 'Target device or platform SDK to set up; defaults to Moddable SDK for current OS; use --list-devices for interactive selection',
+        brief:
+          'Target device or platform SDK to set up; defaults to Moddable SDK for current OS; use --list-devices for interactive selection',
         optional: true,
       },
       listDevices: {
         kind: 'boolean',
-        brief: 'Select target device or platform SDK to set up from a list; defaults to false',
+        brief:
+          'Select target device or platform SDK to set up from a list; defaults to false',
         optional: true,
       },
       tool: {
@@ -94,17 +104,19 @@ const command = buildCommand({
       targetBranch: {
         kind: 'parsed',
         parse: String,
-        brief: 'The remote branch or release to use as source for Moddable SDK set up; defaults to `latest-release`',
+        brief:
+          'The remote branch or release to use as source for Moddable SDK set up; defaults to `latest-release`',
         optional: true,
       },
       sourceRepo: {
         kind: 'parsed',
         parse: String,
-        brief: 'URL for remote repository to use as source for Moddable SDK set up; defaults to upstream project',
+        brief:
+          'URL for remote repository to use as source for Moddable SDK set up; defaults to upstream project',
         optional: true,
-      }
-    }
-  }
+      },
+    },
+  },
 })
 
 export default command

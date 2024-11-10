@@ -20,8 +20,12 @@ const command = buildCommand({
   docs: {
     brief: 'Remove build artifacts for project',
   },
-  // eslint-disable-next-line @typescript-eslint/no-inferrable-types
-  async func(this: LocalContext, flags: CleanOptions, projectPath: string = '.') {
+  async func(
+    this: LocalContext,
+    flags: CleanOptions,
+    // eslint-disable-next-line @typescript-eslint/no-inferrable-types
+    projectPath: string = '.',
+  ) {
     const { filesystem } = this
     const { build } = await import('../toolbox/build/index')
     const currentPlatform: Device = platformType().toLowerCase() as Device
@@ -32,15 +36,18 @@ const command = buildCommand({
       listDevices = false,
       mode = (process.env.NODE_ENV as Mode) ?? 'development',
       output,
-      config = []
+      config = [],
     } = flags
     const targetPlatform: string = DEVICE_ALIAS[device] ?? device
     projectPath = filesystem.resolve(projectPath)
-    const parsedConfig = config.reduce<Record<string, string>>((result, setting) => {
-      const [key, value] = setting.split('=')
-      result[key] = value
-      return result
-    }, {})
+    const parsedConfig = config.reduce<Record<string, string>>(
+      (result, setting) => {
+        const [key, value] = setting.split('=')
+        result[key] = value
+        return result
+      },
+      {},
+    )
 
     await build({
       listExamples,
@@ -51,7 +58,7 @@ const command = buildCommand({
       mode,
       deployStatus: 'clean',
       outputDir: output,
-      config: parsedConfig
+      config: parsedConfig,
     })
   },
   parameters: {
@@ -64,20 +71,22 @@ const command = buildCommand({
           parse: String,
           default: '.',
           optional: true,
-        }
-      ]
+        },
+      ],
     },
     flags: {
       device: {
         kind: 'enum',
         values: Object.keys(DEVICE_ALIAS) as NonNullable<Device[]>,
-        brief: 'Target device or platform for the project, use --list-devices to select from interactive list; defaults to current OS simulator',
+        brief:
+          'Target device or platform for the project, use --list-devices to select from interactive list; defaults to current OS simulator',
         optional: true,
       },
       example: {
         kind: 'parsed',
         parse: String,
-        brief: 'Name of example project to run, use --list-examples to select from an interactive list',
+        brief:
+          'Name of example project to run, use --list-examples to select from an interactive list',
         optional: true,
       },
       listExamples: {
@@ -99,7 +108,8 @@ const command = buildCommand({
       output: {
         kind: 'parsed',
         parse: String,
-        brief: 'Output directory for build result; defaults to internal $MODDABLE build directory for project',
+        brief:
+          'Output directory for build result; defaults to internal $MODDABLE build directory for project',
         optional: true,
       },
       config: {
@@ -108,15 +118,14 @@ const command = buildCommand({
         brief: 'Extra configuration options to provide to build',
         optional: true,
         variadic: true,
-      }
+      },
     },
     aliases: {
       d: 'device',
       m: 'mode',
       o: 'output',
-    }
-  }
+    },
+  },
 })
 
 export default command
-

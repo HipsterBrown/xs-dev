@@ -6,7 +6,7 @@ import upsert from '../patching/upsert'
 import { execWithSudo, sourceEnvironment } from '../system/exec'
 import { ensureHomebrew } from './homebrew'
 
-export default async function(): Promise<void> {
+export default async function (): Promise<void> {
   const OS = platformType().toLowerCase()
   const EMSDK_REPO = 'https://github.com/emscripten-core/emsdk.git'
   const BINARYEN_REPO = 'https://github.com/WebAssembly/binaryen.git'
@@ -22,7 +22,7 @@ export default async function(): Promise<void> {
   // 0. ensure wasm instal directory and Moddable exists
   if (!moddableExists()) {
     spinner.fail(
-      'Moddable platform tooling required. Run `xs-dev setup` before trying again.'
+      'Moddable platform tooling required. Run `xs-dev setup` before trying again.',
     )
     process.exit(1)
   }
@@ -32,7 +32,9 @@ export default async function(): Promise<void> {
   // 1. Clone EM_SDK repo, install, and activate latest version
   if (filesystem.exists(EMSDK_PATH) === false) {
     spinner.start('Cloning emsdk repo')
-    await system.spawn(`git clone --depth 1 --single-branch -b main ${EMSDK_REPO} ${EMSDK_PATH}`)
+    await system.spawn(
+      `git clone --depth 1 --single-branch -b main ${EMSDK_REPO} ${EMSDK_PATH}`,
+    )
     spinner.succeed()
   }
 
@@ -45,9 +47,9 @@ export default async function(): Promise<void> {
   if (shouldBuildEmsdk) {
     try {
       // clear residual env settings
-      process.env.EMSDK = ""
-      process.env.EMSDK_NODE = ""
-      process.env.EMSDK_PYTHON = ""
+      process.env.EMSDK = ''
+      process.env.EMSDK_NODE = ''
+      process.env.EMSDK_PYTHON = ''
 
       spinner.start('Installing latest EMSDK')
       print.debug(EMSDK_PATH)
@@ -61,13 +63,10 @@ export default async function(): Promise<void> {
         cwd: EMSDK_PATH,
         stdout: process.stdout,
       })
+      await upsert(EXPORTS_FILE_PATH, `export EMSDK_QUIET=1`)
       await upsert(
         EXPORTS_FILE_PATH,
-        `export EMSDK_QUIET=1`
-      )
-      await upsert(
-        EXPORTS_FILE_PATH,
-        `source ${filesystem.resolve(EMSDK_PATH, 'emsdk_env.sh')} 1> /dev/null`
+        `source ${filesystem.resolve(EMSDK_PATH, 'emsdk_env.sh')} 1> /dev/null`,
       )
     } catch (error) {
       spinner.fail(`Error activating emsdk: ${String(error)}`)
@@ -80,7 +79,7 @@ export default async function(): Promise<void> {
   if (filesystem.exists(BINARYEN_PATH) === false) {
     spinner.start('Cloning binaryen repo')
     await system.spawn(
-      `git clone --depth 1 --single-branch -b main --recursive ${BINARYEN_REPO} ${BINARYEN_PATH}`
+      `git clone --depth 1 --single-branch -b main --recursive ${BINARYEN_REPO} ${BINARYEN_PATH}`,
     )
     spinner.succeed()
   }
@@ -92,7 +91,7 @@ export default async function(): Promise<void> {
       } catch (error: unknown) {
         if (error instanceof Error) {
           print.info(`${error.message} cmake`)
-          process.exit(1);
+          process.exit(1)
         }
       }
 
@@ -124,17 +123,17 @@ export default async function(): Promise<void> {
   spinner.info('Sourcing adding binaryen to PATH')
   await upsert(
     EXPORTS_FILE_PATH,
-    `export PATH=${filesystem.resolve(BINARYEN_PATH, 'bin')}:$PATH`
+    `export PATH=${filesystem.resolve(BINARYEN_PATH, 'bin')}:$PATH`,
   )
   process.env.PATH = `${String(process.env.PATH)}:${filesystem.resolve(
     BINARYEN_PATH,
-    'bin'
+    'bin',
   )}`
 
   // 4. Build Moddable WASM tools
   if (
     filesystem.exists(
-      filesystem.resolve(String(process.env.MODDABLE), 'build', 'bin', 'wasm')
+      filesystem.resolve(String(process.env.MODDABLE), 'build', 'bin', 'wasm'),
     ) === false
   ) {
     spinner.start('Building Moddable wasm tools')
@@ -143,7 +142,7 @@ export default async function(): Promise<void> {
         String(process.env.MODDABLE),
         'build',
         'makefiles',
-        'wasm'
+        'wasm',
       ),
       stdout: process.stdout,
     })
@@ -154,6 +153,6 @@ export default async function(): Promise<void> {
   })
 
   spinner.succeed(
-    `Successfully set up wasm platform support for Moddable! Test out the setup by starting a new terminal session and running: xs-dev run --example helloworld --device wasm`
+    `Successfully set up wasm platform support for Moddable! Test out the setup by starting a new terminal session and running: xs-dev run --example helloworld --device wasm`,
   )
 }
