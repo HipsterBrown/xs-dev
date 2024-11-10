@@ -1,3 +1,15 @@
+# v0.33.0 (Sun Nov 10 2024)
+
+#### 💥 Breaking Change
+
+- feat(pico): update SDK to v2.0.0 [#181](https://github.com/HipsterBrown/xs-dev/pull/181) ([@HipsterBrown](https://github.com/HipsterBrown))
+
+#### Authors: 1
+
+- Nick Hehr ([@HipsterBrown](https://github.com/HipsterBrown))
+
+---
+
 # v0.32.7 (Sun Nov 10 2024)
 
 #### 🚀 Enhancement
