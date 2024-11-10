@@ -1,3 +1,16 @@
+# v0.32.7 (Sun Nov 10 2024)
+
+#### 🚀 Enhancement
+
+- refactor(cli): migrate application entrypoint to Strcli [#180](https://github.com/HipsterBrown/xs-dev/pull/180) ([@HipsterBrown](https://github.com/HipsterBrown))
+- chore: use default conventions-commits config ([@HipsterBrown](https://github.com/HipsterBrown))
+
+#### Authors: 1
+
+- Nick Hehr ([@HipsterBrown](https://github.com/HipsterBrown))
+
+---
+
 # v0.32.6 (Mon Sep 09 2024)
 
 #### 🚀 Enhancement
