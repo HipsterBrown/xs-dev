@@ -14,7 +14,7 @@ env:
   PNPM_CACHE_FOLDER: .pnpm-store
 jobs:
   format_and_lint:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
 
     steps:
       - name: Checkout
@@ -39,7 +39,7 @@ jobs:
         run: pnpm run format && pnpm run lint
 
   compile:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
 
     steps:
       - name: Checkout
