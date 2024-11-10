@@ -54,6 +54,18 @@ const command = buildCommand({
     })
   },
   parameters: {
+    positional: {
+      kind: 'tuple',
+      parameters: [
+        {
+          placeholder: 'projectPath',
+          brief: 'Path to project; defaults to current directory',
+          parse: String,
+          default: '.',
+          optional: true,
+        }
+      ]
+    },
     flags: {
       device: {
         kind: 'enum',

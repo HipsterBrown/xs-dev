@@ -1,6 +1,7 @@
-import type { GluegunCommand } from 'gluegun'
-import { type as platformType } from 'os'
-import type { Device, XSDevToolbox } from '../types'
+import { type as platformType } from 'node:os'
+import { buildCommand } from '@stricli/core'
+import { LocalContext } from '../cli'
+import type { Device } from '../types'
 import { DEVICE_ALIAS } from '../toolbox/prompt/devices'
 
 type Mode = 'development' | 'production'
@@ -16,11 +17,12 @@ interface DebugOptions {
   output?: string
 }
 
-const command: GluegunCommand<XSDevToolbox> = {
-  name: 'debug',
-  description: 'Connect to running debugging session on target device or simulator',
-  // eslint-disable-next-line @typescript-eslint/no-misused-promises
-  run: async ({ parameters, filesystem, build }) => {
+const command = buildCommand({
+  docs: {
+    brief: 'Connect to running debugging session on target device or simulator',
+  },
+  async func(this: LocalContext, flags: DebugOptions, projectPath: string = '.') {
+    const { filesystem } = this
     const currentPlatform: Device = platformType().toLowerCase() as Device
     const {
       device = currentPlatform,
@@ -31,9 +33,10 @@ const command: GluegunCommand<XSDevToolbox> = {
       log = false,
       mode = (process.env.NODE_ENV as Mode) ?? 'development',
       output,
-    }: DebugOptions = parameters.options
+    } = flags
+    const { build } = await import('../toolbox/build/index')
     const targetPlatform: string = DEVICE_ALIAS[device] ?? device
-    const projectPath = filesystem.resolve(parameters.first ?? '.')
+    projectPath = filesystem.resolve(projectPath)
 
     await build({
       port,
@@ -48,6 +51,61 @@ const command: GluegunCommand<XSDevToolbox> = {
       outputDir: output,
     })
   },
-}
+  parameters: {
+    positional: {
+      kind: 'tuple',
+      parameters: [
+        {
+          placeholder: 'projectPath',
+          brief: 'Path to project; defaults to current directory',
+          parse: String,
+          default: '.',
+          optional: true,
+        }
+      ]
+    },
+    flags: {
+      device: {
+        kind: 'enum',
+        values: Object.keys(DEVICE_ALIAS) as NonNullable<Device[]>,
+        brief: 'Target device or platform for the project, use --list-devices to select from interactive list; defaults to current OS simulator',
+        optional: true,
+      },
+      example: {
+        kind: 'parsed',
+        parse: String,
+        brief: 'Name of example project to run, use --list-examples to select from an interactive list',
+        optional: true,
+      },
+      listExamples: {
+        kind: 'boolean',
+        brief: 'Select an example project from an interactive list',
+        optional: true,
+      },
+      listDevices: {
+        kind: 'boolean',
+        brief: 'Select a target device or platform from an interactive list',
+        optional: true,
+      },
+      mode: {
+        kind: 'enum',
+        values: ['development', 'production'],
+        brief: 'Set the current build context; defaults to development',
+        optional: true,
+      },
+      output: {
+        kind: 'parsed',
+        parse: String,
+        brief: 'Output directory for build result; defaults to internal $MODDABLE build directory for project',
+        optional: true,
+      },
+    },
+    aliases: {
+      d: 'device',
+      m: 'mode',
+      o: 'output',
+    }
+  }
+})
 
 export default command

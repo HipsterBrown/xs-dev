@@ -35,15 +35,7 @@ const commands = buildRouteMap({
       },
     }),
     clean,
-    debug: buildCommand({
-      func: debug.run,
-      docs: {
-        brief: debug.description ?? '',
-      },
-      parameters: {
-        flags: {}
-      },
-    }),
+    debug,
     doctor,
     include: buildCommand({
       func: include.run,
