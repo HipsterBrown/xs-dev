@@ -25,15 +25,7 @@ export type LocalContext = CommandContext &
 
 const commands = buildRouteMap({
   routes: {
-    build: buildCommand({
-      func: build.run,
-      docs: {
-        brief: build.description ?? '',
-      },
-      parameters: {
-        flags: {}
-      },
-    }),
+    build,
     clean,
     debug,
     doctor,
