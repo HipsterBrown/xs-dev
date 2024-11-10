@@ -1,28 +1,17 @@
+import { setTimeout as sleep } from 'node:timers/promises'
+import { buildCommand } from '@stricli/core'
 import { SerialPort } from 'serialport'
 import { findBySerialNumber } from 'usb'
-import type { GluegunCommand } from 'gluegun'
-import type { XSDevToolbox } from '../types'
+import { LocalContext } from '../cli'
 import { parseScanResult } from '../toolbox/scan/parse'
 import { sourceEnvironment, sourceIdf } from '../toolbox/system/exec'
 
-// eslint-disable-next-line
-function sleep(timeout: number) {
-  return new Promise((resolve) => {
-    setTimeout(resolve, timeout)
-  })
-}
-
-const command: GluegunCommand<XSDevToolbox> = {
-  name: 'scan',
-  description: 'Look for available devices',
-  // eslint-disable-next-line @typescript-eslint/no-misused-promises
-  run: async (toolbox) => {
-    const { filesystem, parameters, print, system } = toolbox
-    if (parameters.options.help !== undefined) {
-      print.printCommands(toolbox, ['scan'])
-      process.exit(0)
-    }
-
+const command = buildCommand({
+  docs: {
+    brief: 'Look for available devices for deployment',
+  },
+  async func(this: LocalContext) {
+    const { filesystem, print, system } = this
     const spinner = print.spin()
 
     await sourceEnvironment()
@@ -90,6 +79,9 @@ const command: GluegunCommand<XSDevToolbox> = {
       print.table([['Port', 'Device', 'Features'], ...rows])
     }
   },
-}
+  parameters: {
+    flags: {}
+  }
+})
 
 export default command

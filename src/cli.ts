@@ -35,15 +35,7 @@ const commands = buildRouteMap({
     init,
     remove,
     run,
-    scan: buildCommand({
-      func: scan.run,
-      docs: {
-        brief: scan.description ?? '',
-      },
-      parameters: {
-        flags: {}
-      },
-    }),
+    scan,
     setup: buildCommand({
       func: setup.run,
       docs: {
