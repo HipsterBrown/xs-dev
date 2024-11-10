@@ -1,4 +1,4 @@
-import os from 'os'
+import os from 'node:os'
 import { buildCommand } from '@stricli/core'
 import { LocalContext } from '../cli'
 import { DEVICE_ALIAS } from '../toolbox/prompt/devices'
