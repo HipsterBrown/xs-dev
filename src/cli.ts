@@ -1,10 +1,25 @@
 #!/usr/bin/env node
 import process from 'node:process'
 import type { GluegunToolbox } from 'gluegun'
-import { filesystem, strings, print, system, semver, http, patching, prompt, packageManager } from 'gluegun'
+import {
+  filesystem,
+  strings,
+  print,
+  system,
+  semver,
+  http,
+  patching,
+  prompt,
+  packageManager,
+} from 'gluegun'
 // @ts-expect-error opaque import path, to be replaced by vendored solution
 import { buildGenerate } from 'gluegun/build/toolbox/template-tools'
-import { buildApplication, buildRouteMap, run as runApp, type CommandContext } from '@stricli/core'
+import {
+  buildApplication,
+  buildRouteMap,
+  run as runApp,
+  type CommandContext,
+} from '@stricli/core'
 import { description, version, name } from '../package.json'
 
 import build from './commands/build'
@@ -21,10 +36,21 @@ import teardown from './commands/teardown'
 import update from './commands/update'
 
 export type LocalContext = CommandContext &
-  Pick<GluegunToolbox, 'filesystem' | 'strings' | 'print' | 'system' | 'semver' | 'http' | 'patching' | 'prompt' | 'packageManager' | 'template'> &
-{
-  currentVersion: string;
-}
+  Pick<
+    GluegunToolbox,
+    | 'filesystem'
+    | 'strings'
+    | 'print'
+    | 'system'
+    | 'semver'
+    | 'http'
+    | 'patching'
+    | 'prompt'
+    | 'packageManager'
+    | 'template'
+  > & {
+    currentVersion: string
+  }
 
 const commands = buildRouteMap({
   routes: {
@@ -47,33 +73,30 @@ const commands = buildRouteMap({
   },
   docs: {
     brief: description,
-  }
+  },
 })
 
 const app = buildApplication<LocalContext>(commands, {
   name,
   versionInfo: {
     currentVersion: version,
-  }
+  },
 })
 
 /**
  * Create the cli and kick it off
  */
-runApp(app,
-  process.argv.slice(2),
-  {
-    process,
-    filesystem,
-    strings,
-    print,
-    system,
-    semver,
-    http,
-    patching,
-    prompt,
-    packageManager,
-    currentVersion: version,
-    template: { generate: buildGenerate({}) }
-  }
-).catch(console.error)
+runApp(app, process.argv.slice(2), {
+  process,
+  filesystem,
+  strings,
+  print,
+  system,
+  semver,
+  http,
+  patching,
+  prompt,
+  packageManager,
+  currentVersion: version,
+  template: { generate: buildGenerate({}) },
+}).catch(console.error)

@@ -21,7 +21,8 @@ const command = buildCommand({
   docs: {
     brief: 'Connect to running debugging session on target device or simulator',
   },
-  async func(this: LocalContext, flags: DebugOptions, projectPath = '.') {
+  // eslint-disable-next-line @typescript-eslint/no-inferrable-types
+  async func(this: LocalContext, flags: DebugOptions, projectPath: string = '.') {
     const { filesystem } = this
     const currentPlatform: Device = platformType().toLowerCase() as Device
     const {

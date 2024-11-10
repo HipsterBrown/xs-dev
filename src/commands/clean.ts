@@ -20,7 +20,8 @@ const command = buildCommand({
   docs: {
     brief: 'Remove build artifacts for project',
   },
-  async func(this: LocalContext, flags: CleanOptions, projectPath = '.') {
+  // eslint-disable-next-line @typescript-eslint/no-inferrable-types
+  async func(this: LocalContext, flags: CleanOptions, projectPath: string = '.') {
     const { filesystem } = this
     const { build } = await import('../toolbox/build/index')
     const currentPlatform: Device = platformType().toLowerCase() as Device

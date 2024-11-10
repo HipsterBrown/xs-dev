@@ -7,9 +7,10 @@
     "node": ">=20"
   },
   "bin": {
-    "xs-dev": "bin/xs-dev"
+    "xs-dev": "build/src/cli.js"
   },
   "scripts": {
+    "xs-dev": "tsx src/cli.ts",
     "format": "prettier --write **/*.{js,ts,json}",
     "lint": "eslint src/",
     "clean-build": "rm -rf ./build",
@@ -35,8 +36,7 @@
     "build",
     "LICENSE",
     "README.md",
-    "docs",
-    "bin"
+    "docs"
   ],
   "license": "MIT",
   "repository": {
@@ -91,6 +91,7 @@
     "tailwindcss": "^3.0.24",
     "ts-jest": "^29.2.4",
     "ts-node": "^10.9.2",
+    "tsx": "^4.19.2",
     "typescript": "^5.5.4",
     "typescript-eslint": "^8.1.0"
   },

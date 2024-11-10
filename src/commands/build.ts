@@ -22,7 +22,8 @@ const command = buildCommand({
   docs: {
     brief: 'Build project for release to target device',
   },
-  async func(this: LocalContext, flags: BuildOptions, projectPath = '.') {
+  // eslint-disable-next-line @typescript-eslint/no-inferrable-types
+  async func(this: LocalContext, flags: BuildOptions, projectPath: string = '.') {
     const { filesystem } = this
     const { build } = await import('../toolbox/build/index')
     const currentPlatform: Device = platformType().toLowerCase() as Device
