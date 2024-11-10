@@ -2,6 +2,8 @@
 import process from 'node:process'
 import type { GluegunToolbox } from 'gluegun'
 import { filesystem, strings, print, system, semver, http, patching, prompt, packageManager } from 'gluegun'
+// @ts-expect-error opaque import path, to be replaced by vendored solution
+import { buildGenerate } from 'gluegun/build/toolbox/template-tools'
 import { buildApplication, buildCommand, buildRouteMap, run as runApp, CommandContext } from '@stricli/core'
 import { description, version, name } from '../package.json'
 import build from './commands/build'
@@ -18,7 +20,7 @@ import teardown from './commands/teardown'
 import update from './commands/update'
 
 export type LocalContext = CommandContext &
-  Pick<GluegunToolbox, 'filesystem' | 'strings' | 'print' | 'system' | 'semver' | 'http' | 'patching' | 'prompt' | 'packageManager'> &
+  Pick<GluegunToolbox, 'filesystem' | 'strings' | 'print' | 'system' | 'semver' | 'http' | 'patching' | 'prompt' | 'packageManager' | 'template'> &
 {
   currentVersion: string;
 }
@@ -30,15 +32,7 @@ const commands = buildRouteMap({
     debug,
     doctor,
     include,
-    init: buildCommand({
-      func: init.run,
-      docs: {
-        brief: init.description ?? '',
-      },
-      parameters: {
-        flags: {}
-      },
-    }),
+    init,
     remove: buildCommand({
       func: remove.run,
       docs: {
@@ -126,6 +120,7 @@ runApp(app,
     patching,
     prompt,
     packageManager,
-    currentVersion: version
+    currentVersion: version,
+    template: { generate: buildGenerate({}) }
   }
 ).catch(console.error)

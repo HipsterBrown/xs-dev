@@ -1,49 +1,49 @@
-import type { GluegunCommand } from 'gluegun'
+import { buildCommand } from '@stricli/core'
+import { LocalContext } from '../cli'
 import { collectChoicesFromTree } from '../toolbox/prompt/choices'
 import { sourceEnvironment } from '../toolbox/system/exec'
 
 interface InitOptions {
   typescript?: boolean
   io?: boolean
-  example?: string | boolean
+  example?: string
+  listExamples?: boolean
   overwrite?: boolean,
   asyncMain?: boolean
 }
 
-const command: GluegunCommand = {
-  name: 'init',
-  alias: ['i'],
-  description: 'Scaffold a new Moddable XS project',
-  // eslint-disable-next-line @typescript-eslint/no-misused-promises
-  run: async (toolbox) => {
+const command = buildCommand({
+  docs: {
+    brief: 'Scaffold a new Moddable XS project',
+  },
+  async func(this: LocalContext, flags: InitOptions, projectName: string) {
     const {
-      parameters,
       filesystem,
       template,
       print: { warning, info, success },
       prompt,
-    } = toolbox
+    } = this
 
-    const name = parameters.first
     const {
       typescript = false,
       io = false,
-      example = false,
+      example,
+      listExamples = false,
       overwrite = false,
       asyncMain = false,
-    }: InitOptions = parameters.options
+    } = flags
 
-    if (name !== undefined) {
-      if (!overwrite && filesystem.isDirectory(name)) {
+    if (projectName !== undefined) {
+      if (!overwrite && filesystem.isDirectory(projectName)) {
         warning(
-          `Directory called ${name} already exists. Please pass the --overwrite flag to replace an existing project.`
+          `Directory called ${projectName} already exists. Please pass the --overwrite flag to replace an existing project.`
         )
         process.exit(0)
       }
 
       await sourceEnvironment()
 
-      if (example !== false) {
+      if (example || listExamples) {
         // find example project
         const exampleProjectPath = filesystem.resolve(
           String(process.env.MODDABLE),
@@ -56,7 +56,7 @@ const command: GluegunCommand = {
             : []
         let selectedExample = choices.find((choice) => choice === example)
 
-        if (example === true || selectedExample === undefined) {
+        if (listExamples || selectedExample === undefined) {
           const filteredChoices = choices.filter((choice) =>
             choice.includes(String(example))
           )
@@ -77,15 +77,15 @@ const command: GluegunCommand = {
             selectedExample
           )
           info(`Generating project directory from ${selectedExample}`)
-          filesystem.copy(selectedExamplePath, name, { overwrite })
+          filesystem.copy(selectedExamplePath, projectName, { overwrite })
         } else {
           warning('Please select an example template to use.')
           process.exit(0)
         }
       } else {
-        info(`Generating Moddable project: ${name}`)
+        info(`Generating Moddable project: ${projectName}`)
 
-        filesystem.dir(name, { empty: false })
+        filesystem.dir(projectName, { empty: false })
 
         const includes = [
           io
@@ -103,23 +103,68 @@ const command: GluegunCommand = {
 
         await template.generate({
           template: 'manifest.json.ejs',
-          target: `${name}/manifest.json`,
+          directory: filesystem.resolve(__dirname, '..', 'templates'),
+          target: `${projectName}/manifest.json`,
           props: { includes, defines },
         })
 
         await template.generate({
           template: 'main.js.ejs',
-          target: `${name}/main.${typescript ? 'ts' : 'js'}`,
+          directory: filesystem.resolve(__dirname, '..', 'templates'),
+          target: `${projectName}/main.${typescript ? 'ts' : 'js'}`,
         })
       }
 
-      success(`Run the project using: cd ${name} && xs-dev run`)
+      success(`Run the project using: cd ${projectName} && xs-dev run`)
     } else {
       warning(
         'Name is required to generate project: xs-dev init my-project-name'
       )
     }
   },
-}
+  parameters: {
+    positional: {
+      kind: 'tuple',
+      parameters: [{
+        placeholder: 'projectName',
+        parse: String,
+        brief: 'Name of the generated project directory',
+      }]
+    },
+    flags: {
+      typescript: {
+        kind: 'boolean',
+        brief: 'Add TypeScript configuration to generated project; defaults to false',
+        optional: true,
+      },
+      io: {
+        kind: 'boolean',
+        brief: 'Add ECMA-419 standard API support to generated project; defaults to false',
+        optional: true,
+      },
+      example: {
+        kind: 'parsed',
+        brief: 'Name or path of an example project as the base for the generated project; use --list-examples to select interactively',
+        parse: String,
+        optional: true,
+      },
+      listExamples: {
+        kind: 'boolean',
+        brief: 'Select an example project from the Moddable SDK',
+        optional: true,
+      },
+      overwrite: {
+        kind: 'boolean',
+        brief: 'Replace any existing directories with the same name as the generated project; defaults to false',
+        optional: true,
+      },
+      asyncMain: {
+        kind: 'boolean',
+        brief: 'Add top-level await configuration to generated project; defaults to false',
+        optional: true,
+      }
+    }
+  }
+})
 
 export default command

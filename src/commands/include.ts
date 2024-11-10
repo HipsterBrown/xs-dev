@@ -1,4 +1,3 @@
-import type { GluegunCommand } from 'gluegun'
 import { buildCommand } from '@stricli/core'
 import { LocalContext } from '../cli'
 import { collectChoicesFromTree } from '../toolbox/prompt/choices'
@@ -104,8 +103,11 @@ const command = buildCommand({
         brief: 'Target device or platform for the dependency',
         optional: true,
       }
+    },
+    aliases: {
+      d: 'device',
     }
-  }
+  },
 })
 
 export default command
