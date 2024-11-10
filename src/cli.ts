@@ -33,15 +33,7 @@ const commands = buildRouteMap({
     doctor,
     include,
     init,
-    remove: buildCommand({
-      func: remove.run,
-      docs: {
-        brief: remove.description ?? '',
-      },
-      parameters: {
-        flags: {}
-      },
-    }),
+    remove,
     run: buildCommand({
       func: run.run,
       docs: {

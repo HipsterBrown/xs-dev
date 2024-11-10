@@ -1,14 +1,20 @@
-import type { GluegunCommand } from 'gluegun'
+import { buildCommand } from '@stricli/core'
+import { LocalContext } from '../cli'
+import { DEVICE_ALIAS } from '../toolbox/prompt/devices'
+import { Device } from '../types'
 
 interface RemoveOptions {
-  device?: string
+  device?: Device
 }
 
-const command: GluegunCommand = {
-  name: 'remove',
-  description: 'Name or select Moddable module to remove from project manifest',
-  // eslint-disable-next-line @typescript-eslint/no-misused-promises
-  run: async ({ filesystem, patching, print, parameters }) => {
+const deviceSet = new Set(Object.values(DEVICE_ALIAS))
+
+const command = buildCommand({
+  docs: {
+    brief: 'Name or select Moddable module to remove from project manifest',
+  },
+  async func(this: LocalContext, flags: RemoveOptions, moduleName: string) {
+    const { filesystem, patching, print } = this
     const manifestPath = filesystem.resolve(process.cwd(), 'manifest.json')
     if (filesystem.exists(manifestPath) === false) {
       print.error(
@@ -16,10 +22,9 @@ const command: GluegunCommand = {
       )
       process.exit(1)
     }
-    const moduleName = parameters.first
     const {
       device = ""
-    }: RemoveOptions = parameters.options
+    } = flags
 
     if (moduleName === undefined) {
       print.error('Module name is required')
@@ -57,6 +62,27 @@ const command: GluegunCommand = {
     })
     print.success('Done!')
   },
-}
+  parameters: {
+    positional: {
+      kind: 'tuple',
+      parameters: [{
+        placeholder: 'moduleName',
+        brief: 'Name of the SDK module dependency to remove from project manifest',
+        parse: String,
+      }]
+    },
+    flags: {
+      device: {
+        kind: 'enum',
+        values: [...deviceSet] as NonNullable<Device[]>,
+        brief: 'Target device or platform for the dependency',
+        optional: true,
+      }
+    },
+    aliases: {
+      d: 'device',
+    }
+  }
+})
 
 export default command
