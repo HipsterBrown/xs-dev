@@ -11,12 +11,12 @@
   },
   "scripts": {
     "xs-dev": "tsx src/cli.ts",
+    "xs-dev:debug": "DEBUG=* tsx --trace-deprecation src/cli.ts",
     "format": "prettier --write **/*.{js,ts,json}",
     "lint": "eslint src/",
     "clean-build": "rm -rf ./build",
     "compile": "tsc -p .",
-    "copy-templates": "if [ -e ./src/templates ]; then cp -a ./src/templates ./build/; fi",
-    "build": "pnpm run format && pnpm run lint && pnpm run clean-build && pnpm run compile && pnpm run copy-templates",
+    "build": "pnpm run format && pnpm run lint && pnpm run clean-build && pnpm run compile",
     "prepublishOnly": "pnpm run build",
     "test": "jest",
     "watch": "jest --watch",
@@ -44,7 +44,7 @@
     "url": "https://github.com/HipsterBrown/xs-dev.git"
   },
   "dependencies": {
-    "@octokit/rest": "^19.0.3",
+    "@octokit/rest": "^20.1.1",
     "@stricli/core": "^1.1.0",
     "axios": "^1.2.1",
     "gluegun": "^5.1.2",
