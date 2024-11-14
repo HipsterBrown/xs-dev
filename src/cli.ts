@@ -12,8 +12,6 @@ import {
   prompt,
   packageManager,
 } from 'gluegun'
-// @ts-expect-error opaque import path, to be replaced by vendored solution
-import { buildGenerate } from 'gluegun/build/toolbox/template-tools'
 import {
   buildApplication,
   buildRouteMap,
@@ -47,7 +45,6 @@ export type LocalContext = CommandContext &
     | 'patching'
     | 'prompt'
     | 'packageManager'
-    | 'template'
   > & {
     currentVersion: string
   }
@@ -98,5 +95,4 @@ runApp(app, process.argv.slice(2), {
   prompt,
   packageManager,
   currentVersion: version,
-  template: { generate: buildGenerate({}) },
 }).catch(console.error)

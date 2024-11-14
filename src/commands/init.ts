@@ -19,7 +19,6 @@ const command = buildCommand({
   async func(this: LocalContext, flags: InitOptions, projectName: string) {
     const {
       filesystem,
-      template,
       print: { warning, info, success },
       prompt,
     } = this
@@ -60,14 +59,14 @@ const command = buildCommand({
           const filteredChoices = choices.filter((choice) =>
             choice.includes(String(example)),
           )
-          ;({ example: selectedExample } = await prompt.ask([
-            {
-              type: 'autocomplete',
-              name: 'example',
-              message: 'Here are the available examples templates:',
-              choices: filteredChoices.length > 0 ? filteredChoices : choices,
-            },
-          ]))
+            ; ({ example: selectedExample } = await prompt.ask([
+              {
+                type: 'autocomplete',
+                name: 'example',
+                message: 'Here are the available examples templates:',
+                choices: filteredChoices.length > 0 ? filteredChoices : choices,
+              },
+            ]))
         }
 
         // copy files into new project directory
@@ -90,9 +89,9 @@ const command = buildCommand({
         const includes = [
           io
             ? [
-                '"$(MODDABLE)/modules/io/manifest.json"',
-                '"$(MODDABLE)/examples/manifest_net.json"',
-              ]
+              '"$(MODDABLE)/modules/io/manifest.json"',
+              '"$(MODDABLE)/examples/manifest_net.json"',
+            ]
             : '"$(MODDABLE)/examples/manifest_base.json"',
           typescript && '"$(MODDABLE)/examples/manifest_typings.json"',
         ]
@@ -104,18 +103,18 @@ const command = buildCommand({
           ? ',\n  defines: {\n    async_main: 1\n  }'
           : ''
 
-        await template.generate({
-          template: 'manifest.json.ejs',
-          directory: filesystem.resolve(__dirname, '..', 'templates'),
-          target: `${projectName}/manifest.json`,
-          props: { includes, defines },
-        })
+        const { createManifest, createMain } = await import('../toolbox/init/templates')
 
-        await template.generate({
-          template: 'main.js.ejs',
-          directory: filesystem.resolve(__dirname, '..', 'templates'),
-          target: `${projectName}/main.${typescript ? 'ts' : 'js'}`,
-        })
+        await Promise.all([
+          createManifest({
+            target: `${projectName}/manifest.json`,
+            includes,
+            defines,
+          }),
+          createMain({
+            target: `${projectName}/main.${typescript ? 'ts' : 'js'}`,
+          })
+        ])
       }
 
       success(`Run the project using: cd ${projectName} && xs-dev run`)
