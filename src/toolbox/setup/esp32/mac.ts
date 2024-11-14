@@ -35,8 +35,11 @@ export async function installDeps(
 
     if (typeof maybePython3Path !== 'string') {
       try {
+        spinner.start('Installing python through Homebrew')
         await system.exec('brew install python', { shell: process.env.SHELL })
+        spinner.succeed()
       } catch (error: unknown) {
+        spinner.fail()
         if (error instanceof Error && error.message.includes('xcode-select')) {
           print.error(
             'Apple Command Line Tools must be installed in order to install python from Homebrew. Please run `xcode-select --install` before trying again.',
@@ -61,7 +64,7 @@ export async function installDeps(
 
   // 4. install pip, if needed
   if (system.which('pip3') === null) {
-    spinner.start('Installing pip3')
+    spinner.start('Ensuring pip is available')
     await system.exec('python3 -m ensurepip --user', {
       shell: process.env.SHELL,
     })
@@ -69,9 +72,16 @@ export async function installDeps(
   }
 
   // 5. pip install pyserial, if needed
-  spinner.start('Installing pyserial through pip3')
-  await system.exec('python3 -m pip install pyserial', {
-    shell: process.env.SHELL,
-  })
-  spinner.succeed()
+  try {
+    spinner.start('Installing pyserial through python3 -m pip')
+    await system.exec('python3 -m pip install --user pyserial', {
+      shell: process.env.SHELL,
+    })
+    spinner.succeed()
+  } catch (error: unknown) {
+    spinner.fail()
+    print.error(
+      'Unable to install pyserial through the availble Python environment. This may be required by the ESP-IDF. If you encounter issues, please try manually installing pyserial.',
+    )
+  }
 }
