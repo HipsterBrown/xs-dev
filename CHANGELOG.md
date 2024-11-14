@@ -1,3 +1,15 @@
+# v0.33.1 (Thu Nov 14 2024)
+
+#### 🚀 Enhancement
+
+- fix: update octokit/rest, check python install on mac, simplify init template generation [#185](https://github.com/HipsterBrown/xs-dev/pull/185) ([@HipsterBrown](https://github.com/HipsterBrown))
+
+#### Authors: 1
+
+- Nick Hehr ([@HipsterBrown](https://github.com/HipsterBrown))
+
+---
+
 # v0.33.0 (Sun Nov 10 2024)
 
 #### 💥 Breaking Change
