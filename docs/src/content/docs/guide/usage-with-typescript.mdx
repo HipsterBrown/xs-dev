@@ -1,0 +1,100 @@
+---
+title: Usage with TypeScript
+description: Initialize a new project with TypeScript and start to interact with some hardware!
+---
+
+import { Aside } from '@astrojs/starlight/components'
+
+Using [TypeScript](https://www.typescriptlang.org/) is a industry standard in 2024. It provides a lot of benefits over JavaScript, such as static type checking, better code completion, and improved code readability. This guide will show you how to use TypeScript with the Moddable SDK.
+
+# Prerequisites
+
+There are various ways to start a new project with TypeScript. But first let's detail what is needed for the Moddable SDK.
+
+A moddable project should ideally lives within a single file. This is because the Moddable SDK does not support the `import` and `export` keywords. This means that you will need to use a bundler to compile your TypeScript code into a single file. Or you could relies on `mcpack` and the dependencies management system from Moddable but this get a bit complicated.
+
+Using a bundler is very popular in the JavaScript community especially in the web development where you want to reduce the number of network request and optimize the JS bundle server. There are many tools available to help you with this task. Tools like Webpack, Rollup, and EsBuild are popular choices for bundling JavaScript code.
+
+## Let's get started
+
+For the purpose of this guide, as bundler we will use [Bun](https://bun.sh/), which is a JavaScript Environment, but also a bundler/transpiler. It is a very simple tool that allows you to write your code in TypeScript and bundle it into a single file. If you use [mise-en-place](https://mise.jdx.dev/getting-started.html), you can install it with the following command:
+
+```bash
+mise install bun
+```
+
+Otherwise follow the instructions on the [Bun website](https://bun.sh/).
+
+Now we will use a starter template that has setup everything for us upfront.
+
+```bash
+git clone git@github.com:ScreamZ/xs-dev-Typescript-template.git
+```
+
+The documentation of this template is self-explanatory, but we will go through it in this guide for the details.
+
+## Specializing the starter template for your project
+
+The first thing you need to do is to update the `package.json` file with your project details. You can do this by running the following command:
+
+1. Update `name` property with your project name.
+2. Update `author` property with your name.
+3. Remove existing git repository and add your own.
+
+```bash
+rm -rf .git
+git init
+```
+
+4. Follow the remaining instruction on the github [https://github.com/ScreamZ/xs-dev-Typescript-template](https://github.com/ScreamZ/xs-dev-Typescript-template)
+
+## How does it work?
+
+The template is a simple project that uses Bun to bundle the TypeScript code into a single file. The TypeScript code is located in the `src` folder, and the bundled code is located in the `dist` folder.
+
+The starter exposes a `pnpm dev` command that watch for changes in the `src` folder and automatically recompile the code. This is very useful when you are developing your project. You should keep this command running in a terminal window while you are working on your project.
+
+When you need to try the code, simply run `xs-dev run` in the terminal. This will upload the bundled code from `dist/main.js` to the device and run it. The rest remain the same as the standard xs-dev workflow.
+
+Take note that whenever you import some code from the Moddable SDK, you will need to add the following line in the `tsconfig.json` file:
+
+```json
+"types": [
+     // ... Previous lines
+      "./node_modules/@moddable/typings/<path-to-the-file>"
+    ]
+```
+
+Those typings are provided by `@moddable/typings` package, and while at the moment this get a bit cumbersome but it's up to you to find the correct definition file for the module you are using.
+
+As an example Timer and WiFi lives in
+
+````
+      "./node_modules/@moddable/typings/wifi",
+      "./node_modules/@moddable/typings/timer",
+      ```
+````
+
+The team is actively working on improving the development workflow.
+
+<Aside>
+  As modules from ModdableSDK are not available inside node_modules and injected
+  on build, the bundler do not bundle them thanks to the `--packages external`
+  argument.
+</Aside>
+
+# Deploying to production
+
+When you are ready to deploy your project to production, you can run the following command:
+
+```bash
+pnpm run build:release
+```
+
+This will bundle the TypeScript code into a single file and minify it. The bundled code will be located in the `dist` folder. You can then upload this code to your device following the [standard xs-dev workflow](/features/run#building-projects-for-release).
+
+As an example to build for an ESP32 device:
+
+```bash
+xs-dev build --device esp32
+```
