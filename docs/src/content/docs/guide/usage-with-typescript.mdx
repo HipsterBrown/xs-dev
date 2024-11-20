@@ -9,15 +9,18 @@ Using [TypeScript](https://www.typescriptlang.org/) is a industry standard in 20
 
 # Prerequisites
 
-There are various ways to start a new project with TypeScript. But first let's detail what is needed for the Moddable SDK.
+There are various ways to start a new project with TypeScript. There are also many way to do it using the Moddable SDK. The following guide is opinionated and will use a specific setup. You can adapt it to your needs. But this looks like a good starting point close to the web development environment.
 
-A moddable project should ideally lives within a single file. This is because the Moddable SDK does not support the `import` and `export` keywords. This means that you will need to use a bundler to compile your TypeScript code into a single file. Or you could relies on `mcpack` and the dependencies management system from Moddable but this get a bit complicated.
-
-Using a bundler is very popular in the JavaScript community, especially in the web development where you want to reduce the number of network request and optimize the JS bundle from the server. There are many tools available to help you with this task. Tools like Webpack, Rollup, and esbuild are popular choices for bundling JavaScript code.
+In the following statement of this guide we will use [pnpm](https://pnpm.io/installation) as our package manager. You can use any other while this is recommended. Adapt your commands accordingly if so.
 
 ## Let's get started
 
-For the purpose of this guide, as bundler we will use [Bun](https://bun.sh/), which is a JavaScript Environment, but also a bundler/transpiler. It is a very simple tool that allows you to write your code in TypeScript and bundle it into a single file. If you use [mise-en-place](https://mise.jdx.dev/getting-started.html), you can install it with the following command:
+This starter project aim to build a single JS file that will be passed to XS. This helps developers coming from the web to have a more familiar environment and also to have a better development experience.
+
+For this purpose, we will use a bundler tool which is very popular in the JavaScript community, especially in the web development where you want to reduce the number of network request and optimize the JS bundle from the server. There are many tools available to help you with this task. Tools like Webpack, Rollup, and esbuild are popular choices for bundling JavaScript code.
+For this guide, as the bundler we will use [Bun](https://bun.sh/), which is a JavaScript Environment, but also a bundler/transpiler. It is a very simple tool that allows you to write your code in TypeScript and bundle it into a single file. If you use [mise-en-place](https://mise.jdx.dev/getting-started.html), you can install it with the following command:
+
+Along with Bun, we will add Typescript as a dev dependency because bundler for performances reasons do not lint the code. Therefore we will use `tsc` for that.
 
 ```bash
 mise install bun
@@ -25,13 +28,17 @@ mise install bun
 
 Otherwise follow the instructions on the [Bun website](https://bun.sh/).
 
-Now we will use a starter template that has setup everything for us upfront.
+Now we will use a [starter template](https://github.com/ScreamZ/xs-dev-Typescript-template) that has setup everything for us upfront.
 
 ```bash
  bunx tiged ScreamZ/xs-dev-TypeScript-template ts-xs-project
 ```
 
-The documentation of this template is self-explanatory, but we will go through it in this guide for the details.
+<Aside>
+  The `bunx` command is a wrapper around `git clone` that will clone the
+  repository and remove the `.git` folder. This is useful when you want to start
+  a new project from a template.
+</Aside>
 
 ## Specializing the starter template for your project
 
@@ -39,14 +46,7 @@ The first thing you need to do is to update the `package.json` file with your pr
 
 1. Update `name` property with your project name.
 2. Update `author` property with your name.
-3. Remove existing git repository and add your own.
-
-```bash
-rm -rf .git
-git init
-```
-
-4. Follow the remaining instruction on the github [https://github.com/ScreamZ/xs-dev-Typescript-template](https://github.com/ScreamZ/xs-dev-Typescript-template)
+3. Follow the remaining instruction on the GitHub [https://github.com/ScreamZ/xs-dev-Typescript-template](https://github.com/ScreamZ/xs-dev-Typescript-template)
 
 ## How does it work?
 
@@ -65,7 +65,7 @@ Take note that whenever you import some code from the Moddable SDK, you will nee
     ]
 ```
 
-Those typings are provided by `@moddable/typings` package, and while at the moment this get a bit cumbersome but it's up to you to find the correct definition file for the module you are using.
+Those typings are provided by [`@moddable/typings` package](https://github.com/Moddable-OpenSource/moddable/tree/4142d4d353960ea7ede15d56864d841de692a68d/typings), and while at the moment this get a bit cumbersome but it's up to you to find the correct definition file for the module you are using.
 
 As an example Timer and WiFi lives in
 
@@ -78,9 +78,9 @@ As an example Timer and WiFi lives in
 The team is actively working on improving the development workflow.
 
 <Aside>
-  As modules from ModdableSDK are not available inside node_modules and injected
-  on build, the bundler do not bundle them thanks to the `--packages external`
-  argument.
+  As modules from the Moddable SDK are not available inside node_modules and
+  injected on build, the bundler do not bundle them thanks to the `--packages
+  external` argument.
 </Aside>
 
 # Deploying to production
