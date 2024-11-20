@@ -97,6 +97,9 @@ importers:
       '@typescript-eslint/parser':
         specifier: ^8.1.0
         version: 8.1.0(eslint@8.57.0)(typescript@5.5.4)
+      all-contributors-cli:
+        specifier: ^6.26.1
+        version: 6.26.1
       astro:
         specifier: 4.13.3
         version: 4.13.3(@types/node@18.11.19)(typescript@5.5.4)
@@ -1764,6 +1767,11 @@ packages:
 
   all-contributors-cli@6.19.0:
     resolution: {integrity: sha512-QJN4iLeTeYpTZJES8XFTzQ+itA1qSyBbxLapJLtwrnY+kipyRhCX49fS/s/qftQQym9XLATMZUpUeEeJSox1sw==}
+    engines: {node: '>=4'}
+    hasBin: true
+
+  all-contributors-cli@6.26.1:
+    resolution: {integrity: sha512-Ymgo3FJACRBEd1eE653FD1J/+uD0kqpUNYfr9zNC1Qby0LgbhDBzB3EF6uvkAbYpycStkk41J+0oo37Lc02yEw==}
     engines: {node: '>=4'}
     hasBin: true
 
@@ -4612,6 +4620,11 @@ packages:
   prettier@1.19.1:
     resolution: {integrity: sha512-s7PoyDv/II1ObgQunCbB9PdLmUcBZcnWOcxDh7O0N/UwDEsHyqkW+Qh28jW+mVuCdx7gLB0BotYI1Y6uI9iyew==}
     engines: {node: '>=4'}
+    hasBin: true
+
+  prettier@2.8.8:
+    resolution: {integrity: sha512-tdN8qQGvNjw4CHbY+XXk0JgCXn9QiF21a55rBe5LJAU+kDyC4WQn4+awm2Xfk2lQMk5fKup9XgzTZtGkjBdP9Q==}
+    engines: {node: '>=10.13.0'}
     hasBin: true
 
   prettier@3.3.3:
@@ -7873,6 +7886,23 @@ snapshots:
       node-fetch: 2.6.11
       pify: 5.0.0
       yargs: 15.4.1
+    transitivePeerDependencies:
+      - encoding
+
+  all-contributors-cli@6.26.1:
+    dependencies:
+      '@babel/runtime': 7.25.6
+      async: 3.2.4
+      chalk: 4.1.2
+      didyoumean: 1.2.2
+      inquirer: 7.3.3
+      json-fixer: 1.6.15
+      lodash: 4.17.21
+      node-fetch: 2.6.11
+      pify: 5.0.0
+      yargs: 15.4.1
+    optionalDependencies:
+      prettier: 2.8.8
     transitivePeerDependencies:
       - encoding
 
@@ -11598,6 +11628,9 @@ snapshots:
       fast-diff: 1.3.0
 
   prettier@1.19.1: {}
+
+  prettier@2.8.8:
+    optional: true
 
   prettier@3.3.3: {}
 

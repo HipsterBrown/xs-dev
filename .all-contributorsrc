@@ -20,6 +20,96 @@
         "infra",
         "code"
       ]
+    },
+    {
+      "login": "andycarle",
+      "name": "Andy Carle",
+      "avatar_url": "https://avatars.githubusercontent.com/u/1427817?v=4",
+      "profile": "https://moddable.com/",
+      "contributions": [
+        "code"
+      ]
+    },
+    {
+      "login": "phoddie",
+      "name": "Peter Hoddie",
+      "avatar_url": "https://avatars.githubusercontent.com/u/6856458?v=4",
+      "profile": "https://moddable.com/",
+      "contributions": [
+        "code"
+      ]
+    },
+    {
+      "login": "stc1988",
+      "name": "Satoshi Tanaka",
+      "avatar_url": "https://avatars.githubusercontent.com/u/11245747?v=4",
+      "profile": "https://github.com/stc1988",
+      "contributions": [
+        "code"
+      ]
+    },
+    {
+      "login": "ScreamZ",
+      "name": "Andréas Hanss",
+      "avatar_url": "https://avatars.githubusercontent.com/u/6640835?v=4",
+      "profile": "https://linktr.ee/scr34mz",
+      "contributions": [
+        "doc"
+      ]
+    },
+    {
+      "login": "intGus",
+      "name": "Gustavo",
+      "avatar_url": "https://avatars.githubusercontent.com/u/46197948?v=4",
+      "profile": "https://github.com/intGus",
+      "contributions": [
+        "code"
+      ]
+    },
+    {
+      "login": "gibson042",
+      "name": "Richard Gibson",
+      "avatar_url": "https://avatars.githubusercontent.com/u/1199584?v=4",
+      "profile": "https://github.com/gibson042",
+      "contributions": [
+        "doc"
+      ]
+    },
+    {
+      "login": "jaykesarkar",
+      "name": "Jay Kesarkar",
+      "avatar_url": "https://avatars.githubusercontent.com/u/115918351?v=4",
+      "profile": "https://dev-portfolio-jay.netlify.app/",
+      "contributions": [
+        "code"
+      ]
+    },
+    {
+      "login": "pricklywiggles",
+      "name": "Gustavo Gallegos",
+      "avatar_url": "https://avatars.githubusercontent.com/u/51838513?v=4",
+      "profile": "https://gustavo.is",
+      "contributions": [
+        "doc"
+      ]
+    },
+    {
+      "login": "dtex",
+      "name": "Donovan Buck",
+      "avatar_url": "https://avatars.githubusercontent.com/u/854911?v=4",
+      "profile": "http://dtex.github.com",
+      "contributions": [
+        "code"
+      ]
+    },
+    {
+      "login": "mkellner",
+      "name": "Michael Kellner",
+      "avatar_url": "https://avatars.githubusercontent.com/u/6822704?v=4",
+      "profile": "https://github.com/mkellner",
+      "contributions": [
+        "code"
+      ]
     }
   ],
   "contributorsPerLine": 7

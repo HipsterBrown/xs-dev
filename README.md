@@ -130,9 +130,23 @@ Thanks goes to these wonderful people ([emoji key](https://allcontributors.org/d
 <!-- prettier-ignore-start -->
 <!-- markdownlint-disable -->
 <table>
-  <tr>
-    <td align="center"><a href="https://hipsterbrown.com/"><img src="https://avatars.githubusercontent.com/u/3051193?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Nick Hehr</b></sub></a><br /><a href="https://github.com/HipsterBrown/xs-dev/commits?author=HipsterBrown" title="Documentation">📖</a> <a href="#infra-HipsterBrown" title="Infrastructure (Hosting, Build-Tools, etc)">🚇</a> <a href="https://github.com/HipsterBrown/xs-dev/commits?author=HipsterBrown" title="Code">💻</a></td>
-  </tr>
+  <tbody>
+    <tr>
+      <td align="center" valign="top" width="14.28%"><a href="https://hipsterbrown.com/"><img src="https://avatars.githubusercontent.com/u/3051193?v=4?s=100" width="100px;" alt="Nick Hehr"/><br /><sub><b>Nick Hehr</b></sub></a><br /><a href="https://github.com/HipsterBrown/xs-dev/commits?author=HipsterBrown" title="Documentation">📖</a> <a href="#infra-HipsterBrown" title="Infrastructure (Hosting, Build-Tools, etc)">🚇</a> <a href="https://github.com/HipsterBrown/xs-dev/commits?author=HipsterBrown" title="Code">💻</a></td>
+      <td align="center" valign="top" width="14.28%"><a href="https://moddable.com/"><img src="https://avatars.githubusercontent.com/u/1427817?v=4?s=100" width="100px;" alt="Andy Carle"/><br /><sub><b>Andy Carle</b></sub></a><br /><a href="https://github.com/HipsterBrown/xs-dev/commits?author=andycarle" title="Code">💻</a></td>
+      <td align="center" valign="top" width="14.28%"><a href="https://moddable.com/"><img src="https://avatars.githubusercontent.com/u/6856458?v=4?s=100" width="100px;" alt="Peter Hoddie"/><br /><sub><b>Peter Hoddie</b></sub></a><br /><a href="https://github.com/HipsterBrown/xs-dev/commits?author=phoddie" title="Code">💻</a></td>
+      <td align="center" valign="top" width="14.28%"><a href="https://github.com/stc1988"><img src="https://avatars.githubusercontent.com/u/11245747?v=4?s=100" width="100px;" alt="Satoshi Tanaka"/><br /><sub><b>Satoshi Tanaka</b></sub></a><br /><a href="https://github.com/HipsterBrown/xs-dev/commits?author=stc1988" title="Code">💻</a></td>
+      <td align="center" valign="top" width="14.28%"><a href="https://linktr.ee/scr34mz"><img src="https://avatars.githubusercontent.com/u/6640835?v=4?s=100" width="100px;" alt="Andréas Hanss"/><br /><sub><b>Andréas Hanss</b></sub></a><br /><a href="https://github.com/HipsterBrown/xs-dev/commits?author=ScreamZ" title="Documentation">📖</a></td>
+      <td align="center" valign="top" width="14.28%"><a href="https://github.com/intGus"><img src="https://avatars.githubusercontent.com/u/46197948?v=4?s=100" width="100px;" alt="Gustavo"/><br /><sub><b>Gustavo</b></sub></a><br /><a href="https://github.com/HipsterBrown/xs-dev/commits?author=intGus" title="Code">💻</a></td>
+      <td align="center" valign="top" width="14.28%"><a href="https://github.com/gibson042"><img src="https://avatars.githubusercontent.com/u/1199584?v=4?s=100" width="100px;" alt="Richard Gibson"/><br /><sub><b>Richard Gibson</b></sub></a><br /><a href="https://github.com/HipsterBrown/xs-dev/commits?author=gibson042" title="Documentation">📖</a></td>
+    </tr>
+    <tr>
+      <td align="center" valign="top" width="14.28%"><a href="https://dev-portfolio-jay.netlify.app/"><img src="https://avatars.githubusercontent.com/u/115918351?v=4?s=100" width="100px;" alt="Jay Kesarkar"/><br /><sub><b>Jay Kesarkar</b></sub></a><br /><a href="https://github.com/HipsterBrown/xs-dev/commits?author=jaykesarkar" title="Code">💻</a></td>
+      <td align="center" valign="top" width="14.28%"><a href="https://gustavo.is"><img src="https://avatars.githubusercontent.com/u/51838513?v=4?s=100" width="100px;" alt="Gustavo Gallegos"/><br /><sub><b>Gustavo Gallegos</b></sub></a><br /><a href="https://github.com/HipsterBrown/xs-dev/commits?author=pricklywiggles" title="Documentation">📖</a></td>
+      <td align="center" valign="top" width="14.28%"><a href="http://dtex.github.com"><img src="https://avatars.githubusercontent.com/u/854911?v=4?s=100" width="100px;" alt="Donovan Buck"/><br /><sub><b>Donovan Buck</b></sub></a><br /><a href="https://github.com/HipsterBrown/xs-dev/commits?author=dtex" title="Code">💻</a></td>
+      <td align="center" valign="top" width="14.28%"><a href="https://github.com/mkellner"><img src="https://avatars.githubusercontent.com/u/6822704?v=4?s=100" width="100px;" alt="Michael Kellner"/><br /><sub><b>Michael Kellner</b></sub></a><br /><a href="https://github.com/HipsterBrown/xs-dev/commits?author=mkellner" title="Code">💻</a></td>
+    </tr>
+  </tbody>
 </table>
 
 <!-- markdownlint-restore -->
