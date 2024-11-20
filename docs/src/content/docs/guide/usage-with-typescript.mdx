@@ -20,8 +20,6 @@ This starter project aim to build a single JS file that will be passed to XS. Th
 For this purpose, we will use a bundler tool which is very popular in the JavaScript community, especially in the web development where you want to reduce the number of network request and optimize the JS bundle from the server. There are many tools available to help you with this task. Tools like Webpack, Rollup, and esbuild are popular choices for bundling JavaScript code.
 For this guide, as the bundler we will use [Bun](https://bun.sh/), which is a JavaScript Environment, but also a bundler/transpiler. It is a very simple tool that allows you to write your code in TypeScript and bundle it into a single file. If you use [mise-en-place](https://mise.jdx.dev/getting-started.html), you can install it with the following command:
 
-Along with Bun, we will add Typescript as a dev dependency because bundler for performances reasons do not lint the code. Therefore we will use `tsc` for that.
-
 ```bash
 mise install bun
 ```
@@ -35,14 +33,15 @@ Now we will use a [starter template](https://github.com/ScreamZ/xs-dev-Typescrip
 ```
 
 <Aside>
-  The `bunx` command is a wrapper around `git clone` that will clone the
-  repository and remove the `.git` folder. This is useful when you want to start
-  a new project from a template.
+  `tiged` is the CLI that wraps around git clone, while `bunx` allows for
+  running package commands without globally installing said package (similar to
+  npx, pnpx, and yarn dlx). This is useful when you want to start a new project
+  from a template.
 </Aside>
 
 ## Specializing the starter template for your project
 
-The first thing you need to do is to update the `package.json` file with your project details. You can do this by running the following command:
+The first thing you need to do is to update the `package.json` file with your project details. You can do this by following those instructions:
 
 1. Update `name` property with your project name.
 2. Update `author` property with your name.
