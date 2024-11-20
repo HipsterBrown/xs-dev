@@ -67,13 +67,7 @@ Take note that whenever you import some code from the Moddable SDK, you will nee
 
 Those typings are provided by [`@moddable/typings` package](https://github.com/Moddable-OpenSource/moddable/tree/4142d4d353960ea7ede15d56864d841de692a68d/typings), and while at the moment this get a bit cumbersome but it's up to you to find the correct definition file for the module you are using.
 
-As an example Timer and WiFi lives in
-
-````
-      "./node_modules/@moddable/typings/wifi",
-      "./node_modules/@moddable/typings/timer",
-      ```
-````
+As an example Timer and WiFi lives in `./node_modules/@moddable/typings/wifi` and `./node_modules/@moddable/typings/timer`
 
 The team is actively working on improving the development workflow.
 
@@ -91,7 +85,7 @@ When you are ready to deploy your project to production, you can run the followi
 pnpm run build:release
 ```
 
-This will bundle the TypeScript code into a single file and minify it. The bundled code will be located in the `dist` folder. You can then upload this code to your device following the [standard xs-dev workflow](/features/run#building-projects-for-release).
+This will bundle the TypeScript code into a single file and minify it (compress into a single line of code and compress variables names). The bundled code will be located in the `dist` folder. You can then upload this code to your device following the [standard xs-dev workflow](/features/run#building-projects-for-release).
 
 As an example to build for an ESP32 device:
 
