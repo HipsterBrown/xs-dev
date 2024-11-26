@@ -27,7 +27,7 @@ export async function execWithSudo(
     )
     return
   } catch (error) {
-    if (error.toString().includes('password') === false) {
+    if (error.toString().includes('password') === true) {
       ensureAskPass()
     } else {
       throw error as Error
