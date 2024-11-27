@@ -1,14 +1,18 @@
 import { writeFile } from 'node:fs/promises'
 
 export interface TemplateBuilderOptions {
-  target: string;
+  target: string
 }
 
 export interface CreateManifestOptions extends TemplateBuilderOptions {
-  includes: string;
-  defines: string;
+  includes: string
+  defines: string
 }
-export async function createManifest({ target, includes, defines }: CreateManifestOptions): Promise<void> {
+export async function createManifest({
+  target,
+  includes,
+  defines,
+}: CreateManifestOptions): Promise<void> {
   const template = `\
 {
   "include": [
@@ -22,7 +26,9 @@ export async function createManifest({ target, includes, defines }: CreateManife
   await writeFile(target, template, { encoding: 'utf8' })
 }
 
-export async function createMain({ target }: TemplateBuilderOptions): Promise<void> {
+export async function createMain({
+  target,
+}: TemplateBuilderOptions): Promise<void> {
   const template = `\
 debugger;
 
