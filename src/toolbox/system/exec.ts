@@ -5,7 +5,7 @@ import type { Device } from '../../types'
 
 function ensureAskPass(): void {
   const SUDO_ASKPASS = system.which('ssh-askpass')
-  if (SUDO_ASKPASS === null) {
+  if (SUDO_ASKPASS === null || SUDO_ASKPASS === undefined) {
     print.warning('ssh-askpass required to prompt for password')
     process.exit(1)
   }
