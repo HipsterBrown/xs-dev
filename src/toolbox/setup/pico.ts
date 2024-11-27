@@ -131,6 +131,19 @@ export default async function (): Promise<void> {
     )
   }
 
+  if (process.env.PICO_EXAMPLES_DIR === undefined) {
+    spinner.info('Setting PICO_EXAMPLES_DIR')
+    process.env.PICO_EXAMPLES_DIR = PICO_EXAMPLES_PATH
+    await upsert(
+      EXPORTS_FILE_PATH,
+      `export PICO_EXAMPLES_DIR=${PICO_EXAMPLES_PATH}`,
+    )
+  } else {
+    spinner.info(
+      `Using existing $PICO_EXAMPLES_DIR: ${process.env.PICO_EXAMPLES_DIR}`,
+    )
+  }
+
   // 4. Build some pico tools:
   if (
     filesystem.exists(PICO_SDK_BUILD_DIR) === false ||
