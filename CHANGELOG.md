@@ -1,3 +1,19 @@
+# v0.33.4 (Wed Nov 27 2024)
+
+:tada: This release contains work from a new contributor! :tada:
+
+Thank you, Dane Henson ([@dahenson](https://github.com/dahenson)), for all your work!
+
+#### 🚀 Enhancement
+
+- Fix some issues with the Linux setup script [#190](https://github.com/HipsterBrown/xs-dev/pull/190) ([@dahenson](https://github.com/dahenson))
+
+#### Authors: 1
+
+- Dane Henson ([@dahenson](https://github.com/dahenson))
+
+---
+
 # v0.33.3 (Wed Nov 27 2024)
 
 #### 🚀 Enhancement
