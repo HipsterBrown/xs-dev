@@ -1,3 +1,25 @@
+# v0.33.2 (Wed Nov 27 2024)
+
+:tada: This release contains work from a new contributor! :tada:
+
+Thank you, Andréas Hanss ([@ScreamZ](https://github.com/ScreamZ)), for all your work!
+
+#### 🚀 Enhancement
+
+- fix(setup/pico): pin picotool repo branch, add pioasm build step [#191](https://github.com/HipsterBrown/xs-dev/pull/191) ([@HipsterBrown](https://github.com/HipsterBrown))
+- Add TypeScript usage example [#187](https://github.com/HipsterBrown/xs-dev/pull/187) ([@ScreamZ](https://github.com/ScreamZ))
+
+#### ⚠️ Pushed to `main`
+
+- chore: add new, previous contributors to README ([@HipsterBrown](https://github.com/HipsterBrown))
+
+#### Authors: 2
+
+- Andréas Hanss ([@ScreamZ](https://github.com/ScreamZ))
+- Nick Hehr ([@HipsterBrown](https://github.com/HipsterBrown))
+
+---
+
 # v0.33.1 (Thu Nov 14 2024)
 
 #### 🚀 Enhancement
