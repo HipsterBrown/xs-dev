@@ -59,14 +59,14 @@ const command = buildCommand({
           const filteredChoices = choices.filter((choice) =>
             choice.includes(String(example)),
           )
-            ; ({ example: selectedExample } = await prompt.ask([
-              {
-                type: 'autocomplete',
-                name: 'example',
-                message: 'Here are the available examples templates:',
-                choices: filteredChoices.length > 0 ? filteredChoices : choices,
-              },
-            ]))
+          ;({ example: selectedExample } = await prompt.ask([
+            {
+              type: 'autocomplete',
+              name: 'example',
+              message: 'Here are the available examples templates:',
+              choices: filteredChoices.length > 0 ? filteredChoices : choices,
+            },
+          ]))
         }
 
         // copy files into new project directory
@@ -89,9 +89,9 @@ const command = buildCommand({
         const includes = [
           io
             ? [
-              '"$(MODDABLE)/modules/io/manifest.json"',
-              '"$(MODDABLE)/examples/manifest_net.json"',
-            ]
+                '"$(MODDABLE)/modules/io/manifest.json"',
+                '"$(MODDABLE)/examples/manifest_net.json"',
+              ]
             : '"$(MODDABLE)/examples/manifest_base.json"',
           typescript && '"$(MODDABLE)/examples/manifest_typings.json"',
         ]
@@ -103,7 +103,9 @@ const command = buildCommand({
           ? ',\n  defines: {\n    async_main: 1\n  }'
           : ''
 
-        const { createManifest, createMain } = await import('../toolbox/init/templates')
+        const { createManifest, createMain } = await import(
+          '../toolbox/init/templates'
+        )
 
         await Promise.all([
           createManifest({
@@ -113,7 +115,7 @@ const command = buildCommand({
           }),
           createMain({
             target: `${projectName}/main.${typescript ? 'ts' : 'js'}`,
-          })
+          }),
         ])
       }
 
