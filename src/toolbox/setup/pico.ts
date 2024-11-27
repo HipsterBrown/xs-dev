@@ -22,14 +22,16 @@ export default async function (): Promise<void> {
   const PICOTOOL_PATH = filesystem.resolve(PICO_ROOT, 'picotool')
   const PICOTOOL_BUILD_DIR = filesystem.resolve(PICOTOOL_PATH, 'build')
   const PICO_SDK_BUILD_DIR = filesystem.resolve(PICO_SDK_DIR, 'build')
-  const PIOASM_PATH = filesystem.resolve(PICO_SDK_BUILD_DIR, 'pioasm', 'pioasm')
+  const PIOASM_TOOL_PATH = filesystem.resolve(PICO_SDK_DIR, 'tools', 'pioasm')
+  const PIOASM_BUILD_PATH = filesystem.resolve(PICO_SDK_BUILD_DIR, 'pioasm')
+  const PIOASM_PATH = filesystem.resolve(PIOASM_BUILD_PATH, 'pioasm')
 
   await sourceEnvironment()
 
   const spinner = print.spin()
   spinner.start('Starting pico tooling setup')
 
-  // 0. ensure pico instal directory and Moddable exists
+  // 0. ensure pico install directory and Moddable exists
   if (!moddableExists()) {
     spinner.fail(
       'Moddable platform tooling required. Run `xs-dev setup` before trying again.',
@@ -102,7 +104,7 @@ export default async function (): Promise<void> {
   if (filesystem.exists(PICOTOOL_PATH) === false) {
     spinner.start('Cloning picotool repo')
     await system.exec(
-      `git clone --depth 1 --single-branch -b master ${PICOTOOL_REPO} ${PICOTOOL_PATH}`,
+      `git clone --depth 1 --single-branch -b ${PICO_BRANCH} ${PICOTOOL_REPO} ${PICOTOOL_PATH}`,
       {
         stdout: process.stdout,
       },
@@ -146,6 +148,20 @@ export default async function (): Promise<void> {
       stdout: process.stdout,
       cwd: PICO_SDK_BUILD_DIR,
     })
+
+    // Build pioasm
+    filesystem.dir(PIOASM_BUILD_PATH)
+    await system.exec(`cmake ${PIOASM_TOOL_PATH}`, {
+      shell: process.env.SHELL,
+      stdout: process.stdout,
+      cwd: PIOASM_BUILD_PATH,
+    })
+    await system.exec('make', {
+      shell: process.env.SHELL,
+      stdout: process.stdout,
+      cwd: PIOASM_BUILD_PATH,
+    })
+
     spinner.succeed()
   }
 
