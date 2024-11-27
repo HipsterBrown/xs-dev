@@ -1,3 +1,15 @@
+# v0.33.3 (Wed Nov 27 2024)
+
+#### 🚀 Enhancement
+
+- fix(setup/pico): set PICO_EXAMPLES_DIR env var in exports file [#192](https://github.com/HipsterBrown/xs-dev/pull/192) ([@HipsterBrown](https://github.com/HipsterBrown))
+
+#### Authors: 1
+
+- Nick Hehr ([@HipsterBrown](https://github.com/HipsterBrown))
+
+---
+
 # v0.33.2 (Wed Nov 27 2024)
 
 :tada: This release contains work from a new contributor! :tada:
