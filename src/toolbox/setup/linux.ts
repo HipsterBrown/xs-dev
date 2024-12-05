@@ -50,6 +50,8 @@ export default async function ({
   const spinner = print.spin()
   spinner.start('Beginning setup...')
 
+  filesystem.dir(INSTALL_DIR)
+
   // 0. check for the required build tools and libraries
   const dependencies: Array<Dependency> = [
     { name: 'bison', packageName: 'bison', type: 'binary' },
