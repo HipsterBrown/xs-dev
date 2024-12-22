@@ -7,7 +7,7 @@ interface InitOptions {
   typescript?: boolean
   io?: boolean
   example?: string
-  listExamples?: boolean
+  'list-examples'?: boolean
   overwrite?: boolean
   asyncMain?: boolean
 }
@@ -27,7 +27,7 @@ const command = buildCommand({
       typescript = false,
       io = false,
       example,
-      listExamples = false,
+      'list-examples': listExamples = false,
       overwrite = false,
       asyncMain = false,
     } = flags
@@ -157,7 +157,7 @@ const command = buildCommand({
         parse: String,
         optional: true,
       },
-      listExamples: {
+      'list-examples': {
         kind: 'boolean',
         brief: 'Select an example project from the Moddable SDK',
         optional: true,

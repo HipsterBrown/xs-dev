@@ -6,7 +6,7 @@ import { DEVICE_ALIAS } from '../toolbox/prompt/devices'
 
 interface UpdateOptions {
   device?: Device
-  targetBranch?: 'public' | 'latest-release'
+  'target-branch'?: 'public' | 'latest-release'
 }
 
 const command = buildCommand({
@@ -17,7 +17,7 @@ const command = buildCommand({
     const currentPlatform: Device = platformType().toLowerCase() as Device
     const {
       device = DEVICE_ALIAS[currentPlatform],
-      targetBranch = 'latest-release',
+      'target-branch': targetBranch = 'latest-release',
     } = flags
     const { default: update } = await import(`../toolbox/update/${device}`)
     await update({ targetBranch })
@@ -31,7 +31,7 @@ const command = buildCommand({
           'Target device or platform SDK to set up; defaults to Moddable SDK for current OS',
         optional: true,
       },
-      targetBranch: {
+      'target-branch': {
         kind: 'enum',
         values: ['public', 'latest-release'],
         brief:

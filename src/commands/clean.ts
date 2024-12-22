@@ -7,10 +7,10 @@ import { DEVICE_ALIAS } from '../toolbox/prompt/devices'
 type Mode = 'development' | 'production'
 
 interface CleanOptions {
-  device?: Device
+  device?: string
   example?: string
-  listExamples?: boolean
-  listDevices?: boolean
+  'list-examples'?: boolean
+  'list-devices'?: boolean
   mode?: Mode
   output?: string
   config?: string[]
@@ -32,13 +32,13 @@ const command = buildCommand({
     const {
       device = currentPlatform,
       example,
-      listExamples = false,
-      listDevices = false,
+      'list-examples': listExamples = false,
+      'list-devices': listDevices = false,
       mode = (process.env.NODE_ENV as Mode) ?? 'development',
       output,
       config = [],
     } = flags
-    const targetPlatform: string = DEVICE_ALIAS[device] ?? device
+    const targetPlatform: string = DEVICE_ALIAS[device as Device] ?? device
     projectPath = filesystem.resolve(projectPath)
     const parsedConfig = config.reduce<Record<string, string>>(
       (result, setting) => {
@@ -76,8 +76,8 @@ const command = buildCommand({
     },
     flags: {
       device: {
-        kind: 'enum',
-        values: Object.keys(DEVICE_ALIAS) as NonNullable<Device[]>,
+        kind: 'parsed',
+        parse: String,
         brief:
           'Target device or platform for the project, use --list-devices to select from interactive list; defaults to current OS simulator',
         optional: true,
@@ -89,12 +89,12 @@ const command = buildCommand({
           'Name of example project to run, use --list-examples to select from an interactive list',
         optional: true,
       },
-      listExamples: {
+      'list-examples': {
         kind: 'boolean',
         brief: 'Select an example project from an interactive list',
         optional: true,
       },
-      listDevices: {
+      'list-devices': {
         kind: 'boolean',
         brief: 'Select a target device or platform from an interactive list',
         optional: true,
