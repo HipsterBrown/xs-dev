@@ -7,7 +7,7 @@ import { DEVICE_ALIAS } from '../toolbox/prompt/devices'
 type Mode = 'development' | 'production'
 
 interface DebugOptions {
-  device?: Device
+  device?: string
   port?: string
   example?: string
   'list-examples'?: boolean
@@ -40,7 +40,7 @@ const command = buildCommand({
       output,
     } = flags
     const { build } = await import('../toolbox/build/index')
-    const targetPlatform: string = DEVICE_ALIAS[device] ?? device
+    const targetPlatform: string = DEVICE_ALIAS[device as Device] ?? device
     projectPath = filesystem.resolve(projectPath)
 
     await build({
@@ -71,8 +71,8 @@ const command = buildCommand({
     },
     flags: {
       device: {
-        kind: 'enum',
-        values: Object.keys(DEVICE_ALIAS) as NonNullable<Device[]>,
+        kind: 'parsed',
+        parse: String,
         brief:
           'Target device or platform for the project, use --list-devices to select from interactive list; defaults to current OS simulator',
         optional: true,
