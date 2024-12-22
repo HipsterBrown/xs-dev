@@ -37,20 +37,38 @@ The [`moddable` git repo](https://github.com/Moddable-OpenSource/moddable) is cl
 
 This command will create (and update) an environment configuration file called `~/.local/share/xs-dev-export.sh` (on Mac & Linux) or `Moddable.bat` (on Windows). This file will be sourced by `xs-dev` when running commands (on Mac & Linux) or through the custom command prompt (on Windows), to set environment variables and call other "exports" files for embedded tooling.
 
+## Tagged Release
+
+The default behavior of this command for Moddable developer tooling pulls the [latest release tooling](https://github.com/Moddable-OpenSource/moddable/releases) and source code for the associated tagged branch. This provides a known-working state for the SDK and avoids needing to build the tooling on the local machine. 
+
+To override this behavior, use the `--release` flag to select a tagged release version; this fetches the pre-compiled release assets and latest commit off that tag.
+
+```
+xs-dev setup --release 5.3.0
+```
+
+When combined with the `--source-repo` flag, it's possible to get the SDK from another source instead of the default GitHub repo.
+
+```
+xs-dev setup --source-repo https://my-sdk.moddable-git.not-real --release 5.4.0-alpha
+```
+
+_This will only work for the `mac`, `windows`, and `linux` device options, which are the respective defaults for the operating system on which the command is run._
+
 ## Target Branch
 
 The default behavior of this command for Moddable developer tooling pulls the [latest release tooling](https://github.com/Moddable-OpenSource/moddable/releases) and source code for the associated tagged branch. This provides a known-working state for the SDK and avoids needing to build the tooling on the local machine. 
 
-To override this behavior, use the `--target-branch` flag to select `public`; this fetches the latest commit off that main branch and runs the build to generate the associated tools. This can be set to any branch name, however `public` is the main public branch for the Moddable-OpenSource repo.
+To override this behavior, use the `--branch` flag to select `public`; this fetches the latest commit off that main branch and runs the build to generate the associated tools. This can be set to any branch name, however `public` is the main public branch for the Moddable-OpenSource repo.
 
 ```
-xs-dev setup --target-branch public
+xs-dev setup --branch public
 ```
 
 When combined with the `--source-repo` flag, it's possible to get the SDK repo from another source instead of the default GitHub repo.
 
 ```
-xs-dev setup --source-repo https://my-sdk.moddable-git.not-real --target-branch main
+xs-dev setup --source-repo https://my-sdk.moddable-git.not-real --branch main
 ```
 
 _This will only work for the `mac`, `windows`, and `linux` device options, which are the respective defaults for the operating system on which the command is run._

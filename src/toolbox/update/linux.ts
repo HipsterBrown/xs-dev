@@ -5,7 +5,7 @@ import { print, system, filesystem } from 'gluegun'
 import { INSTALL_PATH, MODDABLE_REPO, XSBUG_LOG_PATH } from '../setup/constants'
 import type { SetupArgs } from '../setup/types'
 import {
-  fetchLatestRelease,
+  fetchRelease,
   moddableExists,
   downloadReleaseTools,
 } from '../setup/moddable'
@@ -13,7 +13,7 @@ import { execWithSudo, sourceEnvironment } from '../system/exec'
 
 const chmodPromise = promisify(chmod)
 
-export default async function ({ targetBranch }: SetupArgs): Promise<void> {
+export default async function ({ branch, release }: SetupArgs): Promise<void> {
   await sourceEnvironment()
 
   // 0. ensure Moddable exists
@@ -33,15 +33,15 @@ export default async function ({ targetBranch }: SetupArgs): Promise<void> {
     'lin',
   )
 
-  if (targetBranch === 'latest-release') {
+  if (release !== undefined && (branch === undefined || branch === null)) {
     // get tag for current repo
     const currentTag: string = await system.exec('git tag', {
       cwd: process.env.MODDABLE,
     })
     // get latest release tag
-    const latestRelease = await fetchLatestRelease()
+    const remoteRelease = await fetchRelease(release)
 
-    if (currentTag.trim() === latestRelease.tag_name) {
+    if (currentTag.trim() === remoteRelease.tag_name) {
       print.success('Moddable SDK already up to date!')
       process.exit(0)
     }
@@ -66,7 +66,7 @@ export default async function ({ targetBranch }: SetupArgs): Promise<void> {
 
     filesystem.remove(process.env.MODDABLE)
     await system.spawn(
-      `git clone ${MODDABLE_REPO} ${INSTALL_PATH} --depth 1 --branch ${latestRelease.tag_name} --single-branch`,
+      `git clone ${MODDABLE_REPO} ${INSTALL_PATH} --depth 1 --branch ${remoteRelease.tag_name} --single-branch`,
     )
 
     filesystem.dir(BIN_PATH)
@@ -81,7 +81,7 @@ export default async function ({ targetBranch }: SetupArgs): Promise<void> {
     await downloadReleaseTools({
       writePath: BIN_PATH,
       assetName,
-      release: latestRelease,
+      release: remoteRelease,
     })
 
     spinner.info('Updating tool permissions')
@@ -140,12 +140,12 @@ export default async function ({ targetBranch }: SetupArgs): Promise<void> {
     )
   }
 
-  if (targetBranch === 'public') {
-    const currentRev: string = await system.exec('git rev-parse public', {
+  if (typeof branch === 'string') {
+    const currentRev: string = await system.exec(`git rev-parse ${branch}`, {
       cwd: process.env.MODDABLE,
     })
     const remoteRev: string = await system.exec(
-      'git ls-remote origin refs/heads/public',
+      `git ls-remote origin refs/heads/${branch}`,
       { cwd: process.env.MODDABLE },
     )
 
@@ -159,7 +159,9 @@ export default async function ({ targetBranch }: SetupArgs): Promise<void> {
 
     spinner.start('Stashing any unsaved changes before committing')
     await system.exec('git stash', { cwd: process.env.MODDABLE })
-    await system.exec('git pull origin public', { cwd: process.env.MODDABLE })
+    await system.exec(`git pull origin ${branch}`, {
+      cwd: process.env.MODDABLE,
+    })
 
     await system.exec('rm -rf build/{tmp,bin}', { cwd: process.env.MODDABLE })
     spinner.succeed()

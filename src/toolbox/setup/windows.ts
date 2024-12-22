@@ -9,7 +9,7 @@ import upsert from '../patching/upsert'
 import ws from 'windows-shortcuts'
 import { promisify } from 'util'
 import type { PlatformSetupArgs } from './types'
-import { downloadReleaseTools, fetchLatestRelease } from './moddable'
+import { downloadReleaseTools, fetchRelease } from './moddable'
 
 const wsPromise = promisify(ws.create)
 
@@ -57,7 +57,8 @@ export async function ensureModdableCommandPrompt(
 
 export default async function ({
   sourceRepo,
-  targetBranch,
+  branch,
+  release,
 }: PlatformSetupArgs): Promise<void> {
   const BIN_PATH = filesystem.resolve(
     INSTALL_PATH,
@@ -216,11 +217,11 @@ export default async function ({
     spinner.info('Moddable repo already installed')
   } else {
     try {
-      if (targetBranch === 'latest-release') {
+      if (release !== undefined && (branch === undefined || branch === null)) {
         spinner.start(`Getting latest Moddable-OpenSource/moddable release`)
-        const release = await fetchLatestRelease()
+        const remoteRelease = await fetchRelease(release)
         await system.spawn(
-          `git clone ${sourceRepo} ${INSTALL_PATH} --depth 1 --branch ${release.tag_name} --single-branch`,
+          `git clone ${sourceRepo} ${INSTALL_PATH} --depth 1 --branch ${remoteRelease.tag_name} --single-branch`,
         )
 
         filesystem.dir(BIN_PATH)
@@ -232,7 +233,7 @@ export default async function ({
         await downloadReleaseTools({
           writePath: BIN_PATH,
           assetName,
-          release,
+          release: remoteRelease,
         })
 
         const tools = filesystem.list(BIN_PATH) ?? []
@@ -249,7 +250,7 @@ export default async function ({
       } else {
         spinner.start(`Cloning ${sourceRepo} repo`)
         await system.spawn(
-          `git clone ${sourceRepo} ${INSTALL_PATH} --depth 1 --branch ${targetBranch} --single-branch`,
+          `git clone ${sourceRepo} ${INSTALL_PATH} --depth 1 --branch ${branch} --single-branch`,
         )
       }
     } catch (error) {
@@ -270,7 +271,7 @@ export default async function ({
   }
 
   // 3. build tools if needed
-  if (targetBranch !== 'latest-release') {
+  if (typeof branch === 'string') {
     try {
       spinner.start(`Building Moddable SDK tools`)
       await system.exec(`build.bat`, { cwd: BUILD_DIR, stdout: process.stdout })

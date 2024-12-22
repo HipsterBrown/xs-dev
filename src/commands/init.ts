@@ -42,7 +42,7 @@ const command = buildCommand({
 
       await sourceEnvironment()
 
-      if (example !== undefined ?? listExamples) {
+      if (example !== undefined || listExamples) {
         // find example project
         const exampleProjectPath = filesystem.resolve(
           String(process.env.MODDABLE),

@@ -11,7 +11,7 @@ import {
 import upsert from '../patching/upsert'
 import {
   downloadReleaseTools,
-  fetchLatestRelease,
+  fetchRelease,
   MissingReleaseAssetError,
 } from './moddable'
 import type { PlatformSetupArgs } from './types'
@@ -20,7 +20,8 @@ const chmodPromise = promisify(chmod)
 
 export default async function ({
   sourceRepo,
-  targetBranch,
+  branch,
+  release,
 }: PlatformSetupArgs): Promise<void> {
   print.info('Setting up the mac tools!')
 
@@ -72,11 +73,11 @@ export default async function ({
     spinner.info('Moddable repo already installed')
   } else {
     try {
-      if (targetBranch === 'latest-release') {
+      if (release !== undefined && (branch === undefined || branch === null)) {
         spinner.start('Getting latest Moddable-OpenSource/moddable release')
-        const release = await fetchLatestRelease()
+        const remoteRelease = await fetchRelease(release)
         await system.spawn(
-          `git clone ${sourceRepo} ${INSTALL_PATH} --depth 1 --branch ${release.tag_name} --single-branch`,
+          `git clone ${sourceRepo} ${INSTALL_PATH} --depth 1 --branch ${remoteRelease.tag_name} --single-branch`,
         )
 
         filesystem.dir(BIN_PATH)
@@ -88,7 +89,7 @@ export default async function ({
           await downloadReleaseTools({
             writePath: BIN_PATH,
             assetName: universalAssetName,
-            release,
+            release: remoteRelease,
           })
         } catch (error: unknown) {
           if (error instanceof MissingReleaseAssetError) {
@@ -99,7 +100,7 @@ export default async function ({
             await downloadReleaseTools({
               writePath: BIN_PATH,
               assetName,
-              release,
+              release: remoteRelease,
             })
           } else {
             throw error as Error
@@ -129,7 +130,7 @@ export default async function ({
       } else {
         spinner.start(`Cloning ${sourceRepo} repo`)
         await system.spawn(
-          `git clone ${sourceRepo} ${INSTALL_PATH} --depth 1 --branch ${targetBranch} --single-branch`,
+          `git clone ${sourceRepo} ${INSTALL_PATH} --depth 1 --branch ${branch} --single-branch`,
         )
       }
       spinner.succeed()
@@ -147,7 +148,7 @@ export default async function ({
   await upsert(EXPORTS_FILE_PATH, `export PATH="${BIN_PATH}:$PATH"`)
 
   // 3. cd into makefiles dir for platform, run `make`
-  if (targetBranch !== 'latest-release') {
+  if (branch !== undefined || branch !== null) {
     try {
       spinner.start('Building platform tooling')
       await system.exec('make', { cwd: BUILD_DIR, stdout: process.stdout })

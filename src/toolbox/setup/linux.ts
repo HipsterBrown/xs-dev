@@ -11,13 +11,14 @@ import {
 import upsert from '../patching/upsert'
 import { execWithSudo } from '../system/exec'
 import type { PlatformSetupArgs } from './types'
-import { fetchLatestRelease, downloadReleaseTools } from './moddable'
+import { fetchRelease, downloadReleaseTools } from './moddable'
 
 const chmodPromise = promisify(chmod)
 
 export default async function ({
   sourceRepo,
-  targetBranch,
+  branch,
+  release,
 }: PlatformSetupArgs): Promise<void> {
   print.info('Setting up Linux tools!')
 
@@ -69,11 +70,11 @@ export default async function ({
   if (filesystem.exists(INSTALL_PATH) !== false) {
     spinner.info('Moddable repo already installed')
   } else {
-    if (targetBranch === 'latest-release') {
+    if (release !== undefined && (branch === undefined || branch === null)) {
       spinner.start('Getting latest Moddable-OpenSource/moddable release')
-      const release = await fetchLatestRelease()
+      const remoteRelease = await fetchRelease(release)
       await system.spawn(
-        `git clone ${sourceRepo} ${INSTALL_PATH} --depth 1 --branch ${release.tag_name} --single-branch`,
+        `git clone ${sourceRepo} ${INSTALL_PATH} --depth 1 --branch ${remoteRelease.tag_name} --single-branch`,
       )
 
       filesystem.dir(BIN_PATH)
@@ -87,7 +88,7 @@ export default async function ({
       await downloadReleaseTools({
         writePath: BIN_PATH,
         assetName,
-        release,
+        release: remoteRelease,
       })
       const tools = filesystem.list(BIN_PATH) ?? []
       await Promise.all(
@@ -102,7 +103,7 @@ export default async function ({
     } else {
       spinner.start(`Cloning ${sourceRepo} repo`)
       await system.spawn(
-        `git clone ${sourceRepo} ${INSTALL_PATH} --depth 1 --branch ${targetBranch} --single-branch`,
+        `git clone ${sourceRepo} ${INSTALL_PATH} --depth 1 --branch ${branch} --single-branch`,
       )
     }
     spinner.succeed()
@@ -116,7 +117,7 @@ export default async function ({
   await upsert(EXPORTS_FILE_PATH, `export PATH="${BIN_PATH}:$PATH"`)
 
   // 5. Build the Moddable command line tools, simulator, and debugger from the command line:
-  if (targetBranch !== 'latest-release') {
+  if (typeof branch === 'string') {
     spinner.start('Building platform tooling')
     await system.exec('make', { cwd: BUILD_DIR, stdout: process.stdout })
     spinner.succeed()
@@ -124,7 +125,7 @@ export default async function ({
 
   // 6. Install the desktop simulator and xsbug debugger applications
   spinner.start('Installing simulator')
-  if (targetBranch === 'latest-release') {
+  if (release !== undefined && (branch === undefined || branch === null)) {
     filesystem.dir(
       filesystem.resolve(
         BUILD_DIR,
