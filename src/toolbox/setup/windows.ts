@@ -55,7 +55,7 @@ export async function ensureModdableCommandPrompt(
   }
 }
 
-export default async function({
+export default async function ({
   sourceRepo,
   branch,
   release,
@@ -217,7 +217,7 @@ export default async function({
     spinner.info('Moddable repo already installed')
   } else {
     try {
-      if (release && (branch === undefined || branch === null)) {
+      if (release !== undefined && (branch === undefined || branch === null)) {
         spinner.start(`Getting latest Moddable-OpenSource/moddable release`)
         const remoteRelease = await fetchRelease(release)
         await system.spawn(
@@ -271,7 +271,7 @@ export default async function({
   }
 
   // 3. build tools if needed
-  if (branch) {
+  if (typeof branch === 'string') {
     try {
       spinner.start(`Building Moddable SDK tools`)
       await system.exec(`build.bat`, { cwd: BUILD_DIR, stdout: process.stdout })

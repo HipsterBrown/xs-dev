@@ -18,7 +18,7 @@ import type { PlatformSetupArgs } from './types'
 
 const chmodPromise = promisify(chmod)
 
-export default async function({
+export default async function ({
   sourceRepo,
   branch,
   release,
@@ -73,7 +73,7 @@ export default async function({
     spinner.info('Moddable repo already installed')
   } else {
     try {
-      if (release && (branch === undefined || branch === null)) {
+      if (release !== undefined && (branch === undefined || branch === null)) {
         spinner.start('Getting latest Moddable-OpenSource/moddable release')
         const remoteRelease = await fetchRelease(release)
         await system.spawn(

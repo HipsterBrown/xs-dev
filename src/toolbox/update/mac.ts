@@ -14,7 +14,7 @@ import { sourceEnvironment } from '../system/exec'
 
 const chmodPromise = promisify(chmod)
 
-export default async function({ branch, release }: SetupArgs): Promise<void> {
+export default async function ({ branch, release }: SetupArgs): Promise<void> {
   print.info('Checking for SDK changes')
 
   await sourceEnvironment()
@@ -27,7 +27,7 @@ export default async function({ branch, release }: SetupArgs): Promise<void> {
     process.exit(1)
   }
 
-  if (release && (branch === undefined || branch === null)) {
+  if (release !== undefined && (branch === undefined || branch === null)) {
     // get tag for current repo
     const currentTag: string = await system.exec('git tag', {
       cwd: process.env.MODDABLE,
@@ -121,7 +121,7 @@ export default async function({ branch, release }: SetupArgs): Promise<void> {
     )
   }
 
-  if (branch) {
+  if (typeof branch === 'string') {
     const currentRev: string = await system.exec(`git rev-parse ${branch}`, {
       cwd: process.env.MODDABLE,
     })
@@ -140,7 +140,9 @@ export default async function({ branch, release }: SetupArgs): Promise<void> {
 
     spinner.start('Stashing any unsaved changes before committing')
     await system.exec('git stash', { cwd: process.env.MODDABLE })
-    await system.exec(`git pull origin ${branch}`, { cwd: process.env.MODDABLE })
+    await system.exec(`git pull origin ${branch}`, {
+      cwd: process.env.MODDABLE,
+    })
 
     const BUILD_DIR = filesystem.resolve(
       process.env.MODDABLE ?? '',

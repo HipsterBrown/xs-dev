@@ -62,7 +62,9 @@ type GitHubRelease = ExtractFromArray<
   RestEndpointMethodTypes['repos']['listReleases']['response']['data']
 >
 
-export async function fetchRelease(release: 'latest' | string): Promise<GitHubRelease> {
+export async function fetchRelease(
+  release: 'latest' | string,
+): Promise<GitHubRelease> {
   const octokit = new Octokit()
   if (release === 'latest') {
     const { data: latestRelease } = await octokit.rest.repos.getLatestRelease({
@@ -74,7 +76,7 @@ export async function fetchRelease(release: 'latest' | string): Promise<GitHubRe
     const { data: taggedRelease } = await octokit.rest.repos.getReleaseByTag({
       owner: 'Moddable-OpenSource',
       repo: 'moddable',
-      tag: release
+      tag: release,
     })
     return taggedRelease
   }

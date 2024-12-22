@@ -105,8 +105,7 @@ const command = buildCommand({
       branch: {
         kind: 'parsed',
         parse: String,
-        brief:
-          'The remote branch to use as the source for Moddable SDK set up',
+        brief: 'The remote branch to use as the source for Moddable SDK set up',
         optional: true,
       },
       release: {

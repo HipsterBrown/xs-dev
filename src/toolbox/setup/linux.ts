@@ -15,7 +15,7 @@ import { fetchRelease, downloadReleaseTools } from './moddable'
 
 const chmodPromise = promisify(chmod)
 
-export default async function({
+export default async function ({
   sourceRepo,
   branch,
   release,
@@ -70,7 +70,7 @@ export default async function({
   if (filesystem.exists(INSTALL_PATH) !== false) {
     spinner.info('Moddable repo already installed')
   } else {
-    if (release && (branch === undefined || branch === null)) {
+    if (release !== undefined && (branch === undefined || branch === null)) {
       spinner.start('Getting latest Moddable-OpenSource/moddable release')
       const remoteRelease = await fetchRelease(release)
       await system.spawn(
@@ -117,7 +117,7 @@ export default async function({
   await upsert(EXPORTS_FILE_PATH, `export PATH="${BIN_PATH}:$PATH"`)
 
   // 5. Build the Moddable command line tools, simulator, and debugger from the command line:
-  if (branch) {
+  if (typeof branch === 'string') {
     spinner.start('Building platform tooling')
     await system.exec('make', { cwd: BUILD_DIR, stdout: process.stdout })
     spinner.succeed()
@@ -125,7 +125,7 @@ export default async function({
 
   // 6. Install the desktop simulator and xsbug debugger applications
   spinner.start('Installing simulator')
-  if (release && (branch === undefined || branch === null)) {
+  if (release !== undefined && (branch === undefined || branch === null)) {
     filesystem.dir(
       filesystem.resolve(
         BUILD_DIR,
