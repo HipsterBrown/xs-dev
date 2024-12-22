@@ -62,18 +62,27 @@ type GitHubRelease = ExtractFromArray<
   RestEndpointMethodTypes['repos']['listReleases']['response']['data']
 >
 
-export async function fetchLatestRelease(): Promise<GitHubRelease> {
+export async function fetchRelease(release: 'latest' | string): Promise<GitHubRelease> {
   const octokit = new Octokit()
-  const { data: latestRelease } = await octokit.rest.repos.getLatestRelease({
-    owner: 'Moddable-OpenSource',
-    repo: 'moddable',
-  })
-  return latestRelease
+  if (release === 'latest') {
+    const { data: latestRelease } = await octokit.rest.repos.getLatestRelease({
+      owner: 'Moddable-OpenSource',
+      repo: 'moddable',
+    })
+    return latestRelease
+  } else {
+    const { data: taggedRelease } = await octokit.rest.repos.getReleaseByTag({
+      owner: 'Moddable-OpenSource',
+      repo: 'moddable',
+      tag: release
+    })
+    return taggedRelease
+  }
 }
 
 export class MissingReleaseAssetError extends Error {
   constructor(assetName: string) {
-    super(`Unabled to find release asset matching ${assetName}`)
+    super(`Unable to find release asset matching ${assetName}`)
   }
 }
 

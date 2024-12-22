@@ -1,5 +1,6 @@
 export interface SetupArgs {
-  targetBranch: 'public' | 'latest-release' | string
+  branch: 'public' | string
+  release: 'latest' | string
 }
 
 export interface PlatformSetupArgs extends SetupArgs {

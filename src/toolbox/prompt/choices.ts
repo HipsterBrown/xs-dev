@@ -11,7 +11,7 @@ export function collectChoicesFromTree(
 ): string[] {
   if (
     fd.type === 'dir' &&
-    fd.children.find((file) => file.name === 'manifest.json') !== undefined
+    fd.children.find((file) => ['manifest.json', 'package.json'].includes(file.name)) !== undefined
   ) {
     results.push(root + fd.name)
   } else if (fd.type === 'dir') {

@@ -42,7 +42,7 @@ const command = buildCommand({
 
       await sourceEnvironment()
 
-      if (example !== undefined ?? listExamples) {
+      if (example !== undefined || listExamples) {
         // find example project
         const exampleProjectPath = filesystem.resolve(
           String(process.env.MODDABLE),
@@ -59,14 +59,14 @@ const command = buildCommand({
           const filteredChoices = choices.filter((choice) =>
             choice.includes(String(example)),
           )
-          ;({ example: selectedExample } = await prompt.ask([
-            {
-              type: 'autocomplete',
-              name: 'example',
-              message: 'Here are the available examples templates:',
-              choices: filteredChoices.length > 0 ? filteredChoices : choices,
-            },
-          ]))
+            ; ({ example: selectedExample } = await prompt.ask([
+              {
+                type: 'autocomplete',
+                name: 'example',
+                message: 'Here are the available examples templates:',
+                choices: filteredChoices.length > 0 ? filteredChoices : choices,
+              },
+            ]))
         }
 
         // copy files into new project directory
@@ -89,9 +89,9 @@ const command = buildCommand({
         const includes = [
           io
             ? [
-                '"$(MODDABLE)/modules/io/manifest.json"',
-                '"$(MODDABLE)/examples/manifest_net.json"',
-              ]
+              '"$(MODDABLE)/modules/io/manifest.json"',
+              '"$(MODDABLE)/examples/manifest_net.json"',
+            ]
             : '"$(MODDABLE)/examples/manifest_base.json"',
           typescript && '"$(MODDABLE)/examples/manifest_typings.json"',
         ]
