@@ -9,8 +9,8 @@ type Mode = 'development' | 'production'
 interface CleanOptions {
   device?: Device
   example?: string
-  listExamples?: boolean
-  listDevices?: boolean
+  'list-examples'?: boolean
+  'list-devices'?: boolean
   mode?: Mode
   output?: string
   config?: string[]
@@ -32,8 +32,8 @@ const command = buildCommand({
     const {
       device = currentPlatform,
       example,
-      listExamples = false,
-      listDevices = false,
+      'list-examples': listExamples = false,
+      'list-devices': listDevices = false,
       mode = (process.env.NODE_ENV as Mode) ?? 'development',
       output,
       config = [],
@@ -89,12 +89,12 @@ const command = buildCommand({
           'Name of example project to run, use --list-examples to select from an interactive list',
         optional: true,
       },
-      listExamples: {
+      'list-examples': {
         kind: 'boolean',
         brief: 'Select an example project from an interactive list',
         optional: true,
       },
-      listDevices: {
+      'list-devices': {
         kind: 'boolean',
         brief: 'Select a target device or platform from an interactive list',
         optional: true,

@@ -9,10 +9,10 @@ import type { SetupArgs } from '../toolbox/setup/types'
 
 interface SetupOptions {
   device?: Device
-  listDevices?: boolean
+  'list-devices'?: boolean
   tool?: 'ejectfix'
-  targetBranch?: SetupArgs['targetBranch']
-  sourceRepo?: string
+  'target-branch'?: SetupArgs['targetBranch']
+  'source-repo'?: string
 }
 const command = buildCommand({
   docs: {
@@ -23,10 +23,10 @@ const command = buildCommand({
     const currentPlatform: Device = platformType().toLowerCase() as Device
     const {
       device,
-      listDevices = false,
+      'list-devices': listDevices = false,
       tool,
-      targetBranch = 'latest-release',
-      sourceRepo = MODDABLE_REPO,
+      'target-branch': targetBranch = 'latest-release',
+      'source-repo': sourceRepo = MODDABLE_REPO,
     } = flags
     let target: Device = device ?? DEVICE_ALIAS[currentPlatform]
 
@@ -88,7 +88,7 @@ const command = buildCommand({
           'Target device or platform SDK to set up; defaults to Moddable SDK for current OS; use --list-devices for interactive selection',
         optional: true,
       },
-      listDevices: {
+      'list-devices': {
         kind: 'boolean',
         brief:
           'Select target device or platform SDK to set up from a list; defaults to false',
@@ -100,14 +100,14 @@ const command = buildCommand({
         brief: 'Install additional tooling to support common development tasks',
         optional: true,
       },
-      targetBranch: {
+      'target-branch': {
         kind: 'parsed',
         parse: String,
         brief:
           'The remote branch or release to use as source for Moddable SDK set up; defaults to `latest-release`',
         optional: true,
       },
-      sourceRepo: {
+      'source-repo': {
         kind: 'parsed',
         parse: String,
         brief:

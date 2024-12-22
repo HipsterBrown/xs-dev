@@ -10,8 +10,8 @@ interface DebugOptions {
   device?: Device
   port?: string
   example?: string
-  listExamples?: boolean
-  listDevices?: boolean
+  'list-examples'?: boolean
+  'list-devices'?: boolean
   log?: boolean
   mode?: Mode
   output?: string
@@ -33,8 +33,8 @@ const command = buildCommand({
       device = currentPlatform,
       port,
       example,
-      listExamples = false,
-      listDevices = false,
+      'list-examples': listExamples = false,
+      'list-devices': listDevices = false,
       log = false,
       mode = (process.env.NODE_ENV as Mode) ?? 'development',
       output,
@@ -84,12 +84,12 @@ const command = buildCommand({
           'Name of example project to run, use --list-examples to select from an interactive list',
         optional: true,
       },
-      listExamples: {
+      'list-examples': {
         kind: 'boolean',
         brief: 'Select an example project from an interactive list',
         optional: true,
       },
-      listDevices: {
+      'list-devices': {
         kind: 'boolean',
         brief: 'Select a target device or platform from an interactive list',
         optional: true,

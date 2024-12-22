@@ -7,7 +7,7 @@ interface InitOptions {
   typescript?: boolean
   io?: boolean
   example?: string
-  listExamples?: boolean
+  'list-examples'?: boolean
   overwrite?: boolean
   asyncMain?: boolean
 }
@@ -27,7 +27,7 @@ const command = buildCommand({
       typescript = false,
       io = false,
       example,
-      listExamples = false,
+      'list-examples': listExamples = false,
       overwrite = false,
       asyncMain = false,
     } = flags
@@ -59,14 +59,14 @@ const command = buildCommand({
           const filteredChoices = choices.filter((choice) =>
             choice.includes(String(example)),
           )
-          ;({ example: selectedExample } = await prompt.ask([
-            {
-              type: 'autocomplete',
-              name: 'example',
-              message: 'Here are the available examples templates:',
-              choices: filteredChoices.length > 0 ? filteredChoices : choices,
-            },
-          ]))
+            ; ({ example: selectedExample } = await prompt.ask([
+              {
+                type: 'autocomplete',
+                name: 'example',
+                message: 'Here are the available examples templates:',
+                choices: filteredChoices.length > 0 ? filteredChoices : choices,
+              },
+            ]))
         }
 
         // copy files into new project directory
@@ -89,9 +89,9 @@ const command = buildCommand({
         const includes = [
           io
             ? [
-                '"$(MODDABLE)/modules/io/manifest.json"',
-                '"$(MODDABLE)/examples/manifest_net.json"',
-              ]
+              '"$(MODDABLE)/modules/io/manifest.json"',
+              '"$(MODDABLE)/examples/manifest_net.json"',
+            ]
             : '"$(MODDABLE)/examples/manifest_base.json"',
           typescript && '"$(MODDABLE)/examples/manifest_typings.json"',
         ]
@@ -157,7 +157,7 @@ const command = buildCommand({
         parse: String,
         optional: true,
       },
-      listExamples: {
+      'list-examples': {
         kind: 'boolean',
         brief: 'Select an example project from the Moddable SDK',
         optional: true,
