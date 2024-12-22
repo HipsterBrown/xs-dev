@@ -1,3 +1,15 @@
+# v0.35.0 (Sun Dec 22 2024)
+
+#### 💥 Breaking Change
+
+- feat(esp32): update esp-idf version to 5.3.1 [#198](https://github.com/HipsterBrown/xs-dev/pull/198) ([@HipsterBrown](https://github.com/HipsterBrown))
+
+#### Authors: 1
+
+- Nick Hehr ([@HipsterBrown](https://github.com/HipsterBrown))
+
+---
+
 # v0.34.0 (Sun Dec 22 2024)
 
 #### 💥 Breaking Change
