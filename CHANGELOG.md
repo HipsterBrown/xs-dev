@@ -1,3 +1,15 @@
+# v0.33.5 (Sun Dec 22 2024)
+
+#### 🚀 Enhancement
+
+- fix: use kebab-case command flags, loosen device target typing for build/run commands [#196](https://github.com/HipsterBrown/xs-dev/pull/196) ([@HipsterBrown](https://github.com/HipsterBrown))
+
+#### Authors: 1
+
+- Nick Hehr ([@HipsterBrown](https://github.com/HipsterBrown))
+
+---
+
 # v0.33.4 (Wed Nov 27 2024)
 
 :tada: This release contains work from a new contributor! :tada:
