@@ -1,3 +1,15 @@
+# v0.34.0 (Sun Dec 22 2024)
+
+#### 💥 Breaking Change
+
+- feat(setup/update): split target-branch into release, branch options [#197](https://github.com/HipsterBrown/xs-dev/pull/197) ([@HipsterBrown](https://github.com/HipsterBrown))
+
+#### Authors: 1
+
+- Nick Hehr ([@HipsterBrown](https://github.com/HipsterBrown))
+
+---
+
 # v0.33.5 (Sun Dec 22 2024)
 
 #### 🚀 Enhancement
