@@ -44,25 +44,28 @@ export async function createPackageJSON({
   typescript,
 }: CreatePackageJSONOptions): Promise<void> {
   const name = projectName.split('/').pop()
+  const scripts: Record<string, string> = {
+    build: 'xs-dev build',
+    start: 'xs-dev run',
+  }
+  const devDependencies: Record<string, string> = {}
+  const moddable: Record<string, unknown> = {}
   const packageJSON = {
     name,
     main: typescript ? 'dist/main.js' : 'main.js',
     type: 'module',
     description: 'A starter project for embedded JS',
-    scripts: {
-      build: 'xs-dev build',
-      start: 'xs-dev run',
-    } as Record<string, string>,
-    devDependencies: {} as Record<string, string>,
-    moddable: {} as Record<string, unknown>,
+    scripts,
+    devDependencies,
+    moddable,
   }
 
   if (typescript) {
-    packageJSON.scripts['prebuild'] = 'tsc'
-    packageJSON.scripts['prestart'] = packageJSON.scripts['prebuild']
+    packageJSON.scripts.prebuild = 'tsc'
+    packageJSON.scripts.prestart = packageJSON.scripts.prebuild
 
     packageJSON.devDependencies['@moddable/typings'] = '^5.3.0'
-    packageJSON.devDependencies['typescript'] = '^5.7.2'
+    packageJSON.devDependencies.typescript = '^5.7.2'
   }
 
   if (io) {
