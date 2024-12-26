@@ -10,6 +10,7 @@ export interface CreateManifestOptions extends TemplateBuilderOptions {
 }
 
 export interface CreatePackageJSONOptions extends TemplateBuilderOptions {
+  io: boolean
   projectName: string
   typescript: boolean
 }
@@ -36,7 +37,7 @@ export async function createManifest({
   await writeFile(target, template, { encoding: 'utf8' })
 }
 
-export async function createPackageJSON({ target, projectName, typescript }: CreatePackageJSONOptions): Promise<void> {
+export async function createPackageJSON({ target, io, projectName, typescript }: CreatePackageJSONOptions): Promise<void> {
   const name = projectName.split('/').pop()
   const packageJSON = {
     name,
@@ -47,7 +48,8 @@ export async function createPackageJSON({ target, projectName, typescript }: Cre
       "build": "xs-dev build",
       "start": "xs-dev run"
     } as Record<string, string>,
-    devDependencies: {} as Record<string, string>
+    devDependencies: {} as Record<string, string>,
+    moddable: {} as Record<string, unknown>
   }
 
   if (typescript) {
@@ -56,6 +58,20 @@ export async function createPackageJSON({ target, projectName, typescript }: Cre
 
     packageJSON.devDependencies["@moddable/typings"] = "^5.3.0"
     packageJSON.devDependencies["typescript"] = "^5.7.2"
+  }
+
+  if (io) {
+    packageJSON.moddable = {
+      manifest: {
+        build: {
+          MODULES: "$(MODDABLE)/modules"
+        },
+        include: [
+          "$(MODULES)/io/manifest.json"
+        ]
+      }
+
+    }
   }
 
   await writeFile(target, JSON.stringify(packageJSON, null, 2), { encoding: 'utf8' })

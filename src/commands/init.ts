@@ -121,7 +121,7 @@ const command = buildCommand({
             defines,
           }))
         } else {
-          fileTasks.push(createPackageJSON({ target: `${projectName}/package.json`, projectName, typescript }))
+          fileTasks.push(createPackageJSON({ target: `${projectName}/package.json`, projectName, typescript, io }))
         }
 
         if (typescript) {
