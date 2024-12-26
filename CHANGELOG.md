@@ -1,3 +1,15 @@
+# v0.36.0 (Thu Dec 26 2024)
+
+#### 💥 Breaking Change
+
+- feat(init): use package.json & ECMA-419 in default project scaffold [#199](https://github.com/HipsterBrown/xs-dev/pull/199) ([@HipsterBrown](https://github.com/HipsterBrown))
+
+#### Authors: 1
+
+- Nick Hehr ([@HipsterBrown](https://github.com/HipsterBrown))
+
+---
+
 # v0.35.0 (Sun Dec 22 2024)
 
 #### 💥 Breaking Change
