@@ -30,7 +30,8 @@ const command = buildCommand({
       release = 'latest',
       'source-repo': sourceRepo = MODDABLE_REPO,
     } = flags
-    let target: Device = device ?? DEVICE_ALIAS[currentPlatform]
+    let target: Device =
+      DEVICE_ALIAS[device ?? ('' as Device)] ?? DEVICE_ALIAS[currentPlatform]
 
     if (device === undefined && listDevices) {
       const choices = [
@@ -70,6 +71,7 @@ const command = buildCommand({
       'mac',
       'darwin',
       'windows_nt',
+      'windows',
       'win',
       'lin',
       'linux',

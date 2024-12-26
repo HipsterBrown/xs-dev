@@ -1,14 +1,15 @@
 import type { Device } from '../../types'
 
-export const DEVICE_ALIAS: Record<Device | 'esp8266', Device> = Object.freeze({
-  esp8266: 'esp',
+export const DEVICE_ALIAS: Record<Device | 'esp', Device> = Object.freeze({
+  esp: 'esp8266',
+  esp8266: 'esp8266',
   darwin: 'mac',
   mac: 'mac',
-  windows_nt: 'win',
-  win: 'win',
+  windows_nt: 'windows',
+  windows: 'windows',
+  win: 'windows',
   linux: 'linux',
   lin: 'linux',
-  esp: 'esp',
   esp32: 'esp32',
   wasm: 'wasm',
   pico: 'pico',

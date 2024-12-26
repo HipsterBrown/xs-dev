@@ -20,40 +20,37 @@ Generating Moddable project: guiding-light
 Run the project using: cd guiding-light && xs-dev run
 ```
 
-The `guiding-light` directory should contain `main.js` and `manifest.json` files. `main.js` contains that was run from the [Hello Console example](/guide/01-hello-console#run-the-hello-world-example):
+The `guiding-light` directory should contain `main.js` and `package.json` files. `main.js` contains that was run from the [Hello Console example](/guide/01-hello-console#run-the-hello-world-example):
 
 ```javascript
 debugger;
 
 let message = "Hello, world - sample";
-trace(message);
+console.log(message);
 ```
 
 The first line is a [debugger statement](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/debugger) for setting a breakpoint in [xsbug](https://github.com/Moddable-OpenSource/moddable/blob/public/documentation/xs/xsbug.md).
-The third and fourth lines save a string to a variable and log it to the xsbug console using the global [`trace` function](https://github.com/Moddable-OpenSource/moddable/blob/public/documentation/xs/xsbug.md#colorizing-consolelog-with-trace).
+The third and fourth lines save a string to a variable and log it to the xsbug console using the global [`console.log` function](https://developer.mozilla.org/en-US/docs/Web/API/console/log_static).
 
-The [Moddable docs](https://github.com/Moddable-OpenSource/moddable/blob/public/documentation/tools/manifest.md) describe the `manifest.json` as follows:
-
-> A manifest is a JSON file that describes the modules and resources necessary to build a Moddable app.
-
-The initialized `manifest.json` in the `guiding-light` project should look like this:
+The initialized `package.json` in the `guiding-light` project should look like this:
 
 ```json
 {
-  "include": [
-    "$(MODDABLE)/examples/manifest_base.json"
-  ],
-  "modules": {
-    "*": "./main"
-  }
+  "name": "guiding-light",
+  "main": "main.js",
+  "type": "module",
+  "description": "A starter project for embedded JS",
+  "scripts": {
+    "build": "xs-dev build",
+    "start": "xs-dev run"
+  },
+  "devDependencies": {}
 }
 ```
 
-The [`include` field](https://github.com/Moddable-OpenSource/moddable/blob/public/documentation/tools/manifest.md#include) contains references to other manifests to provide quick reuse of common configuration found in the Moddable SDK, examples, and your own projects. The `manifest_base.json` includes basic platform support for all available platforms and some initial modules for time, timers, and instrumentation.
+The `main` field points to the generated `main.js` as the entrypoint for the program.
 
-The [`modules` field](https://github.com/Moddable-OpenSource/moddable/blob/public/documentation/tools/manifest.md#modules) should contain a mapping of every module to include in the build. The `*` key means the module (or list of modules) can be imported and referenced by their file name. A custom key can be used as an alias to reference when importing the assigned module.
-
-Executing `xs-dev run` should provide the same experience as the [Hello Console guide](/guide/01-hello-console).
+Executing the `start` script using the package manager of your choice, i.e. `npm start`, or `xs-dev run` will provide the same experience as the [Hello Console guide](/guide/01-hello-console).
 
 _Quick tip: check out all the available simulators by using the [`--list-devices` flag](/features/run#select-a-device-target) with the `run` command and typing "simulator" to filter the list._
 
@@ -68,6 +65,7 @@ Just like the [previous step](/guide/01-hello-console#setup-system-tooling), the
 ? Here are the available target devices: …
 esp8266
 esp32
+nrf52
 pico
 wasm
 mac
@@ -95,27 +93,9 @@ This will take some time to compile and send the code over to the device. When i
 
 ## Hello blinky
 
-Now that we know we can run code on our device, it is time to shed a little light on hardware control. We will use the [ECMA-419 standard APIs](https://419.ecma-international.org/) to perform this task. To access those APIs we need to include them in our project:
+Now that we know we can run code on our device, it is time to shed a little light on hardware control. We will use the [ECMA-419 standard APIs](https://419.ecma-international.org/) to perform this task.
 
-```
-xs-dev include io
-```
-
-The [`include` command](/features/include) updates the `manifest.json` to (you guessed it) _include_ the required module(s) from the Moddable SDK. In this case, the `io` module provides the complete set of ECMA-419 APIs for the supported device platform. The `manifest.json` should look like this:
-
-```json
-{
-  "include": [
-    "$(MODDABLE)/examples/manifest_base.json",
-    "$(MODDABLE)/modules/io/manifest.json"
-  ],
-  "modules": {
-    "*": "./main"
-  }
-}
-```
-
-With that configured, the `main.js` file can be updated with the following code:
+With that default `package.json` the ECMA-419 APIs are included in the compiled program, so the `main.js` file can be updated with the following code:
 
 ```javascript
 const Digital = device.io.Digital;
@@ -165,7 +145,7 @@ The project can be run using the same command as before: `xs-dev run --device <d
 
 ## Keep exploring!
 
-Tried adding some `trace` calls to log the state to the debugger or updating the timer code to send a message in [Morse code](https://ledask.com/morse-code-lights/).
+Tried adding some `console.log` calls to log the state to the debugger or updating the timer code to send a message in [Morse code](https://ledask.com/morse-code-lights/).
 
 _Coming soon: react to digital input by pressing some buttons_
 

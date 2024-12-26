@@ -6,6 +6,7 @@ import { sourceEnvironment } from '../toolbox/system/exec'
 interface InitOptions {
   typescript?: boolean
   io?: boolean
+  manifest?: boolean
   example?: string
   'list-examples'?: boolean
   overwrite?: boolean
@@ -25,7 +26,8 @@ const command = buildCommand({
 
     const {
       typescript = false,
-      io = false,
+      io = true,
+      manifest = false,
       example,
       'list-examples': listExamples = false,
       overwrite = false,
@@ -103,20 +105,46 @@ const command = buildCommand({
           ? ',\n  defines: {\n    async_main: 1\n  }'
           : ''
 
-        const { createManifest, createMain } = await import(
-          '../toolbox/init/templates'
-        )
+        const {
+          createManifest,
+          createMain,
+          createPackageJSON,
+          createTSConfig,
+        } = await import('../toolbox/init/templates')
 
-        await Promise.all([
-          createManifest({
-            target: `${projectName}/manifest.json`,
-            includes,
-            defines,
-          }),
+        const fileTasks = [
           createMain({
             target: `${projectName}/main.${typescript ? 'ts' : 'js'}`,
+            legacy: manifest,
           }),
-        ])
+        ]
+
+        if (manifest) {
+          fileTasks.push(
+            createManifest({
+              target: `${projectName}/manifest.json`,
+              includes,
+              defines,
+            }),
+          )
+        } else {
+          fileTasks.push(
+            createPackageJSON({
+              target: `${projectName}/package.json`,
+              projectName,
+              typescript,
+              io,
+            }),
+          )
+        }
+
+        if (typescript) {
+          fileTasks.push(
+            createTSConfig({ target: `${projectName}/tsconfig.json` }),
+          )
+        }
+
+        await Promise.all(fileTasks)
       }
 
       success(`Run the project using: cd ${projectName} && xs-dev run`)
@@ -147,13 +175,19 @@ const command = buildCommand({
       io: {
         kind: 'boolean',
         brief:
-          'Add ECMA-419 standard API support to generated project; defaults to false',
+          'Add ECMA-419 standard API support to generated project; defaults to true',
+        optional: true,
+      },
+      manifest: {
+        kind: 'boolean',
+        brief:
+          'Use manifest.json file for project configuration instead of package.json; defaults to false',
         optional: true,
       },
       example: {
         kind: 'parsed',
         brief:
-          'Name or path of an example project as the base for the generated project; use --list-examples to select interactively',
+          'Name or path of an example project as the base for the generated project; omit a name or use --list-examples to select interactively',
         parse: String,
         optional: true,
       },
