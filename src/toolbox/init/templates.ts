@@ -37,85 +37,88 @@ export async function createManifest({
   await writeFile(target, template, { encoding: 'utf8' })
 }
 
-export async function createPackageJSON({ target, io, projectName, typescript }: CreatePackageJSONOptions): Promise<void> {
+export async function createPackageJSON({
+  target,
+  io,
+  projectName,
+  typescript,
+}: CreatePackageJSONOptions): Promise<void> {
   const name = projectName.split('/').pop()
   const packageJSON = {
     name,
-    main: typescript ? "dist/main.js" : "main.js",
-    type: "module",
-    description: "A starter project for embedded JS",
+    main: typescript ? 'dist/main.js' : 'main.js',
+    type: 'module',
+    description: 'A starter project for embedded JS',
     scripts: {
-      "build": "xs-dev build",
-      "start": "xs-dev run"
+      build: 'xs-dev build',
+      start: 'xs-dev run',
     } as Record<string, string>,
     devDependencies: {} as Record<string, string>,
-    moddable: {} as Record<string, unknown>
+    moddable: {} as Record<string, unknown>,
   }
 
   if (typescript) {
-    packageJSON.scripts["prebuild"] = "tsc"
-    packageJSON.scripts["prestart"] = packageJSON.scripts["prebuild"]
+    packageJSON.scripts['prebuild'] = 'tsc'
+    packageJSON.scripts['prestart'] = packageJSON.scripts['prebuild']
 
-    packageJSON.devDependencies["@moddable/typings"] = "^5.3.0"
-    packageJSON.devDependencies["typescript"] = "^5.7.2"
+    packageJSON.devDependencies['@moddable/typings'] = '^5.3.0'
+    packageJSON.devDependencies['typescript'] = '^5.7.2'
   }
 
   if (io) {
     packageJSON.moddable = {
       manifest: {
         build: {
-          MODULES: "$(MODDABLE)/modules"
+          MODULES: '$(MODDABLE)/modules',
         },
-        include: [
-          "$(MODULES)/io/manifest.json"
-        ]
-      }
-
+        include: ['$(MODULES)/io/manifest.json'],
+      },
     }
   }
 
-  await writeFile(target, JSON.stringify(packageJSON, null, 2), { encoding: 'utf8' })
+  await writeFile(target, JSON.stringify(packageJSON, null, 2), {
+    encoding: 'utf8',
+  })
 }
 
-export async function createTSConfig({ target }: TemplateBuilderOptions): Promise<void> {
+export async function createTSConfig({
+  target,
+}: TemplateBuilderOptions): Promise<void> {
   const tsconfig = {
-    "compilerOptions": {
-      "incremental": true,
-      "lib": [
-        "es2022"
-      ],
-      "outDir": "dist",
-      "module": "es2022",
-      "sourceMap": true,
-      "target": "ES2022",
-      "checkJs": true,
-      "baseUrl": ".",
-      "paths": {
-        "*": [
-          "*",
-          "node_modules/@moddable/typings/*"
-        ]
+    compilerOptions: {
+      incremental: true,
+      lib: ['es2022'],
+      outDir: 'dist',
+      module: 'es2022',
+      sourceMap: true,
+      target: 'ES2022',
+      checkJs: true,
+      baseUrl: '.',
+      paths: {
+        '*': ['*', 'node_modules/@moddable/typings/*'],
       },
-      "types": [
-        "./node_modules/@moddable/typings/xs",
-        "./node_modules/@moddable/typings/mcpack",
-        "./node_modules/@moddable/typings/embedded_provider/builtin.d.ts",
-        "./node_modules/@moddable/typings/embedded_io/_common.d.ts",
-        "./node_modules/@moddable/typings/embedded_io/analog.d.ts",
-        "./node_modules/@moddable/typings/embedded_io/digital.d.ts",
-        "./node_modules/@moddable/typings/embedded_io/digitalbank.d.ts",
-        "./node_modules/@moddable/typings/embedded_io/i2c.d.ts",
-        "./node_modules/@moddable/typings/embedded_io/pulsecount.d.ts",
-        "./node_modules/@moddable/typings/embedded_io/pwm.d.ts",
-        "./node_modules/@moddable/typings/embedded_io/serial.d.ts",
-        "./node_modules/@moddable/typings/embedded_io/smbus.d.ts",
-        "./node_modules/@moddable/typings/embedded_io/spi.d.ts",
-        "./node_modules/@moddable/typings/embedded_io/system.d.ts",
-        "./node_modules/@moddable/typings/global.d.ts"
-      ]
-    }
+      types: [
+        './node_modules/@moddable/typings/xs',
+        './node_modules/@moddable/typings/mcpack',
+        './node_modules/@moddable/typings/embedded_provider/builtin.d.ts',
+        './node_modules/@moddable/typings/embedded_io/_common.d.ts',
+        './node_modules/@moddable/typings/embedded_io/analog.d.ts',
+        './node_modules/@moddable/typings/embedded_io/digital.d.ts',
+        './node_modules/@moddable/typings/embedded_io/digitalbank.d.ts',
+        './node_modules/@moddable/typings/embedded_io/i2c.d.ts',
+        './node_modules/@moddable/typings/embedded_io/pulsecount.d.ts',
+        './node_modules/@moddable/typings/embedded_io/pwm.d.ts',
+        './node_modules/@moddable/typings/embedded_io/serial.d.ts',
+        './node_modules/@moddable/typings/embedded_io/smbus.d.ts',
+        './node_modules/@moddable/typings/embedded_io/spi.d.ts',
+        './node_modules/@moddable/typings/embedded_io/system.d.ts',
+        './node_modules/@moddable/typings/global.d.ts',
+      ],
+    },
   }
-  await writeFile(target, JSON.stringify(tsconfig, null, 2), { encoding: 'utf8' })
+  await writeFile(target, JSON.stringify(tsconfig, null, 2), {
+    encoding: 'utf8',
+  })
 }
 
 export async function createMain({

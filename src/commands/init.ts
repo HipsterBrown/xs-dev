@@ -61,14 +61,14 @@ const command = buildCommand({
           const filteredChoices = choices.filter((choice) =>
             choice.includes(String(example)),
           )
-            ; ({ example: selectedExample } = await prompt.ask([
-              {
-                type: 'autocomplete',
-                name: 'example',
-                message: 'Here are the available examples templates:',
-                choices: filteredChoices.length > 0 ? filteredChoices : choices,
-              },
-            ]))
+          ;({ example: selectedExample } = await prompt.ask([
+            {
+              type: 'autocomplete',
+              name: 'example',
+              message: 'Here are the available examples templates:',
+              choices: filteredChoices.length > 0 ? filteredChoices : choices,
+            },
+          ]))
         }
 
         // copy files into new project directory
@@ -91,9 +91,9 @@ const command = buildCommand({
         const includes = [
           io
             ? [
-              '"$(MODDABLE)/modules/io/manifest.json"',
-              '"$(MODDABLE)/examples/manifest_net.json"',
-            ]
+                '"$(MODDABLE)/modules/io/manifest.json"',
+                '"$(MODDABLE)/examples/manifest_net.json"',
+              ]
             : '"$(MODDABLE)/examples/manifest_base.json"',
           typescript && '"$(MODDABLE)/examples/manifest_typings.json"',
         ]
@@ -105,27 +105,43 @@ const command = buildCommand({
           ? ',\n  defines: {\n    async_main: 1\n  }'
           : ''
 
-        const { createManifest, createMain, createPackageJSON, createTSConfig } = await import(
-          '../toolbox/init/templates'
-        )
+        const {
+          createManifest,
+          createMain,
+          createPackageJSON,
+          createTSConfig,
+        } = await import('../toolbox/init/templates')
 
-        const fileTasks = [createMain({
-          target: `${projectName}/main.${typescript ? 'ts' : 'js'}`,
-          legacy: manifest,
-        })]
+        const fileTasks = [
+          createMain({
+            target: `${projectName}/main.${typescript ? 'ts' : 'js'}`,
+            legacy: manifest,
+          }),
+        ]
 
         if (manifest) {
-          fileTasks.push(createManifest({
-            target: `${projectName}/manifest.json`,
-            includes,
-            defines,
-          }))
+          fileTasks.push(
+            createManifest({
+              target: `${projectName}/manifest.json`,
+              includes,
+              defines,
+            }),
+          )
         } else {
-          fileTasks.push(createPackageJSON({ target: `${projectName}/package.json`, projectName, typescript, io }))
+          fileTasks.push(
+            createPackageJSON({
+              target: `${projectName}/package.json`,
+              projectName,
+              typescript,
+              io,
+            }),
+          )
         }
 
         if (typescript) {
-          fileTasks.push(createTSConfig({ target: `${projectName}/tsconfig.json` }))
+          fileTasks.push(
+            createTSConfig({ target: `${projectName}/tsconfig.json` }),
+          )
         }
 
         await Promise.all(fileTasks)
