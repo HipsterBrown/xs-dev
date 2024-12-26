@@ -16,12 +16,10 @@ const command = buildCommand({
   },
   async func(this: LocalContext, flags: UpdateOptions) {
     const currentPlatform: Device = platformType().toLowerCase() as Device
-    const {
-      device = DEVICE_ALIAS[currentPlatform],
-      branch,
-      release = 'latest',
-    } = flags
-    const { default: update } = await import(`../toolbox/update/${device}`)
+    const { device = currentPlatform, branch, release = 'latest' } = flags
+    const { default: update } = await import(
+      `../toolbox/update/${DEVICE_ALIAS[device]}`
+    )
     await update({ branch, release })
   },
   parameters: {
