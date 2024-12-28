@@ -1,7 +1,7 @@
 import os from 'os'
 import { promisify } from 'util'
 import { chmod } from 'fs'
-import { print, system, filesystem } from 'gluegun'
+import { print, system, filesystem, prompt } from 'gluegun'
 import { INSTALL_PATH, MODDABLE_REPO, XSBUG_LOG_PATH } from '../setup/constants'
 import type { SetupArgs } from '../setup/types'
 import {
@@ -32,6 +32,7 @@ export default async function ({ branch, release }: SetupArgs): Promise<void> {
     'makefiles',
     'lin',
   )
+  let rebuildTools = false
 
   if (release !== undefined && (branch === undefined || branch === null)) {
     // get tag for current repo
@@ -46,98 +47,117 @@ export default async function ({ branch, release }: SetupArgs): Promise<void> {
       process.exit(0)
     }
 
+    if (remoteRelease.assets.length === 0) {
+      print.warning(
+        `Moddable release ${release} does not have any pre-built assets.`,
+      )
+      rebuildTools = await prompt.confirm(
+        'Would you like to continue updating and build the SDK locally?',
+        false,
+      )
+
+      if (!rebuildTools) {
+        print.info(
+          'Please select another release version with pre-built assets: https://github.com/Moddable-OpenSource/moddable/releases',
+        )
+        process.exit(0)
+      }
+    }
+
     const spinner = print.spin()
     spinner.start('Updating Moddable SDK!')
-
-    const BIN_PATH = filesystem.resolve(
-      INSTALL_PATH,
-      'build',
-      'bin',
-      'lin',
-      'release',
-    )
-    const DEBUG_BIN_PATH = filesystem.resolve(
-      INSTALL_PATH,
-      'build',
-      'bin',
-      'lin',
-      'debug',
-    )
 
     filesystem.remove(process.env.MODDABLE)
     await system.spawn(
       `git clone ${MODDABLE_REPO} ${INSTALL_PATH} --depth 1 --branch ${remoteRelease.tag_name} --single-branch`,
     )
 
-    filesystem.dir(BIN_PATH)
-    filesystem.dir(DEBUG_BIN_PATH)
-
-    const isArm = os.arch() === 'arm64'
-    const assetName = isArm
-      ? 'moddable-tools-lin64arm.zip'
-      : 'moddable-tools-lin64.zip'
-
-    spinner.info('Downloading release tools')
-    await downloadReleaseTools({
-      writePath: BIN_PATH,
-      assetName,
-      release: remoteRelease,
-    })
-
-    spinner.info('Updating tool permissions')
-    const tools = filesystem.list(BIN_PATH) ?? []
-    await Promise.all(
-      tools.map(async (tool) => {
-        await chmodPromise(filesystem.resolve(BIN_PATH, tool), 0o751)
-        await filesystem.copyAsync(
-          filesystem.resolve(BIN_PATH, tool),
-          filesystem.resolve(DEBUG_BIN_PATH, tool),
-        )
-      }),
-    )
-
-    spinner.info('Reinstalling simulator')
-    filesystem.dir(
-      filesystem.resolve(
-        BUILD_DIR,
-        '..',
-        '..',
-        'tmp',
+    if (!rebuildTools) {
+      const BIN_PATH = filesystem.resolve(
+        INSTALL_PATH,
+        'build',
+        'bin',
+        'lin',
+        'release',
+      )
+      const DEBUG_BIN_PATH = filesystem.resolve(
+        INSTALL_PATH,
+        'build',
+        'bin',
         'lin',
         'debug',
-        'simulator',
-      ),
-    )
-    await system.exec(
-      `mcconfig -m -p x-lin ${filesystem.resolve(
-        INSTALL_PATH,
-        'tools',
-        'xsbug',
-        'manifest.json',
-      )}`,
-      { process },
-    )
-    await system.exec(
-      `mcconfig -m -p x-lin ${filesystem.resolve(
-        INSTALL_PATH,
-        'tools',
-        'mcsim',
-        'manifest.json',
-      )}`,
-      { process },
-    )
-    await execWithSudo('make install', {
-      cwd: BUILD_DIR,
-      stdout: process.stdout,
-    })
-    if (system.which('npm') !== null) {
-      spinner.start('Installing xsbug-log dependencies')
-      await system.exec('npm install', { cwd: XSBUG_LOG_PATH })
-      spinner.succeed()
+      )
+
+      filesystem.dir(BIN_PATH)
+      filesystem.dir(DEBUG_BIN_PATH)
+
+      const isArm = os.arch() === 'arm64'
+      const assetName = isArm
+        ? 'moddable-tools-lin64arm.zip'
+        : 'moddable-tools-lin64.zip'
+
+      spinner.info('Downloading release tools')
+      await downloadReleaseTools({
+        writePath: BIN_PATH,
+        assetName,
+        release: remoteRelease,
+      })
+
+      spinner.info('Updating tool permissions')
+      const tools = filesystem.list(BIN_PATH) ?? []
+      await Promise.all(
+        tools.map(async (tool) => {
+          await chmodPromise(filesystem.resolve(BIN_PATH, tool), 0o751)
+          await filesystem.copyAsync(
+            filesystem.resolve(BIN_PATH, tool),
+            filesystem.resolve(DEBUG_BIN_PATH, tool),
+          )
+        }),
+      )
+
+      spinner.info('Reinstalling simulator')
+      filesystem.dir(
+        filesystem.resolve(
+          BUILD_DIR,
+          '..',
+          '..',
+          'tmp',
+          'lin',
+          'debug',
+          'simulator',
+        ),
+      )
+      await system.exec(
+        `mcconfig -m -p x-lin ${filesystem.resolve(
+          INSTALL_PATH,
+          'tools',
+          'xsbug',
+          'manifest.json',
+        )}`,
+        { process },
+      )
+      await system.exec(
+        `mcconfig -m -p x-lin ${filesystem.resolve(
+          INSTALL_PATH,
+          'tools',
+          'mcsim',
+          'manifest.json',
+        )}`,
+        { process },
+      )
+      await execWithSudo('make install', {
+        cwd: BUILD_DIR,
+        stdout: process.stdout,
+      })
+      if (system.which('npm') !== null) {
+        spinner.start('Installing xsbug-log dependencies')
+        await system.exec('npm install', { cwd: XSBUG_LOG_PATH })
+        spinner.succeed()
+      }
+      spinner.succeed(
+        'Moddable SDK successfully updated! Start the xsbug.app and run the "helloworld example": xs-dev run --example helloworld',
+      )
     }
-    spinner.succeed(
-      'Moddable SDK successfully updated! Start the xsbug.app and run the "helloworld example": xs-dev run --example helloworld',
-    )
   }
 
   if (typeof branch === 'string') {
@@ -157,16 +177,21 @@ export default async function ({ branch, release }: SetupArgs): Promise<void> {
     const spinner = print.spin()
     spinner.start('Updating Moddable SDK!')
 
-    spinner.start('Stashing any unsaved changes before committing')
+    spinner.info('Stashing any unsaved changes before committing')
     await system.exec('git stash', { cwd: process.env.MODDABLE })
     await system.exec(`git pull origin ${branch}`, {
       cwd: process.env.MODDABLE,
     })
+    rebuildTools = true
+    spinner.succeed()
+  }
+
+  if (rebuildTools) {
+    const spinner = print.spin()
+    spinner.start('Rebuilding platform tools')
 
     await system.exec('rm -rf build/{tmp,bin}', { cwd: process.env.MODDABLE })
-    spinner.succeed()
 
-    spinner.start('Rebuilding platform tools')
     await system.exec('make', {
       cwd: BUILD_DIR,
       stdout: process.stdout,

@@ -10,7 +10,6 @@ import { sourceEnvironment } from '../system/exec'
 export default async function (): Promise<void> {
   const OS = platformType().toLowerCase()
   const PICO_BRANCH = '2.0.0'
-  const PICO_EXTRAS_REPO = 'https://github.com/raspberrypi/pico-extras'
   const PICO_ROOT =
     process.env.PICO_ROOT ?? filesystem.resolve(INSTALL_DIR, 'pico')
   const PICO_SDK_DIR = filesystem.resolve(PICO_ROOT, 'pico-sdk')
@@ -25,7 +24,7 @@ export default async function (): Promise<void> {
   const spinner = print.spin()
   spinner.start('Starting pico tooling update')
 
-  // 0. ensure pico instal directory and Moddable exists
+  // 0. ensure pico install directory and Moddable exists
   if (!moddableExists()) {
     spinner.fail(
       'Moddable platform tooling required. Run `xs-dev setup` before trying again.',
@@ -85,10 +84,6 @@ export default async function (): Promise<void> {
 
   if (filesystem.exists(PICO_EXTRAS_DIR) === 'dir') {
     spinner.start('Updating pico-extras repo')
-    await system.exec(
-      `git clone --depth 1 --single-branch -b sdk-${PICO_BRANCH} ${PICO_EXTRAS_REPO} ${PICO_EXTRAS_DIR}`,
-      { stdout: process.stdout },
-    )
     await system.spawn(`git fetch --all --tags`, { cwd: PICO_EXTRAS_DIR })
     await system.spawn(`git checkout sdk-${PICO_BRANCH}`, {
       cwd: PICO_EXTRAS_DIR,
