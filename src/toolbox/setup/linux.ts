@@ -1,7 +1,7 @@
 import os from 'os'
 import { promisify } from 'util'
 import { chmod } from 'fs'
-import { filesystem, print, system } from 'gluegun'
+import { filesystem, print, system, prompt } from 'gluegun'
 import {
   INSTALL_DIR,
   INSTALL_PATH,
@@ -43,6 +43,7 @@ export default async function ({
     'lin',
   )
 
+  let buildTools = false
   const spinner = print.spin()
   spinner.start('Beginning setup...')
 
@@ -73,38 +74,59 @@ export default async function ({
     if (release !== undefined && (branch === undefined || branch === null)) {
       spinner.start('Getting latest Moddable-OpenSource/moddable release')
       const remoteRelease = await fetchRelease(release)
+
+      if (remoteRelease.assets.length === 0) {
+        print.warning(
+          `Moddable release ${release} does not have any pre-built assets.`,
+        )
+        buildTools = await prompt.confirm(
+          'Would you like to continue setting up and build the SDK locally?',
+          true,
+        )
+
+        if (!buildTools) {
+          print.info(
+            'Please select another release version with pre-built assets: https://github.com/Moddable-OpenSource/moddable/releases',
+          )
+          process.exit(0)
+        }
+      }
+
       await system.spawn(
         `git clone ${sourceRepo} ${INSTALL_PATH} --depth 1 --branch ${remoteRelease.tag_name} --single-branch`,
       )
 
-      filesystem.dir(BIN_PATH)
-      filesystem.dir(DEBUG_BIN_PATH)
+      if (!buildTools) {
+        filesystem.dir(BIN_PATH)
+        filesystem.dir(DEBUG_BIN_PATH)
 
-      const isArm = os.arch() === 'arm64'
-      const assetName = isArm
-        ? 'moddable-tools-lin64arm.zip'
-        : 'moddable-tools-lin64.zip'
-      spinner.info('Downloading release tools')
-      await downloadReleaseTools({
-        writePath: BIN_PATH,
-        assetName,
-        release: remoteRelease,
-      })
-      const tools = filesystem.list(BIN_PATH) ?? []
-      await Promise.all(
-        tools.map(async (tool) => {
-          await chmodPromise(filesystem.resolve(BIN_PATH, tool), 0o751)
-          await filesystem.copyAsync(
-            filesystem.resolve(BIN_PATH, tool),
-            filesystem.resolve(DEBUG_BIN_PATH, tool),
-          )
-        }),
-      )
+        const isArm = os.arch() === 'arm64'
+        const assetName = isArm
+          ? 'moddable-tools-lin64arm.zip'
+          : 'moddable-tools-lin64.zip'
+        spinner.info('Downloading release tools')
+        await downloadReleaseTools({
+          writePath: BIN_PATH,
+          assetName,
+          release: remoteRelease,
+        })
+        const tools = filesystem.list(BIN_PATH) ?? []
+        await Promise.all(
+          tools.map(async (tool) => {
+            await chmodPromise(filesystem.resolve(BIN_PATH, tool), 0o751)
+            await filesystem.copyAsync(
+              filesystem.resolve(BIN_PATH, tool),
+              filesystem.resolve(DEBUG_BIN_PATH, tool),
+            )
+          }),
+        )
+      }
     } else {
       spinner.start(`Cloning ${sourceRepo} repo`)
       await system.spawn(
         `git clone ${sourceRepo} ${INSTALL_PATH} --depth 1 --branch ${branch} --single-branch`,
       )
+      buildTools = true
     }
     spinner.succeed()
   }
@@ -117,7 +139,7 @@ export default async function ({
   await upsert(EXPORTS_FILE_PATH, `export PATH="${BIN_PATH}:$PATH"`)
 
   // 5. Build the Moddable command line tools, simulator, and debugger from the command line:
-  if (typeof branch === 'string') {
+  if (buildTools) {
     spinner.start('Building platform tooling')
     await system.exec('make', { cwd: BUILD_DIR, stdout: process.stdout })
     spinner.succeed()

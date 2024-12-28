@@ -1,4 +1,4 @@
-import { print, filesystem, system } from 'gluegun'
+import { print, filesystem, system, prompt } from 'gluegun'
 import os from 'os'
 import { promisify } from 'util'
 import { chmod } from 'fs'
@@ -56,6 +56,8 @@ export default async function ({
     process.exit(1)
   }
 
+  let buildTools = false
+
   const spinner = print.spin()
   spinner.start('Beginning setup...')
 
@@ -76,62 +78,83 @@ export default async function ({
       if (release !== undefined && (branch === undefined || branch === null)) {
         spinner.start('Getting latest Moddable-OpenSource/moddable release')
         const remoteRelease = await fetchRelease(release)
+
+        if (remoteRelease.assets.length === 0) {
+          print.warning(
+            `Moddable release ${release} does not have any pre-built assets.`,
+          )
+          buildTools = await prompt.confirm(
+            'Would you like to continue setting up and build the SDK locally?',
+            true,
+          )
+
+          if (!buildTools) {
+            print.info(
+              'Please select another release version with pre-built assets: https://github.com/Moddable-OpenSource/moddable/releases',
+            )
+            process.exit(0)
+          }
+        }
+
         await system.spawn(
           `git clone ${sourceRepo} ${INSTALL_PATH} --depth 1 --branch ${remoteRelease.tag_name} --single-branch`,
         )
 
-        filesystem.dir(BIN_PATH)
-        filesystem.dir(DEBUG_BIN_PATH)
+        if (!buildTools) {
+          filesystem.dir(BIN_PATH)
+          filesystem.dir(DEBUG_BIN_PATH)
 
-        spinner.info('Downloading release tools')
-        try {
-          const universalAssetName = `moddable-tools-macuniversal.zip`
-          await downloadReleaseTools({
-            writePath: BIN_PATH,
-            assetName: universalAssetName,
-            release: remoteRelease,
-          })
-        } catch (error: unknown) {
-          if (error instanceof MissingReleaseAssetError) {
-            const isArm = os.arch() === 'arm64'
-            const assetName = isArm
-              ? 'moddable-tools-mac64arm.zip'
-              : 'moddable-tools-mac64.zip'
+          spinner.info('Downloading release tools')
+          try {
+            const universalAssetName = `moddable-tools-macuniversal.zip`
             await downloadReleaseTools({
               writePath: BIN_PATH,
-              assetName,
+              assetName: universalAssetName,
               release: remoteRelease,
             })
-          } else {
-            throw error as Error
-          }
-        }
-        const tools = filesystem.list(BIN_PATH) ?? []
-        await Promise.all(
-          tools.map(async (tool) => {
-            if (tool.endsWith('.app')) {
-              const mainPath = filesystem.resolve(
-                BIN_PATH,
-                tool,
-                'Contents',
-                'MacOS',
-                'main',
-              )
-              await chmodPromise(mainPath, 0o751)
+          } catch (error: unknown) {
+            if (error instanceof MissingReleaseAssetError) {
+              const isArm = os.arch() === 'arm64'
+              const assetName = isArm
+                ? 'moddable-tools-mac64arm.zip'
+                : 'moddable-tools-mac64.zip'
+              await downloadReleaseTools({
+                writePath: BIN_PATH,
+                assetName,
+                release: remoteRelease,
+              })
             } else {
-              await chmodPromise(filesystem.resolve(BIN_PATH, tool), 0o751)
+              throw error as Error
             }
-            await filesystem.copyAsync(
-              filesystem.resolve(BIN_PATH, tool),
-              filesystem.resolve(DEBUG_BIN_PATH, tool),
-            )
-          }),
-        )
+          }
+          const tools = filesystem.list(BIN_PATH) ?? []
+          await Promise.all(
+            tools.map(async (tool) => {
+              if (tool.endsWith('.app')) {
+                const mainPath = filesystem.resolve(
+                  BIN_PATH,
+                  tool,
+                  'Contents',
+                  'MacOS',
+                  'main',
+                )
+                await chmodPromise(mainPath, 0o751)
+              } else {
+                await chmodPromise(filesystem.resolve(BIN_PATH, tool), 0o751)
+              }
+              await filesystem.copyAsync(
+                filesystem.resolve(BIN_PATH, tool),
+                filesystem.resolve(DEBUG_BIN_PATH, tool),
+              )
+            }),
+          )
+        }
       } else {
         spinner.start(`Cloning ${sourceRepo} repo`)
         await system.spawn(
           `git clone ${sourceRepo} ${INSTALL_PATH} --depth 1 --branch ${branch} --single-branch`,
         )
+        buildTools = true
       }
       spinner.succeed()
     } catch (error) {
@@ -148,7 +171,7 @@ export default async function ({
   await upsert(EXPORTS_FILE_PATH, `export PATH="${BIN_PATH}:$PATH"`)
 
   // 3. cd into makefiles dir for platform, run `make`
-  if (branch !== undefined || branch !== null) {
+  if (buildTools) {
     try {
       spinner.start('Building platform tooling')
       await system.exec('make', { cwd: BUILD_DIR, stdout: process.stdout })

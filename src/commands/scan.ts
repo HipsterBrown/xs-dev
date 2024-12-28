@@ -31,16 +31,18 @@ const command = buildCommand({
       )
     }
 
-    spinner.start('Scanning for devices...')
-
     const hasPicotool = system.which('picotool') !== null
 
     if (hasPicotool) {
       try {
+        spinner.start('Found picotool, rebooting device before scanning')
         await system.exec('picotool reboot -fa')
         await sleep(1000)
+        spinner.stop()
       } catch {}
     }
+
+    spinner.start('Scanning for devices...')
 
     const ports = await SerialPort.list()
     const result: Array<
@@ -50,10 +52,7 @@ const command = buildCommand({
         .filter((port) => port.serialNumber !== undefined)
         .map(async (port) => {
           try {
-            if (
-              port.manufacturer?.includes('Raspberry Pi') === true &&
-              hasPicotool
-            ) {
+            if (port.vendorId === '2e8a' && hasPicotool) {
               const device = await findBySerialNumber(port.serialNumber ?? '')
               const bus = String(device?.busNumber)
               const address = String(device?.deviceAddress)

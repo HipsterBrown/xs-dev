@@ -212,6 +212,7 @@ export default async function ({
     spinner.fail(`Error setting up install directory: ${String(error)}`)
     process.exit(1)
   }
+  let buildTools = false
 
   if (filesystem.exists(INSTALL_PATH) !== false) {
     spinner.info('Moddable repo already installed')
@@ -220,39 +221,59 @@ export default async function ({
       if (release !== undefined && (branch === undefined || branch === null)) {
         spinner.start(`Getting latest Moddable-OpenSource/moddable release`)
         const remoteRelease = await fetchRelease(release)
+
+        if (remoteRelease.assets.length === 0) {
+          print.warning(
+            `Moddable release ${release} does not have any pre-built assets.`,
+          )
+          buildTools = await prompt.confirm(
+            'Would you like to continue setting up and build the SDK locally?',
+            true,
+          )
+
+          if (!buildTools) {
+            print.info(
+              'Please select another release version with pre-built assets: https://github.com/Moddable-OpenSource/moddable/releases',
+            )
+            process.exit(0)
+          }
+        }
+
         await system.spawn(
           `git clone ${sourceRepo} ${INSTALL_PATH} --depth 1 --branch ${remoteRelease.tag_name} --single-branch`,
         )
 
-        filesystem.dir(BIN_PATH)
-        filesystem.dir(DEBUG_BIN_PATH)
+        if (!buildTools) {
+          filesystem.dir(BIN_PATH)
+          filesystem.dir(DEBUG_BIN_PATH)
 
-        spinner.info('Downloading release tools')
+          spinner.info('Downloading release tools')
 
-        const assetName = `moddable-tools-win64.zip`
-        await downloadReleaseTools({
-          writePath: BIN_PATH,
-          assetName,
-          release: remoteRelease,
-        })
+          const assetName = `moddable-tools-win64.zip`
+          await downloadReleaseTools({
+            writePath: BIN_PATH,
+            assetName,
+            release: remoteRelease,
+          })
 
-        const tools = filesystem.list(BIN_PATH) ?? []
-        await Promise.all(
-          tools.map(async (tool) => {
-            await filesystem.copyAsync(
-              filesystem.resolve(BIN_PATH, tool),
-              filesystem.resolve(DEBUG_BIN_PATH, tool),
-            )
-          }),
-        )
-
-        spinner.succeed()
+          const tools = filesystem.list(BIN_PATH) ?? []
+          await Promise.all(
+            tools.map(async (tool) => {
+              await filesystem.copyAsync(
+                filesystem.resolve(BIN_PATH, tool),
+                filesystem.resolve(DEBUG_BIN_PATH, tool),
+              )
+            }),
+          )
+        }
       } else {
         spinner.start(`Cloning ${sourceRepo} repo`)
         await system.spawn(
           `git clone ${sourceRepo} ${INSTALL_PATH} --depth 1 --branch ${branch} --single-branch`,
         )
+        buildTools = true
       }
+      spinner.succeed()
     } catch (error) {
       spinner.fail(`Error cloning moddable repo: ${String(error)}`)
       process.exit(1)
@@ -271,7 +292,7 @@ export default async function ({
   }
 
   // 3. build tools if needed
-  if (typeof branch === 'string') {
+  if (buildTools) {
     try {
       spinner.start(`Building Moddable SDK tools`)
       await system.exec(`build.bat`, { cwd: BUILD_DIR, stdout: process.stdout })
