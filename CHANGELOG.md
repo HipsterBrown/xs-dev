@@ -1,3 +1,15 @@
+# v0.36.1 (Sat Dec 28 2024)
+
+#### 🚀 Enhancement
+
+- fix(setup,update):  build SDK tools if not included in tagged release [#200](https://github.com/HipsterBrown/xs-dev/pull/200) ([@HipsterBrown](https://github.com/HipsterBrown))
+
+#### Authors: 1
+
+- Nick Hehr ([@HipsterBrown](https://github.com/HipsterBrown))
+
+---
+
 # v0.36.0 (Thu Dec 26 2024)
 
 #### 💥 Breaking Change
