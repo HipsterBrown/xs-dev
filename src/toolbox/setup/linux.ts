@@ -76,6 +76,7 @@ export default async function ({
       const remoteRelease = await fetchRelease(release)
 
       if (remoteRelease.assets.length === 0) {
+        spinner.stop()
         print.warning(
           `Moddable release ${release} does not have any pre-built assets.`,
         )
@@ -90,6 +91,7 @@ export default async function ({
           )
           process.exit(0)
         }
+        spinner.start()
       }
 
       await system.spawn(
