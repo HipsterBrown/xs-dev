@@ -1,3 +1,19 @@
+# v0.36.2 (Wed Jan 01 2025)
+
+:tada: This release contains work from a new contributor! :tada:
+
+Thank you, Ayachika Kitazaki ([@kitazaki](https://github.com/kitazaki)), for all your work!
+
+#### 🐛 Bug Fix
+
+- fixed: stop spinner before prompt [#203](https://github.com/HipsterBrown/xs-dev/pull/203) ([@kitazaki](https://github.com/kitazaki))
+
+#### Authors: 1
+
+- Ayachika Kitazaki ([@kitazaki](https://github.com/kitazaki))
+
+---
+
 # v0.36.1 (Sat Dec 28 2024)
 
 #### 🚀 Enhancement
