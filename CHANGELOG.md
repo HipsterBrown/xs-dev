@@ -1,3 +1,15 @@
+# v0.36.3 (Fri Jan 03 2025)
+
+#### 🐛 Bug Fix
+
+- fixed: xs-dev doctor shows the current environment of Moddable SDK [#205](https://github.com/HipsterBrown/xs-dev/pull/205) ([@kitazaki](https://github.com/kitazaki))
+
+#### Authors: 1
+
+- Ayachika Kitazaki ([@kitazaki](https://github.com/kitazaki))
+
+---
+
 # v0.36.2 (Wed Jan 01 2025)
 
 :tada: This release contains work from a new contributor! :tada:
