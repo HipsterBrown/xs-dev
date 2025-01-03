@@ -13,13 +13,17 @@ const finishedPromise = promisify(finished)
 
 export function moddableExists(): boolean {
   const OS = platformType().toLowerCase() as Device
-  const platformDir = DEVICE_ALIAS[OS]
+  const platformDir = DEVICE_ALIAS[OS].substr(0,3)
   const releaseTools = filesystem.exists(
     filesystem.resolve(INSTALL_PATH, 'build', 'bin', platformDir, 'release'),
   )
   const debugTools = filesystem.exists(
     filesystem.resolve(INSTALL_PATH, 'build', 'bin', platformDir, 'debug'),
   )
+  //console.log("debug0")
+  //console.log(INSTALL_PATH)
+  //console.log(DEVICE_ALIAS)
+  //console.log(OS+","+platformDir+","+releaseTools+","+debugTools)
   return (
     process.env.MODDABLE !== undefined &&
     filesystem.exists(process.env.MODDABLE) === 'dir' &&
@@ -32,6 +36,7 @@ function isGitRepo(path: string): boolean {
 }
 
 export async function getModdableVersion(): Promise<string | null> {
+  //console.log("debug1")
   if (moddableExists() && isGitRepo(process.env.MODDABLE ?? '')) {
     const tags = await system.run('git tag -l --sort=-taggerdate', {
       cwd: process.env.MODDABLE,
