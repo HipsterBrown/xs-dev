@@ -1,3 +1,15 @@
+# v0.36.4 (Sun Jan 05 2025)
+
+#### 🚀 Enhancement
+
+- feat(setup/update): add interactive mode [#206](https://github.com/HipsterBrown/xs-dev/pull/206) ([@HipsterBrown](https://github.com/HipsterBrown))
+
+#### Authors: 1
+
+- Nick Hehr ([@HipsterBrown](https://github.com/HipsterBrown))
+
+---
+
 # v0.36.3 (Fri Jan 03 2025)
 
 #### 🐛 Bug Fix
