@@ -15,12 +15,12 @@ This should output something like this:
 
 ```
 xs-dev environment info:
-  CLI Version                0.19.3
+  CLI Version                0.36.5
   OS                         Darwin
   Arch                       arm64
-  NodeJS Version             v16.14.0 (/path/to/node)
-  Python Version             3.10.9 (/path/to/python)
-  Moddable SDK Version       3.5.0 (/path/to/moddable)
+  NodeJS Version             v22.10.0 (/path/to/node)
+  Python Version             3.12.8 (/path/to/python)
+  Moddable SDK Version       5.3.3 (/path/to/moddable)
   Supported target devices   mac, esp32, esp8266, pico
   ESP32 IDF Directory        /path/to/esp32/esp-idf
   ESP8266 Base Directory     /path/to/esp

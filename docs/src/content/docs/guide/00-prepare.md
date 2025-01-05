@@ -34,9 +34,9 @@ These are not the only available editors, so feel free to do your own research a
 
 ## NodeJS & Package Manager (optional)
 
-While [NodeJS](https://nodejs.org/en/) is not required for [Moddable XS](https://github.com/Moddable-OpenSource/moddable) projects, it is a dependency for installing and using the [`xs-dev` CLI](https://xs-dev.js.org/).
+While [NodeJS](https://nodejs.org/en/) is not required for [Moddable XS](https://github.com/Moddable-OpenSource/moddable) projects, it is a dependency for installing and using the [`xs-dev` CLI](https://xs-dev.js.org/). It supports at least the [active Long Term Support (LTS) version](https://nodejs.org/en/about/previous-releases#nodejs-releases).
 
-Node can be [downloaded directly from the website](https://nodejs.org/en/download/), however using one of the following version managers can help with quickly switching to recommended versions of the tooling in the future:
+NodeJS can be [downloaded directly from the website](https://nodejs.org/en/download/), however using one of the following version managers can help with quickly switching to recommended versions of the tooling in the future:
 
 - [mise](https://mise.jdx.dev/getting-started.html#_1-install-mise-cli)
 - [`pnpm env`](https://pnpm.io/cli/env)
@@ -44,7 +44,7 @@ Node can be [downloaded directly from the website](https://nodejs.org/en/downloa
 - [fnm](https://github.com/Schniz/fnm)
 - [asdf](https://asdf-vm.com/guide/getting-started.html#_4-install-a-plugin)
 
-Node comes with [npm](https://docs.npmjs.com/cli/v8/commands/npm) as the included package manager, but there are other options available if needed:
+NodeJS comes with [npm](https://docs.npmjs.com/cli/v8/commands/npm) as the included package manager, but there are other options available if needed:
 
 - [pnpm](https://pnpm.io/installation)
 - [yarn](https://yarnpkg.com/)
@@ -72,6 +72,7 @@ Simulators are fun and everything, but controlling hardware with JavaScript is e
 - [ESP8266](https://github.com/Moddable-OpenSource/moddable/blob/public/documentation/devices/esp8266.md)
 - [ESP32](https://github.com/Moddable-OpenSource/moddable/blob/public/documentation/devices/esp32.md)
 - [Raspberry Pi Pico](https://github.com/Moddable-OpenSource/moddable/blob/public/documentation/devices/pico.md)
+- [Nordic nRF52840](https://github.com/Moddable-OpenSource/moddable/blob/public/documentation/devices/nrf52.md)
 
 Each platform has a variety of features and form factors to support whatever you might dream up. This guide will do its best to provide code and diagrams that match the expectations of your chosen device(s) but cannot promise comprehensive coverage of every piece of hardware in existence.
 
