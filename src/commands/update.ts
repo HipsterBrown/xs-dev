@@ -29,7 +29,10 @@ const command = buildCommand({
     await update({
       branch,
       release,
-      interactive: Boolean(process.env.CI) || interactive,
+      interactive:
+        typeof process.env.CI !== 'undefined'
+          ? process.env.CI === 'false'
+          : interactive,
     })
   },
   parameters: {

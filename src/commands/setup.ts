@@ -79,12 +79,16 @@ const command = buildCommand({
       'linux',
     ]
     const { default: setup } = await import(`../toolbox/setup/${target}`)
+
     if (platformDevices.includes(target)) {
       await setup({
         branch,
         release,
         sourceRepo,
-        interactive: Boolean(process.env.CI) || interactive,
+        interactive:
+          typeof process.env.CI !== 'undefined'
+            ? process.env.CI === 'false'
+            : interactive,
       })
     } else {
       await setup({ branch, release })
