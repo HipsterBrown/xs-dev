@@ -8,6 +8,7 @@ interface UpdateOptions {
   device?: Device
   branch?: 'public' | string
   release?: 'latest' | string
+  interactive?: boolean
 }
 
 const command = buildCommand({
@@ -16,11 +17,20 @@ const command = buildCommand({
   },
   async func(this: LocalContext, flags: UpdateOptions) {
     const currentPlatform: Device = platformType().toLowerCase() as Device
-    const { device = currentPlatform, branch, release = 'latest' } = flags
+    const {
+      device = currentPlatform,
+      branch,
+      release = 'latest',
+      interactive = true,
+    } = flags
     const { default: update } = await import(
       `../toolbox/update/${DEVICE_ALIAS[device]}`
     )
-    await update({ branch, release })
+    await update({
+      branch,
+      release,
+      interactive: Boolean(process.env.CI) || interactive,
+    })
   },
   parameters: {
     flags: {
@@ -43,6 +53,12 @@ const command = buildCommand({
         parse: String,
         brief:
           'The tagged release to use as source for Moddable SDK update; defaults to `latest`',
+        optional: true,
+      },
+      interactive: {
+        kind: 'boolean',
+        brief:
+          'Choose whether to show any prompts or automatically accept them; defaults to true unless CI environment variable is true.',
         optional: true,
       },
     },

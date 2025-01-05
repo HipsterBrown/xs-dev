@@ -14,6 +14,7 @@ interface SetupOptions {
   branch?: SetupArgs['branch']
   release?: SetupArgs['release']
   'source-repo'?: string
+  interactive?: boolean
 }
 const command = buildCommand({
   docs: {
@@ -29,6 +30,7 @@ const command = buildCommand({
       branch,
       release = 'latest',
       'source-repo': sourceRepo = MODDABLE_REPO,
+      interactive = true,
     } = flags
     let target: Device =
       DEVICE_ALIAS[device ?? ('' as Device)] ?? DEVICE_ALIAS[currentPlatform]
@@ -78,7 +80,12 @@ const command = buildCommand({
     ]
     const { default: setup } = await import(`../toolbox/setup/${target}`)
     if (platformDevices.includes(target)) {
-      await setup({ branch, release, sourceRepo })
+      await setup({
+        branch,
+        release,
+        sourceRepo,
+        interactive: Boolean(process.env.CI) || interactive,
+      })
     } else {
       await setup({ branch, release })
     }
@@ -122,6 +129,12 @@ const command = buildCommand({
         parse: String,
         brief:
           'URL for remote repository to use as source for Moddable SDK set up; defaults to upstream project',
+        optional: true,
+      },
+      interactive: {
+        kind: 'boolean',
+        brief:
+          'Choose whether to show any prompts or automatically accept them; defaults to true unless CI environment variable is true.',
         optional: true,
       },
     },

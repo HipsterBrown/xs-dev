@@ -13,7 +13,7 @@ const finishedPromise = promisify(finished)
 
 export function moddableExists(): boolean {
   const OS = platformType().toLowerCase() as Device
-  const platformDir = DEVICE_ALIAS[OS].substr(0,3)
+  const platformDir = DEVICE_ALIAS[OS].substr(0, 3)
   const releaseTools = filesystem.exists(
     filesystem.resolve(INSTALL_PATH, 'build', 'bin', platformDir, 'release'),
   )
