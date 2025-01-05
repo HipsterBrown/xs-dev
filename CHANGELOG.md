@@ -1,3 +1,15 @@
+# v0.36.5 (Sun Jan 05 2025)
+
+#### 🚀 Enhancement
+
+- fix(setup/update): use correct interactive logic for CI env var ([@HipsterBrown](https://github.com/HipsterBrown))
+
+#### Authors: 1
+
+- Nick Hehr ([@HipsterBrown](https://github.com/HipsterBrown))
+
+---
+
 # v0.36.4 (Sun Jan 05 2025)
 
 #### 🚀 Enhancement
