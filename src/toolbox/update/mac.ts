@@ -14,7 +14,11 @@ import { sourceEnvironment } from '../system/exec'
 
 const chmodPromise = promisify(chmod)
 
-export default async function ({ branch, release }: SetupArgs): Promise<void> {
+export default async function ({
+  branch,
+  release,
+  interactive,
+}: SetupArgs): Promise<void> {
   print.info('Checking for SDK changes')
 
   await sourceEnvironment()
@@ -46,10 +50,12 @@ export default async function ({ branch, release }: SetupArgs): Promise<void> {
       print.warning(
         `Moddable release ${release} does not have any pre-built assets.`,
       )
-      rebuildTools = await prompt.confirm(
-        'Would you like to continue updating and build the SDK locally?',
-        false,
-      )
+      rebuildTools =
+        !interactive ||
+        (await prompt.confirm(
+          'Would you like to continue updating and build the SDK locally?',
+          false,
+        ))
 
       if (!rebuildTools) {
         print.info(

@@ -37,6 +37,12 @@ The [`moddable` git repo](https://github.com/Moddable-OpenSource/moddable) is cl
 
 This command will create (and update) an environment configuration file called `~/.local/share/xs-dev-export.sh` (on Mac & Linux) or `Moddable.bat` (on Windows). This file will be sourced by `xs-dev` when running commands (on Mac & Linux) or through the custom command prompt (on Windows), to set environment variables and call other "exports" files for embedded tooling.
 
+## Interactive Input
+
+By default, this command may prompt during the setup process. To override this behavior, use the `--noInteractive` flag.
+
+If there is a environment variable called `CI` set to `true`, then this command will be non-interactive and automatically accept all prompts.
+
 ## Tagged Release
 
 The default behavior of this command for Moddable developer tooling pulls the [latest release tooling](https://github.com/Moddable-OpenSource/moddable/releases) and source code for the associated tagged branch. This provides a known-working state for the SDK and avoids needing to build the tooling on the local machine. 

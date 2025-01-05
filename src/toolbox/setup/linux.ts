@@ -19,6 +19,7 @@ export default async function ({
   sourceRepo,
   branch,
   release,
+  interactive,
 }: PlatformSetupArgs): Promise<void> {
   print.info('Setting up Linux tools!')
 
@@ -80,10 +81,12 @@ export default async function ({
         print.warning(
           `Moddable release ${release} does not have any pre-built assets.`,
         )
-        buildTools = await prompt.confirm(
-          'Would you like to continue setting up and build the SDK locally?',
-          true,
-        )
+        buildTools =
+          !interactive ||
+          (await prompt.confirm(
+            'Would you like to continue setting up and build the SDK locally?',
+            true,
+          ))
 
         if (!buildTools) {
           print.info(
