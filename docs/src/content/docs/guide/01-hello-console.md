@@ -96,12 +96,12 @@ Running [`xs-dev doctor` command](/features/doctor) will display relevant info a
 
 ```
 xs-dev environment info:
-  CLI Version                0.19.3
+  CLI Version                0.36.5
   OS                         Darwin
   Arch                       arm64
-  NodeJS Version             v16.14.0 (/path/to/node)
-  Python Version             3.10.9 (/path/to/python)
-  Moddable SDK Version       3.5.0 (/path/to/moddable)
+  NodeJS Version             v22.10.0 (/path/to/node)
+  Python Version             3.12.8 (/path/to/python)
+  Moddable SDK Version       5.3.3 (/path/to/moddable)
   Supported target devices   mac
 
 If this is related to an error when using the CLI, please create an issue at "https://github.com/hipsterbrown/xs-dev/issues/new" with the above info.

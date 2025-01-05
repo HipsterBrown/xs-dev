@@ -10,7 +10,7 @@ The Moddable SDK and associated dev board tooling is incredibly empowering for e
 
 ## Requirements
 
-[Node.js >= v16](https://nodejs.org/en/)
+[Node.js](https://nodejs.org/en/), at least the [active LTS version](https://nodejs.org/en/about/previous-releases#nodejs-releases).
 
 _If you've never installed Node.js before, check out the [getting started guide for xs-dev](https://hipsterbrown.github.io/xs-dev/guide/00-prepare#nodejs-package-manager-optional)._
 
