@@ -11,6 +11,12 @@ Stay up to date with the latest tooling from Moddable and supported device targe
 xs-dev update
 ```
 
+## Interactive Input
+
+By default, this command may prompt during the update process. To override this behavior, use the `--noInteractive` flag.
+
+If there is a environment variable called `CI` set to `true`, then this command will be non-interactive and automatically accept all prompts.
+
 ## Tagged Release
 
 The default behavior of this command for Moddable developer tooling pulls the [latest release tooling](https://github.com/Moddable-OpenSource/moddable/releases) and source code for the associated tagged branch. This provides a known-working state for the SDK and avoids needing to build the tooling on the local machine. 
