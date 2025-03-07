@@ -146,6 +146,7 @@ Thanks goes to these wonderful people ([emoji key](https://allcontributors.org/d
     <td align="center"><a href="https://github.com/mkellner"><img src="https://avatars.githubusercontent.com/u/6822704?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Michael Kellner</b></sub></a><br /><a href="https://github.com/HipsterBrown/xs-dev/commits?author=mkellner" title="Code">💻</a></td>
     <td align="center"><a href="http://brainofdane.com/"><img src="https://avatars.githubusercontent.com/u/2007067?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Dane Henson</b></sub></a><br /><a href="https://github.com/HipsterBrown/xs-dev/commits?author=dahenson" title="Code">💻</a></td>
     <td align="center"><a href="https://github.com/kitazaki"><img src="https://avatars.githubusercontent.com/u/23477407?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Ayachika Kitazaki</b></sub></a><br /><a href="https://github.com/HipsterBrown/xs-dev/commits?author=kitazaki" title="Code">💻</a></td>
+    <td align="center"><a href="https://andrew.nonetoohappy.buzz/"><img src="https://avatars.githubusercontent.com/u/18542095?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Andrew Chou</b></sub></a><br /><a href="https://github.com/HipsterBrown/xs-dev/commits?author=achou11" title="Code">💻</a></td>
   </tr>
 </table>
 

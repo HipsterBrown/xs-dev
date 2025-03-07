@@ -128,6 +128,15 @@
       "contributions": [
         "code"
       ]
+    },
+    {
+      "login": "achou11",
+      "name": "Andrew Chou",
+      "avatar_url": "https://avatars.githubusercontent.com/u/18542095?v=4",
+      "profile": "https://andrew.nonetoohappy.buzz/",
+      "contributions": [
+        "code"
+      ]
     }
   ],
   "contributorsPerLine": 7
