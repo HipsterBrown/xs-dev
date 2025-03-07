@@ -1,3 +1,24 @@
+# v0.37.0 (Fri Mar 07 2025)
+
+:tada: This release contains work from a new contributor! :tada:
+
+Thank you, Andrew Chou ([@achou11](https://github.com/achou11)), for all your work!
+
+#### 💥 Breaking Change
+
+- feat(esp32): update esp-idf version to 5.4.0 [#210](https://github.com/HipsterBrown/xs-dev/pull/210) ([@achou11](https://github.com/achou11))
+
+#### 📝 Documentation
+
+- docs: update NodeJS version requirements [#207](https://github.com/HipsterBrown/xs-dev/pull/207) ([@HipsterBrown](https://github.com/HipsterBrown))
+
+#### Authors: 2
+
+- Andrew Chou ([@achou11](https://github.com/achou11))
+- Nick Hehr ([@HipsterBrown](https://github.com/HipsterBrown))
+
+---
+
 # v0.36.5 (Sun Jan 05 2025)
 
 #### 🚀 Enhancement
