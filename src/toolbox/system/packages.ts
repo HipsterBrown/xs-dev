@@ -1,5 +1,5 @@
 import type { Dependency } from './types'
-import { execWithSudo } from '../system/exec'
+import { pkexec } from '../system/exec'
 import { print, system } from 'gluegun'
 
 /**
@@ -40,13 +40,13 @@ export async function installPackages(packages: Dependency[]): Promise<void> {
   const packageManager = system.which('apt')
 
   if (packageManager !== null && packageManager !== undefined) {
-    await execWithSudo(
+    await pkexec(
       `${packageManager} install --yes ${packages.map((p) => p.packageName).join(' ')}`,
       { stdout: process.stdout },
     )
   } else {
     print.warning(
-      'xs-dev attempted to install dependencies, but your Linux distribution is not yet supported',
+      'xs-dev attempted to install dependencies, but does not yet support your package manager',
     )
     print.warning(
       `Please install these dependencies before running this command again: ${packages.map((p) => p.packageName).join(', ')}`,

@@ -37,6 +37,9 @@ export async function execWithSudo(
   await system.exec(`sudo --askpass --preserve-env ${command}`, options)
 }
 
+/**
+ * Use Policykit pkexec to run the command as an admin user
+ */
 export async function pkexec(
   command: string,
   options: Record<string, unknown> = {},
