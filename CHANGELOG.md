@@ -1,3 +1,15 @@
+# v0.37.1 (Sat Jul 19 2025)
+
+#### 🚀 Enhancement
+
+- Improve linux dependency check [#195](https://github.com/HipsterBrown/xs-dev/pull/195) ([@dahenson](https://github.com/dahenson))
+
+#### Authors: 1
+
+- Dane Henson ([@dahenson](https://github.com/dahenson))
+
+---
+
 # v0.37.0 (Fri Mar 07 2025)
 
 :tada: This release contains work from a new contributor! :tada:
