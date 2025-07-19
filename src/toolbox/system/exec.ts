@@ -38,6 +38,16 @@ export async function execWithSudo(
 }
 
 /**
+ * Use Policykit pkexec to run the command as an admin user
+ */
+export async function pkexec(
+  command: string,
+  options: Record<string, unknown> = {},
+): Promise <void> {
+  await system.exec(`pkexec ${command}`, options)
+}
+
+/**
  * Utility for updating in-memory process.env after running a command
  */
 async function updateProcessEnv(command: string): Promise<void> {
