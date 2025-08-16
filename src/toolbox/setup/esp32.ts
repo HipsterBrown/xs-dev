@@ -14,7 +14,7 @@ export default async function (): Promise<void> {
   const isWindows = OS === 'windows_nt'
   const ESP_IDF_REPO = 'https://github.com/espressif/esp-idf.git'
   const ESP_BRANCH_V4 = 'v4.4.3'
-  const ESP_BRANCH_V5 = 'v5.4'
+  const ESP_BRANCH_V5 = 'v5.5'
   const ESP32_DIR = filesystem.resolve(INSTALL_DIR, 'esp32')
   const IDF_PATH = filesystem.resolve(ESP32_DIR, 'esp-idf')
 
