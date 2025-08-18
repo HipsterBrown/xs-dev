@@ -1,3 +1,15 @@
+# v0.38.0 (Mon Aug 18 2025)
+
+#### 💥 Breaking Change
+
+- feat(esp32): update esp-idf version to 5.5 [#214](https://github.com/HipsterBrown/xs-dev/pull/214) ([@stc1988](https://github.com/stc1988))
+
+#### Authors: 1
+
+- Satoshi Tanaka ([@stc1988](https://github.com/stc1988))
+
+---
+
 # v0.37.1 (Sat Jul 19 2025)
 
 #### 🚀 Enhancement
