@@ -5,6 +5,7 @@ import { getModdableVersion, moddableExists } from '../setup/moddable'
 import upsert from '../patching/upsert'
 import { installDeps as installMacDeps } from '../setup/esp32/mac'
 import { installDeps as installLinuxDeps } from '../setup/esp32/linux'
+import { getExpectedEspIdfVersion } from '../setup/esp32'
 import { sourceEnvironment } from '../system/exec'
 
 export default async function (): Promise<void> {
@@ -43,11 +44,13 @@ export default async function (): Promise<void> {
   if (filesystem.exists(IDF_PATH) === 'dir') {
     spinner.start('Updating esp-idf repo')
     const moddableVersion = (await getModdableVersion()) ?? ''
+    const expectedEspIdfVersion = await getExpectedEspIdfVersion()
     const branch =
-      moddableVersion.includes('branch') ||
+      expectedEspIdfVersion ??
+      (moddableVersion.includes('branch') ||
       semver.satisfies(moddableVersion ?? '', '>= 4.2.x')
         ? ESP_BRANCH_V5
-        : ESP_BRANCH_V4
+        : ESP_BRANCH_V4)
 
     if (
       branch === ESP_BRANCH_V5 &&
