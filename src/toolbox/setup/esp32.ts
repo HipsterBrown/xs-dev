@@ -1,6 +1,6 @@
 import { print, filesystem, system, semver } from 'gluegun'
 import { type as platformType } from 'os'
-import { INSTALL_DIR, EXPORTS_FILE_PATH } from './constants'
+import { INSTALL_DIR, EXPORTS_FILE_PATH, INSTALL_PATH } from './constants'
 import { moddableExists, getModdableVersion } from './moddable'
 import upsert from '../patching/upsert'
 import { installDeps as installMacDeps } from './esp32/mac'
@@ -43,11 +43,13 @@ export default async function (): Promise<void> {
   if (filesystem.exists(IDF_PATH) === false) {
     spinner.start('Cloning esp-idf repo')
     const moddableVersion = (await getModdableVersion()) ?? ''
+    const expectedEspIdfVersion = await getExpectedEspIdfVersion()
     const branch =
-      moddableVersion.includes('branch') ||
+      expectedEspIdfVersion ??
+      (moddableVersion.includes('branch') ||
       semver.satisfies(moddableVersion ?? '', '>= 4.2.x')
         ? ESP_BRANCH_V5
-        : ESP_BRANCH_V4
+        : ESP_BRANCH_V4)
     await system.spawn(
       `git clone --depth 1 --single-branch -b ${branch} --recursive ${ESP_IDF_REPO} ${IDF_PATH}`,
     )
@@ -112,4 +114,14 @@ export default async function (): Promise<void> {
   Test out the setup by starting a new ${isWindows ? 'Moddable Command Prompt' : 'terminal session'}, plugging in your device, and running: xs-dev run --example helloworld --device=esp32
   If there is trouble finding the correct port, pass the "--port" flag to the above command with the ${isWindows ? 'COM Port' : 'path to the /dev.cu.*'} that matches your device.
   `)
+}
+
+export async function getExpectedEspIdfVersion(): Promise<string | null> {
+  if (moddableExists()) {
+    const es32DeviceManifest = filesystem.read(
+      filesystem.resolve(INSTALL_PATH, 'build', 'devices', 'esp32', 'manifest.json'), 'json'
+    )
+    return es32DeviceManifest?.build?.EXPECTED_ESP_IDF ?? null
+  }
+  return null
 }
