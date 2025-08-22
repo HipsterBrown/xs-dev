@@ -1,3 +1,15 @@
+# v0.38.1 (Fri Aug 22 2025)
+
+#### 🚀 Enhancement
+
+- Track the dependent version of ESP-IDF [#217](https://github.com/HipsterBrown/xs-dev/pull/217) ([@stc1988](https://github.com/stc1988))
+
+#### Authors: 1
+
+- Satoshi Tanaka ([@stc1988](https://github.com/stc1988))
+
+---
+
 # v0.38.0 (Mon Aug 18 2025)
 
 #### 💥 Breaking Change
