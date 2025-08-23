@@ -6,8 +6,9 @@ import { Octokit, type RestEndpointMethodTypes } from '@octokit/rest'
 import { Extract as ZipExtract } from 'unzip-stream'
 import axios from 'axios'
 import { INSTALL_PATH } from './constants'
-import type { Device } from '../../types'
+import type { Device, Result } from '../../types'
 import { DEVICE_ALIAS } from '../prompt/devices'
+import { success, failure, wrapAsync } from '../system/errors'
 
 const finishedPromise = promisify(finished)
 
@@ -31,8 +32,12 @@ function isGitRepo(path: string): boolean {
   return filesystem.exists(filesystem.resolve(path, '.git')) === 'dir'
 }
 
-export async function getModdableVersion(): Promise<string | null> {
-  if (moddableExists() && isGitRepo(process.env.MODDABLE ?? '')) {
+export async function getModdableVersion(): Promise<Result<string | null>> {
+  if (!moddableExists() || !isGitRepo(process.env.MODDABLE ?? '')) {
+    return success(null)
+  }
+
+  return wrapAsync(async () => {
     const tags = await system.run('git tag -l --sort=-taggerdate', {
       cwd: process.env.MODDABLE,
     })
@@ -52,8 +57,7 @@ export async function getModdableVersion(): Promise<string | null> {
       cwd: process.env.MODDABLE,
     })
     return `branch: ${currentBranch.trim()}, commit: ${latestCommit}`
-  }
-  return null
+  })
 }
 
 type ExtractFromArray<Item extends readonly unknown[]> =
@@ -64,22 +68,24 @@ type GitHubRelease = ExtractFromArray<
 
 export async function fetchRelease(
   release: 'latest' | string,
-): Promise<GitHubRelease> {
-  const octokit = new Octokit()
-  if (release === 'latest') {
-    const { data: latestRelease } = await octokit.rest.repos.getLatestRelease({
-      owner: 'Moddable-OpenSource',
-      repo: 'moddable',
-    })
-    return latestRelease
-  } else {
-    const { data: taggedRelease } = await octokit.rest.repos.getReleaseByTag({
-      owner: 'Moddable-OpenSource',
-      repo: 'moddable',
-      tag: release,
-    })
-    return taggedRelease
-  }
+): Promise<Result<GitHubRelease>> {
+  return wrapAsync(async () => {
+    const octokit = new Octokit()
+    if (release === 'latest') {
+      const { data: latestRelease } = await octokit.rest.repos.getLatestRelease({
+        owner: 'Moddable-OpenSource',
+        repo: 'moddable',
+      })
+      return latestRelease
+    } else {
+      const { data: taggedRelease } = await octokit.rest.repos.getReleaseByTag({
+        owner: 'Moddable-OpenSource',
+        repo: 'moddable',
+        tag: release,
+      })
+      return taggedRelease
+    }
+  })
 }
 
 export class MissingReleaseAssetError extends Error {
@@ -98,19 +104,21 @@ export async function downloadReleaseTools({
   writePath,
   assetName,
   release,
-}: DownloadToolsArgs): Promise<void> {
+}: DownloadToolsArgs): Promise<Result<void>> {
   const moddableTools = release.assets.find(({ name }) => name === assetName)
 
   if (moddableTools === undefined) {
-    throw new MissingReleaseAssetError(assetName)
+    return failure(`Unable to find release asset matching ${assetName}`)
   }
 
-  const zipWriter = ZipExtract({
-    path: writePath,
+  return wrapAsync(async () => {
+    const zipWriter = ZipExtract({
+      path: writePath,
+    })
+    const response = await axios.get(moddableTools.browser_download_url, {
+      responseType: 'stream',
+    })
+    response.data.pipe(zipWriter)
+    await finishedPromise(zipWriter)
   })
-  const response = await axios.get(moddableTools.browser_download_url, {
-    responseType: 'stream',
-  })
-  response.data.pipe(zipWriter)
-  await finishedPromise(zipWriter)
 }
