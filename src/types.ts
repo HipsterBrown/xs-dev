@@ -16,6 +16,15 @@ export type Device =
   | 'pico'
   | 'nrf52'
 
+// Result types for improved error handling
+export type Result<T, E = string> = 
+  | { success: true; data: T }
+  | { success: false; error: E }
+
+export type SetupResult = Result<void>
+export type BuildResult = Result<string> // output path
+export type UpdateResult = Result<void>
+
 export interface XSDevToolbox extends GluegunToolbox {
   setup: Record<
     Device,

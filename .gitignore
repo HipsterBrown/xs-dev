@@ -10,3 +10,6 @@ build/
 .npmrc
 
 .env
+
+# Planning documents
+plans/
