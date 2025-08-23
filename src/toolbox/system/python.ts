@@ -1,4 +1,6 @@
 import { system } from 'gluegun'
+import type { Result } from '../../types'
+import { success, wrapAsync } from './errors'
 
 export function detectPython(): string | null {
   if (system.which('python') !== null) return 'python'
@@ -6,12 +8,14 @@ export function detectPython(): string | null {
   return null
 }
 
-export async function getPythonVersion(): Promise<string | null> {
+export async function getPythonVersion(): Promise<Result<string | null>> {
   const python = detectPython()
-  if (python !== null) {
-    return (
-      (await system.run(`${python} --version`)).split(' ').pop()?.trim() ?? null
-    )
+  if (python === null) {
+    return success(null)
   }
-  return null
+
+  return wrapAsync(async () => {
+    const output = await system.run(`${python} --version`)
+    return output.split(' ').pop()?.trim() ?? null
+  })
 }
