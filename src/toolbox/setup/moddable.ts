@@ -32,9 +32,9 @@ function isGitRepo(path: string): boolean {
   return filesystem.exists(filesystem.resolve(path, '.git')) === 'dir'
 }
 
-export async function getModdableVersion(): Promise<Result<string | null>> {
+export async function getModdableVersion(): Promise<Result<string>> {
   if (!moddableExists() || !isGitRepo(process.env.MODDABLE ?? '')) {
-    return success(null)
+    return success('')
   }
 
   return wrapAsync(async () => {

@@ -1,11 +1,13 @@
 import { system, semver, print } from 'gluegun'
 import type { GluegunPrint } from 'gluegun'
 import { ensureHomebrew } from '../homebrew'
+import { Result } from '../../../types'
+import { failure, successVoid } from '../../system/errors'
 
 // brew install python3, cmake, ninja, dfu-util
 export async function installDeps(
   spinner: ReturnType<GluegunPrint['spin']>,
-): Promise<void> {
+): Promise<Result<void>> {
   spinner.stop()
 
   try {
@@ -13,7 +15,7 @@ export async function installDeps(
   } catch (error: unknown) {
     if (error instanceof Error) {
       print.info(`${error.message} python 3, cmake, ninja, dfu-util`)
-      process.exit(1)
+      return failure(error.message)
     }
   }
 
@@ -44,7 +46,7 @@ export async function installDeps(
           print.error(
             'Apple Command Line Tools must be installed in order to install python from Homebrew. Please run `xcode-select --install` before trying again.',
           )
-          process.exit(1)
+          return failure('Apple Command Line Tools must be installed in order to install python from Homebrew. Please run `xcode-select --install` before trying again.')
         }
       }
     }
@@ -84,4 +86,5 @@ export async function installDeps(
       'Unable to install pyserial through the availble Python environment. This may be required by the ESP-IDF. If you encounter issues, please try manually installing pyserial.',
     )
   }
+  return successVoid()
 }

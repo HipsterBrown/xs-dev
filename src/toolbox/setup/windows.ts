@@ -10,6 +10,8 @@ import ws from 'windows-shortcuts'
 import { promisify } from 'util'
 import type { PlatformSetupArgs } from './types'
 import { downloadReleaseTools, fetchRelease } from './moddable'
+import { Result } from '../../types'
+import { failure, successVoid } from '../system/errors'
 
 const wsPromise = promisify(ws.create)
 
@@ -36,7 +38,7 @@ export async function openModdableCommandPrompt(): Promise<void> {
 
 export async function ensureModdableCommandPrompt(
   spinner: ReturnType<GluegunPrint['spin']>,
-): Promise<void> {
+): Promise<Result<void>> {
   if (
     process.env.ISMODDABLECOMMANDPROMPT === undefined ||
     process.env.ISMODDABLECOMMANDPROMPT === ''
@@ -51,11 +53,12 @@ export async function ensureModdableCommandPrompt(
         'Moddable tooling required. Run `xs-dev setup` before trying again.',
       )
     }
-    process.exit(1)
+    return failure('Moddable tooling required.')
   }
+  return successVoid()
 }
 
-export default async function ({
+export default async function({
   sourceRepo,
   branch,
   release,

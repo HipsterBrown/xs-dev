@@ -1,10 +1,12 @@
 import type { GluegunPrint } from 'gluegun'
 import type { Dependency } from '../../system/types'
 import { findMissingDependencies, installPackages } from '../../system/packages'
+import { isFailure, successVoid, unwrapOr } from '../../system/errors'
+import { Result } from '../../../types'
 
 export async function installDeps(
   spinner: ReturnType<GluegunPrint['spin']>,
-): Promise<void> {
+): Promise<Result<void>> {
   const dependencies: Dependency[] = [
     { name: 'bison', packageName: 'bison', type: 'binary' },
     { name: 'ccache', packageName: 'ccache', type: 'binary' },
@@ -23,9 +25,11 @@ export async function installDeps(
     { name: 'wget', packageName: 'wget', type: 'binary' },
   ]
 
-  const missingDependencies = await findMissingDependencies(dependencies)
+  const missingDependencies = unwrapOr(await findMissingDependencies(dependencies), [])
   if (missingDependencies.length !== 0) {
-    await installPackages(missingDependencies)
+    const result = await installPackages(missingDependencies)
+    if (isFailure(result)) return result
   }
   spinner.succeed()
+  return successVoid()
 }

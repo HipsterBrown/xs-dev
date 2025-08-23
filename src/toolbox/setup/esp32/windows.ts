@@ -3,6 +3,8 @@ import type { GluegunPrint } from 'gluegun'
 import axios from 'axios'
 import { promisify } from 'util'
 import { finished } from 'stream'
+import { Result } from '../../../types'
+import { successVoid } from '../../system/errors'
 
 const finishedPromise = promisify(finished)
 
@@ -13,10 +15,10 @@ export async function installDeps(
   spinner: ReturnType<GluegunPrint['spin']>,
   ESP32_DIR: string,
   IDF_PATH: string,
-): Promise<void> {
+): Promise<Result<void>> {
   if (esp32Exists()) {
     print.info(`ESP-IDF tooling exists at ${process.env.IDF_PATH ?? ''}`)
-    return
+    return successVoid()
   }
 
   spinner.start('Downloading ESP-IDF Tools Installer')
@@ -39,6 +41,7 @@ export async function installDeps(
   spinner.start('Running ESP-IDF Tools Installer')
   await system.exec(`start /B ${destination}`)
   spinner.succeed()
+  return successVoid()
 }
 
 export function esp32Exists(): boolean {
