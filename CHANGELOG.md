@@ -1,3 +1,15 @@
+# v1.0.0 (Sat Aug 30 2025)
+
+#### 🚀 Enhancement
+
+- refactor(setup): introduce Result type for clearer error handling [#218](https://github.com/HipsterBrown/xs-dev/pull/218) ([@HipsterBrown](https://github.com/HipsterBrown))
+
+#### Authors: 1
+
+- Nick Hehr ([@HipsterBrown](https://github.com/HipsterBrown))
+
+---
+
 # v0.38.1 (Fri Aug 22 2025)
 
 #### 🚀 Enhancement
