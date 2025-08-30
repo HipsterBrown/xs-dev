@@ -12,10 +12,13 @@ const CLI_PATH = resolve(__dirname, '..', 'build', 'src', 'cli.js')
  */
 const runCLI = async (command: string, options: { cwd?: string } = {}) => {
   try {
-    const { stdout, stderr } = await execAsync(`node "${CLI_PATH}" ${command}`, {
-      cwd: options.cwd || process.cwd(),
-      timeout: 30000, // 30 second timeout
-    })
+    const { stdout, stderr } = await execAsync(
+      `node "${CLI_PATH}" ${command}`,
+      {
+        cwd: options.cwd || process.cwd(),
+        timeout: 30000, // 30 second timeout
+      },
+    )
     return { stdout: stdout.trim(), stderr: stderr.trim(), code: 0 }
   } catch (error: any) {
     return {
@@ -59,7 +62,9 @@ describe('CLI Integration Tests', () => {
       const result = await runCLI('nonexistent-command')
 
       expect(result.code).not.toBe(0)
-      expect(result.stderr || result.stdout).toMatch(/no command registered|unknown|not found|invalid/i)
+      expect(result.stderr || result.stdout).toMatch(
+        /no command registered|unknown|not found|invalid/i,
+      )
     }, 10000)
 
     it('should validate missing required arguments', async () => {
@@ -92,14 +97,18 @@ describe('CLI Integration Tests', () => {
     it('should handle include command outside of project directory', async () => {
       const result = await runCLI('include base/timer')
       expect(result.code).not.toBe(0)
-      expect(result.stderr || result.stdout).toMatch(/manifest\.json.*not found|project directory/i)
+      expect(result.stderr || result.stdout).toMatch(
+        /manifest\.json.*not found|project directory/i,
+      )
     }, 10000)
 
     it('should handle remove command outside of project directory', async () => {
       const result = await runCLI('remove timer')
 
       expect(result.code).not.toBe(0)
-      expect(result.stderr || result.stdout).toMatch(/manifest\.json.*not found|project directory/i)
+      expect(result.stderr || result.stdout).toMatch(
+        /manifest\.json.*not found|project directory/i,
+      )
     }, 10000)
 
     it('should handle setup command gracefully when dependencies missing', async () => {
@@ -109,14 +118,18 @@ describe('CLI Integration Tests', () => {
       // Since we don't have Moddable SDK installed in test environment,
       // it should fail gracefully with a helpful message
       expect(result.code).not.toBe(0)
-      expect(result.stderr || result.stdout).toMatch(/moddable|required|setup|tooling/i)
+      expect(result.stderr || result.stdout).toMatch(
+        /moddable|required|setup|tooling/i,
+      )
     }, 20000)
 
     it('should show device help information', async () => {
       const result = await runCLI('setup --help')
 
       // Should mention device options in help
-      expect(result.stdout || result.stderr).toMatch(/device|esp32|esp8266|wasm|pico/i)
+      expect(result.stdout || result.stderr).toMatch(
+        /device|esp32|esp8266|wasm|pico/i,
+      )
     }, 10000)
   })
 
