@@ -30,14 +30,14 @@ describe('CLI Integration Tests', () => {
   describe('Basic CLI functionality', () => {
     it('should output version information', async () => {
       const result = await runCLI('--version')
-      
+
       expect(result.code).toBe(0)
       expect(result.stdout).toMatch(/\d+\.\d+\.\d+/)
     }, 10000)
 
     it('should display help information', async () => {
       const result = await runCLI('--help')
-      
+
       expect(result.code).toBe(0)
       expect(result.stdout).toContain('xs-dev')
       expect(result.stdout).toContain('setup')
@@ -47,7 +47,7 @@ describe('CLI Integration Tests', () => {
 
     it('should show command help', async () => {
       const result = await runCLI('setup --help')
-      
+
       expect(result.code).toBe(0)
       expect(result.stdout).toContain('setup')
       expect(result.stdout).toContain('device')
@@ -57,73 +57,64 @@ describe('CLI Integration Tests', () => {
   describe('Error handling', () => {
     it('should handle unknown commands gracefully', async () => {
       const result = await runCLI('nonexistent-command')
-      
+
       expect(result.code).not.toBe(0)
       expect(result.stderr || result.stdout).toMatch(/no command registered|unknown|not found|invalid/i)
     }, 10000)
 
     it('should validate missing required arguments', async () => {
       const result = await runCLI('init') // init requires project name
-      
+
       expect(result.code).not.toBe(0)
       expect(result.stderr || result.stdout).toMatch(/required|name/i)
     }, 10000)
   })
 
   describe('Command functionality', () => {
-    const tempDir = resolve(__dirname, 'temp-test-project')
+    const tempDir = resolve(__dirname, '..', 'test-project')
 
     beforeEach(() => {
       // Clean up any previous test artifacts
-      if (filesystem.exists(tempDir)) {
-        filesystem.remove(tempDir)
-      }
+      filesystem.remove(tempDir)
     })
 
     afterEach(() => {
       // Clean up test artifacts
-      if (filesystem.exists(tempDir)) {
-        filesystem.remove(tempDir)
-      }
+      filesystem.remove(tempDir)
     })
 
     it('should handle init command without MODDABLE env var', async () => {
       const result = await runCLI(`init test-project --typescript`)
-      
-      // Should either succeed or fail gracefully with helpful message
-      if (result.code !== 0) {
-        expect(result.stderr || result.stdout).toMatch(/moddable|environment|setup/i)
-      }
+
+      expect(result.code).toBe(0)
     }, 15000)
 
     it('should handle include command outside of project directory', async () => {
       const result = await runCLI('include base/timer')
-      
       expect(result.code).not.toBe(0)
       expect(result.stderr || result.stdout).toMatch(/manifest\.json.*not found|project directory/i)
     }, 10000)
 
     it('should handle remove command outside of project directory', async () => {
       const result = await runCLI('remove timer')
-      
+
       expect(result.code).not.toBe(0)
       expect(result.stderr || result.stdout).toMatch(/manifest\.json.*not found|project directory/i)
     }, 10000)
 
     it('should handle setup command gracefully when dependencies missing', async () => {
       const result = await runCLI('setup --device wasm')
-      
+
       // Should either succeed or provide helpful error messages
       // Since we don't have Moddable SDK installed in test environment,
       // it should fail gracefully with a helpful message
-      if (result.code !== 0) {
-        expect(result.stderr || result.stdout).toMatch(/moddable|required|setup|tooling/i)
-      }
+      expect(result.code).not.toBe(0)
+      expect(result.stderr || result.stdout).toMatch(/moddable|required|setup|tooling/i)
     }, 20000)
 
     it('should show device help information', async () => {
       const result = await runCLI('setup --help')
-      
+
       // Should mention device options in help
       expect(result.stdout || result.stderr).toMatch(/device|esp32|esp8266|wasm|pico/i)
     }, 10000)
@@ -132,7 +123,7 @@ describe('CLI Integration Tests', () => {
   describe('Doctor command', () => {
     it('should run diagnostic checks', async () => {
       const result = await runCLI('doctor')
-      
+
       expect(result.code).toBe(0)
       expect(result.stdout).toMatch(/node|system|platform/i)
     }, 15000)
@@ -141,13 +132,13 @@ describe('CLI Integration Tests', () => {
   describe('Edge cases and error conditions', () => {
     it('should handle invalid flags gracefully', async () => {
       const result = await runCLI('setup --invalid-flag')
-      
+
       expect(result.code).not.toBe(0)
     }, 10000)
 
     it('should handle empty arguments appropriately', async () => {
       const result = await runCLI('')
-      
+
       // Should show help or error message
       expect(result.stdout || result.stderr).toMatch(/help|usage|command/i)
     }, 10000)

@@ -98,7 +98,10 @@
   },
   "jest": {
     "preset": "ts-jest",
-    "testEnvironment": "node"
+    "testEnvironment": "node",
+    "testPathIgnorePatterns": [
+      "<rootDir>/build/"
+    ]
   },
   "volta": {
     "node": "18.14.0"
