@@ -1,8 +1,10 @@
 import { type GluegunPrint, print, system } from 'gluegun'
+import { failure, successVoid } from '../../system/errors'
+import type { SetupResult } from '../../../types'
 
 export async function installPython(
   spinner: ReturnType<GluegunPrint['spin']>,
-): Promise<void> {
+): Promise<SetupResult> {
   if (system.which('python') === null) {
     // For some reason, system.which does not work with winget. This is a workaround for now.
     try {
@@ -21,7 +23,7 @@ export async function installPython(
       print.info(
         'Please install either Python or winget, then launch a new Command Prompt and re-run this setup.',
       )
-      throw new Error('Python is required')
+      return failure('Python is required')
     }
 
     spinner.start('Installing python from winget')
@@ -30,6 +32,8 @@ export async function installPython(
     print.info(
       'Python successfully installed. Please close this window and launch a new Moddable Command Prompt to refresh environment variables, then re-run this setup.',
     )
-    throw new Error('Command Prompt restart needed')
+    return failure('Command Prompt restart needed')
   }
+
+  return successVoid()
 }

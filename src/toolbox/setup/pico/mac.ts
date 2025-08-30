@@ -1,15 +1,17 @@
 import { type GluegunPrint, print, system } from 'gluegun'
 import { ensureHomebrew, formulaeExists } from '../homebrew'
+import { failure, successVoid } from '../../system/errors'
+import type { SetupResult } from '../../../types'
 
 export async function installDeps(
   spinner: ReturnType<GluegunPrint['spin']>,
-): Promise<void> {
+): Promise<SetupResult> {
   try {
     await ensureHomebrew()
   } catch (error: unknown) {
     if (error instanceof Error) {
       print.info(`${error.message} gcc-arm-embedded, libusb, pkg-config`)
-      process.exit(1)
+      return failure(`${error.message} gcc-arm-embedded, libusb, pkg-config`)
     }
   }
 
@@ -31,4 +33,6 @@ export async function installDeps(
     shell: process.env.SHELL,
   })
   spinner.succeed()
+
+  return successVoid()
 }
