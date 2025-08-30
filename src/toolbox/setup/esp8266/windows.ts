@@ -6,6 +6,8 @@ import { Extract as ZipExtract } from 'unzip-stream'
 import { promisify } from 'util'
 import { addToPath, setEnv } from '../windows'
 import { INSTALL_DIR } from '../constants'
+import { failure, successVoid } from '../../system/errors'
+import type { SetupResult } from '../../../types'
 
 const finishedPromise = promisify(finished)
 
@@ -16,7 +18,7 @@ const CYGWIN = `https://github.com/Moddable-OpenSource/tools/releases/download/v
 
 export async function installPython(
   spinner: ReturnType<GluegunPrint['spin']>,
-): Promise<void> {
+): Promise<SetupResult> {
   if (system.which('python') === null) {
     // For some reason, system.which does not work with winget. This is a workaround for now.
     try {
@@ -35,7 +37,7 @@ export async function installPython(
       print.info(
         'Please install either Python or winget, then launch a new Command Prompt and re-run this setup.',
       )
-      throw new Error('Python is required')
+      return failure('Python is required')
     }
 
     spinner.start('Installing python from winget')
@@ -44,14 +46,16 @@ export async function installPython(
     print.info(
       'Python successfully installed. Please close this window and launch a new Moddable Command Prompt to refresh environment variables, then re-run this setup.',
     )
-    throw new Error('Command Prompt restart needed')
+    return failure('Command Prompt restart needed')
   }
+
+  return successVoid()
 }
 
 export async function installDeps(
   spinner: ReturnType<GluegunPrint['spin']>,
   ESP_DIR: string,
-): Promise<void> {
+): Promise<SetupResult> {
   const ESP_TOOL_DIR = filesystem.resolve(ESP_DIR, ESP_TOOL_VERSION)
   const ESP_TOOL_EXE = filesystem.resolve(ESP_TOOL_DIR, 'esptool.exe')
   const ESP_TOOL_DESTINATION = filesystem.resolve(ESP_DIR, 'esptool.exe')
@@ -82,11 +86,10 @@ export async function installDeps(
   await addToPath(CYGWIN_BIN)
   spinner.succeed()
 
-  try {
-    await installPython(spinner)
-  } catch (error) {
-    // Command Prompt restart needed
-    process.exit(1)
+  const pythonResult = await installPython(spinner)
+  if (!pythonResult.success) {
+    // Command Prompt restart needed or Python is required
+    return pythonResult
   }
 
   if (system.which('pip') === null) {
@@ -98,4 +101,6 @@ export async function installDeps(
   spinner.start('Installing pyserial through pip')
   await system.exec('python -m pip install pyserial')
   spinner.succeed()
+
+  return successVoid()
 }

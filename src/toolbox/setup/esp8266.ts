@@ -14,12 +14,13 @@ import { installDeps as installLinuxDeps } from './esp8266/linux'
 import { installDeps as installWindowsDeps } from './esp8266/windows'
 import { ensureModdableCommandPrompt } from './windows'
 import { DEVICE_ALIAS } from '../prompt/devices'
-import type { Device } from '../../types'
+import type { Device, SetupResult } from '../../types'
 import { sourceEnvironment } from '../system/exec'
+import { failure, successVoid, isFailure } from '../system/errors'
 
 const finishedPromise = promisify(finished)
 
-export default async function (): Promise<void> {
+export default async function (): Promise<SetupResult> {
   const OS = platformType().toLowerCase() as Device
   const isWindows = OS === 'windows_nt'
   const TOOLCHAIN = `https://github.com/Moddable-OpenSource/tools/releases/download/v1.0.0/esp8266.toolchain.${isWindows ? 'win32' : OS}.${isWindows ? 'zip' : 'tgz'}`
@@ -42,11 +43,12 @@ export default async function (): Promise<void> {
     spinner.fail(
       `Moddable tooling required. Run 'xs-dev setup --device ${DEVICE_ALIAS[OS]}' before trying again.`,
     )
-    process.exit(1)
+    return failure(`Moddable tooling required. Run 'xs-dev setup --device ${DEVICE_ALIAS[OS]}' before trying again.`)
   }
 
   if (isWindows) {
-    await ensureModdableCommandPrompt(spinner)
+    const result = await ensureModdableCommandPrompt(spinner)
+    if (isFailure(result)) return result
   }
 
   // 1. ensure ~/.local/share/esp directory
@@ -99,21 +101,22 @@ export default async function (): Promise<void> {
 
   // 5. ensure python, pip, and pyserial are installed
   if (OS === 'darwin') {
-    await installMacDeps(spinner)
+    const result = await installMacDeps(spinner)
+    if (isFailure(result)) return result
   }
 
   if (OS === 'linux') {
-    await installLinuxDeps(spinner)
+    const result = await installLinuxDeps(spinner)
+    if (isFailure(result)) return result
   }
 
   if (isWindows) {
-    try {
-      await installWindowsDeps(spinner, ESP_DIR)
-    } catch (error) {
+    const result = await installWindowsDeps(spinner, ESP_DIR)
+    if (isFailure(result)) {
       print.error(
         `Windows dependencies failed to install. Please review the information above.`,
       )
-      process.exit(1)
+      return result
     }
   }
 
@@ -131,4 +134,6 @@ export default async function (): Promise<void> {
   Test out the setup by starting a new ${isWindows ? 'Moddable Command Prompt' : 'terminal session'}, plugging in your device, and running: xs-dev run --example helloworld --device esp8266
   If there is trouble finding the correct port, pass the "--port" flag to the above command with the path to the "/dev.cu.*" that matches your device.
   `)
+
+  return successVoid()
 }
