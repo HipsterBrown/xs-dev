@@ -7,6 +7,7 @@ import { installDeps as installMacDeps } from '../setup/esp32/mac'
 import { installDeps as installLinuxDeps } from '../setup/esp32/linux'
 import { getExpectedEspIdfVersion } from '../setup/esp32'
 import { sourceEnvironment } from '../system/exec'
+import { isFailure, unwrap } from '../system/errors'
 
 export default async function (): Promise<void> {
   const OS = platformType().toLowerCase()
@@ -43,18 +44,19 @@ export default async function (): Promise<void> {
   // 2. update local esp-idf repo
   if (filesystem.exists(IDF_PATH) === 'dir') {
     spinner.start('Updating esp-idf repo')
-    const moddableVersion = (await getModdableVersion()) ?? ''
+    const moddableVersionResult = await getModdableVersion()
+    const moddableVersion = isFailure(moddableVersionResult) ? '' : unwrap(moddableVersionResult)
     const expectedEspIdfVersion = await getExpectedEspIdfVersion()
     const branch =
       expectedEspIdfVersion ??
       (moddableVersion.includes('branch') ||
-      semver.satisfies(moddableVersion ?? '', '>= 4.2.x')
+      semver.satisfies(moddableVersion || '', '>= 4.2.x')
         ? ESP_BRANCH_V5
         : ESP_BRANCH_V4)
 
     if (
       branch === ESP_BRANCH_V5 &&
-      !semver.satisfies(moddableVersion ?? '', '>= 4.3.8')
+      !semver.satisfies(moddableVersion || '', '>= 4.3.8')
     ) {
       spinner.fail(
         'Latest Moddable SDK is required before updating ESP-IDF. Run `xs-dev update` before trying again.',

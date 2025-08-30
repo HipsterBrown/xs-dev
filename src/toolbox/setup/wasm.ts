@@ -8,7 +8,7 @@ import { ensureHomebrew } from './homebrew'
 import { failure, successVoid } from '../system/errors'
 import type { SetupResult } from '../../types'
 
-export default async function (): Promise<SetupResult> {
+export default async function(): Promise<SetupResult> {
   const OS = platformType().toLowerCase()
   const EMSDK_REPO = 'https://github.com/emscripten-core/emsdk.git'
   const BINARYEN_REPO = 'https://github.com/WebAssembly/binaryen.git'
@@ -21,7 +21,7 @@ export default async function (): Promise<SetupResult> {
   const spinner = print.spin({ stream: process.stdout })
   spinner.start('Setting up wasm simulator tools')
 
-  // 0. ensure wasm instal directory and Moddable exists
+  // 0. ensure wasm install directory and Moddable exists
   if (!moddableExists()) {
     spinner.fail(
       'Moddable platform tooling required. Run `xs-dev setup` before trying again.',

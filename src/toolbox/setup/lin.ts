@@ -14,12 +14,12 @@ import { findMissingDependencies, installPackages } from '../system/packages'
 import type { Dependency } from '../system/types'
 import type { PlatformSetupArgs } from './types'
 import { fetchRelease, downloadReleaseTools } from './moddable'
-import { successVoid, isFailure } from '../system/errors'
+import { successVoid, isFailure, unwrap } from '../system/errors'
 import type { SetupResult } from '../../types'
 
 const chmodPromise = promisify(chmod)
 
-export default async function ({
+export default async function({
   sourceRepo,
   branch,
   release,
@@ -85,7 +85,9 @@ export default async function ({
   } else {
     if (release !== undefined && (branch === undefined || branch === null)) {
       spinner.start('Getting latest Moddable-OpenSource/moddable release')
-      const remoteRelease = await fetchRelease(release)
+      const remoteReleaseResult = await fetchRelease(release)
+      if (isFailure(remoteReleaseResult)) throw remoteReleaseResult.error
+      const remoteRelease = unwrap(remoteReleaseResult)
 
       if (remoteRelease.assets.length === 0) {
         spinner.stop()
