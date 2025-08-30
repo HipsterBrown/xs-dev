@@ -14,6 +14,8 @@ import { findMissingDependencies, installPackages } from '../system/packages'
 import type { Dependency } from '../system/types'
 import type { PlatformSetupArgs } from './types'
 import { fetchRelease, downloadReleaseTools } from './moddable'
+import { successVoid, isFailure } from '../system/errors'
+import type { SetupResult } from '../../types'
 
 const chmodPromise = promisify(chmod)
 
@@ -22,7 +24,7 @@ export default async function ({
   branch,
   release,
   interactive,
-}: PlatformSetupArgs): Promise<void> {
+}: PlatformSetupArgs): Promise<SetupResult> {
   print.info('Setting up Linux tools!')
 
   const BIN_PATH = filesystem.resolve(
@@ -66,12 +68,14 @@ export default async function ({
   ]
 
   spinner.start('Checking for missing dependencies...')
-  const missingDependencies = await findMissingDependencies(dependencies)
+  const missingDependenciesResult = await findMissingDependencies(dependencies)
+  if (isFailure(missingDependenciesResult)) return missingDependenciesResult
 
   // 1. Install or update the packages required to compile:
   spinner.start('Attempting to install dependencies...')
-  if (missingDependencies.length !== 0) {
-    await installPackages(missingDependencies)
+  if (missingDependenciesResult.data.length !== 0) {
+    const result = await installPackages(missingDependenciesResult.data)
+    if (isFailure(result)) return result
   }
   spinner.succeed()
 
@@ -99,7 +103,7 @@ export default async function ({
           print.info(
             'Please select another release version with pre-built assets: https://github.com/Moddable-OpenSource/moddable/releases',
           )
-          process.exit(0)
+          return successVoid()
         }
         spinner.start()
       }
@@ -191,10 +195,11 @@ export default async function ({
       { process },
     )
   }
-  await execWithSudo('make install', {
+  const installResult = await execWithSudo('make install', {
     cwd: BUILD_DIR,
     stdout: process.stdout,
   })
+  if (isFailure(installResult)) return installResult
   spinner.succeed()
 
   if (system.which('npm') !== null) {
@@ -207,4 +212,6 @@ export default async function ({
   print.success(
     'Moddable SDK successfully set up! Start a new terminal session and run the "helloworld example": xs-dev run --example helloworld',
   )
+
+  return successVoid()
 }
