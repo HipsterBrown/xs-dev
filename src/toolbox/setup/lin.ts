@@ -86,7 +86,7 @@ export default async function({
     if (release !== undefined && (branch === undefined || branch === null)) {
       spinner.start('Getting latest Moddable-OpenSource/moddable release')
       const remoteReleaseResult = await fetchRelease(release)
-      if (isFailure(remoteReleaseResult)) throw remoteReleaseResult.error
+      if (isFailure(remoteReleaseResult)) throw new Error(remoteReleaseResult.error)
       const remoteRelease = unwrap(remoteReleaseResult)
 
       if (remoteRelease.assets.length === 0) {

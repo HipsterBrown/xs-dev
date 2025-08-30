@@ -1,7 +1,7 @@
 import { system, semver, print } from 'gluegun'
 import type { GluegunPrint } from 'gluegun'
 import { ensureHomebrew } from '../homebrew'
-import { Result } from '../../../types'
+import type { Result } from '../../../types'
 import { failure, successVoid } from '../../system/errors'
 
 // brew install python3, cmake, ninja, dfu-util

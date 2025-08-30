@@ -1,7 +1,7 @@
 import { type as platformType } from 'node:os'
 import { buildCommand } from '@stricli/core'
 import type { LocalContext } from '../cli'
-import type { Device } from '../types'
+import type { Device, SetupResult } from '../types'
 import setupEjectfix from '../toolbox/setup/ejectfix'
 import { DEVICE_ALIAS } from '../toolbox/prompt/devices'
 import { MODDABLE_REPO } from '../toolbox/setup/constants'
@@ -96,13 +96,13 @@ const command = buildCommand({
           typeof process.env.CI !== 'undefined'
             ? process.env.CI === 'false'
             : interactive,
-      })
+      }) as SetupResult
       if (isFailure(result)) {
         print.error(result.error)
         process.exit(1)
       }
     } else {
-      const result = await setup({ branch, release })
+      const result = await setup({ branch, release }) as SetupResult
       if (isFailure(result)) {
         print.error(result.error)
         process.exit(1)

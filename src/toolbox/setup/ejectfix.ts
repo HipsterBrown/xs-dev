@@ -47,7 +47,7 @@ export default async function (): Promise<Result<void>> {
     return failure(`Cannot find notification preferences file: ${NC_PREFS_PATH}`)
   }
 
-  return wrapAsync(async () => {
+  return await wrapAsync(async () => {
     try {
       filesystem.copy(
         NC_PREFS_PATH,

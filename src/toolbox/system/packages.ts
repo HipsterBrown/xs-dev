@@ -8,7 +8,7 @@ import { failure, wrapAsync } from './errors'
  * Check if the list of dependencies are installed on the system.
  **/
 export async function findMissingDependencies(dependencies: Dependency[]): Promise<Result<Dependency[]>> {
-  return wrapAsync(async () => {
+  return await wrapAsync(async () => {
     const missingDependencies: Dependency[] = []
 
     for (const dep of dependencies) {

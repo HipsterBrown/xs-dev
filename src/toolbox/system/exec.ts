@@ -38,7 +38,7 @@ export async function execWithSudo(
     }
   }
 
-  return wrapAsync(async () => {
+  return await wrapAsync(async () => {
     await system.exec(`sudo --askpass --preserve-env ${command}`, options)
   })
 }
@@ -50,7 +50,7 @@ export async function pkexec(
   command: string,
   options: Record<string, unknown> = {},
 ): Promise<Result<void>> {
-  return wrapAsync(async () => {
+  return await wrapAsync(async () => {
     await system.exec(`pkexec ${command}`, options)
   })
 }
@@ -65,7 +65,7 @@ async function updateProcessEnv(command: string): Promise<Result<void>> {
     return success(undefined) // No-op on Windows
   }
 
-  return wrapAsync(async () => {
+  return await wrapAsync(async () => {
     const result = await system.spawn(`${command} && env`, {
       shell: process.env.SHELL,
     })
@@ -88,21 +88,21 @@ async function updateProcessEnv(command: string): Promise<Result<void>> {
  * Set updated env from user shell as process.env
  */
 export async function sourceEnvironment(): Promise<Result<void>> {
-  return updateProcessEnv(`source ${EXPORTS_FILE_PATH}`)
+  return await updateProcessEnv(`source ${EXPORTS_FILE_PATH}`)
 }
 
 /**
  * Set updated env from IDF_PATH/export.sh as process.env
  */
 export async function sourceIdf(): Promise<Result<void>> {
-  return updateProcessEnv(`source $IDF_PATH/export.sh 1> /dev/null`)
+  return await updateProcessEnv(`source $IDF_PATH/export.sh 1> /dev/null`)
 }
 
 /**
  * Set updated env from IDF_PYTHON_ENV_PATH as process.env
  */
 export async function sourceIdfPythonEnv(): Promise<Result<void>> {
-  return updateProcessEnv(
+  return await updateProcessEnv(
     `source ${process.env.IDF_PYTHON_ENV_PATH ?? ''}/bin/activate`,
   )
 }

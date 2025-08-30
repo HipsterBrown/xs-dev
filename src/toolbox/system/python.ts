@@ -14,10 +14,10 @@ export async function getPythonVersion(): Promise<Result<string>> {
     return failure('Python not available on this system')
   }
 
-  return wrapAsync(async () => {
+  return await wrapAsync(async () => {
     const output = await system.run(`${python} --version`)
     const version = output.split(' ').pop()?.trim()
-    if (version) return version
+    if (typeof version !== "undefined") return version
     throw new Error('Python version not found.')
   })
 }

@@ -3,7 +3,7 @@ import type { GluegunPrint } from 'gluegun'
 import axios from 'axios'
 import { promisify } from 'util'
 import { finished } from 'stream'
-import { Result } from '../../../types'
+import type { Result } from '../../../types'
 import { successVoid } from '../../system/errors'
 
 const finishedPromise = promisify(finished)

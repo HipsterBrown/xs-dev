@@ -4,5 +4,6 @@ module.exports = [
   {
     ...loveConfig,
     files: ['src/**/*.ts'],
+    ignores: ['**/__tests__/**'],
   },
 ]

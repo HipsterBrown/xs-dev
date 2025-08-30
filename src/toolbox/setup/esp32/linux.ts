@@ -2,7 +2,7 @@ import type { GluegunPrint } from 'gluegun'
 import type { Dependency } from '../../system/types'
 import { findMissingDependencies, installPackages } from '../../system/packages'
 import { isFailure, successVoid, unwrapOr } from '../../system/errors'
-import { Result } from '../../../types'
+import type { Result } from '../../../types'
 
 export async function installDeps(
   spinner: ReturnType<GluegunPrint['spin']>,

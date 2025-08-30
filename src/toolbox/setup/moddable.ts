@@ -37,7 +37,7 @@ export async function getModdableVersion(): Promise<Result<string>> {
     return failure('Moddable not available on this system.')
   }
 
-  return wrapAsync(async () => {
+  return await wrapAsync(async () => {
     const tags = await system.run('git tag -l --sort=-taggerdate', {
       cwd: process.env.MODDABLE,
     })
@@ -69,7 +69,7 @@ type GitHubRelease = ExtractFromArray<
 export async function fetchRelease(
   release: 'latest' | string,
 ): Promise<Result<GitHubRelease>> {
-  return wrapAsync(async () => {
+  return await wrapAsync(async () => {
     const octokit = new Octokit()
     if (release === 'latest') {
       const { data: latestRelease } = await octokit.rest.repos.getLatestRelease({
@@ -111,7 +111,7 @@ export async function downloadReleaseTools({
     return failure(`Unable to find release asset matching ${assetName}`)
   }
 
-  return wrapAsync(async () => {
+  return await wrapAsync(async () => {
     const zipWriter = ZipExtract({
       path: writePath,
     })
