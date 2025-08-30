@@ -10,6 +10,8 @@ import ws from 'windows-shortcuts'
 import { promisify } from 'util'
 import type { PlatformSetupArgs } from './types'
 import { downloadReleaseTools, fetchRelease } from './moddable'
+import type { Result, SetupResult } from '../../types'
+import { failure, isFailure, successVoid, unwrap } from '../system/errors'
 
 const wsPromise = promisify(ws.create)
 
@@ -36,7 +38,7 @@ export async function openModdableCommandPrompt(): Promise<void> {
 
 export async function ensureModdableCommandPrompt(
   spinner: ReturnType<GluegunPrint['spin']>,
-): Promise<void> {
+): Promise<Result<void>> {
   if (
     process.env.ISMODDABLECOMMANDPROMPT === undefined ||
     process.env.ISMODDABLECOMMANDPROMPT === ''
@@ -51,16 +53,17 @@ export async function ensureModdableCommandPrompt(
         'Moddable tooling required. Run `xs-dev setup` before trying again.',
       )
     }
-    process.exit(1)
+    return failure('Moddable tooling required.')
   }
+  return successVoid()
 }
 
-export default async function ({
+export default async function({
   sourceRepo,
   branch,
   release,
   interactive,
-}: PlatformSetupArgs): Promise<void> {
+}: PlatformSetupArgs): Promise<SetupResult> {
   const BIN_PATH = filesystem.resolve(
     INSTALL_PATH,
     'build',
@@ -110,7 +113,7 @@ export default async function ({
       print.info(
         'Please install either Visual Studio 2022 Community or winget, then launch a new xs86 Native Tools Command Prompt for VS 2022 and re-run this setup.',
       )
-      process.exit(1)
+      return failure('Visual Studio 2022 Community is required to build the Moddable SDK')
     }
 
     print.error(
@@ -130,7 +133,7 @@ export default async function ({
       print.info(
         'Okay. Please manually install VS 2022 Community from https://www.visualstudio.com/downloads/ if necessary and then run "xs-dev setup" from the x86 Native Tools Command Prompt for VS 2022',
       )
-      process.exit(1)
+      return failure('Please manually install VS 2022 Community')
     }
 
     print.info('Okay. Installing Visual Studio 2022 Community from winget...')
@@ -141,7 +144,7 @@ export default async function ({
       )
     } catch (error) {
       print.error('Visual Studio 2022 Community install failed')
-      process.exit(1)
+      return failure('Visual Studio 2022 Community install failed')
     }
 
     print.info('Visual Studio 2022 Community successfully installed.')
@@ -154,7 +157,7 @@ export default async function ({
     print.info(
       'When complete, please close this window and launch the "x86 Native Tools Command Prompt for VS 2022" from the start menu.',
     )
-    process.exit(1)
+    return successVoid()
   }
 
   if (system.which('git') === null) {
@@ -174,7 +177,7 @@ export default async function ({
       print.info(
         'Please install either git or winget, then launch a new xs86 Native Tools Command Prompt for VS 2022 and re-run this setup.',
       )
-      process.exit(1)
+      return failure('git is required to clone the Moddable SDK')
     }
 
     print.info('Installing git from winget...')
@@ -185,13 +188,13 @@ export default async function ({
       })
     } catch (error) {
       print.error('git install failed')
-      process.exit(1)
+      return failure('git install failed')
     }
 
     print.info(
       'git successfully installed. Please close this window and re-launch the x86 Native Tools Command Prompt for VS 2022, then re-run this setup.',
     )
-    process.exit(1)
+    return successVoid()
   }
 
   const spinner = print.spin()
@@ -211,7 +214,7 @@ export default async function ({
     filesystem.dir(INSTALL_DIR)
   } catch (error) {
     spinner.fail(`Error setting up install directory: ${String(error)}`)
-    process.exit(1)
+    return failure(`Error setting up install directory: ${String(error)}`)
   }
   let buildTools = false
 
@@ -221,7 +224,11 @@ export default async function ({
     try {
       if (release !== undefined && (branch === undefined || branch === null)) {
         spinner.start(`Getting latest Moddable-OpenSource/moddable release`)
-        const remoteRelease = await fetchRelease(release)
+        const remoteReleaseResult = await fetchRelease(release)
+        if (isFailure(remoteReleaseResult)) {
+          throw new Error(remoteReleaseResult.error)
+        }
+        const remoteRelease = unwrap(remoteReleaseResult)
 
         if (remoteRelease.assets.length === 0) {
           spinner.stop()
@@ -239,7 +246,7 @@ export default async function ({
             print.info(
               'Please select another release version with pre-built assets: https://github.com/Moddable-OpenSource/moddable/releases',
             )
-            process.exit(0)
+            return successVoid()
           }
           spinner.start()
         }
@@ -281,7 +288,7 @@ export default async function ({
       spinner.succeed()
     } catch (error) {
       spinner.fail(`Error cloning moddable repo: ${String(error)}`)
-      process.exit(1)
+      return failure(`Error cloning moddable repo: ${String(error)}`)
     }
   }
 
@@ -304,7 +311,7 @@ export default async function ({
       spinner.succeed()
     } catch (error) {
       spinner.fail(`Error building Moddable SDK tools: ${String(error)}`)
-      process.exit(1)
+      return failure(`Error building Moddable SDK tools: ${String(error)}`)
     }
   }
 
@@ -342,4 +349,5 @@ export default async function ({
     `As a next step, try running the "helloworld example" in the Moddable Command Prompt: xs-dev run --example helloworld'`,
   )
   await openModdableCommandPrompt()
+  return successVoid()
 }

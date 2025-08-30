@@ -10,6 +10,7 @@ import {
   downloadReleaseTools,
 } from '../setup/moddable'
 import { execWithSudo, sourceEnvironment } from '../system/exec'
+import { isFailure, unwrap } from '../system/errors'
 
 const chmodPromise = promisify(chmod)
 
@@ -44,7 +45,12 @@ export default async function ({
       cwd: process.env.MODDABLE,
     })
     // get latest release tag
-    const remoteRelease = await fetchRelease(release)
+    const remoteReleaseResult = await fetchRelease(release)
+    if (isFailure(remoteReleaseResult)) {
+      print.error(`Failed to fetch release: ${remoteReleaseResult.error}`)
+      process.exit(1)
+    }
+    const remoteRelease = unwrap(remoteReleaseResult)
 
     if (currentTag.trim() === remoteRelease.tag_name) {
       print.success('Moddable SDK already up to date!')

@@ -1,16 +1,18 @@
 import { print, system } from 'gluegun'
 import type { GluegunPrint } from 'gluegun'
 import { ensureHomebrew } from '../homebrew'
+import { failure, successVoid } from '../../system/errors'
+import type { SetupResult } from '../../../types'
 
 export async function installDeps(
   spinner: ReturnType<GluegunPrint['spin']>,
-): Promise<void> {
+): Promise<SetupResult> {
   try {
     await ensureHomebrew()
   } catch (error: unknown) {
     if (error instanceof Error) {
       print.info(`${error.message} python`)
-      process.exit(1)
+      return failure(`${error.message} python`)
     }
   }
 
@@ -27,7 +29,7 @@ export async function installDeps(
           spinner.fail(
             'Apple Command Line Tools must be installed in order to install python from Homebrew. Please run `xcode-select --install` before trying again.',
           )
-          process.exit(1)
+          return failure('Apple Command Line Tools must be installed in order to install python from Homebrew. Please run `xcode-select --install` before trying again.')
         }
       }
     }
@@ -42,4 +44,6 @@ export async function installDeps(
   spinner.start('Installing pyserial through pip')
   await system.exec('python3 -m pip install pyserial')
   spinner.succeed()
+
+  return successVoid()
 }

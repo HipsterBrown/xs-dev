@@ -6,8 +6,10 @@ import { installDeps as installMacDeps } from './pico/mac'
 import { installDeps as installLinuxDeps } from './pico/linux'
 import { moddableExists } from './moddable'
 import { sourceEnvironment } from '../system/exec'
+import { failure, successVoid, isFailure } from '../system/errors'
+import type { SetupResult } from '../../types'
 
-export default async function (): Promise<void> {
+export default async function (): Promise<SetupResult> {
   const OS = platformType().toLowerCase()
   const PICO_BRANCH = '2.0.0'
   const PICO_SDK_REPO = 'https://github.com/raspberrypi/pico-sdk'
@@ -36,7 +38,7 @@ export default async function (): Promise<void> {
     spinner.fail(
       'Moddable platform tooling required. Run `xs-dev setup` before trying again.',
     )
-    process.exit(1)
+    return failure('Moddable platform tooling required. Run `xs-dev setup` before trying again.')
   }
   spinner.info('Ensuring pico directory')
   filesystem.dir(PICO_ROOT)
@@ -52,7 +54,8 @@ export default async function (): Promise<void> {
       spinner.succeed()
     }
 
-    await installMacDeps(spinner)
+    const result = await installMacDeps(spinner)
+    if (isFailure(result)) return result
 
     const brewPrefix = await system.run('brew --prefix')
     process.env.PICO_GCC_ROOT = brewPrefix
@@ -61,7 +64,8 @@ export default async function (): Promise<void> {
 
   if (OS === 'linux') {
     spinner.start('Installing build dependencies with apt')
-    await installLinuxDeps(spinner)
+    const result = await installLinuxDeps(spinner)
+    if (isFailure(result)) return result
     process.env.PICO_GCC_ROOT = '/usr'
     await upsert(EXPORTS_FILE_PATH, `export PICO_GCC_ROOT=/usr`)
   }
@@ -220,4 +224,6 @@ Successfully set up pico platform support for Moddable!
 Test out the setup by starting a new terminal session and putting the device into programming mode by holding the BOOTSEL button when powering on the Pico
 Then run: xs-dev run --example helloworld --device pico
   `)
+
+  return successVoid()
 }

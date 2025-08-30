@@ -1,4 +1,6 @@
 import { system } from 'gluegun'
+import type { Result } from '../../types'
+import { failure, wrapAsync } from './errors'
 
 export function detectPython(): string | null {
   if (system.which('python') !== null) return 'python'
@@ -6,12 +8,16 @@ export function detectPython(): string | null {
   return null
 }
 
-export async function getPythonVersion(): Promise<string | null> {
+export async function getPythonVersion(): Promise<Result<string>> {
   const python = detectPython()
-  if (python !== null) {
-    return (
-      (await system.run(`${python} --version`)).split(' ').pop()?.trim() ?? null
-    )
+  if (python === null) {
+    return failure('Python not available on this system')
   }
-  return null
+
+  return await wrapAsync(async () => {
+    const output = await system.run(`${python} --version`)
+    const version = output.split(' ').pop()?.trim()
+    if (typeof version !== "undefined") return version
+    throw new Error('Python version not found.')
+  })
 }

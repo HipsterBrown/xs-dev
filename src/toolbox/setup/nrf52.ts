@@ -6,7 +6,7 @@ import { finished, type Transform } from 'stream'
 import { extract } from 'tar-fs'
 import { promisify } from 'util'
 import { Extract as ZipExtract } from 'unzip-stream'
-import type { Device } from '../../types'
+import type { Device, SetupResult } from '../../types'
 import { DEVICE_ALIAS } from '../prompt/devices'
 import { execWithSudo, sourceEnvironment } from '../system/exec'
 import { EXPORTS_FILE_PATH, INSTALL_DIR } from './constants'
@@ -14,6 +14,7 @@ import { moddableExists } from './moddable'
 import { ensureModdableCommandPrompt, setEnv } from './windows'
 import upsert from '../patching/upsert'
 import { installPython } from './nrf52/windows'
+import { failure, successVoid, isFailure } from '../system/errors'
 
 const finishedPromise = promisify(finished)
 
@@ -23,7 +24,7 @@ const ARCH_ALIAS: Record<string, string> = {
   linux_x64: 'x86_64',
   windows_nt_x64: 'mingw-w64-i686',
 }
-export default async function (): Promise<void> {
+export default async function (): Promise<SetupResult> {
   const OS = platformType().toLowerCase() as Device
   const isWindows = OS === 'windows_nt'
   const TOOLCHAIN = `arm-gnu-toolchain-12.2.rel1-${ARCH_ALIAS[`${OS}_${arch()}`]}-arm-none-eabi`
@@ -46,11 +47,12 @@ export default async function (): Promise<void> {
     spinner.fail(
       `Moddable tooling required. Run 'xs-dev setup --device ${DEVICE_ALIAS[OS]}' before trying again.`,
     )
-    process.exit(1)
+    return failure(`Moddable tooling required. Run 'xs-dev setup --device ${DEVICE_ALIAS[OS]}' before trying again.`)
   }
 
   if (isWindows) {
-    await ensureModdableCommandPrompt(spinner)
+    const result = await ensureModdableCommandPrompt(spinner)
+    if (isFailure(result)) return result
   }
 
   let createUnxz: (() => Transform) | (() => void) = () => {
@@ -63,7 +65,7 @@ export default async function (): Promise<void> {
       spinner.fail(
         'Unable to extract Arm Embedded Toolchain without XZ utils (https://tukaani.org/xz/). Please install that dependency on your system and reinstall xs-dev before attempting this setup again. See https://xs-dev.js.org/troubleshooting for more info.',
       )
-      process.exit(1)
+      return failure('Unable to extract Arm Embedded Toolchain without XZ utils (https://tukaani.org/xz/). Please install that dependency on your system and reinstall xs-dev before attempting this setup again. See https://xs-dev.js.org/troubleshooting for more info.')
     }
   }
 
@@ -128,11 +130,10 @@ export default async function (): Promise<void> {
     process.env.NRF52_SDK_PATH = NRF5_SDK_PATH
     await setEnv('NRF_ROOT', NRF52_DIR)
     await setEnv('NRF52_SDK_PATH', NRF5_SDK_PATH)
-    try {
-      await installPython(spinner)
-    } catch (error) {
-      // Command Prompt restart needed
-      process.exit(1)
+    const pythonResult = await installPython(spinner)
+    if (isFailure(pythonResult)) {
+      // Command Prompt restart needed or Python installation failed
+      return pythonResult
     }
   }
 
@@ -150,4 +151,6 @@ export default async function (): Promise<void> {
   Successfully set up nrf52 platform support for Moddable!
   Test out the setup by starting a new ${isWindows ? 'Moddable Command Prompt' : 'terminal session'}, plugging in your device, and running: xs-dev run --example helloworld --device nrf52
   `)
+
+  return successVoid()
 }

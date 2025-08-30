@@ -8,5 +8,13 @@ build/
 .vscode
 !src/toolbox/build/
 .npmrc
+test-project/
 
 .env
+
+# Planning documents
+plans/
+.claude/
+.crush/
+CLAUDE.md
+CRUSH.md

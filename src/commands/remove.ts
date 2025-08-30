@@ -26,7 +26,7 @@ const command = buildCommand({
 
     if (moduleName === undefined) {
       print.error('Module name is required')
-      process.exit(1)
+      return
     }
 
     print.info(`Removing "${String(moduleName)}" from manifest includes`)

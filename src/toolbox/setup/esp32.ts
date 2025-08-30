@@ -8,8 +8,10 @@ import { installDeps as installLinuxDeps } from './esp32/linux'
 import { installDeps as installWinDeps } from './esp32/windows'
 import { setEnv, ensureModdableCommandPrompt } from './windows'
 import { sourceEnvironment } from '../system/exec'
+import { isFailure, successVoid, failure, unwrapOr } from '../system/errors'
+import type { Result } from '../../types'
 
-export default async function (): Promise<void> {
+export default async function(): Promise<Result<void>> {
   const OS = platformType().toLowerCase()
   const isWindows = OS === 'windows_nt'
   const ESP_IDF_REPO = 'https://github.com/espressif/esp-idf.git'
@@ -28,11 +30,12 @@ export default async function (): Promise<void> {
     spinner.fail(
       'Moddable tooling required. Run `xs-dev setup` before trying again.',
     )
-    process.exit(1)
+    return failure('Moddable tooling required. Run `xs-dev setup` before trying again.')
   }
 
   if (isWindows) {
-    await ensureModdableCommandPrompt(spinner)
+    const result = await ensureModdableCommandPrompt(spinner)
+    if (isFailure(result)) return result
   }
 
   // 1. ensure ~/.local/share/esp32 directory
@@ -42,12 +45,12 @@ export default async function (): Promise<void> {
   // 2. clone esp-idf into ~/.local/share/esp32/esp-idf
   if (filesystem.exists(IDF_PATH) === false) {
     spinner.start('Cloning esp-idf repo')
-    const moddableVersion = (await getModdableVersion()) ?? ''
+    const moddableVersion = unwrapOr(await getModdableVersion(), '')
     const expectedEspIdfVersion = await getExpectedEspIdfVersion()
     const branch =
       expectedEspIdfVersion ??
       (moddableVersion.includes('branch') ||
-      semver.satisfies(moddableVersion ?? '', '>= 4.2.x')
+        semver.satisfies(moddableVersion, '>= 4.2.x')
         ? ESP_BRANCH_V5
         : ESP_BRANCH_V4)
     await system.spawn(
@@ -60,15 +63,18 @@ export default async function (): Promise<void> {
   spinner.start('Installing build dependencies')
 
   if (OS === 'darwin') {
-    await installMacDeps(spinner)
+    const result = await installMacDeps(spinner)
+    if (isFailure(result)) return result
   }
 
   if (OS === 'linux') {
-    await installLinuxDeps(spinner)
+    const result = await installLinuxDeps(spinner)
+    if (isFailure(result)) return result
   }
 
   if (isWindows) {
-    await installWinDeps(spinner, ESP32_DIR, IDF_PATH)
+    const result = await installWinDeps(spinner, ESP32_DIR, IDF_PATH)
+    if (isFailure(result)) return result
   }
 
   // 4. append IDF_PATH env export to shell profile
@@ -114,6 +120,7 @@ export default async function (): Promise<void> {
   Test out the setup by starting a new ${isWindows ? 'Moddable Command Prompt' : 'terminal session'}, plugging in your device, and running: xs-dev run --example helloworld --device=esp32
   If there is trouble finding the correct port, pass the "--port" flag to the above command with the ${isWindows ? 'COM Port' : 'path to the /dev.cu.*'} that matches your device.
   `)
+  return successVoid()
 }
 
 export async function getExpectedEspIdfVersion(): Promise<string | null> {

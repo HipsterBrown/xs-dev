@@ -98,7 +98,10 @@
   },
   "jest": {
     "preset": "ts-jest",
-    "testEnvironment": "node"
+    "testEnvironment": "node",
+    "testPathIgnorePatterns": [
+      "<rootDir>/build/"
+    ]
   },
   "volta": {
     "node": "18.14.0"
@@ -113,7 +116,14 @@
       "ejs@<3.1.7": ">=3.1.7",
       "axios@>=0.8.1 <1.6.0": ">=1.6.0",
       "minimatch@<3.0.5": ">=3.0.5"
-    }
+    },
+    "onlyBuiltDependencies": [
+      "@serialport/bindings-cpp",
+      "esbuild",
+      "node-liblzma",
+      "sharp",
+      "usb"
+    ]
   },
   "author": "HipsterBrown <headhipster@hipsterbrown.com>",
   "auto": {

@@ -1,11 +1,12 @@
 import { type as platformType } from 'node:os'
 import { buildCommand } from '@stricli/core'
 import type { LocalContext } from '../cli'
-import type { Device } from '../types'
+import type { Device, SetupResult } from '../types'
 import setupEjectfix from '../toolbox/setup/ejectfix'
 import { DEVICE_ALIAS } from '../toolbox/prompt/devices'
 import { MODDABLE_REPO } from '../toolbox/setup/constants'
 import type { SetupArgs } from '../toolbox/setup/types'
+import { isFailure } from '../toolbox/system/errors'
 
 interface SetupOptions {
   device?: Device
@@ -57,7 +58,7 @@ const command = buildCommand({
         target = selectedDevice as Device
       } else {
         print.warning('Please select a target device to run')
-        process.exit(0)
+        return
       }
     }
 
@@ -66,7 +67,13 @@ const command = buildCommand({
         print.warning(`Unknown tool ${tool}`)
         process.exit(1)
       }
-      if (tool === 'ejectfix') await setupEjectfix()
+      if (tool === 'ejectfix') {
+        const result = await setupEjectfix()
+        if (isFailure(result)) {
+          print.error(result.error)
+          process.exit(1)
+        }
+      }
       return
     }
     const platformDevices: Device[] = [
@@ -81,7 +88,7 @@ const command = buildCommand({
     const { default: setup } = await import(`../toolbox/setup/${target}`)
 
     if (platformDevices.includes(target)) {
-      await setup({
+      const result = await setup({
         branch,
         release,
         sourceRepo,
@@ -89,9 +96,17 @@ const command = buildCommand({
           typeof process.env.CI !== 'undefined'
             ? process.env.CI === 'false'
             : interactive,
-      })
+      }) as SetupResult
+      if (isFailure(result)) {
+        print.error(result.error)
+        process.exit(1)
+      }
     } else {
-      await setup({ branch, release })
+      const result = await setup({ branch, release }) as SetupResult
+      if (isFailure(result)) {
+        print.error(result.error)
+        process.exit(1)
+      }
     }
   },
   parameters: {

@@ -5,8 +5,10 @@ import { moddableExists } from './moddable'
 import upsert from '../patching/upsert'
 import { execWithSudo, sourceEnvironment } from '../system/exec'
 import { ensureHomebrew } from './homebrew'
+import { failure, successVoid } from '../system/errors'
+import type { SetupResult } from '../../types'
 
-export default async function (): Promise<void> {
+export default async function(): Promise<SetupResult> {
   const OS = platformType().toLowerCase()
   const EMSDK_REPO = 'https://github.com/emscripten-core/emsdk.git'
   const BINARYEN_REPO = 'https://github.com/WebAssembly/binaryen.git'
@@ -19,12 +21,12 @@ export default async function (): Promise<void> {
   const spinner = print.spin({ stream: process.stdout })
   spinner.start('Setting up wasm simulator tools')
 
-  // 0. ensure wasm instal directory and Moddable exists
+  // 0. ensure wasm install directory and Moddable exists
   if (!moddableExists()) {
     spinner.fail(
       'Moddable platform tooling required. Run `xs-dev setup` before trying again.',
     )
-    process.exit(1)
+    return failure('Moddable platform tooling required. Run `xs-dev setup` before trying again.')
   }
   spinner.info('Ensuring wasm directory')
   filesystem.dir(WASM_DIR)
@@ -70,7 +72,7 @@ export default async function (): Promise<void> {
       )
     } catch (error) {
       spinner.fail(`Error activating emsdk: ${String(error)}`)
-      process.exit(1)
+      return failure(`Error activating emsdk: ${String(error)}`)
     }
   }
   spinner.succeed('emsdk setup complete')
@@ -91,7 +93,7 @@ export default async function (): Promise<void> {
       } catch (error: unknown) {
         if (error instanceof Error) {
           print.info(`${error.message} cmake`)
-          process.exit(1)
+          return failure(`${error.message} cmake`)
         }
       }
 
@@ -155,4 +157,6 @@ export default async function (): Promise<void> {
   spinner.succeed(
     `Successfully set up wasm platform support for Moddable! Test out the setup by starting a new terminal session and running: xs-dev run --example helloworld --device wasm`,
   )
+
+  return successVoid()
 }
