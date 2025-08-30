@@ -20,13 +20,13 @@ const command = buildCommand({
       print.error(
         'Cannot find manifest.json. Must be in project directory to update manifest includes.',
       )
-      process.exit(1)
+      return
     }
     const { device = '' } = flags
 
     if (moduleName === undefined) {
       print.error('Module name is required')
-      process.exit(1)
+      return
     }
 
     print.info(`Removing "${String(moduleName)}" from manifest includes`)

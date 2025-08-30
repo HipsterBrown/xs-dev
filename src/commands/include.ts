@@ -22,7 +22,7 @@ const command = buildCommand({
       print.error(
         'Cannot find manifest.json. Must be in project directory to update manifest includes.',
       )
-      process.exit(1)
+      return
     }
 
     await sourceEnvironment()

@@ -39,7 +39,7 @@ const command = buildCommand({
         warning(
           `Directory called ${projectName} already exists. Please pass the --overwrite flag to replace an existing project.`,
         )
-        process.exit(0)
+        return
       }
 
       await sourceEnvironment()
@@ -81,7 +81,7 @@ const command = buildCommand({
           filesystem.copy(selectedExamplePath, projectName, { overwrite })
         } else {
           warning('Please select an example template to use.')
-          process.exit(0)
+          return
         }
       } else {
         info(`Generating Moddable project: ${projectName}`)
