@@ -8,7 +8,7 @@ import axios from 'axios'
 import { INSTALL_PATH } from './constants'
 import type { Device, Result } from '../../types'
 import { DEVICE_ALIAS } from '../prompt/devices'
-import { success, failure, wrapAsync } from '../system/errors'
+import { failure, wrapAsync } from '../system/errors'
 
 const finishedPromise = promisify(finished)
 
@@ -34,7 +34,7 @@ function isGitRepo(path: string): boolean {
 
 export async function getModdableVersion(): Promise<Result<string>> {
   if (!moddableExists() || !isGitRepo(process.env.MODDABLE ?? '')) {
-    return success('')
+    return failure('Moddable not available on this system.')
   }
 
   return wrapAsync(async () => {

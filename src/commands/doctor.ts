@@ -6,6 +6,7 @@ import { getModdableVersion, moddableExists } from '../toolbox/setup/moddable'
 import { sourceEnvironment } from '../toolbox/system/exec'
 import { detectPython, getPythonVersion } from '../toolbox/system/python'
 import type { Device } from '../types'
+import { unwrapOr } from '../toolbox/system/errors'
 
 const command = buildCommand({
   async func(this: LocalContext) {
@@ -66,10 +67,10 @@ const command = buildCommand({
       supportedDevices.push('nrf52')
     }
 
-    const pythonVersion = (await getPythonVersion()) ?? 'Unavailable'
+    const pythonVersion = unwrapOr(await getPythonVersion(), 'Unavailable')
     const pythonPath = system.which(detectPython() ?? '') ?? 'n/a'
 
-    const moddableVersion = (await getModdableVersion()) ?? 'Not found'
+    const moddableVersion = unwrapOr(await getModdableVersion(), 'Not found')
     const moddablePath = process.env.MODDABLE ?? 'n/a'
 
     print.info('xs-dev environment info:')
@@ -103,9 +104,9 @@ const command = buildCommand({
           : [],
         supportedDevices.includes('nrf52')
           ? [
-              'NRF52 SDK Directory',
-              String(process.env.NRF_SDK_DIR ?? process.env.NRF52_SDK_PATH),
-            ]
+            'NRF52 SDK Directory',
+            String(process.env.NRF_SDK_DIR ?? process.env.NRF52_SDK_PATH),
+          ]
           : [],
       ].filter((tuple) => tuple.length !== 0),
     )
