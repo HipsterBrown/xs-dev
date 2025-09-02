@@ -1,3 +1,15 @@
+# v1.0.2 (Tue Sep 02 2025)
+
+#### 🐛 Bug Fix
+
+- Update ESP32 Linux dependencies [#219](https://github.com/HipsterBrown/xs-dev/pull/219) ([@stc1988](https://github.com/stc1988))
+
+#### Authors: 1
+
+- Satoshi Tanaka ([@stc1988](https://github.com/stc1988))
+
+---
+
 # v1.0.1 (Tue Sep 02 2025)
 
 #### 🐛 Bug Fix
