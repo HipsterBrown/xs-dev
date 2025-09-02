@@ -1,3 +1,15 @@
+# v1.0.1 (Tue Sep 02 2025)
+
+#### 🐛 Bug Fix
+
+- Use sudo for package install in CI environments [#220](https://github.com/HipsterBrown/xs-dev/pull/220) ([@stc1988](https://github.com/stc1988))
+
+#### Authors: 1
+
+- Satoshi Tanaka ([@stc1988](https://github.com/stc1988))
+
+---
+
 # v1.0.0 (Sat Aug 30 2025)
 
 #### 🚀 Enhancement
