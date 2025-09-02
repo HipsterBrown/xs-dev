@@ -1,5 +1,5 @@
 import type { Dependency } from './types'
-import { pkexec } from '../system/exec'
+import { pkexec, execWithSudo } from '../system/exec'
 import { system } from 'gluegun'
 import type { Result } from '../../types'
 import { failure, wrapAsync } from './errors'
@@ -44,11 +44,19 @@ export async function installPackages(packages: Dependency[]): Promise<Result<vo
   const packageManager = system.which('apt')
 
   if (packageManager !== null && packageManager !== undefined) {
-    const result = await pkexec(
-      `${packageManager} install --yes ${packages.map((p) => p.packageName).join(' ')}`,
-      { stdout: process.stdout },
-    )
-    return result
+    if (typeof process.env.CI !== 'undefined' && process.env.CI !== 'false') {
+      const result = await execWithSudo(
+        `${packageManager} install --yes ${packages.map((p) => p.packageName).join(' ')}`,
+        { stdout: process.stdout },
+      )
+      return result
+    } else {
+      const result = await pkexec(
+        `${packageManager} install --yes ${packages.map((p) => p.packageName).join(' ')}`,
+        { stdout: process.stdout },
+      )
+      return result
+    }
   } else {
     return failure(
       `xs-dev attempted to install dependencies, but does not yet support your package manager. ` +
