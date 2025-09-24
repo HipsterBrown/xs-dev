@@ -3,6 +3,7 @@
   "version": "1.0.2",
   "description": "CLI for automating the setup and usage of Moddable XS tools",
   "types": "build/types/types.d.ts",
+  "packageManager": "pnpm@10.17.1",
   "engines": {
     "node": ">=20"
   },
