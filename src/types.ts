@@ -24,16 +24,3 @@ export type Result<T, E = string> =
 export type SetupResult = Result<void>
 export type BuildResult = Result<string> // output path
 export type UpdateResult = Result<void>
-
-export interface XSDevToolbox extends GluegunToolbox {
-  setup: Record<
-    Device,
-    | (() => Promise<void>)
-    | ((args: SetupArgs | PlatformSetupArgs) => Promise<void>)
-  >
-  update: Record<
-    Device,
-    (() => Promise<void>) | ((args: SetupArgs) => Promise<void>)
-  >
-  build: (args: BuildArgs) => Promise<void>
-}

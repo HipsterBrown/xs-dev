@@ -1,5 +1,5 @@
 import { buildCommand } from '@stricli/core'
-import type { LocalContext } from '../cli'
+import type { LocalContext } from '../app'
 import { collectChoicesFromTree } from '../toolbox/prompt/choices'
 import { sourceEnvironment } from '../toolbox/system/exec'
 
@@ -61,14 +61,14 @@ const command = buildCommand({
           const filteredChoices = choices.filter((choice) =>
             choice.includes(String(example)),
           )
-          ;({ example: selectedExample } = await prompt.ask([
-            {
-              type: 'autocomplete',
-              name: 'example',
-              message: 'Here are the available examples templates:',
-              choices: filteredChoices.length > 0 ? filteredChoices : choices,
-            },
-          ]))
+            ; ({ example: selectedExample } = await prompt.ask([
+              {
+                type: 'autocomplete',
+                name: 'example',
+                message: 'Here are the available examples templates:',
+                choices: filteredChoices.length > 0 ? filteredChoices : choices,
+              },
+            ]))
         }
 
         // copy files into new project directory
@@ -91,9 +91,9 @@ const command = buildCommand({
         const includes = [
           io
             ? [
-                '"$(MODDABLE)/modules/io/manifest.json"',
-                '"$(MODDABLE)/examples/manifest_net.json"',
-              ]
+              '"$(MODDABLE)/modules/io/manifest.json"',
+              '"$(MODDABLE)/examples/manifest_net.json"',
+            ]
             : '"$(MODDABLE)/examples/manifest_base.json"',
           typescript && '"$(MODDABLE)/examples/manifest_typings.json"',
         ]

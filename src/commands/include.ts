@@ -1,5 +1,5 @@
 import { buildCommand } from '@stricli/core'
-import type { LocalContext } from '../cli'
+import type { LocalContext } from '../app'
 import { collectChoicesFromTree } from '../toolbox/prompt/choices'
 import { sourceEnvironment } from '../toolbox/system/exec'
 import { DEVICE_ALIAS } from '../toolbox/prompt/devices'

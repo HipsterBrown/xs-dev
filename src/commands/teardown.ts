@@ -1,6 +1,6 @@
 import { type as platformType } from 'node:os'
 import { buildCommand } from '@stricli/core'
-import type { LocalContext } from '../cli'
+import type { LocalContext } from '../app'
 import {
   INSTALL_DIR,
   EXPORTS_FILE_PATH,

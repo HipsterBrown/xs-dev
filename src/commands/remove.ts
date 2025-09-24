@@ -1,5 +1,5 @@
 import { buildCommand } from '@stricli/core'
-import type { LocalContext } from '../cli'
+import type { LocalContext } from '../app'
 import { DEVICE_ALIAS } from '../toolbox/prompt/devices'
 import type { Device } from '../types'
 

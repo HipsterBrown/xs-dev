@@ -2,7 +2,7 @@ import { setTimeout as sleep } from 'node:timers/promises'
 import { buildCommand } from '@stricli/core'
 import { SerialPort } from 'serialport'
 import { findBySerialNumber } from 'usb'
-import type { LocalContext } from '../cli'
+import type { LocalContext } from '../app'
 import { parseScanResult } from '../toolbox/scan/parse'
 import { sourceEnvironment, sourceIdf } from '../toolbox/system/exec'
 
@@ -39,7 +39,7 @@ const command = buildCommand({
         await system.exec('picotool reboot -fa')
         await sleep(1000)
         spinner.stop()
-      } catch {}
+      } catch { }
     }
 
     spinner.start('Scanning for devices...')
@@ -63,7 +63,7 @@ const command = buildCommand({
             return await system
               .exec(`esptool.py --port ${port.path} read_mac`)
               .then((buffer) => [buffer, port.path])
-          } catch {}
+          } catch { }
           return [undefined, port.path]
         }),
     )
