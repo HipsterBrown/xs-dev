@@ -11,9 +11,7 @@ import {
   prompt,
   packageManager,
 } from 'gluegun'
-import {
-  run as runApp,
-} from '@stricli/core'
+import { run as runApp } from '@stricli/core'
 import { version } from '../package.json'
 import { app } from './app'
 

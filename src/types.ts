@@ -1,7 +1,3 @@
-import type { GluegunToolbox } from 'gluegun'
-import type { PlatformSetupArgs, SetupArgs } from './toolbox/setup/types'
-import type { BuildArgs } from './toolbox/build/index'
-
 export type Device =
   | 'darwin'
   | 'mac'

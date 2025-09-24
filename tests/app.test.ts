@@ -1,12 +1,12 @@
-import { afterEach, beforeEach, describe, it, mock } from 'node:test';
+import { afterEach, beforeEach, describe, it, mock } from 'node:test'
 import { chdir, cwd } from 'node:process'
-import assert from 'node:assert/strict';
-import { cleanupTempDir, createTempDir, runWithInputs } from './helpers/runner';
-import { app } from '../src/app';
+import assert from 'node:assert/strict'
+import { cleanupTempDir, createTempDir, runWithInputs } from './helpers/runner'
+import { app } from '../src/app'
 
 describe('Application', () => {
   afterEach(() => {
-    mock.reset();
+    mock.reset()
   })
 
   describe('default output', () => {
@@ -101,4 +101,3 @@ describe('Application', () => {
     })
   })
 })
-

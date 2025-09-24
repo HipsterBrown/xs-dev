@@ -21,7 +21,12 @@
     "target": "es2022",
     "declaration": true,
     "declarationDir": "build/types",
-    "esModuleInterop": true
+    "esModuleInterop": true,
+    "paths": {
+      "#src/*": [
+        "./src/*"
+      ]
+    }
   },
   "include": [
     "src/**/*"
