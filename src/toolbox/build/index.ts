@@ -172,6 +172,18 @@ export async function build({
         process.exit(1)
       }
     }
+
+    if (targetPlatform.includes('zephyr') && !startsWithSimulator) {
+      if (
+        typeof process.env.ZEPHYR_BASE !== 'string' ||
+        filesystem.exists(process.env.ZEPHYR_BASE) !== 'dir'
+      ) {
+        print.error(
+          'The current environment does not appear to be set up for the zephyr build target. Please run `xs-dev setup --device zephyr` before trying again.',
+        )
+        process.exit(1)
+      }
+    }
   }
 
   if (listExamples) {
@@ -268,8 +280,7 @@ export async function build({
       break
     default:
       spinner.start(
-        `Building${
-          deployStatus !== 'none' ? ' and deploying project' : ''
+        `Building${deployStatus !== 'none' ? ' and deploying project' : ''
         } ${projectPath} on ${targetPlatform}\n`,
       )
   }
@@ -297,7 +308,7 @@ export async function build({
   const canUseMCPack =
     system.which('mcpack') !== null &&
     filesystem.exists(filesystem.resolve(projectPath, 'package.json')) ===
-      'file'
+    'file'
   let rootCommand = 'mcconfig'
 
   if (canUseMCPack) {

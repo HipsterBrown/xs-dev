@@ -66,6 +66,12 @@ const command = buildCommand({
     ) {
       supportedDevices.push('nrf52')
     }
+    if (
+      typeof process.env.ZEPHYR_BASE === 'string' &&
+      filesystem.exists(process.env.ZEPHYR_BASE) === 'dir'
+    ) {
+      supportedDevices.push('zephyr')
+    }
 
     const pythonVersion = unwrapOr(await getPythonVersion(), 'Unavailable')
     const pythonPath = system.which(detectPython() ?? '') ?? 'n/a'
@@ -107,6 +113,9 @@ const command = buildCommand({
             'NRF52 SDK Directory',
             String(process.env.NRF_SDK_DIR ?? process.env.NRF52_SDK_PATH),
           ]
+          : [],
+        supportedDevices.includes('zephyr')
+          ? ['Zephyr SDK Directory', String(process.env.ZEPHYR_BASE)]
           : [],
       ].filter((tuple) => tuple.length !== 0),
     )

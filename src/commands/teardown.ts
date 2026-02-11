@@ -26,6 +26,7 @@ const command = buildCommand({
     filesystem.remove(filesystem.resolve(INSTALL_DIR, 'pico'))
     filesystem.remove(filesystem.resolve(INSTALL_DIR, 'fontbm'))
     filesystem.remove(filesystem.resolve(INSTALL_DIR, 'nrf52'))
+    filesystem.remove(filesystem.resolve(INSTALL_DIR, 'zephyrproject'))
 
     if (platformType() === 'Darwin') {
       const NC_PREFS_BACKUP = filesystem.resolve(
