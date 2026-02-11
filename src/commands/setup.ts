@@ -43,6 +43,7 @@ const command = buildCommand({
         'pico',
         'wasm',
         'nrf52',
+        'zephyr',
         DEVICE_ALIAS[currentPlatform],
       ]
       const { device: selectedDevice } = await prompt.ask([

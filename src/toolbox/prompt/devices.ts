@@ -14,4 +14,5 @@ export const DEVICE_ALIAS: Record<Device | 'esp', Device> = Object.freeze({
   wasm: 'wasm',
   pico: 'pico',
   nrf52: 'nrf52',
+  zephyr: 'zephyr',
 })
