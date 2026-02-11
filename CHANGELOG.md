@@ -1,3 +1,25 @@
+# v1.1.0 (Tue Feb 10 2026)
+
+#### 🚀 Enhancement
+
+- feat(zephyr): add clearer logging for each step ([@HipsterBrown](https://github.com/HipsterBrown))
+- feat: release zephyr support ([@HipsterBrown](https://github.com/HipsterBrown))
+- feat: initial zephyr support [#223](https://github.com/HipsterBrown/xs-dev/pull/223) ([@HipsterBrown](https://github.com/HipsterBrown))
+
+#### 🐛 Bug Fix
+
+- refactor: migrate tests from jest to Node.js test utils [#221](https://github.com/HipsterBrown/xs-dev/pull/221) ([@HipsterBrown](https://github.com/HipsterBrown))
+
+#### ⚠️ Pushed to `main`
+
+- chore(workflows/release): add registry-url config to setup-node step ([@HipsterBrown](https://github.com/HipsterBrown))
+
+#### Authors: 1
+
+- Nick Hehr ([@HipsterBrown](https://github.com/HipsterBrown))
+
+---
+
 # v1.0.2 (Tue Sep 02 2025)
 
 #### 🐛 Bug Fix
