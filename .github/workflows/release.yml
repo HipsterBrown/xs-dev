@@ -7,6 +7,11 @@ on:
 env:
   CI: true
   PNPM_CACHE_FOLDER: .pnpm-store
+
+permissions:
+  id-token: write
+  contents: read
+
 jobs:
   release:
     timeout-minutes: 15
@@ -15,7 +20,7 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
         with:
           fetch-depth: 0
 
@@ -31,7 +36,7 @@ jobs:
           run_install: false
 
       - name: Setup Node
-        uses: actions/setup-node@v5
+        uses: actions/setup-node@v6
         with:
           node-version: 22
           cache: 'pnpm'
@@ -44,4 +49,3 @@ jobs:
           pnpm release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
