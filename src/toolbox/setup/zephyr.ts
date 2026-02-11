@@ -64,18 +64,15 @@ export default async function(): Promise<SetupResult> {
   await sourceEnvironment()
 
   // 4. Install West with pip
-  await system.exec(
-    `which pip`,
-    {
-      stdout: process.stdout,
-    },
-  )
+  spinner.start('Installing west build tool')
   await system.exec(`pip install west`, {
     process,
     shell: process.env.SHELL,
   })
+  spinner.succeed()
 
   // 5. Install west build tools
+  spinner.start(`Initializing west tooling in ${ZEPHYR_ROOT}`)
   await system.exec(`west init ${ZEPHYR_ROOT}`, {
     process,
     shell: process.env.SHELL,
@@ -85,26 +82,31 @@ export default async function(): Promise<SetupResult> {
     process,
     shell: process.env.SHELL,
   })
+  spinner.succeed()
 
   // 6. Install west packages
+  spinner.start(`Installing west packages`)
   await system.exec(`west packages pip --install`, {
     process,
     shell: process.env.SHELL,
     stdout: process.stdout
   })
+  spinner.succeed()
 
   // 7. Install Zephyr SDK 
+  spinner.start(`Installing Zephyr SDK in ${ZEPHYR_BASE}`)
   await system.exec(`west sdk install`, {
     cwd: ZEPHYR_BASE,
     process,
     shell: process.env.SHELL,
   })
+  spinner.succeed()
 
   if (process.env.ZEPHYR_BASE === undefined) {
     await upsert(EXPORTS_FILE_PATH, `export ZEPHYR_BASE=${ZEPHYR_BASE}`)
   }
 
-  spinner.succeed(`
+  print.success(`
 Successfully set up zephyr platform support for Moddable!
 Test out the setup by starting a new terminal session,
 Then run: xs-dev run --example helloworld --device zephyr/<board_name>
