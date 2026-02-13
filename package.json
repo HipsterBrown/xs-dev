@@ -116,7 +116,12 @@
   "auto": {
     "plugins": [
       "magic-zero",
-      "npm",
+      [
+        "npm",
+        {
+          "setRcToken": false
+        }
+      ],
       "all-contributors",
       "conventional-commits",
       "first-time-contributor",
