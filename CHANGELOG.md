@@ -1,3 +1,14 @@
+# v1.2.0 (Thu Feb 12 2026)
+
+#### 🚀 Enhancement
+
+- feat(setup/zephyr): adds support for windows ([@HipsterBrown](https://github.com/HipsterBrown))
+
+#### Authors: 1
+
+- Nick Hehr ([@HipsterBrown](https://github.com/HipsterBrown))
+
+---
 # v1.1.0 (Tue Feb 10 2026)
 
 #### 🚀 Enhancement
