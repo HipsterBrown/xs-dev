@@ -11,6 +11,8 @@ env:
 permissions:
   id-token: write
   contents: read
+  issues: write
+  pull-requests: write
 
 jobs:
   release:
@@ -40,13 +42,12 @@ jobs:
         with:
           node-version: 24
           cache: 'pnpm'
-          registry-url: 'https://registry.npmjs.org'
 
       - name: Install dependencies
         run: pnpm install
 
       - name: Release It
         run: |
-          pnpm release
+          NODE_AUTH_TOKEN="" pnpm release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

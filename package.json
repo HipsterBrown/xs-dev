@@ -7,6 +7,10 @@
   "engines": {
     "node": ">=20"
   },
+  "publishConfig": {
+    "registry": "https://registry.npmjs.org/",
+    "access": "public"
+  },
   "bin": {
     "xs-dev": "build/src/cli.js"
   },
@@ -116,7 +120,12 @@
   "auto": {
     "plugins": [
       "magic-zero",
-      "npm",
+      [
+        "npm",
+        {
+          "setRcToken": false
+        }
+      ],
       "all-contributors",
       "conventional-commits",
       "first-time-contributor",

@@ -4,14 +4,17 @@ import { INSTALL_DIR, EXPORTS_FILE_PATH } from './constants'
 import upsert from '../patching/upsert'
 import { installDeps as installMacDeps } from './zephyr/mac'
 import { installDeps as installLinuxDeps } from './zephyr/linux'
+import { installDeps as installWinDeps } from './zephyr/windows'
 import { moddableExists } from './moddable'
 import { sourceEnvironment } from '../system/exec'
 import { failure, successVoid, isFailure } from '../system/errors'
 import type { SetupResult } from '../../types'
 import { detectPython } from '../system/python'
+import { ensureModdableCommandPrompt, setEnv } from './windows'
 
 export default async function(): Promise<SetupResult> {
   const OS = platformType().toLowerCase()
+  const isWindows = OS === 'windows_nt'
   const ZEPHYR_ROOT =
     process.env.ZEPHYR_ROOT ?? filesystem.resolve(INSTALL_DIR, 'zephyrproject')
   const ZEPHYR_BASE =
@@ -31,6 +34,11 @@ export default async function(): Promise<SetupResult> {
     )
     return failure('Moddable platform tooling required. Run `xs-dev setup` before trying again.')
   }
+
+  if (isWindows) {
+    const result = await ensureModdableCommandPrompt(spinner)
+    if (isFailure(result)) return result
+  }
   spinner.info('Ensuring zephyr directory')
   filesystem.dir(ZEPHYR_ROOT)
 
@@ -43,6 +51,11 @@ export default async function(): Promise<SetupResult> {
   if (OS === 'linux') {
     spinner.start('Installing dependencies with apt')
     const result = await installLinuxDeps(spinner)
+    if (isFailure(result)) return result
+  }
+  if (isWindows) {
+    spinner.start('Installing dependencies with winget')
+    const result = await installWinDeps(spinner)
     if (isFailure(result)) return result
   }
   spinner.succeed()
@@ -60,7 +73,18 @@ export default async function(): Promise<SetupResult> {
     spinner.succeed()
   }
   // 3. Activate virtual environment
-  await upsert(EXPORTS_FILE_PATH, `source ${ZEPHYR_VENV_ACTIVATE}`)
+  if (isWindows) {
+    await upsert(
+      EXPORTS_FILE_PATH,
+      `call "${ZEPHYR_ROOT}\\.venv\\Scripts\\activate.bat"`,
+    )
+    await system.exec(`${ZEPHYR_ROOT}\\.venv\\Scripts\\activate.bat`, {
+      stdout: process.stdout,
+      shell: true,
+    })
+  } else {
+    await upsert(EXPORTS_FILE_PATH, `source ${ZEPHYR_VENV_ACTIVATE}`)
+  }
   await sourceEnvironment()
 
   // 4. Install West with pip
@@ -86,11 +110,19 @@ export default async function(): Promise<SetupResult> {
 
   // 6. Install west packages
   spinner.start(`Installing west packages`)
-  await system.exec(`west packages pip --install`, {
-    process,
-    shell: process.env.SHELL,
-    stdout: process.stdout
-  })
+  if (isWindows) {
+    await system.exec(`cmd /c zephyr\\scripts\\utils\\west-packages-pip-install.cmd`, {
+      cwd: ZEPHYR_ROOT,
+      process,
+      shell: process.env.SHELL,
+    })
+  } else {
+    await system.exec(`west packages pip --install`, {
+      process,
+      shell: process.env.SHELL,
+      stdout: process.stdout
+    })
+  }
   spinner.succeed()
 
   // 7. Install Zephyr SDK 
@@ -103,7 +135,11 @@ export default async function(): Promise<SetupResult> {
   spinner.succeed()
 
   if (process.env.ZEPHYR_BASE === undefined) {
-    await upsert(EXPORTS_FILE_PATH, `export ZEPHYR_BASE=${ZEPHYR_BASE}`)
+    if (isWindows) {
+      await setEnv('ZEPHYR_BASE', ZEPHYR_BASE)
+    } else {
+      await upsert(EXPORTS_FILE_PATH, `export ZEPHYR_BASE=${ZEPHYR_BASE}`)
+    }
   }
 
   print.success(`
