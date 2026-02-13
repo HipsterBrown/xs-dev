@@ -10,7 +10,7 @@ env:
 
 permissions:
   id-token: write
-  contents: read
+  contents: write
   issues: write
   pull-requests: write
 
