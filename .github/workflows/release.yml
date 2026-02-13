@@ -47,6 +47,6 @@ jobs:
 
       - name: Release It
         run: |
-          pnpm release
+          NODE_AUTH_TOKEN="" pnpm release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
