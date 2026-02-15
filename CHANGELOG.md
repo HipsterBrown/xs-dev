@@ -1,3 +1,19 @@
+# v1.2.1 (Sun Feb 15 2026)
+
+#### 🐛 Bug Fix
+
+- fix(setup/zephyr): install west packages in workspace [#226](https://github.com/HipsterBrown/xs-dev/pull/226) ([@HipsterBrown](https://github.com/HipsterBrown))
+
+#### ⚠️ Pushed to `main`
+
+- chore(workflows/release): update token permissions to allow for pushing commits ([@HipsterBrown](https://github.com/HipsterBrown))
+
+#### Authors: 1
+
+- Nick Hehr ([@HipsterBrown](https://github.com/HipsterBrown))
+
+---
+
 # v1.2.0 (Thu Feb 12 2026)
 
 #### 🚀 Enhancement
