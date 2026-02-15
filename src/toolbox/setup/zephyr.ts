@@ -119,6 +119,7 @@ export default async function(): Promise<SetupResult> {
   } else {
     await system.exec(`west packages pip --install`, {
       process,
+      cwd: ZEPHYR_ROOT,
       shell: process.env.SHELL,
       stdout: process.stdout
     })
