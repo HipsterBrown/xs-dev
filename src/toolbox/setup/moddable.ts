@@ -4,11 +4,11 @@ import { promisify } from 'util'
 import { filesystem, system } from 'gluegun'
 import { Octokit, type RestEndpointMethodTypes } from '@octokit/rest'
 import { Extract as ZipExtract } from 'unzip-stream'
-import axios from 'axios'
 import { INSTALL_PATH } from './constants'
 import type { Device, Result } from '../../types'
 import { DEVICE_ALIAS } from '../prompt/devices'
 import { failure, wrapAsync } from '../system/errors'
+import { fetchStream } from '../system/fetch'
 
 const finishedPromise = promisify(finished)
 
@@ -115,10 +115,8 @@ export async function downloadReleaseTools({
     const zipWriter = ZipExtract({
       path: writePath,
     })
-    const response = await axios.get(moddableTools.browser_download_url, {
-      responseType: 'stream',
-    })
-    response.data.pipe(zipWriter)
+    const download = await fetchStream(moddableTools.browser_download_url)
+    download.pipe(zipWriter)
     await finishedPromise(zipWriter)
   })
 }

@@ -1,10 +1,10 @@
 import { filesystem, print, system } from 'gluegun'
 import type { GluegunPrint } from 'gluegun'
-import axios from 'axios'
 import { promisify } from 'util'
 import { finished } from 'stream'
 import type { Result } from '../../../types'
 import { successVoid } from '../../system/errors'
+import { fetchStream } from '../../system/fetch'
 
 const finishedPromise = promisify(finished)
 
@@ -27,10 +27,8 @@ export async function installDeps(
     'esp-idf-tools-setup-online-2.15.exe',
   )
   const writer = filesystem.createWriteStream(destination)
-  const response = await axios.get(IDF_INSTALLER, {
-    responseType: 'stream',
-  })
-  response.data.pipe(writer)
+  const download = await fetchStream(IDF_INSTALLER)
+  download.pipe(writer)
   await finishedPromise(writer)
   spinner.succeed()
 

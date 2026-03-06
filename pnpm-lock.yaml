@@ -20,9 +20,6 @@ importers:
       '@stricli/core':
         specifier: ^1.1.0
         version: 1.1.0
-      axios:
-        specifier: '>=1.6.0'
-        version: 1.6.4
       gluegun:
         specifier: ^5.1.2
         version: 5.1.2
@@ -50,19 +47,19 @@ importers:
     devDependencies:
       '@astrojs/starlight':
         specifier: ^0.25.4
-        version: 0.25.4(astro@4.13.3(@types/node@18.11.19)(typescript@5.5.4))
+        version: 0.25.4(astro@4.13.3(@types/node@24.12.0)(typescript@5.5.4))
       '@auto-it/all-contributors':
         specifier: ^11.2.1
-        version: 11.2.1(@types/node@18.11.19)(typescript@5.5.4)
+        version: 11.2.1(@types/node@24.12.0)(typescript@5.5.4)
       '@auto-it/conventional-commits':
         specifier: ^11.2.1
-        version: 11.2.1(@types/node@18.11.19)(typescript@5.5.4)
+        version: 11.2.1(@types/node@24.12.0)(typescript@5.5.4)
       '@auto-it/first-time-contributor':
         specifier: ^11.2.1
-        version: 11.2.1(@types/node@18.11.19)(typescript@5.5.4)
+        version: 11.2.1(@types/node@24.12.0)(typescript@5.5.4)
       '@auto-it/magic-zero':
         specifier: ^11.2.1
-        version: 11.2.1(@types/node@18.11.19)(typescript@5.5.4)
+        version: 11.2.1(@types/node@24.12.0)(typescript@5.5.4)
       '@babel/core':
         specifier: '>=7.20.12 <8.0.0'
         version: 7.21.3
@@ -73,8 +70,8 @@ importers:
         specifier: ^1.5.0
         version: 1.5.0
       '@types/node':
-        specifier: ^18.11.19
-        version: 18.11.19
+        specifier: ^24.0.0
+        version: 24.12.0
       '@types/serve-handler':
         specifier: ^6.1.1
         version: 6.1.1
@@ -95,10 +92,10 @@ importers:
         version: 6.26.1
       astro:
         specifier: 4.13.3
-        version: 4.13.3(@types/node@18.11.19)(typescript@5.5.4)
+        version: 4.13.3(@types/node@24.12.0)(typescript@5.5.4)
       auto:
         specifier: ^11.2.1
-        version: 11.2.1(@types/node@18.11.19)(typescript@5.5.4)
+        version: 11.2.1(@types/node@24.12.0)(typescript@5.5.4)
       eslint:
         specifier: ^8.57.0
         version: 8.57.0
@@ -131,10 +128,10 @@ importers:
         version: 1.6.15
       tailwindcss:
         specifier: ^3.0.24
-        version: 3.2.4(postcss@8.4.41)(ts-node@10.9.2(@types/node@18.11.19)(typescript@5.5.4))
+        version: 3.2.4(postcss@8.4.41)(ts-node@10.9.2(@types/node@24.12.0)(typescript@5.5.4))
       ts-node:
         specifier: ^10.9.2
-        version: 10.9.2(@types/node@18.11.19)(typescript@5.5.4)
+        version: 10.9.2(@types/node@24.12.0)(typescript@5.5.4)
       tsx:
         specifier: ^4.19.2
         version: 4.19.2
@@ -1402,8 +1399,8 @@ packages:
   '@types/node@17.0.41':
     resolution: {integrity: sha512-xA6drNNeqb5YyV5fO3OAEsnXLfO7uF0whiOfPTz5AeDo8KeZFmODKnvwPymMNO8qE/an8pVY/O50tig2SQCrGw==}
 
-  '@types/node@18.11.19':
-    resolution: {integrity: sha512-YUgMWAQBWLObABqrvx8qKO1enAvBUdjZOAWQ5grBAkp5LQv45jBvYKZ3oFS9iKRCQyFjqw6iuEa1vmFqtxYLZw==}
+  '@types/node@24.12.0':
+    resolution: {integrity: sha512-GYDxsZi3ChgmckRT9HPU0WEhKLP08ev/Yfcq2AstjrDASOYCSXeyjDsHg4v5t4jOj7cyDX3vmprafKlWIG9MXQ==}
 
   '@types/normalize-package-data@2.4.1':
     resolution: {integrity: sha512-Gj7cI7z+98M282Tqmp2K5EIsoouUEzbBJhQQzDE3jSIRk6r9gsz0oUokqIUR4u1R3dMHo0pDHM7sNOHyhulypw==}
@@ -4944,6 +4941,9 @@ packages:
   unbox-primitive@1.0.2:
     resolution: {integrity: sha512-61pPlCD9h51VoreyJ0BReideM3MDKMKnh6+V9L08331ipq6Q8OFXZYiqP6n/tbHx4s5I9uRhcye6BrbkizkBDw==}
 
+  undici-types@7.16.0:
+    resolution: {integrity: sha512-Zz+aZWSj8LE6zoxD+xrjh4VfkIG8Ya6LvYkZqtUQGJPZjYl53ypCaUwWqo7eI0x66KBGeRo+mlBEkMSeSZ38Nw==}
+
   unified@11.0.5:
     resolution: {integrity: sha512-xKvGhPWw3k84Qjh8bI3ZeJjqnyadK+GEFtazSfZv/rKeTkTjOJho6mFqh2SM96iIcZokxiOpg78GazTSg8+KHA==}
 
@@ -5258,12 +5258,12 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  '@astrojs/mdx@3.1.3(astro@4.13.3(@types/node@18.11.19)(typescript@5.5.4))':
+  '@astrojs/mdx@3.1.3(astro@4.13.3(@types/node@24.12.0)(typescript@5.5.4))':
     dependencies:
       '@astrojs/markdown-remark': 5.2.0
       '@mdx-js/mdx': 3.0.1
       acorn: 8.12.1
-      astro: 4.13.3(@types/node@18.11.19)(typescript@5.5.4)
+      astro: 4.13.3(@types/node@24.12.0)(typescript@5.5.4)
       es-module-lexer: 1.5.4
       estree-util-visit: 2.0.0
       github-slugger: 2.0.0
@@ -5289,15 +5289,15 @@ snapshots:
       stream-replace-string: 2.0.0
       zod: 3.23.8
 
-  '@astrojs/starlight@0.25.4(astro@4.13.3(@types/node@18.11.19)(typescript@5.5.4))':
+  '@astrojs/starlight@0.25.4(astro@4.13.3(@types/node@24.12.0)(typescript@5.5.4))':
     dependencies:
-      '@astrojs/mdx': 3.1.3(astro@4.13.3(@types/node@18.11.19)(typescript@5.5.4))
+      '@astrojs/mdx': 3.1.3(astro@4.13.3(@types/node@24.12.0)(typescript@5.5.4))
       '@astrojs/sitemap': 3.1.6
       '@pagefind/default-ui': 1.0.4
       '@types/hast': 3.0.4
       '@types/mdast': 4.0.4
-      astro: 4.13.3(@types/node@18.11.19)(typescript@5.5.4)
-      astro-expressive-code: 0.35.6(astro@4.13.3(@types/node@18.11.19)(typescript@5.5.4))
+      astro: 4.13.3(@types/node@24.12.0)(typescript@5.5.4)
+      astro-expressive-code: 0.35.6(astro@4.13.3(@types/node@24.12.0)(typescript@5.5.4))
       bcp-47: 2.1.0
       hast-util-from-html: 2.0.1
       hast-util-select: 6.0.2
@@ -5328,10 +5328,10 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  '@auto-it/all-contributors@11.2.1(@types/node@18.11.19)(typescript@5.5.4)':
+  '@auto-it/all-contributors@11.2.1(@types/node@24.12.0)(typescript@5.5.4)':
     dependencies:
       '@auto-it/bot-list': 11.2.1
-      '@auto-it/core': 11.2.1(@types/node@18.11.19)(typescript@5.5.4)
+      '@auto-it/core': 11.2.1(@types/node@24.12.0)(typescript@5.5.4)
       '@octokit/rest': 18.12.0
       all-contributors-cli: 6.19.0
       anymatch: 3.1.3
@@ -5352,9 +5352,9 @@ snapshots:
 
   '@auto-it/bot-list@11.2.1': {}
 
-  '@auto-it/conventional-commits@11.2.1(@types/node@18.11.19)(typescript@5.5.4)':
+  '@auto-it/conventional-commits@11.2.1(@types/node@24.12.0)(typescript@5.5.4)':
     dependencies:
-      '@auto-it/core': 11.2.1(@types/node@18.11.19)(typescript@5.5.4)
+      '@auto-it/core': 11.2.1(@types/node@24.12.0)(typescript@5.5.4)
       array.prototype.flatmap: 1.3.2
       conventional-changelog-core: 4.2.4
       conventional-changelog-preset-loader: 2.3.4
@@ -5371,7 +5371,7 @@ snapshots:
       - supports-color
       - typescript
 
-  '@auto-it/core@11.2.1(@types/node@18.11.19)(typescript@5.5.4)':
+  '@auto-it/core@11.2.1(@types/node@24.12.0)(typescript@5.5.4)':
     dependencies:
       '@auto-it/bot-list': 11.2.1
       '@endemolshinegroup/cosmiconfig-typescript-loader': 3.0.2(cosmiconfig@7.0.0)(typescript@5.5.4)
@@ -5408,24 +5408,24 @@ snapshots:
       tapable: 2.2.1
       terminal-link: 2.1.1
       tinycolor2: 1.6.0
-      ts-node: 10.9.2(@types/node@18.11.19)(typescript@5.5.4)
+      ts-node: 10.9.2(@types/node@24.12.0)(typescript@5.5.4)
       tslib: 2.1.0
       type-fest: 0.21.3
       typescript: 5.5.4
       typescript-memoize: 1.1.1
       url-join: 4.0.1
     optionalDependencies:
-      '@types/node': 18.11.19
+      '@types/node': 24.12.0
     transitivePeerDependencies:
       - '@swc/core'
       - '@swc/wasm'
       - encoding
       - supports-color
 
-  '@auto-it/first-time-contributor@11.2.1(@types/node@18.11.19)(typescript@5.5.4)':
+  '@auto-it/first-time-contributor@11.2.1(@types/node@24.12.0)(typescript@5.5.4)':
     dependencies:
       '@auto-it/bot-list': 11.2.1
-      '@auto-it/core': 11.2.1(@types/node@18.11.19)(typescript@5.5.4)
+      '@auto-it/core': 11.2.1(@types/node@24.12.0)(typescript@5.5.4)
       array.prototype.flatmap: 1.3.2
       endent: 2.1.0
       tslib: 2.1.0
@@ -5438,9 +5438,9 @@ snapshots:
       - supports-color
       - typescript
 
-  '@auto-it/magic-zero@11.2.1(@types/node@18.11.19)(typescript@5.5.4)':
+  '@auto-it/magic-zero@11.2.1(@types/node@24.12.0)(typescript@5.5.4)':
     dependencies:
-      '@auto-it/core': 11.2.1(@types/node@18.11.19)(typescript@5.5.4)
+      '@auto-it/core': 11.2.1(@types/node@24.12.0)(typescript@5.5.4)
       fp-ts: 2.16.9
       io-ts: 2.2.21(fp-ts@2.16.9)
       semver: 7.6.3
@@ -5453,9 +5453,9 @@ snapshots:
       - supports-color
       - typescript
 
-  '@auto-it/npm@11.2.1(@types/node@18.11.19)(typescript@5.5.4)':
+  '@auto-it/npm@11.2.1(@types/node@24.12.0)(typescript@5.5.4)':
     dependencies:
-      '@auto-it/core': 11.2.1(@types/node@18.11.19)(typescript@5.5.4)
+      '@auto-it/core': 11.2.1(@types/node@24.12.0)(typescript@5.5.4)
       '@auto-it/package-json-utils': 11.2.1
       await-to-js: 3.0.0
       endent: 2.1.0
@@ -5482,10 +5482,10 @@ snapshots:
       parse-author: 2.0.0
       parse-github-url: 1.0.2
 
-  '@auto-it/released@11.2.1(@types/node@18.11.19)(typescript@5.5.4)':
+  '@auto-it/released@11.2.1(@types/node@24.12.0)(typescript@5.5.4)':
     dependencies:
       '@auto-it/bot-list': 11.2.1
-      '@auto-it/core': 11.2.1(@types/node@18.11.19)(typescript@5.5.4)
+      '@auto-it/core': 11.2.1(@types/node@24.12.0)(typescript@5.5.4)
       deepmerge: 4.3.1
       fp-ts: 2.16.9
       io-ts: 2.2.21(fp-ts@2.16.9)
@@ -5498,9 +5498,9 @@ snapshots:
       - supports-color
       - typescript
 
-  '@auto-it/version-file@11.2.1(@types/node@18.11.19)(typescript@5.5.4)':
+  '@auto-it/version-file@11.2.1(@types/node@24.12.0)(typescript@5.5.4)':
     dependencies:
-      '@auto-it/core': 11.2.1(@types/node@18.11.19)(typescript@5.5.4)
+      '@auto-it/core': 11.2.1(@types/node@24.12.0)(typescript@5.5.4)
       fp-ts: 2.16.9
       io-ts: 2.2.21(fp-ts@2.16.9)
       semver: 7.6.3
@@ -6728,7 +6728,9 @@ snapshots:
 
   '@types/node@17.0.41': {}
 
-  '@types/node@18.11.19': {}
+  '@types/node@24.12.0':
+    dependencies:
+      undici-types: 7.16.0
 
   '@types/normalize-package-data@2.4.1': {}
 
@@ -6736,22 +6738,22 @@ snapshots:
 
   '@types/sax@1.2.4':
     dependencies:
-      '@types/node': 18.11.19
+      '@types/node': 24.12.0
 
   '@types/semver@6.2.3': {}
 
   '@types/serve-handler@6.1.1':
     dependencies:
-      '@types/node': 18.11.19
+      '@types/node': 24.12.0
 
   '@types/tar-fs@2.0.1':
     dependencies:
-      '@types/node': 18.11.19
+      '@types/node': 24.12.0
       '@types/tar-stream': 2.2.2
 
   '@types/tar-stream@2.2.2':
     dependencies:
-      '@types/node': 18.11.19
+      '@types/node': 24.12.0
 
   '@types/unist@2.0.6': {}
 
@@ -6759,7 +6761,7 @@ snapshots:
 
   '@types/unzip-stream@0.3.1':
     dependencies:
-      '@types/node': 18.11.19
+      '@types/node': 24.12.0
 
   '@types/w3c-web-usb@1.0.6': {}
 
@@ -7124,12 +7126,12 @@ snapshots:
 
   astring@1.8.4: {}
 
-  astro-expressive-code@0.35.6(astro@4.13.3(@types/node@18.11.19)(typescript@5.5.4)):
+  astro-expressive-code@0.35.6(astro@4.13.3(@types/node@24.12.0)(typescript@5.5.4)):
     dependencies:
-      astro: 4.13.3(@types/node@18.11.19)(typescript@5.5.4)
+      astro: 4.13.3(@types/node@24.12.0)(typescript@5.5.4)
       rehype-expressive-code: 0.35.6
 
-  astro@4.13.3(@types/node@18.11.19)(typescript@5.5.4):
+  astro@4.13.3(@types/node@24.12.0)(typescript@5.5.4):
     dependencies:
       '@astrojs/compiler': 2.10.2
       '@astrojs/internal-helpers': 0.4.1
@@ -7186,8 +7188,8 @@ snapshots:
       tsconfck: 3.1.1(typescript@5.5.4)
       unist-util-visit: 5.0.0
       vfile: 6.0.2
-      vite: 5.4.0(@types/node@18.11.19)
-      vitefu: 0.2.5(vite@5.4.0(@types/node@18.11.19))
+      vite: 5.4.0(@types/node@24.12.0)
+      vitefu: 0.2.5(vite@5.4.0(@types/node@24.12.0))
       which-pm: 3.0.0
       yargs-parser: 21.1.1
       zod: 3.23.8
@@ -7212,12 +7214,12 @@ snapshots:
 
   author-regex@1.0.0: {}
 
-  auto@11.2.1(@types/node@18.11.19)(typescript@5.5.4):
+  auto@11.2.1(@types/node@24.12.0)(typescript@5.5.4):
     dependencies:
-      '@auto-it/core': 11.2.1(@types/node@18.11.19)(typescript@5.5.4)
-      '@auto-it/npm': 11.2.1(@types/node@18.11.19)(typescript@5.5.4)
-      '@auto-it/released': 11.2.1(@types/node@18.11.19)(typescript@5.5.4)
-      '@auto-it/version-file': 11.2.1(@types/node@18.11.19)(typescript@5.5.4)
+      '@auto-it/core': 11.2.1(@types/node@24.12.0)(typescript@5.5.4)
+      '@auto-it/npm': 11.2.1(@types/node@24.12.0)(typescript@5.5.4)
+      '@auto-it/released': 11.2.1(@types/node@24.12.0)(typescript@5.5.4)
+      '@auto-it/version-file': 11.2.1(@types/node@24.12.0)(typescript@5.5.4)
       await-to-js: 3.0.0
       chalk: 4.1.2
       command-line-application: 0.10.1
@@ -10126,13 +10128,13 @@ snapshots:
       camelcase-css: 2.0.1
       postcss: 8.4.41
 
-  postcss-load-config@3.1.4(postcss@8.4.41)(ts-node@10.9.2(@types/node@18.11.19)(typescript@5.5.4)):
+  postcss-load-config@3.1.4(postcss@8.4.41)(ts-node@10.9.2(@types/node@24.12.0)(typescript@5.5.4)):
     dependencies:
       lilconfig: 2.0.6
       yaml: 1.10.2
     optionalDependencies:
       postcss: 8.4.41
-      ts-node: 10.9.2(@types/node@18.11.19)(typescript@5.5.4)
+      ts-node: 10.9.2(@types/node@24.12.0)(typescript@5.5.4)
 
   postcss-nested@6.0.0(postcss@8.4.41):
     dependencies:
@@ -10891,7 +10893,7 @@ snapshots:
       typical: 5.2.0
       wordwrapjs: 4.0.1
 
-  tailwindcss@3.2.4(postcss@8.4.41)(ts-node@10.9.2(@types/node@18.11.19)(typescript@5.5.4)):
+  tailwindcss@3.2.4(postcss@8.4.41)(ts-node@10.9.2(@types/node@24.12.0)(typescript@5.5.4)):
     dependencies:
       arg: 5.0.2
       chokidar: 3.5.3
@@ -10910,7 +10912,7 @@ snapshots:
       postcss: 8.4.41
       postcss-import: 14.1.0(postcss@8.4.41)
       postcss-js: 4.0.0(postcss@8.4.41)
-      postcss-load-config: 3.1.4(postcss@8.4.41)(ts-node@10.9.2(@types/node@18.11.19)(typescript@5.5.4))
+      postcss-load-config: 3.1.4(postcss@8.4.41)(ts-node@10.9.2(@types/node@24.12.0)(typescript@5.5.4))
       postcss-nested: 6.0.0(postcss@8.4.41)
       postcss-selector-parser: 6.0.11
       postcss-value-parser: 4.2.0
@@ -10988,14 +10990,14 @@ snapshots:
     dependencies:
       typescript: 5.5.4
 
-  ts-node@10.9.2(@types/node@18.11.19)(typescript@5.5.4):
+  ts-node@10.9.2(@types/node@24.12.0)(typescript@5.5.4):
     dependencies:
       '@cspotcode/source-map-support': 0.8.1
       '@tsconfig/node10': 1.0.8
       '@tsconfig/node12': 1.0.9
       '@tsconfig/node14': 1.0.1
       '@tsconfig/node16': 1.0.2
-      '@types/node': 18.11.19
+      '@types/node': 24.12.0
       acorn: 8.12.1
       acorn-walk: 8.2.0
       arg: 4.1.3
@@ -11139,6 +11141,8 @@ snapshots:
       has-symbols: 1.0.3
       which-boxed-primitive: 1.0.2
 
+  undici-types@7.16.0: {}
+
   unified@11.0.5:
     dependencies:
       '@types/unist': 3.0.2
@@ -11259,18 +11263,18 @@ snapshots:
       unist-util-stringify-position: 4.0.0
       vfile-message: 4.0.2
 
-  vite@5.4.0(@types/node@18.11.19):
+  vite@5.4.0(@types/node@24.12.0):
     dependencies:
       esbuild: 0.21.5
       postcss: 8.4.41
       rollup: 4.20.0
     optionalDependencies:
-      '@types/node': 18.11.19
+      '@types/node': 24.12.0
       fsevents: 2.3.3
 
-  vitefu@0.2.5(vite@5.4.0(@types/node@18.11.19)):
+  vitefu@0.2.5(vite@5.4.0(@types/node@24.12.0)):
     optionalDependencies:
-      vite: 5.4.0(@types/node@18.11.19)
+      vite: 5.4.0(@types/node@24.12.0)
 
   wcwidth@1.0.1:
     dependencies:

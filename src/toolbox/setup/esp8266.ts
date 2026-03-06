@@ -1,5 +1,4 @@
 import { print, filesystem, system } from 'gluegun'
-import axios from 'axios'
 import { finished } from 'stream'
 import { promisify } from 'util'
 import { extract } from 'tar-fs'
@@ -17,6 +16,7 @@ import { DEVICE_ALIAS } from '../prompt/devices'
 import type { Device, SetupResult } from '../../types'
 import { sourceEnvironment } from '../system/exec'
 import { failure, successVoid, isFailure } from '../system/errors'
+import { fetchStream } from '../system/fetch'
 
 const finishedPromise = promisify(finished)
 
@@ -61,18 +61,14 @@ export default async function (): Promise<SetupResult> {
 
     if (isWindows) {
       const writer = ZipExtract({ path: ESP_DIR })
-      const response = await axios.get(TOOLCHAIN, {
-        responseType: 'stream',
-      })
-      response.data.pipe(writer)
+      const download = await fetchStream(TOOLCHAIN)
+      download.pipe(writer)
       await finishedPromise(writer)
     } else {
       const writer = extract(ESP_DIR, { readable: true })
       const gunzip = createGunzip()
-      const response = await axios.get(TOOLCHAIN, {
-        responseType: 'stream',
-      })
-      response.data.pipe(gunzip).pipe(writer)
+      const download = await fetchStream(TOOLCHAIN)
+      download.pipe(gunzip).pipe(writer)
       await finishedPromise(writer)
     }
     spinner.succeed()
@@ -82,10 +78,8 @@ export default async function (): Promise<SetupResult> {
   if (filesystem.exists(ARDUINO_CORE_PATH) === false) {
     spinner.start('Downloading arduino core tooling')
     const writer = ZipExtract({ path: ESP_DIR })
-    const response = await axios.get(ARDUINO_CORE, {
-      responseType: 'stream',
-    })
-    response.data.pipe(writer)
+    const download = await fetchStream(ARDUINO_CORE)
+    download.pipe(writer)
     await finishedPromise(writer)
     spinner.succeed()
   }

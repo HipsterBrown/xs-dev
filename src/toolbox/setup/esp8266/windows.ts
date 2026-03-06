@@ -1,12 +1,12 @@
 import { system, filesystem, print } from 'gluegun'
 import { finished } from 'stream'
-import axios from 'axios'
 import type { GluegunPrint } from 'gluegun'
 import { Extract as ZipExtract } from 'unzip-stream'
 import { promisify } from 'util'
 import { addToPath, setEnv } from '../windows'
 import { INSTALL_DIR } from '../constants'
 import { failure, successVoid } from '../../system/errors'
+import { fetchStream } from '../../system/fetch'
 import type { SetupResult } from '../../../types'
 
 const finishedPromise = promisify(finished)
@@ -63,10 +63,8 @@ export async function installDeps(
 
   spinner.start('Downloading ESP Tool')
   let writer = ZipExtract({ path: ESP_DIR })
-  let response = await axios.get(ESP_TOOL, {
-    responseType: 'stream',
-  })
-  response.data.pipe(writer)
+  let download = await fetchStream(ESP_TOOL)
+  download.pipe(writer)
   await finishedPromise(writer)
   filesystem.move(ESP_TOOL_EXE, ESP_TOOL_DESTINATION, { overwrite: true })
   filesystem.remove(ESP_TOOL_DIR)
@@ -74,10 +72,8 @@ export async function installDeps(
 
   spinner.start('Downloading Cygwin toolchain support package')
   writer = ZipExtract({ path: ESP_DIR })
-  response = await axios.get(CYGWIN, {
-    responseType: 'stream',
-  })
-  response.data.pipe(writer)
+  download = await fetchStream(CYGWIN)
+  download.pipe(writer)
   await finishedPromise(writer)
   spinner.succeed()
 
