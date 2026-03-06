@@ -1,82 +1,108 @@
-import { filesystem, print, prompt, system } from 'gluegun'
-import { INSTALL_DIR } from './constants'
-import { type as platformType } from 'os'
+import { mkdir, copyFile } from 'node:fs/promises'
+import { existsSync } from 'node:fs'
+import { resolve } from 'node:path'
+import { type as platformType } from 'node:os'
+import { execaCommand } from 'execa'
 import plist from 'simple-plist'
-import type { Result } from '../../types'
-import { success, failure, wrapAsync } from '../system/errors'
+import { INSTALL_DIR } from './constants'
+import type { Prompter } from '../../lib/prompter.js'
+import type { OperationEvent } from '../../lib/events.js'
 
 const NC_PREFS_PLIST = 'com.apple.ncprefs.plist'
 const DISK_AGENT_NC_PREF_ID =
   '_SYSTEM_CENTER_:com.apple.DiskArbitration.DiskArbitrationAgent'
 
-export default async function (): Promise<Result<void>> {
-  const spinner = print.spin()
-  spinner.start('Beginning setup...')
+export default async function* ejectfix(
+  _args: Record<string, unknown>,
+  prompter: Prompter,
+): AsyncGenerator<OperationEvent> {
+  yield { type: 'step:start', message: 'Beginning setup...' }
 
   const OS = platformType().toLowerCase()
   if (OS !== 'darwin') {
-    spinner.fail(`OS "${OS}" not supported`)
-    return failure(`OS "${OS}" not supported`)
+    yield { type: 'step:fail', message: `OS "${OS}" not supported` }
+    return
   }
 
-  const PREFS_DIR = filesystem.resolve(
+  const PREFS_DIR = resolve(
     process.env.HOME ?? '~',
     'Library',
     'Preferences',
   )
-  const PREFS_BACKUP_DIR = filesystem.resolve(INSTALL_DIR, 'ejectfix')
-  const NC_PREFS_PATH = filesystem.resolve(PREFS_DIR, NC_PREFS_PLIST)
+  const PREFS_BACKUP_DIR = resolve(INSTALL_DIR, 'ejectfix')
+  const NC_PREFS_PATH = resolve(PREFS_DIR, NC_PREFS_PLIST)
 
-  filesystem.dir(PREFS_BACKUP_DIR)
+  try {
+    await mkdir(PREFS_BACKUP_DIR, { recursive: true })
+  } catch (error) {
+    yield {
+      type: 'step:fail',
+      message: `Error creating backup directory: ${String(error)}`,
+    }
+    return
+  }
 
-  if (
-    filesystem.exists(filesystem.resolve(PREFS_BACKUP_DIR, NC_PREFS_PLIST)) !==
-    false
-  ) {
-    spinner.info('A backup of your notification preferences already exists.')
-    const shouldContinue = await prompt.confirm(
+  const backupPath = resolve(PREFS_BACKUP_DIR, NC_PREFS_PLIST)
+  if (existsSync(backupPath)) {
+    yield { type: 'info', message: 'A backup of your notification preferences already exists.' }
+    const shouldContinue = await prompter.confirm(
       'Would you like to override this backup and continue?',
     )
     if (!shouldContinue) {
-      spinner.info('Cancelling ejectfix setup.')
-      return success(undefined)
+      yield { type: 'info', message: 'Cancelling ejectfix setup.' }
+      return
     }
   }
-  if (filesystem.exists(NC_PREFS_PATH) === false) {
-    spinner.fail(`Cannot find notification preferences file: ${NC_PREFS_PATH}`)
-    return failure(`Cannot find notification preferences file: ${NC_PREFS_PATH}`)
+
+  if (!existsSync(NC_PREFS_PATH)) {
+    yield {
+      type: 'step:fail',
+      message: `Cannot find notification preferences file: ${NC_PREFS_PATH}`,
+    }
+    return
   }
 
-  return await wrapAsync(async () => {
-    try {
-      filesystem.copy(
-        NC_PREFS_PATH,
-        filesystem.resolve(PREFS_BACKUP_DIR, NC_PREFS_PLIST),
-        { overwrite: true },
-      )
-    } catch (error) {
-      spinner.fail(`Error copying notification preferences: ${String(error)}`)
-      throw new Error(`Error copying notification preferences: ${String(error)}`)
+  try {
+    yield { type: 'info', message: 'Backing up notification preferences' }
+    await copyFile(NC_PREFS_PATH, backupPath)
+  } catch (error) {
+    yield {
+      type: 'step:fail',
+      message: `Error copying notification preferences: ${String(error)}`,
     }
+    return
+  }
 
-    try {
-      const prefs = plist.readFileSync<{
-        apps: Array<{ 'bundle-id': string; flags: number }>
-      }>(NC_PREFS_PATH)
-      for (const app of prefs.apps) {
-        if (app['bundle-id'] === DISK_AGENT_NC_PREF_ID) {
-          app.flags = (Number(app.flags) & ~0b00010000) | 0b01001000
-        }
+  try {
+    yield { type: 'info', message: 'Updating notification preferences' }
+    const prefs = plist.readFileSync<{
+      apps: Array<{ 'bundle-id': string; flags: number }>
+    }>(NC_PREFS_PATH)
+    for (const app of prefs.apps) {
+      if (app['bundle-id'] === DISK_AGENT_NC_PREF_ID) {
+        app.flags = (Number(app.flags) & ~0b00010000) | 0b01001000
       }
-      plist.writeBinaryFileSync(NC_PREFS_PATH, prefs)
-    } catch (error) {
-      spinner.fail(`Unable to update notification preferences: ${String(error)}`)
-      throw new Error(`Unable to update notification preferences: ${String(error)}`)
     }
+    plist.writeBinaryFileSync(NC_PREFS_PATH, prefs)
+  } catch (error) {
+    yield {
+      type: 'step:fail',
+      message: `Unable to update notification preferences: ${String(error)}`,
+    }
+    return
+  }
 
-    await system.exec('killall usernoted cfprefsd')
-    spinner.succeed(
-      'Successfully updated notification preferences for `DISK NOT EJECTED PROPERLY` warning!',
-    )
-  })
+  try {
+    yield { type: 'info', message: 'Restarting notification services' }
+    await execaCommand('killall usernoted cfprefsd', { reject: false })
+    yield {
+      type: 'step:done',
+      message: 'Successfully updated notification preferences for `DISK NOT EJECTED PROPERLY` warning!',
+    }
+  } catch (error) {
+    yield {
+      type: 'step:fail',
+      message: `Error restarting services: ${String(error)}`,
+    }
+  }
 }
