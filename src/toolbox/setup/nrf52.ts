@@ -1,21 +1,24 @@
-import { createWriteStream } from 'node:fs'
-import { filesystem, print } from 'gluegun'
+import { createWriteStream, existsSync } from 'node:fs'
 import { arch, type as platformType } from 'node:os'
 import { finished, Transform, type TransformOptions } from 'node:stream'
 import { extract } from 'tar-fs'
 import { promisify } from 'node:util'
+import { mkdir } from 'node:fs/promises'
 import { Extract as ZipExtract } from 'unzip-stream'
+import { resolve } from 'node:path'
 import type { LZMAOptions, Unxz } from 'node-liblzma'
-import type { Device, SetupResult } from '../../types'
+import type { Device } from '../../types'
 import { DEVICE_ALIAS } from '../prompt/devices'
 import { execWithSudo, sourceEnvironment } from '../system/exec'
 import { EXPORTS_FILE_PATH, INSTALL_DIR } from './constants'
 import { moddableExists } from './moddable'
-import { ensureModdableCommandPrompt, setEnv } from './windows'
+import { setEnv } from './windows'
 import upsert from '../patching/upsert'
 import { installPython } from './nrf52/windows'
-import { failure, successVoid, isFailure } from '../system/errors'
+import { isFailure } from '../system/errors'
 import { fetchStream } from '../system/fetch'
+import type { Prompter } from '../../lib/prompter.js'
+import type { OperationEvent } from '../../lib/events.js'
 
 const finishedPromise = promisify(finished)
 
@@ -25,7 +28,13 @@ const ARCH_ALIAS: Record<string, string> = {
   linux_x64: 'x86_64',
   windows_nt_x64: 'mingw-w64-i686',
 }
-export default async function(): Promise<SetupResult> {
+
+export default async function* nrf52Setup(
+  args: Record<string, unknown>,
+  prompter: Prompter,
+): AsyncGenerator<OperationEvent> {
+  yield { type: 'step:start', message: 'Setting up nrf52 tools' }
+
   const OS = platformType().toLowerCase() as Device
   const isWindows = OS === 'windows_nt'
   const TOOLCHAIN = `arm-gnu-toolchain-12.2.rel1-${ARCH_ALIAS[`${OS}_${arch()}`]}-arm-none-eabi`
@@ -34,27 +43,19 @@ export default async function(): Promise<SetupResult> {
     'https://github.com/Moddable-OpenSource/tools/releases/download/v1.0.0/uf2conv.py'
   const NRF5_SDK = 'nRF5_SDK_17.0.2_d674dde'
   const NRF5_SDK_DOWNLOAD = `https://github.com/Moddable-OpenSource/tools/releases/download/v1.0.0/${NRF5_SDK}-mod.zip`
-  const NRF52_DIR = filesystem.resolve(INSTALL_DIR, 'nrf52')
-  const TOOLCHAIN_PATH = filesystem.resolve(NRF52_DIR, TOOLCHAIN)
-  const UF2CONV_PATH = filesystem.resolve(NRF52_DIR, 'uf2conv.py')
-  const NRF5_SDK_PATH = filesystem.resolve(NRF52_DIR, NRF5_SDK)
+  const NRF52_DIR = resolve(INSTALL_DIR, 'nrf52')
+  const TOOLCHAIN_PATH = resolve(NRF52_DIR, TOOLCHAIN)
+  const UF2CONV_PATH = resolve(NRF52_DIR, 'uf2conv.py')
+  const NRF5_SDK_PATH = resolve(NRF52_DIR, NRF5_SDK)
 
   await sourceEnvironment()
 
-  const spinner = print.spin()
-  spinner.start('Setting up nrf52 tools')
-
   if (!moddableExists()) {
-    spinner.fail(
-      `Moddable tooling required. Run 'xs-dev setup --device ${DEVICE_ALIAS[OS]}' before trying again.`,
-    )
-    return failure(`Moddable tooling required. Run 'xs-dev setup --device ${DEVICE_ALIAS[OS]}' before trying again.`)
+    yield { type: 'step:fail', message: `Moddable tooling required. Run 'xs-dev setup --device ${DEVICE_ALIAS[OS]}' before trying again.` }
+    return
   }
 
-  if (isWindows) {
-    const result = await ensureModdableCommandPrompt(spinner)
-    if (isFailure(result)) return result
-  }
+  // Windows-specific setup already handled by setEnv
 
   let createUnxz: ((lzmaOption?: LZMAOptions, transformOption?: TransformOptions) => Unxz) = () => {
     return new Transform() as Unxz
@@ -63,84 +64,97 @@ export default async function(): Promise<SetupResult> {
     try {
       ; ({ createUnxz } = await import('node-liblzma'))
     } catch (error) {
-      spinner.fail()
-      return failure('Unable to extract Arm Embedded Toolchain without XZ utils (https://tukaani.org/xz/). Please install that dependency on your system and reinstall xs-dev before attempting this setup again. See https://xs-dev.js.org/troubleshooting for more info.')
+      yield { type: 'step:fail', message: 'Unable to extract Arm Embedded Toolchain without XZ utils (https://tukaani.org/xz/). Please install that dependency on your system and reinstall xs-dev before attempting this setup again. See https://xs-dev.js.org/troubleshooting for more info.' }
+      return
     }
   }
 
-  spinner.info('Ensuring nrf52 directory')
-  filesystem.dir(NRF52_DIR)
-
-  if (filesystem.exists(TOOLCHAIN_PATH) === false) {
-    spinner.start('Downloading GNU Arm Embedded Toolchain')
-
-    const writer = isWindows
-      ? ZipExtract({ path: NRF52_DIR })
-      : extract(NRF52_DIR, { readable: true })
-    const download = await fetchStream(TOOLCHAIN_DOWNLOAD)
-    const stream = isWindows ? download : download.pipe(createUnxz())
-    stream.pipe(writer)
-    await finishedPromise(writer)
-    spinner.succeed()
+  try {
+    yield { type: 'info', message: 'Ensuring nrf52 directory' }
+    await mkdir(NRF52_DIR, { recursive: true })
+  } catch (error) {
+    yield { type: 'step:fail', message: `Error creating nrf52 directory: ${String(error)}` }
+    return
   }
 
-  if (filesystem.exists(UF2CONV_PATH) === false) {
-    spinner.start('Downloading Adafruit nRF52 Bootloader')
-    const writer = createWriteStream(UF2CONV_PATH, { mode: 0o755 })
-    const download = await fetchStream(ADAFRUIT_NRF52_BOOTLOADER_UF2CONV_DOWNLOAD)
-    download.pipe(writer)
-    await finishedPromise(writer)
-    spinner.succeed()
+  try {
+    if (!existsSync(TOOLCHAIN_PATH)) {
+      yield { type: 'step:start', message: 'Downloading GNU Arm Embedded Toolchain' }
+
+      const writer = isWindows
+        ? ZipExtract({ path: NRF52_DIR })
+        : extract(NRF52_DIR, { readable: true })
+      const download = await fetchStream(TOOLCHAIN_DOWNLOAD)
+      const stream = isWindows ? download : download.pipe(createUnxz())
+      stream.pipe(writer)
+      await finishedPromise(writer)
+      yield { type: 'step:done' }
+    }
+
+    if (!existsSync(UF2CONV_PATH)) {
+      yield { type: 'step:start', message: 'Downloading Adafruit nRF52 Bootloader' }
+      const writer = createWriteStream(UF2CONV_PATH, { mode: 0o755 })
+      const download = await fetchStream(ADAFRUIT_NRF52_BOOTLOADER_UF2CONV_DOWNLOAD)
+      download.pipe(writer)
+      await finishedPromise(writer)
+      yield { type: 'step:done' }
+    }
+
+    if (!existsSync(NRF5_SDK_PATH)) {
+      yield { type: 'step:start', message: 'Downloading nRF5 SDK' }
+      const writer = ZipExtract({ path: NRF52_DIR })
+      const download = await fetchStream(NRF5_SDK_DOWNLOAD)
+      download.pipe(writer)
+      await finishedPromise(writer)
+      yield { type: 'step:done' }
+    }
+  } catch (error) {
+    yield { type: 'step:fail', message: `Error downloading dependencies: ${String(error)}` }
+    return
   }
 
-  if (filesystem.exists(NRF5_SDK_PATH) === false) {
-    spinner.start('Downloading nRF5 SDK')
-    const writer = ZipExtract({ path: NRF52_DIR })
-    const download = await fetchStream(NRF5_SDK_DOWNLOAD)
-    download.pipe(writer)
-    await finishedPromise(writer)
-    spinner.succeed()
-  }
-
-  if (OS === 'darwin' || OS === 'linux') {
-    if (
-      process.env.NRF_ROOT === undefined ||
-      process.env.NRF_SDK_DIR === undefined
-    ) {
-      spinner.info('Configuring $NRF_ROOT and $NRF_SDK_DIR')
+  try {
+    if (OS === 'darwin' || OS === 'linux') {
+      if (
+        process.env.NRF_ROOT === undefined ||
+        process.env.NRF_SDK_DIR === undefined
+      ) {
+        yield { type: 'info', message: 'Configuring $NRF_ROOT and $NRF_SDK_DIR' }
+        process.env.NRF_ROOT = NRF52_DIR
+        process.env.NRF_SDK_DIR = NRF5_SDK_PATH
+        await upsert(
+          EXPORTS_FILE_PATH,
+          `export NRF_ROOT=${process.env.NRF_ROOT}\nexport NRF_SDK_DIR=${process.env.NRF_SDK_DIR}`,
+        )
+      }
+    } else {
       process.env.NRF_ROOT = NRF52_DIR
-      process.env.NRF_SDK_DIR = NRF5_SDK_PATH
-      await upsert(
-        EXPORTS_FILE_PATH,
-        `export NRF_ROOT=${process.env.NRF_ROOT}\nexport NRF_SDK_DIR=${process.env.NRF_SDK_DIR}`,
-      )
+      process.env.NRF52_SDK_PATH = NRF5_SDK_PATH
+      await setEnv('NRF_ROOT', NRF52_DIR)
+      await setEnv('NRF52_SDK_PATH', NRF5_SDK_PATH)
+      for await (const event of installPython()) {
+        yield event
+      }
     }
-  } else {
-    process.env.NRF_ROOT = NRF52_DIR
-    process.env.NRF52_SDK_PATH = NRF5_SDK_PATH
-    await setEnv('NRF_ROOT', NRF52_DIR)
-    await setEnv('NRF52_SDK_PATH', NRF5_SDK_PATH)
-    const pythonResult = await installPython(spinner)
-    if (isFailure(pythonResult)) {
-      // Command Prompt restart needed or Python installation failed
-      return pythonResult
+
+    if (OS === 'linux') {
+      try {
+        const result = await execWithSudo('adduser $USER dialout')
+        if (isFailure(result)) {
+          yield { type: 'warning', message: `Unable to provide ttyUSB0 permission to the current user. Please run "sudo adduser <username> dialout" before trying to attempting to build projects for your nrf52 device.` }
+        }
+      } catch (_error) {
+        yield { type: 'warning', message: `Unable to provide ttyUSB0 permission to the current user. Please run "sudo adduser <username> dialout" before trying to attempting to build projects for your nrf52 device.` }
+      }
     }
+  } catch (error) {
+    yield { type: 'step:fail', message: `Error configuring environment: ${String(error)}` }
+    return
   }
 
-  if (OS === 'linux') {
-    try {
-      await execWithSudo('adduser $USER dialout', { process })
-    } catch (_error) {
-      print.warning(
-        `Unable to provide ttyUSB0 permission to the current user. Please run "sudo adduser <username> dialout" before trying to attempting to build projects for your nrf52 device.`,
-      )
-    }
+  yield {
+    type: 'step:done',
+    message: `Successfully set up nrf52 platform support for Moddable!
+Test out the setup by starting a new ${isWindows ? 'Moddable Command Prompt' : 'terminal session'}, plugging in your device, and running: xs-dev run --example helloworld --device nrf52`,
   }
-
-  spinner.succeed(`
-  Successfully set up nrf52 platform support for Moddable!
-  Test out the setup by starting a new ${isWindows ? 'Moddable Command Prompt' : 'terminal session'}, plugging in your device, and running: xs-dev run --example helloworld --device nrf52
-  `)
-
-  return successVoid()
 }
