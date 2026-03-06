@@ -1,11 +1,12 @@
 import axios from 'axios'
-import { createWriteStream } from 'fs'
+import { createWriteStream } from 'node:fs'
 import { filesystem, print } from 'gluegun'
-import { arch, type as platformType } from 'os'
-import { finished, type Transform } from 'stream'
+import { arch, type as platformType } from 'node:os'
+import { finished, Transform, type TransformOptions } from 'node:stream'
 import { extract } from 'tar-fs'
-import { promisify } from 'util'
+import { promisify } from 'node:util'
 import { Extract as ZipExtract } from 'unzip-stream'
+import type { LZMAOptions, Unxz } from 'node-liblzma'
 import type { Device, SetupResult } from '../../types'
 import { DEVICE_ALIAS } from '../prompt/devices'
 import { execWithSudo, sourceEnvironment } from '../system/exec'
@@ -24,7 +25,7 @@ const ARCH_ALIAS: Record<string, string> = {
   linux_x64: 'x86_64',
   windows_nt_x64: 'mingw-w64-i686',
 }
-export default async function (): Promise<SetupResult> {
+export default async function(): Promise<SetupResult> {
   const OS = platformType().toLowerCase() as Device
   const isWindows = OS === 'windows_nt'
   const TOOLCHAIN = `arm-gnu-toolchain-12.2.rel1-${ARCH_ALIAS[`${OS}_${arch()}`]}-arm-none-eabi`
@@ -55,16 +56,14 @@ export default async function (): Promise<SetupResult> {
     if (isFailure(result)) return result
   }
 
-  let createUnxz: (() => Transform) | (() => void) = () => {
-    void 0
+  let createUnxz: ((lzmaOption?: LZMAOptions, transformOption?: TransformOptions) => Unxz) = () => {
+    return new Transform() as Unxz
   }
   if (!isWindows) {
     try {
-      ;({ createUnxz } = await import('node-liblzma'))
+      ; ({ createUnxz } = await import('node-liblzma'))
     } catch (error) {
-      spinner.fail(
-        'Unable to extract Arm Embedded Toolchain without XZ utils (https://tukaani.org/xz/). Please install that dependency on your system and reinstall xs-dev before attempting this setup again. See https://xs-dev.js.org/troubleshooting for more info.',
-      )
+      spinner.fail()
       return failure('Unable to extract Arm Embedded Toolchain without XZ utils (https://tukaani.org/xz/). Please install that dependency on your system and reinstall xs-dev before attempting this setup again. See https://xs-dev.js.org/troubleshooting for more info.')
     }
   }
