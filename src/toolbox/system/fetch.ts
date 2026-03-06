@@ -1,5 +1,4 @@
 import { Readable } from 'node:stream'
-import type { ReadableStream } from 'node:stream/web'
 
 export async function fetchStream(url: string): Promise<Readable> {
   const response = await fetch(url)
@@ -9,5 +8,5 @@ export async function fetchStream(url: string): Promise<Readable> {
   if (response.body === null) {
     throw new Error(`Empty response body: ${url}`)
   }
-  return Readable.fromWeb(response.body as ReadableStream)
+  return Readable.fromWeb(response.body)
 }
