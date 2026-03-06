@@ -1,8 +1,11 @@
 import { type as platformType } from 'node:os'
+import ora from 'ora'
 import { buildCommand } from '@stricli/core'
 import type { LocalContext } from '../app'
 import type { Device } from '../types'
+import build from '../toolbox/build'
 import { DEVICE_ALIAS } from '../toolbox/prompt/devices'
+import { createInteractivePrompter, createNonInteractivePrompter } from '../lib/prompter'
 
 type Mode = 'development' | 'production'
 
@@ -39,22 +42,61 @@ const command = buildCommand({
       mode = (process.env.NODE_ENV as Mode) ?? 'development',
       output,
     } = flags
-    const { build } = await import('../toolbox/build/index')
     const targetPlatform: string = DEVICE_ALIAS[device as Device] ?? device
     projectPath = filesystem.resolve(projectPath)
 
-    await build({
-      port,
-      listExamples,
-      listDevices,
-      log,
-      example,
-      targetPlatform,
-      projectPath,
-      mode,
-      deployStatus: 'debug',
-      outputDir: output,
-    })
+    // Determine interactive mode
+    const isInteractive =
+      typeof process.env.CI !== 'undefined'
+        ? process.env.CI === 'false'
+        : true
+
+    const prompter = isInteractive
+      ? createInteractivePrompter()
+      : createNonInteractivePrompter()
+
+    // Create spinner map for parallel support
+    const spinners = new Map<string, ReturnType<typeof ora>>()
+
+    for await (const event of build(
+      {
+        port,
+        listExamples,
+        listDevices,
+        log,
+        example,
+        targetPlatform,
+        projectPath,
+        mode,
+        deployStatus: 'debug',
+        outputDir: output,
+      },
+      prompter,
+    )) {
+      const key = event.taskId ?? 'default'
+      if (!spinners.has(key)) spinners.set(key, ora())
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+      const spinner = spinners.get(key)!
+
+      switch (event.type) {
+        case 'step:start':
+          spinner.start(event.message)
+          break
+        case 'step:done':
+          spinner.succeed(event.message ?? '')
+          break
+        case 'step:fail':
+          spinner.fail(event.message)
+          process.exit(1)
+          break
+        case 'warning':
+          spinner.warn(event.message)
+          break
+        case 'info':
+          spinner.info(event.message)
+          break
+      }
+    }
   },
   parameters: {
     positional: {
