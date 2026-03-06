@@ -1,7 +1,8 @@
-import os from 'os'
-import { promisify } from 'util'
-import { chmod } from 'fs'
-import { print, system, filesystem, prompt } from 'gluegun'
+import os from 'node:os'
+import { promisify } from 'node:util'
+import { chmod } from 'node:fs'
+import { execaCommand, execa } from 'execa'
+import { resolve } from 'node:path'
 import { INSTALL_PATH, MODDABLE_REPO, XSBUG_LOG_PATH } from '../setup/constants'
 import type { SetupArgs } from '../setup/types'
 import {
@@ -10,28 +11,32 @@ import {
   downloadReleaseTools,
 } from '../setup/moddable'
 import { execWithSudo, sourceEnvironment } from '../system/exec'
-import { isFailure, unwrap } from '../system/errors'
+import type { Prompter } from '../../lib/prompter.js'
+import type { OperationEvent } from '../../lib/events.js'
 
 const chmodPromise = promisify(chmod)
 
-export default async function ({
-  branch,
-  release,
-  interactive,
-}: SetupArgs): Promise<void> {
+export default async function* updateLin(
+  args: Record<string, unknown>,
+  prompter: Prompter,
+): AsyncGenerator<OperationEvent> {
+  const setupArgs = args as SetupArgs
+  const { branch, release, interactive = false } = setupArgs
+
   await sourceEnvironment()
 
   // 0. ensure Moddable exists
   if (!moddableExists()) {
-    print.error(
-      'Moddable tooling required. Run `xs-dev setup` before trying again.',
-    )
-    process.exit(1)
+    yield {
+      type: 'step:fail',
+      message: 'Moddable tooling required. Run `xs-dev setup` before trying again.',
+    }
+    return
   }
 
-  print.info('Checking for SDK changes')
+  yield { type: 'info', message: 'Checking for SDK changes' }
 
-  const BUILD_DIR = filesystem.resolve(
+  const BUILD_DIR = resolve(
     INSTALL_PATH,
     'build',
     'makefiles',
@@ -40,191 +45,231 @@ export default async function ({
   let rebuildTools = false
 
   if (release !== undefined && (branch === undefined || branch === null)) {
-    // get tag for current repo
-    const currentTag: string = await system.exec('git tag', {
-      cwd: process.env.MODDABLE,
-    })
-    // get latest release tag
-    const remoteReleaseResult = await fetchRelease(release)
-    if (isFailure(remoteReleaseResult)) {
-      print.error(`Failed to fetch release: ${remoteReleaseResult.error}`)
-      process.exit(1)
-    }
-    const remoteRelease = unwrap(remoteReleaseResult)
+    try {
+      // get tag for current repo
+      const currentTagResult = await execaCommand('git tag', {
+        cwd: process.env.MODDABLE,
+      })
+      const currentTag = currentTagResult.stdout
 
-    if (currentTag.trim() === remoteRelease.tag_name) {
-      print.success('Moddable SDK already up to date!')
-      process.exit(0)
-    }
+      // get latest release tag
+      const remoteRelease = await fetchRelease(release)
+      if (remoteRelease === null) {
+        yield { type: 'step:fail', message: `Failed to fetch release: ${release}` }
+        return
+      }
 
-    if (remoteRelease.assets.length === 0) {
-      print.warning(
-        `Moddable release ${release} does not have any pre-built assets.`,
-      )
-      rebuildTools =
-        !interactive ||
-        (await prompt.confirm(
-          'Would you like to continue updating and build the SDK locally?',
-          false,
-        ))
+      if (currentTag?.trim() === remoteRelease.tag_name) {
+        yield { type: 'step:done', message: 'Moddable SDK already up to date!' }
+        return
+      }
+
+      if (remoteRelease.assets.length === 0) {
+        yield {
+          type: 'warning',
+          message: `Moddable release ${release} does not have any pre-built assets.`,
+        }
+        rebuildTools =
+          !interactive ||
+          (await prompter.confirm(
+            'Would you like to continue updating and build the SDK locally?',
+            false,
+          ))
+
+        if (!rebuildTools) {
+          yield {
+            type: 'info',
+            message: 'Please select another release version with pre-built assets: https://github.com/Moddable-OpenSource/moddable/releases',
+          }
+          return
+        }
+      }
+
+      yield { type: 'step:start', message: 'Updating Moddable SDK!' }
+
+      // Remove and clone
+      try {
+        if (process.env.MODDABLE !== undefined) {
+          await execa('rm', ['-rf', process.env.MODDABLE])
+        }
+        await execaCommand(
+          `git clone ${MODDABLE_REPO} ${INSTALL_PATH} --depth 1 --branch ${remoteRelease.tag_name} --single-branch`,
+        )
+      } catch (error) {
+        yield { type: 'step:fail', message: `Error cloning repo: ${String(error)}` }
+        return
+      }
 
       if (!rebuildTools) {
-        print.info(
-          'Please select another release version with pre-built assets: https://github.com/Moddable-OpenSource/moddable/releases',
-        )
-        process.exit(0)
-      }
-    }
-
-    const spinner = print.spin()
-    spinner.start('Updating Moddable SDK!')
-
-    filesystem.remove(process.env.MODDABLE)
-    await system.spawn(
-      `git clone ${MODDABLE_REPO} ${INSTALL_PATH} --depth 1 --branch ${remoteRelease.tag_name} --single-branch`,
-    )
-
-    if (!rebuildTools) {
-      const BIN_PATH = filesystem.resolve(
-        INSTALL_PATH,
-        'build',
-        'bin',
-        'lin',
-        'release',
-      )
-      const DEBUG_BIN_PATH = filesystem.resolve(
-        INSTALL_PATH,
-        'build',
-        'bin',
-        'lin',
-        'debug',
-      )
-
-      filesystem.dir(BIN_PATH)
-      filesystem.dir(DEBUG_BIN_PATH)
-
-      const isArm = os.arch() === 'arm64'
-      const assetName = isArm
-        ? 'moddable-tools-lin64arm.zip'
-        : 'moddable-tools-lin64.zip'
-
-      spinner.info('Downloading release tools')
-      await downloadReleaseTools({
-        writePath: BIN_PATH,
-        assetName,
-        release: remoteRelease,
-      })
-
-      spinner.info('Updating tool permissions')
-      const tools = filesystem.list(BIN_PATH) ?? []
-      await Promise.all(
-        tools.map(async (tool) => {
-          await chmodPromise(filesystem.resolve(BIN_PATH, tool), 0o751)
-          await filesystem.copyAsync(
-            filesystem.resolve(BIN_PATH, tool),
-            filesystem.resolve(DEBUG_BIN_PATH, tool),
+        try {
+          const BIN_PATH = resolve(
+            INSTALL_PATH,
+            'build',
+            'bin',
+            'lin',
+            'release',
           )
-        }),
-      )
+          const DEBUG_BIN_PATH = resolve(
+            INSTALL_PATH,
+            'build',
+            'bin',
+            'lin',
+            'debug',
+          )
 
-      spinner.info('Reinstalling simulator')
-      filesystem.dir(
-        filesystem.resolve(
-          BUILD_DIR,
-          '..',
-          '..',
-          'tmp',
-          'lin',
-          'debug',
-          'simulator',
-        ),
-      )
-      await system.exec(
-        `mcconfig -m -p x-lin ${filesystem.resolve(
-          INSTALL_PATH,
-          'tools',
-          'xsbug',
-          'manifest.json',
-        )}`,
-        { process },
-      )
-      await system.exec(
-        `mcconfig -m -p x-lin ${filesystem.resolve(
-          INSTALL_PATH,
-          'tools',
-          'mcsim',
-          'manifest.json',
-        )}`,
-        { process },
-      )
-      await execWithSudo('make install', {
-        cwd: BUILD_DIR,
-        stdout: process.stdout,
-      })
-      if (system.which('npm') !== null) {
-        spinner.start('Installing xsbug-log dependencies')
-        await system.exec('npm install', { cwd: XSBUG_LOG_PATH })
-        spinner.succeed()
+          // Create directories
+          const { mkdir, readdir, copyFile } = await import('node:fs/promises')
+          await mkdir(BIN_PATH, { recursive: true })
+          await mkdir(DEBUG_BIN_PATH, { recursive: true })
+
+          const isArm = os.arch() === 'arm64'
+          const assetName = isArm
+            ? 'moddable-tools-lin64arm.zip'
+            : 'moddable-tools-lin64.zip'
+
+          yield { type: 'info', message: 'Downloading release tools' }
+          await downloadReleaseTools({
+            writePath: BIN_PATH,
+            assetName,
+            release: remoteRelease,
+          })
+
+          yield { type: 'info', message: 'Updating tool permissions' }
+          const tools = await readdir(BIN_PATH)
+          await Promise.all(
+            tools.map(async (tool) => {
+              await chmodPromise(resolve(BIN_PATH, tool), 0o751)
+              await copyFile(
+                resolve(BIN_PATH, tool),
+                resolve(DEBUG_BIN_PATH, tool),
+              )
+            }),
+          )
+
+          yield { type: 'info', message: 'Reinstalling simulator' }
+          const simDir = resolve(
+            BUILD_DIR,
+            '..',
+            '..',
+            'tmp',
+            'lin',
+            'debug',
+            'simulator',
+          )
+          await mkdir(simDir, { recursive: true })
+
+          await execaCommand(
+            `mcconfig -m -p x-lin ${resolve(
+              INSTALL_PATH,
+              'tools',
+              'xsbug',
+              'manifest.json',
+            )}`,
+          )
+          await execaCommand(
+            `mcconfig -m -p x-lin ${resolve(
+              INSTALL_PATH,
+              'tools',
+              'mcsim',
+              'manifest.json',
+            )}`,
+          )
+          await execWithSudo('make install', {
+            cwd: BUILD_DIR,
+            stdio: 'inherit',
+          })
+
+          // Check for npm
+          const npmCheck = await execaCommand('which npm', { reject: false })
+          if (npmCheck.exitCode === 0) {
+            yield { type: 'step:start', message: 'Installing xsbug-log dependencies' }
+            await execaCommand('npm install', { cwd: XSBUG_LOG_PATH })
+            yield { type: 'step:done' }
+          }
+
+          yield {
+            type: 'step:done',
+            message: 'Moddable SDK successfully updated! Start the xsbug and run the "helloworld example": xs-dev run --example helloworld',
+          }
+        } catch (error) {
+          yield {
+            type: 'step:fail',
+            message: `Error downloading/installing tools: ${String(error)}`,
+          }
+          return
+        }
       }
-      spinner.succeed(
-        'Moddable SDK successfully updated! Start the xsbug.app and run the "helloworld example": xs-dev run --example helloworld',
-      )
+    } catch (error) {
+      yield { type: 'step:fail', message: `Error in release update: ${String(error)}` }
+      return
     }
   }
 
   if (typeof branch === 'string') {
-    const currentRev: string = await system.exec(`git rev-parse ${branch}`, {
-      cwd: process.env.MODDABLE,
-    })
-    const remoteRev: string = await system.exec(
-      `git ls-remote origin refs/heads/${branch}`,
-      { cwd: process.env.MODDABLE },
-    )
+    try {
+      const currentRevResult = await execaCommand(`git rev-parse ${branch}`, {
+        cwd: process.env.MODDABLE,
+      })
+      const currentRev = currentRevResult.stdout
 
-    if (remoteRev.split('\t').shift() === currentRev.trim()) {
-      print.success('Moddable SDK already up to date!')
-      process.exit(0)
+      const remoteRevResult = await execaCommand(
+        `git ls-remote origin refs/heads/${branch}`,
+        { cwd: process.env.MODDABLE },
+      )
+      const remoteRev = remoteRevResult.stdout
+
+      if (remoteRev?.split('\t').shift() === currentRev.trim()) {
+        yield { type: 'step:done', message: 'Moddable SDK already up to date!' }
+        return
+      }
+
+      yield { type: 'step:start', message: 'Updating Moddable SDK!' }
+      yield { type: 'info', message: 'Stashing any unsaved changes before committing' }
+      await execaCommand('git stash', { cwd: process.env.MODDABLE, reject: false })
+      await execaCommand(`git pull origin ${branch}`, {
+        cwd: process.env.MODDABLE,
+      })
+      rebuildTools = true
+      yield { type: 'step:done' }
+    } catch (error) {
+      yield { type: 'step:fail', message: `Error in branch update: ${String(error)}` }
+      return
     }
-
-    const spinner = print.spin()
-    spinner.start('Updating Moddable SDK!')
-
-    spinner.info('Stashing any unsaved changes before committing')
-    await system.exec('git stash', { cwd: process.env.MODDABLE })
-    await system.exec(`git pull origin ${branch}`, {
-      cwd: process.env.MODDABLE,
-    })
-    rebuildTools = true
-    spinner.succeed()
   }
 
   if (rebuildTools) {
-    const spinner = print.spin()
-    spinner.start('Rebuilding platform tools')
+    try {
+      yield { type: 'step:start', message: 'Rebuilding platform tools' }
 
-    await system.exec('rm -rf build/{tmp,bin}', { cwd: process.env.MODDABLE })
+      await execa('bash', ['-c', 'rm -rf build/{tmp,bin}'], { cwd: process.env.MODDABLE, reject: false })
 
-    await system.exec('make', {
-      cwd: BUILD_DIR,
-      stdout: process.stdout,
-    })
-    spinner.succeed()
+      await execaCommand('make', {
+        cwd: BUILD_DIR,
+        stdio: 'inherit',
+      })
+      yield { type: 'step:done' }
 
-    spinner.start('Reinstalling simulator')
-    await execWithSudo('make install', {
-      cwd: BUILD_DIR,
-      stdout: process.stdout,
-    })
-    spinner.succeed()
+      yield { type: 'step:start', message: 'Reinstalling simulator' }
+      await execWithSudo('make install', {
+        cwd: BUILD_DIR,
+        stdio: 'inherit',
+      })
+      yield { type: 'step:done' }
 
-    if (system.which('npm') !== null) {
-      spinner.start('Installing xsbug-log dependencies')
-      await system.exec('npm install', { cwd: XSBUG_LOG_PATH })
-      spinner.succeed()
+      // Check for npm
+      const npmCheck = await execaCommand('which npm', { reject: false })
+      if (npmCheck.exitCode === 0) {
+        yield { type: 'step:start', message: 'Installing xsbug-log dependencies' }
+        await execaCommand('npm install', { cwd: XSBUG_LOG_PATH })
+        yield { type: 'step:done' }
+      }
+
+      yield {
+        type: 'step:done',
+        message: 'Moddable SDK successfully updated! Start the xsbug and run the "helloworld example": xs-dev run --example helloworld',
+      }
+    } catch (error) {
+      yield { type: 'step:fail', message: `Error rebuilding tools: ${String(error)}` }
     }
-
-    print.success(
-      'Moddable SDK successfully updated! Start the xsbug.app and run the "helloworld example": xs-dev run --example helloworld',
-    )
   }
 }
