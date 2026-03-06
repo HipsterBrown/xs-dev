@@ -1,3 +1,15 @@
+# v1.2.2 (Fri Mar 06 2026)
+
+#### 🐛 Bug Fix
+
+- fix(nrf52): update node-liblzma dep, patch prebuild bindings for macos arm64 [#229](https://github.com/HipsterBrown/xs-dev/pull/229) ([@HipsterBrown](https://github.com/HipsterBrown))
+
+#### Authors: 1
+
+- Nick Hehr ([@HipsterBrown](https://github.com/HipsterBrown))
+
+---
+
 # v1.2.1 (Sun Feb 15 2026)
 
 #### 🐛 Bug Fix
