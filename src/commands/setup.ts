@@ -8,7 +8,6 @@ import { DEVICE_ALIAS } from '../toolbox/prompt/devices'
 import { MODDABLE_REPO } from '../toolbox/setup/constants'
 import type { SetupArgs } from '../toolbox/setup/types'
 import { createInteractivePrompter, createNonInteractivePrompter } from '../lib/prompter'
-import { isFailure } from '../toolbox/system/errors'
 
 interface SetupOptions {
   device?: Device
@@ -35,6 +34,17 @@ const command = buildCommand({
       'source-repo': sourceRepo = MODDABLE_REPO,
       interactive = true,
     } = flags
+
+    // Determine interactive mode and create prompter early for ejectfix
+    const isInteractive =
+      typeof process.env.CI !== 'undefined'
+        ? process.env.CI === 'false'
+        : interactive
+
+    const prompter = isInteractive
+      ? createInteractivePrompter()
+      : createNonInteractivePrompter()
+
     let target: Device =
       DEVICE_ALIAS[device ?? ('' as Device)] ?? DEVICE_ALIAS[currentPlatform]
 
@@ -71,10 +81,30 @@ const command = buildCommand({
         process.exit(1)
       }
       if (tool === 'ejectfix') {
-        const result = await setupEjectfix()
-        if (isFailure(result)) {
-          print.error(result.error)
-          process.exit(1)
+        const spinners = new Map<string, ReturnType<typeof ora>>()
+        for await (const event of setupEjectfix(prompter)) {
+          const key = event.taskId ?? 'default'
+          if (!spinners.has(key)) spinners.set(key, ora())
+          const spinner = spinners.get(key)!
+
+          switch (event.type) {
+            case 'step:start':
+              spinner.start(event.message)
+              break
+            case 'step:done':
+              spinner.succeed(event.message ?? '')
+              break
+            case 'step:fail':
+              spinner.fail(event.message)
+              process.exit(1)
+              break
+            case 'warning':
+              spinner.warn(event.message)
+              break
+            case 'info':
+              spinner.info(event.message)
+              break
+          }
         }
       }
       return
@@ -89,16 +119,6 @@ const command = buildCommand({
       'linux',
     ]
     const { default: setup } = await import(`../toolbox/setup/${target}`)
-
-    // Determine interactive mode
-    const isInteractive =
-      typeof process.env.CI !== 'undefined'
-        ? process.env.CI === 'false'
-        : interactive
-
-    const prompter = isInteractive
-      ? createInteractivePrompter()
-      : createNonInteractivePrompter()
 
     // Create spinner map for parallel support
     const spinners = new Map<string, ReturnType<typeof ora>>()
