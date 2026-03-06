@@ -7,7 +7,8 @@ import { failure, wrapAsync } from './errors'
 
 function which(bin: string): string | null {
   try {
-    return execSync(`which ${bin}`, { stdio: 'pipe' }).toString().trim() || null
+    const result = execSync(`which ${bin}`, { stdio: 'pipe' }).toString().trim()
+    return result.length > 0 ? result : null
   } catch {
     return null
   }

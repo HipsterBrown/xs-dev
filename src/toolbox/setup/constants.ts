@@ -1,7 +1,6 @@
-import { homedir } from 'node:os'
+import { homedir, type as platformType } from 'node:os'
 import { resolve } from 'node:path'
 import { existsSync } from 'node:fs'
-import { type as platformType } from 'node:os'
 import type { Device } from '../../types'
 
 const currentPlatform: Device = platformType().toLowerCase() as Device
