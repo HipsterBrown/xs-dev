@@ -39,7 +39,7 @@ function which(bin: string): string | null {
 
 export default async function* setupWasm(
   _args: Record<string, unknown>,
-  _prompter: Prompter,
+  prompter: Prompter,
 ): AsyncGenerator<OperationEvent> {
   yield { type: 'step:start', message: 'Setting up wasm simulator tools' }
 
@@ -136,7 +136,9 @@ export default async function* setupWasm(
   if (which('cmake') === null) {
     try {
       if (OS === 'darwin') {
-        await ensureHomebrew()
+        for await (const event of ensureHomebrew(prompter)) {
+          yield event
+        }
         yield { type: 'step:start', message: 'Installing cmake with Homebrew' }
         await execaCommand('brew install cmake')
         yield { type: 'step:done' }

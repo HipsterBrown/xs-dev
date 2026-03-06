@@ -1,49 +1,66 @@
-import { print, system } from 'gluegun'
-import type { GluegunPrint } from 'gluegun'
+import { execSync } from 'node:child_process'
+import { execaCommand } from 'execa'
 import { ensureHomebrew } from '../homebrew'
-import { failure, successVoid } from '../../system/errors'
-import type { SetupResult } from '../../../types'
+import type { OperationEvent } from '../../../lib/events.js'
+import type { Prompter } from '../../../lib/prompter.js'
 
-export async function installDeps(
-  spinner: ReturnType<GluegunPrint['spin']>,
-): Promise<SetupResult> {
+function which(bin: string): string | null {
   try {
-    await ensureHomebrew()
+    const result = execSync(`which ${bin}`, { stdio: 'pipe' }).toString().trim()
+    return result.length > 0 ? result : null
+  } catch {
+    return null
+  }
+}
+
+export async function* installDeps(prompter: Prompter): AsyncGenerator<OperationEvent> {
+  try {
+    for await (const event of ensureHomebrew(prompter)) {
+      yield event
+    }
   } catch (error: unknown) {
     if (error instanceof Error) {
-      print.info(`${error.message} python`)
-      return failure(`${error.message} python`)
+      yield { type: 'info', message: `${error.message} python` }
+      yield { type: 'step:fail', message: `${error.message} python` }
     }
+    return
   }
 
-  if (system.which('python') === null) {
-    const maybePython3Path = system.which('python3')
+  if (which('python') === null) {
+    const maybePython3Path = which('python3')
 
-    if (typeof maybePython3Path !== 'string') {
-      spinner.start('Installing python from homebrew')
+    if (maybePython3Path === null) {
       try {
-        await system.exec('brew install python', { shell: process.env.SHELL })
-        spinner.succeed()
+        yield { type: 'step:start', message: 'Installing python from homebrew' }
+        await execaCommand('brew install python', { shell: process.env.SHELL ?? '/bin/bash' })
+        yield { type: 'step:done' }
       } catch (error: unknown) {
         if (error instanceof Error && error.message.includes('xcode-select')) {
-          spinner.fail(
-            'Apple Command Line Tools must be installed in order to install python from Homebrew. Please run `xcode-select --install` before trying again.',
-          )
-          return failure('Apple Command Line Tools must be installed in order to install python from Homebrew. Please run `xcode-select --install` before trying again.')
+          yield { type: 'step:fail', message: 'Apple Command Line Tools must be installed in order to install python from Homebrew. Please run `xcode-select --install` before trying again.' }
+        } else {
+          yield { type: 'step:fail', message: `Error installing python: ${String(error)}` }
         }
+        return
       }
     }
   }
 
-  if (system.which('pip') === null || system.which('pip3') === null) {
-    spinner.start('Installing pip through ensurepip')
-    await system.exec('python3 -m ensurepip --user')
-    spinner.succeed()
+  if (which('pip') === null || which('pip3') === null) {
+    try {
+      yield { type: 'step:start', message: 'Installing pip through ensurepip' }
+      await execaCommand('python3 -m ensurepip --user', { shell: process.env.SHELL ?? '/bin/bash' })
+      yield { type: 'step:done' }
+    } catch (error) {
+      yield { type: 'step:fail', message: `Error installing pip: ${String(error)}` }
+      return
+    }
   }
 
-  spinner.start('Installing pyserial through pip')
-  await system.exec('python3 -m pip install pyserial')
-  spinner.succeed()
-
-  return successVoid()
+  try {
+    yield { type: 'step:start', message: 'Installing pyserial through pip' }
+    await execaCommand('python3 -m pip install pyserial', { shell: process.env.SHELL ?? '/bin/bash' })
+    yield { type: 'step:done' }
+  } catch (error) {
+    yield { type: 'step:fail', message: `Error installing pyserial: ${String(error)}` }
+  }
 }

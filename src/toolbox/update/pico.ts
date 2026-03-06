@@ -66,7 +66,7 @@ export default async function* updatePico(
         yield { type: 'step:done' }
       }
 
-      for await (const event of installMacDeps()) {
+      for await (const event of installMacDeps(_prompter)) {
         yield event
       }
 

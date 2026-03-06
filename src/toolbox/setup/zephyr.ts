@@ -50,20 +50,20 @@ export default async function* zephyrSetup(
   // 1. Install required components
   try {
     if (OS === 'darwin') {
-      for await (const event of installMacDeps()) {
+      for await (const event of installMacDeps(prompter)) {
         yield event
       }
     }
 
     if (OS === 'linux') {
       yield { type: 'step:start', message: 'Installing dependencies with apt' }
-      for await (const event of installLinuxDeps()) {
+      for await (const event of installLinuxDeps(prompter)) {
         yield event
       }
     }
     if (isWindows) {
       yield { type: 'step:start', message: 'Installing dependencies with winget' }
-      for await (const event of installWinDeps()) {
+      for await (const event of installWinDeps(prompter)) {
         yield event
       }
     }

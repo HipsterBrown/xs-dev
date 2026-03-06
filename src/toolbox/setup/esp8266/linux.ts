@@ -1,13 +1,10 @@
-import type { GluegunPrint } from 'gluegun'
 import type { Dependency } from '../../system/types'
 import { findMissingDependencies, installPackages } from '../../system/packages'
-import { successVoid, isFailure } from '../../system/errors'
-import type { SetupResult } from '../../../types'
+import { isFailure } from '../../system/errors'
+import type { OperationEvent } from '../../../lib/events.js'
 
-export async function installDeps(
-  spinner: ReturnType<GluegunPrint['spin']>,
-): Promise<SetupResult> {
-  spinner.start('Installing python deps with apt-get')
+export async function* installDeps(_prompter?: unknown): AsyncGenerator<OperationEvent> {
+  yield { type: 'step:start', message: 'Installing python deps with apt-get' }
   const dependencies: Dependency[] = [
     { name: 'pip', packageName: 'python-pip', type: 'binary' },
     { name: 'pyserial-miniterm', packageName: 'python3-serial', type: 'binary' },
@@ -15,13 +12,17 @@ export async function installDeps(
   ]
 
   const missingDepsResult = await findMissingDependencies(dependencies)
-  if (isFailure(missingDepsResult)) return missingDepsResult
-  
+  if (isFailure(missingDepsResult)) {
+    yield { type: 'step:fail', message: `Error checking dependencies: ${missingDepsResult.error}` }
+    return
+  }
+
   if (missingDepsResult.data.length !== 0) {
     const result = await installPackages(missingDepsResult.data)
-    if (isFailure(result)) return result
+    if (isFailure(result)) {
+      yield { type: 'step:fail', message: `Error installing packages: ${result.error}` }
+      return
+    }
   }
-  spinner.succeed()
-
-  return successVoid()
+  yield { type: 'step:done' }
 }

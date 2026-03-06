@@ -97,13 +97,13 @@ export default async function* updateEsp32(
     yield { type: 'step:start', message: 'Installing build dependencies' }
 
     if (OS === 'darwin') {
-      for await (const event of installMacDeps()) {
+      for await (const event of installMacDeps(_prompter)) {
         yield event
       }
     }
 
     if (OS === 'linux') {
-      for await (const event of installLinuxDeps()) {
+      for await (const event of installLinuxDeps(_prompter)) {
         yield event
       }
     }

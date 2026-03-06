@@ -1,38 +1,55 @@
-import { type GluegunPrint, print, system } from 'gluegun'
+import { execSync } from 'node:child_process'
+import { execaCommand } from 'execa'
 import { ensureHomebrew, formulaeExists } from '../homebrew'
-import { failure, successVoid } from '../../system/errors'
-import type { SetupResult } from '../../../types'
+import type { OperationEvent } from '../../../lib/events.js'
+import type { Prompter } from '../../../lib/prompter.js'
 
-export async function installDeps(
-  spinner: ReturnType<GluegunPrint['spin']>,
-): Promise<SetupResult> {
+function which(bin: string): string | null {
   try {
-    await ensureHomebrew()
+    const result = execSync(`which ${bin}`, { stdio: 'pipe' }).toString().trim()
+    return result.length > 0 ? result : null
+  } catch {
+    return null
+  }
+}
+
+export async function* installDeps(prompter: Prompter): AsyncGenerator<OperationEvent> {
+  try {
+    for await (const event of ensureHomebrew(prompter)) {
+      yield event
+    }
   } catch (error: unknown) {
     if (error instanceof Error) {
-      print.info(`${error.message} gcc-arm-embedded, libusb, pkg-config`)
-      return failure(`${error.message} gcc-arm-embedded, libusb, pkg-config`)
+      yield { type: 'info', message: `${error.message} gcc-arm-embedded, libusb, pkg-config` }
+      yield { type: 'step:fail', message: `${error.message} gcc-arm-embedded, libusb, pkg-config` }
     }
+    return
   }
 
   if (
-    system.which('arm-none-eabi-gcc') !== null &&
+    which('arm-none-eabi-gcc') !== null &&
     (await formulaeExists('arm-none-eabi-gcc'))
   ) {
-    spinner.start('Removing outdated arm gcc dependency')
-    await system.exec('brew untap ArmMbed/homebrew-formulae')
-    await system.exec('brew uninstall arm-none-eabi-gcc')
-    spinner.succeed()
+    try {
+      yield { type: 'step:start', message: 'Removing outdated arm gcc dependency' }
+      await execaCommand('brew untap ArmMbed/homebrew-formulae')
+      await execaCommand('brew uninstall arm-none-eabi-gcc')
+      yield { type: 'step:done' }
+    } catch (error) {
+      yield { type: 'step:fail', message: `Error removing outdated dependency: ${String(error)}` }
+    }
   }
 
-  spinner.start('Installing pico tools dependencies')
-  await system.exec(`brew install libusb pkg-config`, {
-    shell: process.env.SHELL,
-  })
-  await system.exec(`brew install --cask gcc-arm-embedded`, {
-    shell: process.env.SHELL,
-  })
-  spinner.succeed()
-
-  return successVoid()
+  try {
+    yield { type: 'step:start', message: 'Installing pico tools dependencies' }
+    await execaCommand(`brew install libusb pkg-config`, {
+      shell: process.env.SHELL ?? '/bin/bash',
+    })
+    await execaCommand(`brew install --cask gcc-arm-embedded`, {
+      shell: process.env.SHELL ?? '/bin/bash',
+    })
+    yield { type: 'step:done' }
+  } catch (error) {
+    yield { type: 'step:fail', message: `Error installing dependencies: ${String(error)}` }
+  }
 }

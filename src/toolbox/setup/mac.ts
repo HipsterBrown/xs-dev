@@ -19,7 +19,6 @@ import {
 import type { PlatformSetupArgs } from './types'
 import type { Prompter } from '../../lib/prompter.js'
 import type { OperationEvent } from '../../lib/events.js'
-import { isFailure, unwrap } from '../system/errors'
 
 function which(bin: string): string | null {
   try {
@@ -86,11 +85,10 @@ export default async function* setupMac(
     try {
       if (release !== undefined && (branch === undefined || branch === null)) {
         yield { type: 'step:start', message: 'Getting latest Moddable-OpenSource/moddable release' }
-        const remoteReleaseResult = await fetchRelease(release)
-        if (isFailure(remoteReleaseResult)) {
-          throw new Error(remoteReleaseResult.error)
+        const remoteRelease = await fetchRelease(release)
+        if (remoteRelease === null) {
+          throw new Error(`Failed to fetch release: ${release}`)
         }
-        const remoteRelease = unwrap(remoteReleaseResult)
 
         if (remoteRelease.assets.length === 0) {
           yield { type: 'step:done' }

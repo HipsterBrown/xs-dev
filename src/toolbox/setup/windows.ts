@@ -19,7 +19,6 @@ import {
 import type { PlatformSetupArgs } from './types'
 import type { Prompter } from '../../lib/prompter.js'
 import type { OperationEvent } from '../../lib/events.js'
-import { isFailure, unwrap } from '../system/errors'
 
 const getWsPromise = (): ((path: string, options: unknown) => Promise<void>) => promisify(ws.create)
 
@@ -34,7 +33,7 @@ function which(bin: string): string | null {
   }
 }
 
-async function setEnv(
+export async function setEnv(
   name: string,
   permanentValue: string,
   envValue?: string,
@@ -43,7 +42,7 @@ async function setEnv(
   process.env[name] = envValue ?? permanentValue
 }
 
-async function addToPath(path: string): Promise<void> {
+export async function addToPath(path: string): Promise<void> {
   const newPath = `${path};${process.env.PATH ?? ''}`
   await setEnv('PATH', `${path};%PATH%`, newPath)
 }
@@ -169,11 +168,10 @@ export default async function* setupWindows(
     try {
       if (release !== undefined && (branch === undefined || branch === null)) {
         yield { type: 'step:start', message: 'Getting latest Moddable-OpenSource/moddable release' }
-        const remoteReleaseResult = await fetchRelease(release)
-        if (isFailure(remoteReleaseResult)) {
-          throw new Error(remoteReleaseResult.error)
+        const remoteRelease = await fetchRelease(release)
+        if (remoteRelease === null) {
+          throw new Error(`Failed to fetch release: ${release}`)
         }
-        const remoteRelease = unwrap(remoteReleaseResult)
 
         if (remoteRelease.assets.length === 0) {
           yield { type: 'step:done' }

@@ -1,39 +1,37 @@
-import { type GluegunPrint, print, system } from 'gluegun'
-import { failure, successVoid } from '../../system/errors'
-import type { SetupResult } from '../../../types'
+import { execSync } from 'node:child_process'
+import { execaCommand } from 'execa'
+import type { OperationEvent } from '../../../lib/events.js'
 
-export async function installPython(
-  spinner: ReturnType<GluegunPrint['spin']>,
-): Promise<SetupResult> {
-  if (system.which('python') === null) {
-    // For some reason, system.which does not work with winget. This is a workaround for now.
+function which(bin: string): string | null {
+  try {
+    const result = execSync(`where ${bin}`, { stdio: 'pipe' }).toString().trim()
+    return result.length > 0 ? result : null
+  } catch {
+    return null
+  }
+}
+
+export async function* installPython(_prompter?: unknown): AsyncGenerator<OperationEvent> {
+  if (which('python') === null) {
+    // For some reason, which does not work with winget. This is a workaround for now.
     try {
-      await system.exec('where winget')
+      await execaCommand('where winget')
     } catch (error) {
-      print.error('Python 2.7 is required.')
-      print.info(
-        'You can download and install Python from python.org/downloads',
-      )
-      print.info(
-        'Or xs-dev can manage installing Python and other dependencies using the Windows Package Manager Client (winget).',
-      )
-      print.info(
-        'You can install winget via the App Installer package in the Microsoft Store.',
-      )
-      print.info(
-        'Please install either Python or winget, then launch a new Command Prompt and re-run this setup.',
-      )
-      return failure('Python is required')
+      yield { type: 'step:fail', message: 'Python 2.7 is required.' }
+      yield { type: 'info', message: 'You can download and install Python from python.org/downloads' }
+      yield { type: 'info', message: 'Or xs-dev can manage installing Python and other dependencies using the Windows Package Manager Client (winget).' }
+      yield { type: 'info', message: 'You can install winget via the App Installer package in the Microsoft Store.' }
+      yield { type: 'info', message: 'Please install either Python or winget, then launch a new Command Prompt and re-run this setup.' }
+      return
     }
 
-    spinner.start('Installing python from winget')
-    await system.exec('winget install -e --id Python.Python.2 --silent')
-    spinner.succeed()
-    print.info(
-      'Python successfully installed. Please close this window and launch a new Moddable Command Prompt to refresh environment variables, then re-run this setup.',
-    )
-    return failure('Command Prompt restart needed')
+    try {
+      yield { type: 'step:start', message: 'Installing python from winget' }
+      await execaCommand('winget install -e --id Python.Python.2 --silent')
+      yield { type: 'step:done' }
+      yield { type: 'info', message: 'Python successfully installed. Please close this window and launch a new Moddable Command Prompt to refresh environment variables, then re-run this setup.' }
+    } catch (error) {
+      yield { type: 'step:fail', message: `Error installing python: ${String(error)}` }
+    }
   }
-
-  return successVoid()
 }

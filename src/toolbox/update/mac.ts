@@ -21,7 +21,7 @@ export default async function* updateMac(
   args: Record<string, unknown>,
   prompter: Prompter,
 ): AsyncGenerator<OperationEvent> {
-  const setupArgs = args as SetupArgs
+  const setupArgs = args as Record<string, unknown> & SetupArgs
   const { branch, release, interactive = false } = setupArgs
 
   yield { type: 'info', message: 'Checking for SDK changes' }

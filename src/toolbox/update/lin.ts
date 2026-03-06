@@ -20,7 +20,7 @@ export default async function* updateLin(
   args: Record<string, unknown>,
   prompter: Prompter,
 ): AsyncGenerator<OperationEvent> {
-  const setupArgs = args as SetupArgs
+  const setupArgs = args as Record<string, unknown> & SetupArgs
   const { branch, release, interactive = false } = setupArgs
 
   await sourceEnvironment()

@@ -115,13 +115,13 @@ export default async function* esp8266Setup(
   // 5. ensure python, pip, and pyserial are installed
   try {
     if (OS === 'darwin') {
-      for await (const event of installMacDeps()) {
+      for await (const event of installMacDeps(prompter)) {
         yield event
       }
     }
 
     if (OS === 'linux') {
-      for await (const event of installLinuxDeps()) {
+      for await (const event of installLinuxDeps(prompter)) {
         yield event
       }
     }

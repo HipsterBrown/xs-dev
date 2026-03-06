@@ -79,7 +79,7 @@ export default async function* esp32Setup(
     yield { type: 'step:start', message: 'Installing build dependencies' }
 
     if (OS === 'darwin') {
-      for await (const event of installMacDeps()) {
+      for await (const event of installMacDeps(prompter)) {
         yield event
       }
     }
@@ -163,7 +163,7 @@ If there is trouble finding the correct port, pass the "--port" flag to the abov
   }
 }
 
-async function getExpectedEspIdfVersion(): Promise<string | null> {
+export async function getExpectedEspIdfVersion(): Promise<string | null> {
   if (moddableExists()) {
     try {
       const manifestPath = resolve(INSTALL_PATH, 'build', 'devices', 'esp32', 'manifest.json')
@@ -171,7 +171,8 @@ async function getExpectedEspIdfVersion(): Promise<string | null> {
         const { readFile } = await import('node:fs/promises')
         const content = await readFile(manifestPath, 'utf-8')
         // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-        return (JSON.parse(content) as Record<string, unknown>)?.build?.EXPECTED_ESP_IDF ?? null
+        const manifest = JSON.parse(content) as Record<string, any>
+        return (manifest?.build?.EXPECTED_ESP_IDF as string | undefined) ?? null
       }
     } catch {
       return null
