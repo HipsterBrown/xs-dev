@@ -2,10 +2,11 @@ import axios from 'axios'
 import { createWriteStream } from 'node:fs'
 import { filesystem, print } from 'gluegun'
 import { arch, type as platformType } from 'node:os'
-import { finished, type Transform } from 'node:stream'
+import { finished, Transform, type TransformOptions } from 'node:stream'
 import { extract } from 'tar-fs'
 import { promisify } from 'node:util'
 import { Extract as ZipExtract } from 'unzip-stream'
+import type { LZMAOptions, Unxz } from 'node-liblzma'
 import type { Device, SetupResult } from '../../types'
 import { DEVICE_ALIAS } from '../prompt/devices'
 import { execWithSudo, sourceEnvironment } from '../system/exec'
@@ -55,8 +56,8 @@ export default async function(): Promise<SetupResult> {
     if (isFailure(result)) return result
   }
 
-  let createUnxz: (() => Transform) | (() => void) = () => {
-    void 0
+  let createUnxz: ((lzmaOption?: LZMAOptions, transformOption?: TransformOptions) => Unxz) = () => {
+    return new Transform() as Unxz
   }
   if (!isWindows) {
     try {
