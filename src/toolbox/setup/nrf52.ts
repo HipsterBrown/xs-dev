@@ -1,4 +1,3 @@
-import axios from 'axios'
 import { createWriteStream } from 'node:fs'
 import { filesystem, print } from 'gluegun'
 import { arch, type as platformType } from 'node:os'
@@ -16,6 +15,7 @@ import { ensureModdableCommandPrompt, setEnv } from './windows'
 import upsert from '../patching/upsert'
 import { installPython } from './nrf52/windows'
 import { failure, successVoid, isFailure } from '../system/errors'
+import { fetchStream } from '../system/fetch'
 
 const finishedPromise = promisify(finished)
 
@@ -77,10 +77,8 @@ export default async function(): Promise<SetupResult> {
     const writer = isWindows
       ? ZipExtract({ path: NRF52_DIR })
       : extract(NRF52_DIR, { readable: true })
-    const response = await axios.get(TOOLCHAIN_DOWNLOAD, {
-      responseType: 'stream',
-    })
-    const stream = isWindows ? response.data : response.data.pipe(createUnxz())
+    const download = await fetchStream(TOOLCHAIN_DOWNLOAD)
+    const stream = isWindows ? download : download.pipe(createUnxz())
     stream.pipe(writer)
     await finishedPromise(writer)
     spinner.succeed()
@@ -89,13 +87,8 @@ export default async function(): Promise<SetupResult> {
   if (filesystem.exists(UF2CONV_PATH) === false) {
     spinner.start('Downloading Adafruit nRF52 Bootloader')
     const writer = createWriteStream(UF2CONV_PATH, { mode: 0o755 })
-    const response = await axios.get(
-      ADAFRUIT_NRF52_BOOTLOADER_UF2CONV_DOWNLOAD,
-      {
-        responseType: 'stream',
-      },
-    )
-    response.data.pipe(writer)
+    const download = await fetchStream(ADAFRUIT_NRF52_BOOTLOADER_UF2CONV_DOWNLOAD)
+    download.pipe(writer)
     await finishedPromise(writer)
     spinner.succeed()
   }
@@ -103,10 +96,8 @@ export default async function(): Promise<SetupResult> {
   if (filesystem.exists(NRF5_SDK_PATH) === false) {
     spinner.start('Downloading nRF5 SDK')
     const writer = ZipExtract({ path: NRF52_DIR })
-    const response = await axios.get(NRF5_SDK_DOWNLOAD, {
-      responseType: 'stream',
-    })
-    response.data.pipe(writer)
+    const download = await fetchStream(NRF5_SDK_DOWNLOAD)
+    download.pipe(writer)
     await finishedPromise(writer)
     spinner.succeed()
   }
