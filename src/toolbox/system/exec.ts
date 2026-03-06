@@ -1,11 +1,20 @@
 import { type as platformType } from 'node:os'
-import { system } from 'gluegun'
+import { execSync } from 'node:child_process'
+import { execaCommand, execa } from 'execa'
 import { EXPORTS_FILE_PATH } from '../setup/constants'
 import type { Device, Result } from '../../types'
 import { success, failure, wrapAsync } from './errors'
 
+function which(bin: string): string | null {
+  try {
+    return execSync(`which ${bin}`, { stdio: 'pipe' }).toString().trim() || null
+  } catch {
+    return null
+  }
+}
+
 function ensureAskPass(): Result<void> {
-  const SUDO_ASKPASS = system.which('ssh-askpass')
+  const SUDO_ASKPASS = which('ssh-askpass')
   if (SUDO_ASKPASS === null || SUDO_ASKPASS === undefined) {
     return failure('ssh-askpass required to prompt for password')
   }
@@ -22,10 +31,7 @@ export async function execWithSudo(
   options: Record<string, unknown> = {},
 ): Promise<Result<void>> {
   try {
-    await system.exec(
-      `sudo --non-interactive --preserve-env ${command}`,
-      options,
-    )
+    await execaCommand(`sudo --non-interactive --preserve-env ${command}`, options)
     return success(undefined)
   } catch (error) {
     if (error.toString().includes('password') === true) {
@@ -39,7 +45,7 @@ export async function execWithSudo(
   }
 
   return await wrapAsync(async () => {
-    await system.exec(`sudo --askpass --preserve-env ${command}`, options)
+    await execaCommand(`sudo --askpass --preserve-env ${command}`, options)
   })
 }
 
@@ -51,7 +57,7 @@ export async function pkexec(
   options: Record<string, unknown> = {},
 ): Promise<Result<void>> {
   return await wrapAsync(async () => {
-    await system.exec(`pkexec ${command}`, options)
+    await execaCommand(`pkexec ${command}`, options)
   })
 }
 
@@ -66,15 +72,11 @@ async function updateProcessEnv(command: string): Promise<Result<void>> {
   }
 
   return await wrapAsync(async () => {
-    const result = await system.spawn(`${command} && env`, {
-      shell: process.env.SHELL,
-    })
-    if (
-      typeof result.stdout === 'string' ||
-      result.stdout instanceof Buffer
-    ) {
+    const result = await execa(process.env.SHELL ?? 'bash', ['-c', `${command} && env`])
+    const output = result.stdout
+    if (typeof output === 'string') {
       const localEnv = Object.fromEntries(
-        (result.stdout.toString() as string)
+        output
           .split('\n')
           .map((field: string) => field?.split('='))
           .filter((pair) => pair.length === 2),
