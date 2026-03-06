@@ -1,8 +1,17 @@
+import { execSync } from 'node:child_process'
+import { execaCommand } from 'execa'
 import type { Dependency } from './types'
 import { pkexec, execWithSudo } from '../system/exec'
-import { system } from 'gluegun'
 import type { Result } from '../../types'
 import { failure, wrapAsync } from './errors'
+
+function which(bin: string): string | null {
+  try {
+    return execSync(`which ${bin}`, { stdio: 'pipe' }).toString().trim() || null
+  } catch {
+    return null
+  }
+}
 
 /**
  * Check if the list of dependencies are installed on the system.
@@ -13,20 +22,20 @@ export async function findMissingDependencies(dependencies: Dependency[]): Promi
 
     for (const dep of dependencies) {
       if (dep.type === 'binary') {
-        if (system.which(dep.name) === null) {
+        if (which(dep.name) === null) {
           missingDependencies.push(dep)
         }
       }
       if (dep.type === 'library') {
         try {
-          await system.run(`pkg-config --exists ${dep.name}`)
+          await execaCommand(`pkg-config --exists ${dep.name}`)
         } catch (error) {
           missingDependencies.push(dep)
         }
       }
       if (dep.type === 'pylib') {
         try {
-          await system.run(`pip3 show ${dep.name}`)
+          await execaCommand(`pip3 show ${dep.name}`)
         } catch (error) {
           missingDependencies.push(dep)
         }
@@ -41,7 +50,7 @@ export async function findMissingDependencies(dependencies: Dependency[]): Promi
  * Attempt to install packages on the linux platform.
  **/
 export async function installPackages(packages: Dependency[]): Promise<Result<void>> {
-  const packageManager = system.which('apt')
+  const packageManager = which('apt')
 
   if (packageManager !== null && packageManager !== undefined) {
     if (typeof process.env.CI !== 'undefined' && process.env.CI !== 'false') {
