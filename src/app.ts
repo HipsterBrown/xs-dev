@@ -1,4 +1,3 @@
-import type { GluegunToolbox } from 'gluegun'
 import {
   buildApplication,
   buildRouteMap,
@@ -19,21 +18,9 @@ import setup from './commands/setup'
 import teardown from './commands/teardown'
 import update from './commands/update'
 
-export type LocalContext = CommandContext &
-  Pick<
-    GluegunToolbox,
-    | 'filesystem'
-    | 'strings'
-    | 'print'
-    | 'system'
-    | 'semver'
-    | 'http'
-    | 'patching'
-    | 'prompt'
-    | 'packageManager'
-  > & {
-    currentVersion: string
-  }
+export type LocalContext = CommandContext & {
+  currentVersion: string
+}
 
 const commands = buildRouteMap({
   routes: {
