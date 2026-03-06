@@ -12,10 +12,10 @@ export interface Prompter {
 
 export function createNonInteractivePrompter(): Prompter {
   return {
-    async confirm(_message, defaultValue = true) {
+    async confirm(_message: string, defaultValue = true): Promise<boolean> {
       return defaultValue
     },
-    async select<T>(_message, choices: Choice<T>[]) {
+    async select<T>(_message: string, choices: Choice<T>[]): Promise<T> {
       return choices[0].value
     },
   }
@@ -23,13 +23,13 @@ export function createNonInteractivePrompter(): Prompter {
 
 export function createInteractivePrompter(): Prompter {
   return {
-    async confirm(message, defaultValue = true) {
+    async confirm(message: string, defaultValue = true): Promise<boolean> {
       return inquirerConfirm({ message, default: defaultValue })
     },
-    async select<T>(message, choices) {
+    async select<T>(message: string, choices: Choice<T>[]): Promise<T> {
       return inquirerSelect({
         message,
-        choices: choices.map(c => ({ name: c.label, value: c.value })),
+        choices: choices.map((c: Choice<T>) => ({ name: c.label, value: c.value })),
       })
     },
   }
