@@ -1,3 +1,15 @@
+# v1.2.3 (Fri Mar 06 2026)
+
+#### 🐛 Bug Fix
+
+- fix: replace axios use with native fetch [#230](https://github.com/HipsterBrown/xs-dev/pull/230) ([@HipsterBrown](https://github.com/HipsterBrown))
+
+#### Authors: 1
+
+- Nick Hehr ([@HipsterBrown](https://github.com/HipsterBrown))
+
+---
+
 # v1.2.2 (Fri Mar 06 2026)
 
 #### 🐛 Bug Fix
