@@ -45,7 +45,7 @@ export default async function* updateMac(
       const currentTagResult = await execaCommand('git tag', {
         cwd: process.env.MODDABLE,
       })
-      const currentTag = currentTagResult.stdout
+      const currentTag = String(currentTagResult.stdout)
 
       // get release tag
       const remoteRelease = await fetchRelease(release)
@@ -198,15 +198,15 @@ export default async function* updateMac(
       const currentRevResult = await execaCommand(`git rev-parse ${branch}`, {
         cwd: process.env.MODDABLE,
       })
-      const currentRev = currentRevResult.stdout
+      const currentRev = String(currentRevResult.stdout)
 
       const remoteRevResult = await execaCommand(
         `git ls-remote origin refs/heads/${branch}`,
         { cwd: process.env.MODDABLE },
       )
-      const remoteRev = remoteRevResult.stdout
+      const remoteRev = String(remoteRevResult.stdout)
 
-      if (remoteRev?.split('\t').shift() === currentRev.trim()) {
+      if (remoteRev.split('\t').shift() === currentRev.trim()) {
         yield { type: 'step:done', message: 'Moddable SDK already up to date!' }
         return
       }

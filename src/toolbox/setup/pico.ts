@@ -79,7 +79,7 @@ export default async function* picoSetup(
       }
 
       const brewPrefixResult = await execaCommand('brew --prefix', { stdio: 'pipe' })
-      const brewPrefix = brewPrefixResult.stdout.trim()
+      const brewPrefix = String(brewPrefixResult.stdout).trim()
       process.env.PICO_GCC_ROOT = brewPrefix
       await upsert(EXPORTS_FILE_PATH, `export PICO_GCC_ROOT=${brewPrefix}`)
     }

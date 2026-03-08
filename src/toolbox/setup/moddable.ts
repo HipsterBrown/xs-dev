@@ -42,24 +42,24 @@ export async function getModdableVersion(): Promise<string | null> {
     const tagsResult = await execaCommand('git tag -l --sort=-taggerdate', {
       cwd: process.env.MODDABLE,
     })
-    const tag = tagsResult.stdout.split('\n').shift()
+    const tag = String(tagsResult.stdout).split('\n').shift()
 
     const latestCommitResult = await execaCommand('git rev-parse HEAD', {
       cwd: process.env.MODDABLE,
     })
-    const latestCommit = latestCommitResult.stdout
+    const latestCommit = String(latestCommitResult.stdout)
 
     if (tag !== undefined && tag.length > 0) {
       const tagCommitResult = await execaCommand(`git rev-list -n 1 ${tag}`, {
         cwd: process.env.MODDABLE,
       })
-      if (tagCommitResult.stdout === latestCommit) return tag
+      if (String(tagCommitResult.stdout) === latestCommit) return tag
     }
 
     const currentBranchResult = await execaCommand('git branch --show-current', {
       cwd: process.env.MODDABLE,
     })
-    return `branch: ${currentBranchResult.stdout.trim()}, commit: ${latestCommit}`
+    return `branch: ${String(currentBranchResult.stdout).trim()}, commit: ${String(latestCommit)}`
   } catch {
     return null
   }

@@ -26,7 +26,7 @@ export async function getPythonVersion(): Promise<Result<string>> {
 
   return await wrapAsync(async () => {
     const result = await execaCommand(`${python} --version`)
-    const version = result.stdout.split(' ').pop()?.trim()
+    const version = String(result.stdout).split(' ').pop()?.trim()
     if (typeof version !== "undefined") return version
     throw new Error('Python version not found.')
   })
