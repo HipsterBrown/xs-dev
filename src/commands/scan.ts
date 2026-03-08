@@ -8,6 +8,7 @@ import ora from 'ora'
 import type { LocalContext } from '../app'
 import { parseScanResult } from '../toolbox/scan/parse'
 import { sourceEnvironment, sourceIdf } from '../toolbox/system/exec'
+import * as output from '../lib/output'
 
 const command = buildCommand({
   docs: {
@@ -37,7 +38,7 @@ const command = buildCommand({
     })()
 
     if (esptoolPath === null) {
-      console.warn(
+      output.warn(
         'esptool.py required to scan for Espressif devices. Setup environment for ESP8266 or ESP32:\n xs-dev setup --device esp32\n xs-dev setup --device esp8266.',
       )
     }
@@ -100,7 +101,7 @@ const command = buildCommand({
         Math.max(...allRows.map((row) => String(row[colIdx]).length)),
       )
       for (const row of allRows) {
-        console.log(
+        output.info(
           row.map((cell, idx) => String(cell).padEnd(colWidths[idx])).join('  '),
         )
       }

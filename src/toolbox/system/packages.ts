@@ -1,18 +1,8 @@
-import { execSync } from 'node:child_process'
 import { execaCommand } from './execa.js'
 import type { Dependency } from './types'
-import { pkexec, execWithSudo } from '../system/exec'
+import { pkexec, execWithSudo, which } from '../system/exec'
 import type { Result } from '../../types'
 import { failure, wrapAsync } from './errors'
-
-function which(bin: string): string | null {
-  try {
-    const result = execSync(`which ${bin}`, { stdio: 'pipe' }).toString().trim()
-    return result.length > 0 ? result : null
-  } catch {
-    return null
-  }
-}
 
 /**
  * Check if the list of dependencies are installed on the system.

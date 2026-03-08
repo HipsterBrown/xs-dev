@@ -7,6 +7,7 @@ import type { Device } from '../types'
 import build from '../toolbox/build'
 import { DEVICE_ALIAS } from '../toolbox/prompt/devices'
 import { createInteractivePrompter, createNonInteractivePrompter } from '../lib/prompter'
+import { isInteractive } from '../lib/output'
 
 type Mode = 'development' | 'production'
 
@@ -52,17 +53,11 @@ const command = buildCommand({
     )
 
     // Determine interactive mode
-    const isInteractive =
-      typeof process.env.CI !== 'undefined'
-        ? process.env.CI === 'false'
-        : true
-
-    const prompter = isInteractive
+    const prompter = isInteractive()
       ? createInteractivePrompter()
       : createNonInteractivePrompter()
 
-    // Create spinner map for parallel support
-    const spinners = new Map<string, ReturnType<typeof ora>>()
+    const spinner = ora()
 
     for await (const event of build(
       {
@@ -78,11 +73,6 @@ const command = buildCommand({
       },
       prompter,
     )) {
-      const key = event.taskId ?? 'default'
-      if (!spinners.has(key)) spinners.set(key, ora())
-      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-      const spinner = spinners.get(key)!
-
       switch (event.type) {
         case 'step:start':
           spinner.start(event.message)

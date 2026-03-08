@@ -1,7 +1,7 @@
 import os from 'node:os'
 import { promisify } from 'node:util'
 import { chmod } from 'node:fs'
-import { execaCommand } from '../system/execa.js'
+import { execaCommand, execa } from '../system/execa.js'
 import { resolve } from 'node:path'
 import { INSTALL_PATH, MODDABLE_REPO, XSBUG_LOG_PATH } from '../setup/constants'
 import {
@@ -86,7 +86,6 @@ export default async function* updateMac(
       try {
         if (process.env.MODDABLE !== undefined) {
           // Use rm -rf for directory removal
-          const { execa } = await import('execa')
           await execa('rm', ['-rf', process.env.MODDABLE])
         }
         await execaCommand(

@@ -2,12 +2,11 @@ import { mkdir } from 'node:fs/promises'
 import { existsSync, statSync } from 'node:fs'
 import { resolve } from 'node:path'
 import { type as platformType } from 'node:os'
-import { execSync } from 'node:child_process'
 import { execaCommand, execa } from '../system/execa.js'
 import { INSTALL_DIR, INSTALL_PATH, EXPORTS_FILE_PATH } from './constants'
 import { moddableExists } from './moddable'
 import upsert from '../patching/upsert'
-import { execWithSudo } from '../system/exec'
+import { execWithSudo, which } from '../system/exec'
 import { ensureHomebrew } from './homebrew'
 import type { Prompter } from '../../lib/prompter.js'
 import type { OperationEvent } from '../../lib/events.js'
@@ -25,15 +24,6 @@ function isFile(path: string): boolean {
     return existsSync(path) && statSync(path).isFile()
   } catch {
     return false
-  }
-}
-
-function which(bin: string): string | null {
-  try {
-    const result = execSync(`which ${bin}`, { stdio: 'pipe' }).toString().trim()
-    return result.length > 0 ? result : null
-  } catch {
-    return null
   }
 }
 

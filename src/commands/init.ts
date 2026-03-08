@@ -5,6 +5,7 @@ import { select } from '@inquirer/prompts'
 import type { LocalContext } from '../app'
 import { collectChoicesFromTree } from '../toolbox/prompt/choices'
 import { sourceEnvironment } from '../toolbox/system/exec'
+import * as output from '../lib/output'
 
 interface InitOptions {
   typescript?: boolean
@@ -50,7 +51,7 @@ const command = buildCommand({
 
     if (projectName !== undefined) {
       if (!overwrite && existsSync(projectName) && statSync(projectName).isDirectory()) {
-        console.warn(
+        output.warn(
           `Directory called ${projectName} already exists. Please pass the --overwrite flag to replace an existing project.`,
         )
         return
@@ -88,14 +89,14 @@ const command = buildCommand({
         // copy files into new project directory
         if (selectedExample !== '' && selectedExample !== undefined) {
           const selectedExamplePath = join(exampleProjectPath, selectedExample)
-          console.log(`Generating project directory from ${selectedExample}`)
+          output.info(`Generating project directory from ${selectedExample}`)
           cpSync(selectedExamplePath, projectName, { recursive: true, force: overwrite })
         } else {
-          console.warn('Please select an example template to use.')
+          output.warn('Please select an example template to use.')
           return
         }
       } else {
-        console.log(`Generating Moddable project: ${projectName}`)
+        output.info(`Generating Moddable project: ${projectName}`)
 
         mkdirSync(projectName, { recursive: true })
 
@@ -160,7 +161,7 @@ const command = buildCommand({
 
       this.process.stdout.write(`Run the project using: cd ${projectName} && xs-dev run\n`)
     } else {
-      console.warn(
+      output.warn(
         'Name is required to generate project: xs-dev init my-project-name',
       )
     }

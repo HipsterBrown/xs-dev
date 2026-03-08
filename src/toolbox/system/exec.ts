@@ -5,7 +5,7 @@ import { EXPORTS_FILE_PATH } from '../setup/constants'
 import type { Device, Result } from '../../types'
 import { success, failure, wrapAsync } from './errors'
 
-function which(bin: string): string | null {
+export function which(bin: string): string | null {
   try {
     const result = execSync(`which ${bin}`, { stdio: 'pipe' }).toString().trim()
     return result.length > 0 ? result : null

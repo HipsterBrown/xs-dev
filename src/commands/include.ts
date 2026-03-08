@@ -8,6 +8,7 @@ import { collectChoicesFromTree } from '../toolbox/prompt/choices'
 import { sourceEnvironment } from '../toolbox/system/exec'
 import { DEVICE_ALIAS } from '../toolbox/prompt/devices'
 import type { Device } from '../types'
+import * as output from '../lib/output'
 
 interface IncludeOptions {
   device?: Device
@@ -39,7 +40,7 @@ const command = buildCommand({
   async func(this: LocalContext, flags: IncludeOptions, moduleName?: string) {
     const manifestPath = join(process.cwd(), 'manifest.json')
     if (!existsSync(manifestPath)) {
-      console.error(
+      output.error(
         'Cannot find manifest.json. Must be in project directory to update manifest includes.',
       )
       process.exit(1)
@@ -73,7 +74,7 @@ const command = buildCommand({
       moduleName = selectedModule
     }
 
-    console.log(`Adding "${String(moduleName)}" to manifest includes`)
+    output.info(`Adding "${String(moduleName)}" to manifest includes`)
     const modulePath = `$(MODDABLE)/modules/${String(moduleName)}/manifest.json`
 
     const raw = await readFile(manifestPath, 'utf8')
@@ -102,7 +103,7 @@ const command = buildCommand({
     const result = fn(data)
     await writeFile(manifestPath, JSON.stringify(result ?? data, null, 2), 'utf8')
 
-    console.log('Done!')
+    output.success('Done!')
   },
   parameters: {
     positional: {

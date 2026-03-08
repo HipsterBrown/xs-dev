@@ -10,12 +10,9 @@ import type { SetupArgs } from '../toolbox/setup/types'
 import { createInteractivePrompter, createNonInteractivePrompter } from '../lib/prompter'
 import type { OperationEvent } from '../lib/events'
 import { select } from '@inquirer/prompts'
+import * as output from '../lib/output'
 
-function handleEvent(event: OperationEvent, spinners: Map<string, ReturnType<typeof ora>>): void {
-  const key = event.taskId ?? 'default'
-  if (!spinners.has(key)) spinners.set(key, ora())
-  const spinner = spinners.get(key) ?? ora()
-  spinners.set(key, spinner)
+function handleEvent(event: OperationEvent, spinner: ReturnType<typeof ora>): void {
   switch (event.type) {
     case 'step:start': spinner.start(event.message); break
     case 'step:done': spinner.succeed(event.message ?? ''); break
@@ -51,14 +48,10 @@ const command = buildCommand({
     } = flags
 
     // Determine interactive mode and create prompter early for ejectfix
-    const isInteractive =
-      typeof process.env.CI !== 'undefined'
-        ? process.env.CI === 'false'
-        : interactive
-
-    const prompter = isInteractive
+    const prompter = output.isInteractive(interactive)
       ? createInteractivePrompter()
       : createNonInteractivePrompter()
+
 
     let target: Device =
       DEVICE_ALIAS[device ?? ('' as Device)] ?? DEVICE_ALIAS[currentPlatform]
@@ -81,20 +74,20 @@ const command = buildCommand({
       if (selectedDevice !== '' && selectedDevice !== undefined) {
         target = selectedDevice as Device
       } else {
-        console.warn('Please select a target device to run')
+        output.warn('Please select a target device to run')
         return
       }
     }
 
     if (tool !== undefined) {
       if (!['ejectfix'].includes(tool)) {
-        console.warn(`Unknown tool ${tool}`)
+        output.warn(`Unknown tool ${tool}`)
         process.exit(1)
       }
       if (tool === 'ejectfix') {
-        const spinners = new Map<string, ReturnType<typeof ora>>()
+        const spinner = ora()
         for await (const event of setupEjectfix({}, prompter)) {
-          handleEvent(event, spinners)
+          handleEvent(event, spinner)
         }
       }
       return
@@ -110,16 +103,15 @@ const command = buildCommand({
     ]
     const { default: setup } = await import(`../toolbox/setup/${target}`)
 
-    // Create spinner map for parallel support
-    const spinners = new Map<string, ReturnType<typeof ora>>()
+    const spinner = ora()
 
     if (platformDevices.includes(target)) {
       for await (const event of setup({ branch, release, sourceRepo }, prompter) as AsyncGenerator<OperationEvent>) {
-        handleEvent(event, spinners)
+        handleEvent(event, spinner)
       }
     } else {
       for await (const event of setup({ branch, release }, prompter) as AsyncGenerator<OperationEvent>) {
-        handleEvent(event, spinners)
+        handleEvent(event, spinner)
       }
     }
   },

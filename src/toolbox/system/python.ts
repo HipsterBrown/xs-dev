@@ -1,16 +1,7 @@
-import { execSync } from 'node:child_process'
 import { execaCommand } from './execa.js'
 import type { Result } from '../../types'
 import { failure, wrapAsync } from './errors'
-
-function which(bin: string): string | null {
-  try {
-    const result = execSync(`which ${bin}`, { stdio: 'pipe' }).toString().trim()
-    return result.length > 0 ? result : null
-  } catch {
-    return null
-  }
-}
+import { which } from './exec'
 
 export function detectPython(): string | null {
   if (which('python') !== null) return 'python'

@@ -1,12 +1,11 @@
 import os from 'node:os'
 import { existsSync, statSync } from 'node:fs'
-import { execSync } from 'node:child_process'
 import { join } from 'node:path'
 import { buildCommand } from '@stricli/core'
 import type { LocalContext } from '../app'
 import { DEVICE_ALIAS } from '../toolbox/prompt/devices'
 import { getModdableVersion, moddableExists } from '../toolbox/setup/moddable'
-import { sourceEnvironment } from '../toolbox/system/exec'
+import { sourceEnvironment, which } from '../toolbox/system/exec'
 import { detectPython, getPythonVersion } from '../toolbox/system/python'
 import type { Device } from '../types'
 import { unwrapOr } from '../toolbox/system/errors'
@@ -17,15 +16,6 @@ function isDir(path: string): boolean {
 
 function isFile(path: string): boolean {
   return existsSync(path) && statSync(path).isFile()
-}
-
-function which(tool: string): string | null {
-  try {
-    const result = execSync(`which ${tool}`, { encoding: 'utf8' }).trim()
-    return result.length > 0 ? result : null
-  } catch {
-    return null
-  }
 }
 
 function printTable(rows: string[][], write: (s: string) => void): void {

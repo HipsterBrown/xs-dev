@@ -1,17 +1,8 @@
-import { execSync } from 'node:child_process'
 import { execaCommand } from '../../system/execa.js'
+import { which } from '../../system/exec'
 import { ensureHomebrew, formulaeExists } from '../homebrew'
 import type { OperationEvent } from '../../../lib/events.js'
 import type { Prompter } from '../../../lib/prompter.js'
-
-function which(bin: string): string | null {
-  try {
-    const result = execSync(`which ${bin}`, { stdio: 'pipe' }).toString().trim()
-    return result.length > 0 ? result : null
-  } catch {
-    return null
-  }
-}
 
 export async function* installDeps(prompter: Prompter): AsyncGenerator<OperationEvent> {
   try {

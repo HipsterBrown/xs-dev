@@ -5,6 +5,7 @@ import { buildCommand } from '@stricli/core'
 import type { LocalContext } from '../app'
 import { DEVICE_ALIAS } from '../toolbox/prompt/devices'
 import type { Device } from '../types'
+import * as output from '../lib/output'
 
 interface RemoveOptions {
   device?: Device
@@ -19,7 +20,7 @@ const command = buildCommand({
   async func(this: LocalContext, flags: RemoveOptions, moduleName: string) {
     const manifestPath = join(process.cwd(), 'manifest.json')
     if (!existsSync(manifestPath)) {
-      console.error(
+      output.error(
         'Cannot find manifest.json. Must be in project directory to update manifest includes.',
       )
       process.exit(1)
@@ -27,11 +28,11 @@ const command = buildCommand({
     const { device = '' } = flags
 
     if (moduleName === undefined) {
-      console.error('Module name is required')
+      output.error('Module name is required')
       return
     }
 
-    console.log(`Removing "${String(moduleName)}" from manifest includes`)
+    output.info(`Removing "${String(moduleName)}" from manifest includes`)
 
     const raw = await readFile(manifestPath, 'utf8')
     const data = JSON.parse(raw) as Record<string, unknown>
@@ -52,16 +53,11 @@ const command = buildCommand({
       }
 
       const lengthBefore = (manifest.include as string[]).length
-      manifest.include = (manifest.include as string[]).filter((mod: string) => {
-        const result = !mod.includes(moduleName)
-        if (!result) {
-          console.log(` Removing: ${mod}`)
-        }
-
-        return result
-      })
+      const toRemove = (manifest.include as string[]).filter((mod: string) => mod.includes(moduleName))
+      toRemove.forEach((mod) => { output.info(` Removing: ${mod}`) })
+      manifest.include = (manifest.include as string[]).filter((mod: string) => !mod.includes(moduleName))
       if ((manifest.include as string[]).length === lengthBefore) {
-        console.error(`"${moduleName}" not found. No modules removed.`)
+        output.error(`"${moduleName}" not found. No modules removed.`)
       }
 
       if ((manifest.include as string[]).length === 1) {
@@ -75,7 +71,7 @@ const command = buildCommand({
     const result = fn(data)
     await writeFile(manifestPath, JSON.stringify(result ?? data, null, 2), 'utf8')
 
-    console.log('Done!')
+    output.success('Done!')
   },
   parameters: {
     positional: {

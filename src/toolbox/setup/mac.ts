@@ -19,15 +19,7 @@ import {
 import type { PlatformSetupArgs } from './types'
 import type { Prompter } from '../../lib/prompter.js'
 import type { OperationEvent } from '../../lib/events.js'
-
-function which(bin: string): string | null {
-  try {
-    const result = execSync(`which ${bin}`, { stdio: 'pipe' }).toString().trim()
-    return result.length > 0 ? result : null
-  } catch {
-    return null
-  }
-}
+import { which } from '../system/exec'
 
 export default async function* setupMac(
   {
