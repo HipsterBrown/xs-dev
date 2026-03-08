@@ -2,7 +2,7 @@ import { createWriteStream, statSync } from 'node:fs'
 import { promisify } from 'node:util'
 import { finished } from 'node:stream'
 import { resolve } from 'node:path'
-import { execaCommand } from 'execa'
+import { execaCommand } from '../../system/execa.js'
 import type { OperationEvent } from '../../../lib/events.js'
 import { fetchStream } from '../../system/fetch'
 

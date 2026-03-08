@@ -1,4 +1,4 @@
-import { execaCommand } from 'execa'
+import { execaCommand } from '../../system/execa.js'
 import type { OperationEvent } from '../../../lib/events.js'
 
 export async function* installDeps(_prompter?: unknown): AsyncGenerator<OperationEvent> {

@@ -1,5 +1,5 @@
 import { execSync } from 'node:child_process'
-import { execaCommand } from 'execa'
+import { execaCommand } from '../../system/execa.js'
 import type { OperationEvent } from '../../../lib/events.js'
 
 function which(bin: string): string | null {

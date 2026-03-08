@@ -2,7 +2,7 @@ import { mkdir, readdir, copyFile } from 'node:fs/promises'
 import { existsSync } from 'node:fs'
 import { resolve } from 'node:path'
 import { execSync } from 'node:child_process'
-import { execa } from 'execa'
+import { execa } from '../system/execa.js'
 import ws from 'windows-shortcuts'
 import { promisify } from 'util'
 import {

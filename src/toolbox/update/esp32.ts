@@ -1,5 +1,5 @@
 import { type as platformType } from 'node:os'
-import { execaCommand, execa } from 'execa'
+import { execaCommand, execa } from '../system/execa.js'
 import { existsSync } from 'node:fs'
 import { resolve } from 'node:path'
 import { INSTALL_DIR, EXPORTS_FILE_PATH } from '../setup/constants'

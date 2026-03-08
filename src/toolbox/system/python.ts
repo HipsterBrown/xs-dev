@@ -1,5 +1,5 @@
 import { execSync } from 'node:child_process'
-import { execaCommand } from 'execa'
+import { execaCommand } from './execa.js'
 import type { Result } from '../../types'
 import { failure, wrapAsync } from './errors'
 

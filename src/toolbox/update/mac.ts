@@ -1,7 +1,7 @@
 import os from 'node:os'
 import { promisify } from 'node:util'
 import { chmod } from 'node:fs'
-import { execaCommand } from 'execa'
+import { execaCommand } from '../system/execa.js'
 import { resolve } from 'node:path'
 import { INSTALL_PATH, MODDABLE_REPO, XSBUG_LOG_PATH } from '../setup/constants'
 import {

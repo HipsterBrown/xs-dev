@@ -1,5 +1,5 @@
 import { execSync } from 'node:child_process'
-import { execaCommand } from 'execa'
+import { execaCommand } from './execa.js'
 import type { Dependency } from './types'
 import { pkexec, execWithSudo } from '../system/exec'
 import type { Result } from '../../types'
