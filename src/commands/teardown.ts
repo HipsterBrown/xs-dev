@@ -1,5 +1,9 @@
 import { type as platformType } from 'node:os'
+import { rmSync, cpSync, existsSync, statSync } from 'node:fs'
+import { readFile, writeFile } from 'node:fs/promises'
+import { join } from 'node:path'
 import { buildCommand } from '@stricli/core'
+import ora from 'ora'
 import type { LocalContext } from '../app'
 import {
   INSTALL_DIR,
@@ -13,46 +17,42 @@ const command = buildCommand({
       'Remove all installed git repos and toolchains, unset environment changes',
   },
   async func(this: LocalContext) {
-    const { filesystem, patching, print } = this
     const PROFILE_PATH = getProfilePath()
-    const spinner = print.spin()
+    const spinner = ora()
     spinner.start('Tearing down Moddable tools and platform dependencies')
 
-    filesystem.remove(EXPORTS_FILE_PATH)
-    filesystem.remove(filesystem.resolve(INSTALL_DIR, 'moddable'))
-    filesystem.remove(filesystem.resolve(INSTALL_DIR, 'wasm'))
-    filesystem.remove(filesystem.resolve(INSTALL_DIR, 'esp32'))
-    filesystem.remove(filesystem.resolve(INSTALL_DIR, 'esp'))
-    filesystem.remove(filesystem.resolve(INSTALL_DIR, 'pico'))
-    filesystem.remove(filesystem.resolve(INSTALL_DIR, 'fontbm'))
-    filesystem.remove(filesystem.resolve(INSTALL_DIR, 'nrf52'))
-    filesystem.remove(filesystem.resolve(INSTALL_DIR, 'zephyrproject'))
+    const remove = (path: string) => rmSync(path, { recursive: true, force: true })
+
+    remove(EXPORTS_FILE_PATH)
+    remove(join(INSTALL_DIR, 'moddable'))
+    remove(join(INSTALL_DIR, 'wasm'))
+    remove(join(INSTALL_DIR, 'esp32'))
+    remove(join(INSTALL_DIR, 'esp'))
+    remove(join(INSTALL_DIR, 'pico'))
+    remove(join(INSTALL_DIR, 'fontbm'))
+    remove(join(INSTALL_DIR, 'nrf52'))
+    remove(join(INSTALL_DIR, 'zephyrproject'))
 
     if (platformType() === 'Darwin') {
-      const NC_PREFS_BACKUP = filesystem.resolve(
-        INSTALL_DIR,
-        'ejectfix',
-        'com.apple.ncprefs.plist',
-      )
-      if (filesystem.exists(NC_PREFS_BACKUP) === 'file') {
-        filesystem.copy(
+      const NC_PREFS_BACKUP = join(INSTALL_DIR, 'ejectfix', 'com.apple.ncprefs.plist')
+      if (existsSync(NC_PREFS_BACKUP) && statSync(NC_PREFS_BACKUP).isFile()) {
+        cpSync(
           NC_PREFS_BACKUP,
-          filesystem.resolve(
-            process.env.HOME ?? '~',
-            'Library',
-            'Preferences',
-            'com.apple.ncprefs.plist',
-          ),
-          { overwrite: true },
+          join(process.env.HOME ?? '~', 'Library', 'Preferences', 'com.apple.ncprefs.plist'),
         )
       }
-      filesystem.remove(filesystem.resolve(INSTALL_DIR, 'ejectfix'))
-      filesystem.remove('/Applications/xsbug.app')
+      remove(join(INSTALL_DIR, 'ejectfix'))
+      remove('/Applications/xsbug.app')
     }
 
-    await patching.patch(PROFILE_PATH, {
-      delete: `source ${EXPORTS_FILE_PATH}`,
-    })
+    if (existsSync(PROFILE_PATH)) {
+      const contents = await readFile(PROFILE_PATH, 'utf8')
+      const patched = contents
+        .split('\n')
+        .filter((line) => line.trim() !== `source ${EXPORTS_FILE_PATH}`)
+        .join('\n')
+      await writeFile(PROFILE_PATH, patched, 'utf8')
+    }
 
     spinner.succeed(`Clean up complete!`)
   },
