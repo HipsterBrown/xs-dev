@@ -4,8 +4,7 @@ import { buildCommand } from '@stricli/core'
 import type { LocalContext } from '../app'
 import type { Device } from '../types'
 import { DEVICE_ALIAS } from '../toolbox/prompt/devices'
-import { createInteractivePrompter, createNonInteractivePrompter } from '../lib/prompter'
-import { isInteractive } from '../lib/output'
+import { createInteractivePrompter, createNonInteractivePrompter, isInteractive } from '../lib/prompter'
 import type { OperationEvent } from '../lib/events'
 
 interface UpdateOptions {

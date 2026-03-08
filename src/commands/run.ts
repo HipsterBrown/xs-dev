@@ -6,8 +6,7 @@ import type { LocalContext } from '../app'
 import type { Device } from '../types'
 import build from '../toolbox/build'
 import { DEVICE_ALIAS } from '../toolbox/prompt/devices'
-import { createInteractivePrompter, createNonInteractivePrompter } from '../lib/prompter'
-import { isInteractive } from '../lib/output'
+import { createInteractivePrompter, createNonInteractivePrompter, isInteractive } from '../lib/prompter'
 
 type Mode = 'development' | 'production'
 

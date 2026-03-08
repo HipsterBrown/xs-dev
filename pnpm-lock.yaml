@@ -23,9 +23,6 @@ importers:
       '@stricli/core':
         specifier: ^1.1.0
         version: 1.1.0
-      chalk:
-        specifier: ^5.6.2
-        version: 5.6.2
       execa:
         specifier: ^9.6.1
         version: 9.6.1

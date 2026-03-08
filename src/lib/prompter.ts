@@ -1,5 +1,18 @@
 import { confirm as inquirerConfirm, select as inquirerSelect } from '@inquirer/prompts'
 
+/**
+ * Returns whether the current session is interactive.
+ * CI=true means non-interactive (standard CI convention).
+ * CI=false explicitly opts back into interactive mode.
+ * The defaultValue is used when CI is not set.
+ */
+export function isInteractive(defaultValue = true): boolean {
+  if (typeof process.env.CI !== 'undefined') {
+    return process.env.CI === 'false'
+  }
+  return defaultValue
+}
+
 export interface Choice<T> {
   label: string
   value: T

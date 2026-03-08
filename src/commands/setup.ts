@@ -7,7 +7,7 @@ import setupEjectfix from '../toolbox/setup/ejectfix'
 import { DEVICE_ALIAS } from '../toolbox/prompt/devices'
 import { MODDABLE_REPO } from '../toolbox/setup/constants'
 import type { SetupArgs } from '../toolbox/setup/types'
-import { createInteractivePrompter, createNonInteractivePrompter } from '../lib/prompter'
+import { createInteractivePrompter, createNonInteractivePrompter, isInteractive } from '../lib/prompter'
 import type { OperationEvent } from '../lib/events'
 import { select } from '@inquirer/prompts'
 import * as output from '../lib/output'
@@ -48,7 +48,7 @@ const command = buildCommand({
     } = flags
 
     // Determine interactive mode and create prompter early for ejectfix
-    const prompter = output.isInteractive(interactive)
+    const prompter = isInteractive(interactive)
       ? createInteractivePrompter()
       : createNonInteractivePrompter()
 

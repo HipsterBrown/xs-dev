@@ -24,10 +24,9 @@ export { default as build } from '../toolbox/build/index.js'
 
 // Interfaces and utilities
 export * as output from './output.js'
-export { isInteractive } from './output.js'
 export type { OperationEvent } from './events.js'
 export type { Prompter, Choice } from './prompter.js'
-export { createInteractivePrompter, createNonInteractivePrompter } from './prompter.js'
+export { createInteractivePrompter, createNonInteractivePrompter, isInteractive } from './prompter.js'
 
 // Types
 export type { SetupArgs, PlatformSetupArgs } from '../toolbox/setup/types.js'
