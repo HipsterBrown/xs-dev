@@ -18,10 +18,11 @@ export async function* parallel<T extends OperationEvent>(
 
     // Process results from all generators
     for (const { id, result } of results) {
-      if (result.done) {
+      if (result.done === true) {
         active.delete(id)
       } else {
-        yield { ...result.value, taskId: id } as T & { taskId: string }
+        const yielded: T & { taskId: string } = { ...result.value, taskId: id }
+        yield yielded
       }
     }
   }

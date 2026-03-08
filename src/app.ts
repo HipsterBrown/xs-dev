@@ -20,11 +20,6 @@ import update from './commands/update'
 
 export type LocalContext = CommandContext & {
   currentVersion: string
-  prompt?: any
-  print?: any
-  filesystem?: any
-  patching?: any
-  system?: any
 }
 
 const commands = buildRouteMap({

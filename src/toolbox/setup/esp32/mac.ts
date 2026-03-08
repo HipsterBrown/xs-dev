@@ -81,7 +81,7 @@ export async function* installDeps(prompter: Prompter): AsyncGenerator<Operation
 
   // 4. install pip, if needed
   const pip3Path = which('pip3')
-  if (!pip3Path) {
+  if (pip3Path === null) {
     try {
       yield { type: 'step:start', message: 'Ensuring pip is available' }
       await execaCommand('python3 -m ensurepip --user', {

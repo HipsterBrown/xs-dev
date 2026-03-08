@@ -108,7 +108,7 @@ export default async function* esp32Setup(
       yield { type: 'info', message: 'Configuring IDF_PATH environment variable' }
       await setEnv('IDF_PATH', IDF_PATH)
     } else {
-      if (!process.env.IDF_PATH) {
+      if (process.env.IDF_PATH === undefined || process.env.IDF_PATH === '') {
         yield { type: 'info', message: 'Configuring $IDF_PATH' }
         process.env.IDF_PATH = IDF_PATH
         await upsert(EXPORTS_FILE_PATH, `export IDF_PATH=${IDF_PATH}`)
@@ -132,7 +132,7 @@ export default async function* esp32Setup(
       yield { type: 'step:start', message: 'Installing esp-idf tooling' }
       await execaCommand('./install.sh', {
         cwd: IDF_PATH,
-        shell: process.env.SHELL || '/bin/bash',
+        shell: process.env.SHELL ?? '/bin/bash',
         stdio: 'inherit',
       })
       yield { type: 'step:done' }
@@ -171,7 +171,7 @@ export async function getExpectedEspIdfVersion(): Promise<string | null> {
         const { readFile } = await import('node:fs/promises')
         const content = await readFile(manifestPath, 'utf-8')
         // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-        const manifest = JSON.parse(content) as Record<string, any>
+        const manifest = JSON.parse(content) as Record<string, unknown>
         return (manifest?.build?.EXPECTED_ESP_IDF as string | undefined) ?? null
       }
     } catch {

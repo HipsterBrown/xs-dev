@@ -8,7 +8,22 @@ import { DEVICE_ALIAS } from '../toolbox/prompt/devices'
 import { MODDABLE_REPO } from '../toolbox/setup/constants'
 import type { SetupArgs } from '../toolbox/setup/types'
 import { createInteractivePrompter, createNonInteractivePrompter } from '../lib/prompter'
+import type { OperationEvent } from '../lib/events'
 import { select } from '@inquirer/prompts'
+
+function handleEvent(event: OperationEvent, spinners: Map<string, ReturnType<typeof ora>>): void {
+  const key = event.taskId ?? 'default'
+  if (!spinners.has(key)) spinners.set(key, ora())
+  const spinner = spinners.get(key) ?? ora()
+  spinners.set(key, spinner)
+  switch (event.type) {
+    case 'step:start': spinner.start(event.message); break
+    case 'step:done': spinner.succeed(event.message ?? ''); break
+    case 'step:fail': spinner.fail(event.message); process.exit(1); break
+    case 'warning': spinner.warn(event.message); break
+    case 'info': spinner.info(event.message); break
+  }
+}
 
 interface SetupOptions {
   device?: Device
@@ -79,28 +94,7 @@ const command = buildCommand({
       if (tool === 'ejectfix') {
         const spinners = new Map<string, ReturnType<typeof ora>>()
         for await (const event of setupEjectfix({}, prompter)) {
-          const key = event.taskId ?? 'default'
-          if (!spinners.has(key)) spinners.set(key, ora())
-          const spinner = spinners.get(key)!
-
-          switch (event.type) {
-            case 'step:start':
-              spinner.start(event.message)
-              break
-            case 'step:done':
-              spinner.succeed(event.message ?? '')
-              break
-            case 'step:fail':
-              spinner.fail(event.message)
-              process.exit(1)
-              break
-            case 'warning':
-              spinner.warn(event.message)
-              break
-            case 'info':
-              spinner.info(event.message)
-              break
-          }
+          handleEvent(event, spinners)
         }
       }
       return
@@ -120,54 +114,12 @@ const command = buildCommand({
     const spinners = new Map<string, ReturnType<typeof ora>>()
 
     if (platformDevices.includes(target)) {
-      for await (const event of setup({ branch, release, sourceRepo }, prompter)) {
-        const key = event.taskId ?? 'default'
-        if (!spinners.has(key)) spinners.set(key, ora())
-        const spinner = spinners.get(key)!
-
-        switch (event.type) {
-          case 'step:start':
-            spinner.start(event.message)
-            break
-          case 'step:done':
-            spinner.succeed(event.message ?? '')
-            break
-          case 'step:fail':
-            spinner.fail(event.message)
-            process.exit(1)
-            break
-          case 'warning':
-            spinner.warn(event.message)
-            break
-          case 'info':
-            spinner.info(event.message)
-            break
-        }
+      for await (const event of setup({ branch, release, sourceRepo }, prompter) as AsyncGenerator<OperationEvent>) {
+        handleEvent(event, spinners)
       }
     } else {
-      for await (const event of setup({ branch, release }, prompter)) {
-        const key = event.taskId ?? 'default'
-        if (!spinners.has(key)) spinners.set(key, ora())
-        const spinner = spinners.get(key)!
-
-        switch (event.type) {
-          case 'step:start':
-            spinner.start(event.message)
-            break
-          case 'step:done':
-            spinner.succeed(event.message ?? '')
-            break
-          case 'step:fail':
-            spinner.fail(event.message)
-            process.exit(1)
-            break
-          case 'warning':
-            spinner.warn(event.message)
-            break
-          case 'info':
-            spinner.info(event.message)
-            break
-        }
+      for await (const event of setup({ branch, release }, prompter) as AsyncGenerator<OperationEvent>) {
+        handleEvent(event, spinners)
       }
     }
   },

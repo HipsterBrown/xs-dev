@@ -21,7 +21,7 @@ const command = buildCommand({
     const spinner = ora()
     spinner.start('Tearing down Moddable tools and platform dependencies')
 
-    const remove = (path: string) => rmSync(path, { recursive: true, force: true })
+    const remove = (path: string): void => { rmSync(path, { recursive: true, force: true }) }
 
     remove(EXPORTS_FILE_PATH)
     remove(join(INSTALL_DIR, 'moddable'))

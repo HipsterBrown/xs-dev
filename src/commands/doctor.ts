@@ -38,7 +38,7 @@ function printTable(rows: string[][], write: (s: string) => void): void {
 const command = buildCommand({
   async func(this: LocalContext) {
     const { currentVersion, process: proc } = this
-    const write = (s: string) => proc.stdout.write(s)
+    const write = (s: string): void => { proc.stdout.write(s) }
     await sourceEnvironment()
 
     const supportedDevices = []
