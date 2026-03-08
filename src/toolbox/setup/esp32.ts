@@ -170,9 +170,8 @@ export async function getExpectedEspIdfVersion(): Promise<string | null> {
       if (existsSync(manifestPath)) {
         const { readFile } = await import('node:fs/promises')
         const content = await readFile(manifestPath, 'utf-8')
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-        const manifest = JSON.parse(content) as Record<string, unknown>
-        return (manifest?.build?.EXPECTED_ESP_IDF as string | undefined) ?? null
+        const manifest = JSON.parse(content) as { build?: { EXPECTED_ESP_IDF?: string } }
+        return manifest?.build?.EXPECTED_ESP_IDF ?? null
       }
     } catch {
       return null
