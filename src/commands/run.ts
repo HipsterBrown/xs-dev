@@ -1,8 +1,12 @@
 import { type as platformType } from 'node:os'
+import { resolve } from 'node:path'
+import ora from 'ora'
 import { buildCommand } from '@stricli/core'
 import type { LocalContext } from '../app'
 import type { Device } from '../types'
+import build from '../toolbox/build'
 import { DEVICE_ALIAS } from '../toolbox/prompt/devices'
+import { createInteractivePrompter, createNonInteractivePrompter } from '../lib/prompter'
 
 type Mode = 'development' | 'production'
 
@@ -24,8 +28,6 @@ const command = buildCommand({
   },
   // eslint-disable-next-line @typescript-eslint/no-inferrable-types
   async func(this: LocalContext, flags: RunOptions, projectPath: string = '.') {
-    const { filesystem } = this
-    const { build } = await import('../toolbox/build/index')
     const currentPlatform: Device = platformType().toLowerCase() as Device
     const {
       device = currentPlatform,
@@ -39,7 +41,7 @@ const command = buildCommand({
       config = [],
     } = flags
     const targetPlatform: string = DEVICE_ALIAS[device as Device] ?? device
-    projectPath = filesystem.resolve(projectPath)
+    projectPath = resolve(projectPath)
     const parsedConfig = config.reduce<Record<string, string>>(
       (result, setting) => {
         const [key, value] = setting.split('=')
@@ -49,19 +51,57 @@ const command = buildCommand({
       {},
     )
 
-    await build({
-      listExamples,
-      listDevices,
-      log,
-      example,
-      targetPlatform,
-      port,
-      projectPath,
-      mode,
-      deployStatus: 'run',
-      outputDir: output,
-      config: parsedConfig,
-    })
+    const isInteractive =
+      typeof process.env.CI !== 'undefined'
+        ? process.env.CI === 'false'
+        : true
+
+    const prompter = isInteractive
+      ? createInteractivePrompter()
+      : createNonInteractivePrompter()
+
+    const spinners = new Map<string, ReturnType<typeof ora>>()
+
+    for await (const event of build(
+      {
+        listExamples,
+        listDevices,
+        log,
+        example,
+        targetPlatform,
+        port,
+        projectPath,
+        mode,
+        deployStatus: 'run',
+        outputDir: output,
+        config: parsedConfig,
+      },
+      prompter,
+    )) {
+      const key = event.taskId ?? 'default'
+      if (!spinners.has(key)) spinners.set(key, ora())
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+      const spinner = spinners.get(key)!
+
+      switch (event.type) {
+        case 'step:start':
+          spinner.start(event.message)
+          break
+        case 'step:done':
+          spinner.succeed(event.message ?? '')
+          break
+        case 'step:fail':
+          spinner.fail(event.message)
+          process.exit(1)
+          break
+        case 'warning':
+          spinner.warn(event.message)
+          break
+        case 'info':
+          spinner.info(event.message)
+          break
+      }
+    }
   },
   parameters: {
     positional: {

@@ -1,4 +1,5 @@
 import { type as platformType } from 'node:os'
+import { resolve } from 'node:path'
 import ora from 'ora'
 import { buildCommand } from '@stricli/core'
 import type { LocalContext } from '../app'
@@ -30,7 +31,6 @@ const command = buildCommand({
     // eslint-disable-next-line @typescript-eslint/no-inferrable-types
     projectPath: string = '.',
   ) {
-    const { filesystem } = this
     const currentPlatform: Device = platformType().toLowerCase() as Device
     const {
       device = currentPlatform,
@@ -43,7 +43,7 @@ const command = buildCommand({
       output,
     } = flags
     const targetPlatform: string = DEVICE_ALIAS[device as Device] ?? device
-    projectPath = filesystem.resolve(projectPath)
+    projectPath = resolve(projectPath)
 
     // Determine interactive mode
     const isInteractive =

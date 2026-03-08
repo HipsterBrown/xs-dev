@@ -1,4 +1,7 @@
+import { existsSync, statSync, readdirSync, mkdirSync, cpSync } from 'node:fs'
+import { join } from 'node:path'
 import { buildCommand } from '@stricli/core'
+import { select } from '@inquirer/prompts'
 import type { LocalContext } from '../app'
 import { collectChoicesFromTree } from '../toolbox/prompt/choices'
 import { sourceEnvironment } from '../toolbox/system/exec'
@@ -13,17 +16,28 @@ interface InitOptions {
   asyncMain?: boolean
 }
 
+interface TreeNode {
+  name: string
+  type: 'dir' | 'file'
+  children: TreeNode[]
+}
+
+function buildTree(dirPath: string, name: string): TreeNode {
+  const stat = statSync(dirPath)
+  if (stat.isDirectory()) {
+    const children = readdirSync(dirPath).map((entry) =>
+      buildTree(join(dirPath, entry), entry),
+    )
+    return { name, type: 'dir', children }
+  }
+  return { name, type: 'file', children: [] }
+}
+
 const command = buildCommand({
   docs: {
     brief: 'Scaffold a new Moddable XS project',
   },
   async func(this: LocalContext, flags: InitOptions, projectName: string) {
-    const {
-      filesystem,
-      print: { warning, info, success },
-      prompt,
-    } = this
-
     const {
       typescript = false,
       io = true,
@@ -35,8 +49,8 @@ const command = buildCommand({
     } = flags
 
     if (projectName !== undefined) {
-      if (!overwrite && filesystem.isDirectory(projectName)) {
-        warning(
+      if (!overwrite && existsSync(projectName) && statSync(projectName).isDirectory()) {
+        console.warn(
           `Directory called ${projectName} already exists. Please pass the --overwrite flag to replace an existing project.`,
         )
         return
@@ -46,14 +60,15 @@ const command = buildCommand({
 
       if (example !== undefined || listExamples) {
         // find example project
-        const exampleProjectPath = filesystem.resolve(
-          String(process.env.MODDABLE),
-          'examples',
-        )
-        const examples = filesystem.inspectTree(exampleProjectPath)?.children
+        const exampleProjectPath = join(String(process.env.MODDABLE), 'examples')
+        const exampleChildren = existsSync(exampleProjectPath) && statSync(exampleProjectPath).isDirectory()
+          ? readdirSync(exampleProjectPath).map((entry) =>
+              buildTree(join(exampleProjectPath, entry), entry),
+            )
+          : undefined
         const choices =
-          examples !== undefined
-            ? examples.map((example) => collectChoicesFromTree(example)).flat()
+          exampleChildren !== undefined
+            ? exampleChildren.map((example) => collectChoicesFromTree(example)).flat()
             : []
         let selectedExample = choices.find((choice) => choice === example)
 
@@ -61,32 +76,28 @@ const command = buildCommand({
           const filteredChoices = choices.filter((choice) =>
             choice.includes(String(example)),
           )
-            ; ({ example: selectedExample } = await prompt.ask([
-              {
-                type: 'autocomplete',
-                name: 'example',
-                message: 'Here are the available examples templates:',
-                choices: filteredChoices.length > 0 ? filteredChoices : choices,
-              },
-            ]))
+          selectedExample = await select({
+            message: 'Here are the available examples templates:',
+            choices: (filteredChoices.length > 0 ? filteredChoices : choices).map((c) => ({
+              name: c,
+              value: c,
+            })),
+          })
         }
 
         // copy files into new project directory
         if (selectedExample !== '' && selectedExample !== undefined) {
-          const selectedExamplePath = filesystem.resolve(
-            exampleProjectPath,
-            selectedExample,
-          )
-          info(`Generating project directory from ${selectedExample}`)
-          filesystem.copy(selectedExamplePath, projectName, { overwrite })
+          const selectedExamplePath = join(exampleProjectPath, selectedExample)
+          console.log(`Generating project directory from ${selectedExample}`)
+          cpSync(selectedExamplePath, projectName, { recursive: true, force: overwrite })
         } else {
-          warning('Please select an example template to use.')
+          console.warn('Please select an example template to use.')
           return
         }
       } else {
-        info(`Generating Moddable project: ${projectName}`)
+        console.log(`Generating Moddable project: ${projectName}`)
 
-        filesystem.dir(projectName, { empty: false })
+        mkdirSync(projectName, { recursive: true })
 
         const includes = [
           io
@@ -147,9 +158,9 @@ const command = buildCommand({
         await Promise.all(fileTasks)
       }
 
-      success(`Run the project using: cd ${projectName} && xs-dev run`)
+      console.log(`Run the project using: cd ${projectName} && xs-dev run`)
     } else {
-      warning(
+      console.warn(
         'Name is required to generate project: xs-dev init my-project-name',
       )
     }

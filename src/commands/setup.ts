@@ -70,14 +70,14 @@ const command = buildCommand({
       if (selectedDevice !== '' && selectedDevice !== undefined) {
         target = selectedDevice as Device
       } else {
-        print.warning('Please select a target device to run')
+        console.warn('Please select a target device to run')
         return
       }
     }
 
     if (tool !== undefined) {
       if (!['ejectfix'].includes(tool)) {
-        print.warning(`Unknown tool ${tool}`)
+        console.warn(`Unknown tool ${tool}`)
         process.exit(1)
       }
       if (tool === 'ejectfix') {
