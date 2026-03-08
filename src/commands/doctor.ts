@@ -88,7 +88,7 @@ const command = buildCommand({
     const pythonVersion = unwrapOr(await getPythonVersion(), 'Unavailable')
     const pythonPath = which(detectPython() ?? '') ?? 'n/a'
 
-    const moddableVersion = unwrapOr(await getModdableVersion(), 'Not found')
+    const moddableVersion = (await getModdableVersion()) ?? 'Not found'
     const moddablePath = process.env.MODDABLE ?? 'n/a'
 
     console.log('xs-dev environment info:')
