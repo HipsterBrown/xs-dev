@@ -82,7 +82,7 @@ const command = buildCommand({
       }
       if (tool === 'ejectfix') {
         const spinners = new Map<string, ReturnType<typeof ora>>()
-        for await (const event of setupEjectfix(prompter)) {
+        for await (const event of setupEjectfix({}, prompter)) {
           const key = event.taskId ?? 'default'
           if (!spinners.has(key)) spinners.set(key, ora())
           const spinner = spinners.get(key)!
