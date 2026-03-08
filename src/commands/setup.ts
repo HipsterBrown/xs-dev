@@ -8,6 +8,7 @@ import { DEVICE_ALIAS } from '../toolbox/prompt/devices'
 import { MODDABLE_REPO } from '../toolbox/setup/constants'
 import type { SetupArgs } from '../toolbox/setup/types'
 import { createInteractivePrompter, createNonInteractivePrompter } from '../lib/prompter'
+import { select } from '@inquirer/prompts'
 
 interface SetupOptions {
   device?: Device
@@ -23,7 +24,6 @@ const command = buildCommand({
     brief: 'Download and build Moddable tooling for various platform targets',
   },
   async func(this: LocalContext, flags: SetupOptions) {
-    const { prompt } = this
     const currentPlatform: Device = platformType().toLowerCase() as Device
     const {
       device,
@@ -58,14 +58,10 @@ const command = buildCommand({
         'zephyr',
         DEVICE_ALIAS[currentPlatform],
       ]
-      const { device: selectedDevice } = await prompt.ask([
-        {
-          type: 'autocomplete',
-          name: 'device',
-          message: 'Here are the available target devices:',
-          choices,
-        },
-      ])
+      const selectedDevice = await select({
+        message: 'Here are the available target devices:',
+        choices: choices.map((c) => ({ name: c, value: c })),
+      })
 
       if (selectedDevice !== '' && selectedDevice !== undefined) {
         target = selectedDevice as Device
