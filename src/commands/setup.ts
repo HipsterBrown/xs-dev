@@ -23,7 +23,7 @@ const command = buildCommand({
     brief: 'Download and build Moddable tooling for various platform targets',
   },
   async func(this: LocalContext, flags: SetupOptions) {
-    const { prompt, print } = this
+    const { prompt } = this
     const currentPlatform: Device = platformType().toLowerCase() as Device
     const {
       device,

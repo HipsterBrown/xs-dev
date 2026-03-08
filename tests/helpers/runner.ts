@@ -28,10 +28,10 @@ export function buildFakeContext(options: { env?: Record<string, string> } = {})
 export async function runWithInputs(app: unknown, inputs: string[], ...args: Parameters<typeof buildFakeContext>) {
   const context = buildFakeContext(...args)
   await run(app as any, inputs, context as any)
-  const stdout = context.process.stdout.write.mock.calls?.[0]?.arguments?.join('') ?? ''
+  const stdout = context.process.stdout.write.mock.calls?.map((c) => c.arguments?.join('')).join('') ?? ''
   return {
     stdout,
-    stderr: context.process.stderr.write.mock.calls?.[0]?.arguments?.join('') ?? '',
+    stderr: context.process.stderr.write.mock.calls?.map((c) => c.arguments?.join('')).join('') ?? '',
     exitCode: context.process.exitCode(),
   }
 }

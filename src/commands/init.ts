@@ -158,7 +158,7 @@ const command = buildCommand({
         await Promise.all(fileTasks)
       }
 
-      console.log(`Run the project using: cd ${projectName} && xs-dev run`)
+      this.process.stdout.write(`Run the project using: cd ${projectName} && xs-dev run\n`)
     } else {
       console.warn(
         'Name is required to generate project: xs-dev init my-project-name',

@@ -255,7 +255,7 @@ export default async function* setupWindows(
   if (buildTools) {
     try {
       yield { type: 'step:start', message: 'Building Moddable SDK tools' }
-      await execa('build.bat', { cwd: BUILD_DIR, shell: true })
+      await execa('build.bat', [], { cwd: BUILD_DIR, shell: true })
       yield { type: 'step:done' }
     } catch (error) {
       yield { type: 'step:fail', message: `Error building Moddable SDK tools: ${String(error)}` }

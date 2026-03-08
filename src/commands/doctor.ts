@@ -1,5 +1,6 @@
 import os from 'node:os'
-import { existsSync, statSync, execSync } from 'node:fs'
+import { existsSync, statSync } from 'node:fs'
+import { execSync } from 'node:child_process'
 import { join } from 'node:path'
 import { buildCommand } from '@stricli/core'
 import type { LocalContext } from '../app'
@@ -27,16 +28,17 @@ function which(tool: string): string | null {
   }
 }
 
-function printTable(rows: string[][]): void {
+function printTable(rows: string[][], write: (s: string) => void): void {
   const labelWidth = Math.max(...rows.map((r) => r[0]?.length ?? 0)) + 2
   for (const [label, value] of rows) {
-    console.log(`  ${(label ?? '').padEnd(labelWidth)}${value ?? ''}`)
+    write(`  ${(label ?? '').padEnd(labelWidth)}${value ?? ''}\n`)
   }
 }
 
 const command = buildCommand({
   async func(this: LocalContext) {
-    const { currentVersion } = this
+    const { currentVersion, process: proc } = this
+    const write = (s: string) => proc.stdout.write(s)
     await sourceEnvironment()
 
     const supportedDevices = []
@@ -91,7 +93,7 @@ const command = buildCommand({
     const moddableVersion = (await getModdableVersion()) ?? 'Not found'
     const moddablePath = process.env.MODDABLE ?? 'n/a'
 
-    console.log('xs-dev environment info:')
+    write('xs-dev environment info:\n')
     printTable(
       [
         ['CLI Version', currentVersion],
@@ -124,10 +126,11 @@ const command = buildCommand({
           ? [['Zephyr SDK Directory', String(process.env.ZEPHYR_BASE)]]
           : []),
       ],
+      write,
     )
 
-    console.log(
-      `\nIf this is related to an error when using the CLI, please create an issue at "https://github.com/hipsterbrown/xs-dev/issues/new" with the above info.`,
+    write(
+      `\nIf this is related to an error when using the CLI, please create an issue at "https://github.com/hipsterbrown/xs-dev/issues/new" with the above info.\n`,
     )
   },
   docs: {
