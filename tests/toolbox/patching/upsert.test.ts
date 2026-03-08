@@ -22,6 +22,7 @@ describe('upsert', () => {
     await upsert(filePath, 'export FOO=bar')
     const contents = await readFile(filePath, 'utf8')
     assert.ok(contents.includes('export FOO=bar'))
+    assert.equal(contents, 'export FOO=bar', 'should not have a leading newline')
   })
 
   it('appends a new line to an existing file', async () => {

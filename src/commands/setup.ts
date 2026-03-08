@@ -9,7 +9,6 @@ import { MODDABLE_REPO } from '../toolbox/setup/constants'
 import type { SetupArgs } from '../toolbox/setup/types'
 import { createInteractivePrompter, createNonInteractivePrompter, isInteractive } from '../lib/prompter'
 import type { OperationEvent } from '../lib/events'
-import { select } from '@inquirer/prompts'
 import * as output from '../lib/output'
 
 function handleEvent(event: OperationEvent, spinner: ReturnType<typeof ora>): void {
@@ -66,10 +65,10 @@ const command = buildCommand({
         'zephyr',
         DEVICE_ALIAS[currentPlatform],
       ]
-      const selectedDevice = await select({
-        message: 'Here are the available target devices:',
-        choices: choices.map((c) => ({ name: c, value: c })),
-      })
+      const selectedDevice = await prompter.select(
+        'Here are the available target devices:',
+        choices.map((c) => ({ label: c, value: c })),
+      )
 
       if (selectedDevice !== '' && selectedDevice !== undefined) {
         target = selectedDevice as Device

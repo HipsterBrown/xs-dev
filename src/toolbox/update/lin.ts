@@ -21,7 +21,8 @@ export default async function* updateLin(
   prompter: Prompter,
 ): AsyncGenerator<OperationEvent> {
   const setupArgs = args as Record<string, unknown> & SetupArgs
-  const { branch, release, interactive = false } = setupArgs
+  const { branch, release } = setupArgs
+  const interactive = args.interactive === true
 
   await sourceEnvironment()
 

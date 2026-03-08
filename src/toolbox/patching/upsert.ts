@@ -7,6 +7,7 @@ export default async function upsert(filePath: string, newLine: string): Promise
     contents = await readFile(filePath, 'utf8')
   }
   if (!contents.includes(newLine)) {
-    await writeFile(filePath, [contents, newLine].join('\n'), 'utf8')
+    const separator = contents.length > 0 ? '\n' : ''
+    await writeFile(filePath, `${contents}${separator}${newLine}`, 'utf8')
   }
 }

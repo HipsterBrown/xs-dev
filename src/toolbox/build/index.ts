@@ -10,7 +10,7 @@ import { DEVICE_ALIAS } from '../prompt/devices'
 import type { Device } from '../../types'
 import type { OperationEvent } from '../../lib/events'
 import type { Prompter, Choice } from '../../lib/prompter'
-import { sourceEnvironment, sourceIdfPythonEnv } from '../system/exec'
+import { sourceEnvironment, sourceIdfPythonEnv, which } from '../system/exec'
 
 export type DeployStatus = 'none' | 'run' | 'push' | 'clean' | 'debug'
 
@@ -371,11 +371,13 @@ export default async function* build(
   })
 
   let canUseMCPack = false
-  try {
-    await stat(resolve(projectPath, 'package.json'))
-    canUseMCPack = true
-  } catch {
-    canUseMCPack = false
+  if (which('mcpack') !== null) {
+    try {
+      await stat(resolve(projectPath, 'package.json'))
+      canUseMCPack = true
+    } catch {
+      canUseMCPack = false
+    }
   }
 
   let rootCommand = 'mcconfig'
