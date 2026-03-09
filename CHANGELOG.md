@@ -1,3 +1,15 @@
+# v1.2.5 (Mon Mar 09 2026)
+
+#### 🐛 Bug Fix
+
+- refactor: convert build module to async generator, update build commands [#234](https://github.com/HipsterBrown/xs-dev/pull/234) ([@HipsterBrown](https://github.com/HipsterBrown))
+
+#### Authors: 1
+
+- Nick Hehr ([@HipsterBrown](https://github.com/HipsterBrown))
+
+---
+
 # v1.2.4 (Mon Mar 09 2026)
 
 #### 🐛 Bug Fix
