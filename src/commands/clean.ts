@@ -1,8 +1,13 @@
 import { type as platformType } from 'node:os'
+import { resolve } from 'node:path'
+import ora from 'ora'
 import { buildCommand } from '@stricli/core'
 import type { LocalContext } from '../app'
 import type { Device } from '../types'
+import build from '../toolbox/build'
 import { DEVICE_ALIAS } from '../toolbox/prompt/devices'
+import { createInteractivePrompter, createNonInteractivePrompter, isInteractive } from '../lib/prompter'
+import { handleEvent } from '../lib/renderer'
 
 type Mode = 'development' | 'production'
 
@@ -26,8 +31,6 @@ const command = buildCommand({
     // eslint-disable-next-line @typescript-eslint/no-inferrable-types
     projectPath: string = '.',
   ) {
-    const { filesystem } = this
-    const { build } = await import('../toolbox/build/index')
     const currentPlatform: Device = platformType().toLowerCase() as Device
     const {
       device = currentPlatform,
@@ -39,7 +42,7 @@ const command = buildCommand({
       config = [],
     } = flags
     const targetPlatform: string = DEVICE_ALIAS[device as Device] ?? device
-    projectPath = filesystem.resolve(projectPath)
+    projectPath = resolve(projectPath)
     const parsedConfig = config.reduce<Record<string, string>>(
       (result, setting) => {
         const [key, value] = setting.split('=')
@@ -49,17 +52,29 @@ const command = buildCommand({
       {},
     )
 
-    await build({
-      listExamples,
-      listDevices,
-      example,
-      targetPlatform,
-      projectPath,
-      mode,
-      deployStatus: 'clean',
-      outputDir: output,
-      config: parsedConfig,
-    })
+    // Determine interactive mode
+    const prompter = isInteractive()
+      ? createInteractivePrompter()
+      : createNonInteractivePrompter()
+
+    const spinner = ora()
+
+    for await (const event of build(
+      {
+        listExamples,
+        listDevices,
+        example,
+        targetPlatform,
+        projectPath,
+        mode,
+        deployStatus: 'clean',
+        outputDir: output,
+        config: parsedConfig,
+      },
+      prompter,
+    )) {
+      handleEvent(event, spinner)
+    }
   },
   parameters: {
     positional: {
