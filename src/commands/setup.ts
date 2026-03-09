@@ -9,6 +9,7 @@ import { MODDABLE_REPO } from '../toolbox/setup/constants'
 import type { SetupArgs } from '../toolbox/setup/types'
 import { createInteractivePrompter, createNonInteractivePrompter, isInteractive } from '../lib/prompter'
 import { handleEvent } from '../lib/renderer'
+import type { OperationEvent } from '../lib/events'
 
 interface SetupOptions {
   device?: Device
@@ -95,11 +96,11 @@ const command = buildCommand({
     const spinner = ora()
 
     if (platformDevices.includes(target)) {
-      for await (const event of setup({ branch, release, sourceRepo }, prompter)) {
+      for await (const event of setup({ branch, release, sourceRepo }, prompter) as AsyncGenerator<OperationEvent>) {
         handleEvent(event, spinner)
       }
     } else {
-      for await (const event of setup({ branch, release }, prompter)) {
+      for await (const event of setup({ branch, release }, prompter) as AsyncGenerator<OperationEvent>) {
         handleEvent(event, spinner)
       }
     }

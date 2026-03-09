@@ -11,6 +11,7 @@ import { installDeps as installLinuxDeps } from './esp32/linux'
 import { installDeps as installWinDeps } from './esp32/windows'
 import { setEnv } from './windows'
 import { sourceEnvironment } from '../system/exec'
+import { unwrapOr } from '../system/errors'
 import type { Prompter } from '../../lib/prompter.js'
 import type { OperationEvent } from '../../lib/events.js'
 
@@ -57,11 +58,12 @@ export default async function* esp32Setup(
   if (!existsSync(IDF_PATH)) {
     try {
       yield { type: 'step:start', message: 'Cloning esp-idf repo' }
-      const moddableVersion = await getModdableVersion()
+      const moddableVersionResult = await getModdableVersion()
+      const moddableVersion = unwrapOr(moddableVersionResult, '')
       const expectedEspIdfVersion = await getExpectedEspIdfVersion()
       const branch =
         expectedEspIdfVersion ??
-        (((moddableVersion ?? '').includes('branch') || getVersionSatisfies(moddableVersion ?? '', '>= 4.2.x'))
+        ((moddableVersion.includes('branch') || getVersionSatisfies(moddableVersion, '>= 4.2.x'))
           ? ESP_BRANCH_V5
           : ESP_BRANCH_V4)
       await execaCommand(

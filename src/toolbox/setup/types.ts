@@ -1,5 +1,3 @@
-import type { Prompter } from '../../lib/prompter.js'
-
 export interface SetupArgs {
   branch: 'public' | string
   release: 'latest' | string

@@ -23,7 +23,8 @@ import { isFailure, unwrap } from '../system/errors'
 
 function which(bin: string): string | null {
   try {
-    return execSync(`which ${bin}`, { stdio: 'pipe' }).toString().trim() || null
+    const result = execSync(`which ${bin}`, { stdio: 'pipe' }).toString().trim()
+    return result.length > 0 ? result : null
   } catch {
     return null
   }
@@ -164,17 +165,20 @@ export default async function* setupMac(
             }),
           )
         }
-      } else {
+      } else if (branch !== undefined && branch !== null) {
         yield { type: 'step:start', message: `Cloning ${sourceRepo} repo` }
         await execa('git', [
           'clone',
           sourceRepo,
           INSTALL_PATH,
           '--depth', '1',
-          '--branch', branch!,
+          '--branch', branch,
           '--single-branch',
         ])
         buildTools = true
+      } else {
+        yield { type: 'step:fail', message: 'Either a release or branch must be specified' }
+        return
       }
       yield { type: 'step:done' }
     } catch (error) {
