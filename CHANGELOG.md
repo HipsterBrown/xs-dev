@@ -1,3 +1,15 @@
+# v1.2.6 (Mon Mar 09 2026)
+
+#### 🐛 Bug Fix
+
+- refactor: convert all setup/update modules to async generators [#235](https://github.com/HipsterBrown/xs-dev/pull/235) ([@HipsterBrown](https://github.com/HipsterBrown))
+
+#### Authors: 1
+
+- Nick Hehr ([@HipsterBrown](https://github.com/HipsterBrown))
+
+---
+
 # v1.2.5 (Mon Mar 09 2026)
 
 #### 🐛 Bug Fix
