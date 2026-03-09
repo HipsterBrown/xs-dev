@@ -2,7 +2,7 @@ import { mkdir, readdir, copyFile, chmod } from 'node:fs/promises'
 import { existsSync } from 'node:fs'
 import { resolve } from 'node:path'
 import { execSync } from 'node:child_process'
-import { execaCommand, execa } from 'execa'
+import { execaCommand, execa } from '../system/execa.js'
 import os from 'node:os'
 import {
   INSTALL_PATH,

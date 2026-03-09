@@ -29,10 +29,11 @@ export async function runWithInputs(app: unknown, inputs: string[], ...args: Par
   const context = buildFakeContext(...args)
   await run(app as any, inputs, context as any)
   const stdout = context.process.stdout.write.mock.calls?.map((c) => c.arguments?.join('')).join('') ?? ''
+  const exitCode = typeof context.process.exitCode === 'function' ? context.process.exitCode() : context.process.exitCode as unknown as number | undefined
   return {
     stdout,
     stderr: context.process.stderr.write.mock.calls?.map((c) => c.arguments?.join('')).join('') ?? '',
-    exitCode: context.process.exitCode(),
+    exitCode,
   }
 }
 

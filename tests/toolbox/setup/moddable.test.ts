@@ -47,13 +47,13 @@ describe('toolbox/setup/moddable', async () => {
     assert.ok(typeof result === 'boolean')
   })
 
-  it('getModdableVersion returns a version string', async () => {
-    const version = await getModdableVersion()
-    assert.ok(typeof version === 'string' || version === null)
+  it('getModdableVersion returns a Result', async () => {
+    const result = await getModdableVersion()
+    assert.ok(result && typeof result === 'object' && 'success' in result)
   })
 
-  it('fetchRelease returns release data for latest', async () => {
-    const release = await fetchRelease('latest')
-    assert.ok(release === null || typeof release === 'object')
+  it('fetchRelease returns a Result', async () => {
+    const result = await fetchRelease('latest')
+    assert.ok(result && typeof result === 'object' && 'success' in result)
   })
 })

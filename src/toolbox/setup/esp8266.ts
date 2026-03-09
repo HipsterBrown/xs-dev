@@ -19,7 +19,7 @@ import { sourceEnvironment } from '../system/exec'
 import { fetchStream } from '../system/fetch'
 import type { Prompter } from '../../lib/prompter.js'
 import type { OperationEvent } from '../../lib/events.js'
-import { execaCommand } from 'execa'
+import { execaCommand } from '../system/execa.js'
 
 const finishedPromise = promisify(finished)
 
