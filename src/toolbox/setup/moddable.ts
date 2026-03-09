@@ -7,9 +7,10 @@ import { execaCommand } from '../system/execa.js'
 import { Octokit, type RestEndpointMethodTypes } from '@octokit/rest'
 import { Extract as ZipExtract } from 'unzip-stream'
 import { INSTALL_PATH } from './constants'
-import type { Device } from '../../types'
+import type { Device, Result } from '../../types'
 import { DEVICE_ALIAS } from '../prompt/devices'
 import { fetchStream } from '../system/fetch'
+import { failure, wrapAsync } from '../system/errors'
 
 const finishedPromise = promisify(finished)
 
@@ -33,12 +34,12 @@ function isGitRepo(path: string): boolean {
   return existsSync(resolve(path, '.git'))
 }
 
-export async function getModdableVersion(): Promise<string | null> {
+export async function getModdableVersion(): Promise<Result<string>> {
   if (!moddableExists() || !isGitRepo(process.env.MODDABLE ?? '')) {
-    return null
+    return failure('Moddable SDK not found or not a git repository')
   }
 
-  try {
+  return await wrapAsync(async () => {
     const tagsResult = await execaCommand('git tag -l --sort=-taggerdate', {
       cwd: process.env.MODDABLE,
     })
@@ -60,9 +61,7 @@ export async function getModdableVersion(): Promise<string | null> {
       cwd: process.env.MODDABLE,
     })
     return `branch: ${String(currentBranchResult.stdout).trim()}, commit: ${String(latestCommit)}`
-  } catch {
-    return null
-  }
+  })
 }
 
 type ExtractFromArray<Item extends readonly unknown[]> =
@@ -73,8 +72,8 @@ type GitHubRelease = ExtractFromArray<
 
 export async function fetchRelease(
   release: 'latest' | string,
-): Promise<GitHubRelease | null> {
-  try {
+): Promise<Result<GitHubRelease>> {
+  return await wrapAsync(async () => {
     const octokit = new Octokit()
     if (release === 'latest') {
       const { data: latestRelease } = await octokit.rest.repos.getLatestRelease({
@@ -90,9 +89,7 @@ export async function fetchRelease(
       })
       return taggedRelease
     }
-  } catch {
-    return null
-  }
+  })
 }
 
 export class MissingReleaseAssetError extends Error {
