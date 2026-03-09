@@ -1,15 +1,13 @@
-import { filesystem, patching } from 'gluegun'
+import { readFile, writeFile } from 'node:fs/promises'
+import { existsSync } from 'node:fs'
 
-export default async function (
-  filePath: string,
-  newLine: string,
-): Promise<void> {
-  filesystem.file(filePath)
-
-  await patching.update(filePath, (contents: string) => {
-    if (!contents.includes(newLine)) {
-      return [contents, newLine].join('\n')
-    }
-    return contents
-  })
+export default async function upsert(filePath: string, newLine: string): Promise<void> {
+  let contents = ''
+  if (existsSync(filePath)) {
+    contents = await readFile(filePath, 'utf8')
+  }
+  if (!contents.includes(newLine)) {
+    const separator = contents.length > 0 ? '\n' : ''
+    await writeFile(filePath, `${contents}${separator}${newLine}`, 'utf8')
+  }
 }
