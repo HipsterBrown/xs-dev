@@ -1,7 +1,7 @@
 import os from 'node:os'
 import { promisify } from 'node:util'
 import { chmod } from 'node:fs'
-import { execaCommand } from 'execa'
+import { execaCommand, execa } from '../system/execa.js'
 import { resolve } from 'node:path'
 import { INSTALL_PATH, MODDABLE_REPO, XSBUG_LOG_PATH } from '../setup/constants'
 import {
@@ -21,8 +21,8 @@ export default async function* updateMac(
   args: Record<string, unknown>,
   prompter: Prompter,
 ): AsyncGenerator<OperationEvent> {
-  const setupArgs = args as SetupArgs
-  const { branch, release, interactive = false } = setupArgs
+  const setupArgs = args as unknown as SetupArgs
+  const { branch, release } = setupArgs
 
   yield { type: 'info', message: 'Checking for SDK changes' }
 
@@ -45,16 +45,17 @@ export default async function* updateMac(
       const currentTagResult = await execaCommand('git tag', {
         cwd: process.env.MODDABLE,
       })
-      const currentTag = currentTagResult.stdout
+      const currentTag = String(currentTagResult.stdout)
 
       // get release tag
-      const remoteRelease = await fetchRelease(release)
-      if (remoteRelease === null) {
+      const remoteReleaseResult = await fetchRelease(release)
+      if (!remoteReleaseResult.success) {
         yield { type: 'step:fail', message: `Failed to fetch release: ${release}` }
         return
       }
+      const remoteRelease = remoteReleaseResult.data
 
-      if (currentTag?.trim() === remoteRelease.tag_name) {
+      if (typeof currentTag === 'string' && currentTag.trim() === remoteRelease.tag_name) {
         yield { type: 'step:done', message: 'Moddable SDK already up to date!' }
         return
       }
@@ -64,12 +65,10 @@ export default async function* updateMac(
           type: 'warning',
           message: `Moddable release ${release} does not have any pre-built assets.`,
         }
-        rebuildTools =
-          !interactive ||
-          (await prompter.confirm(
-            'Would you like to continue updating and build the SDK locally?',
-            false,
-          ))
+        rebuildTools = await prompter.confirm(
+          'Would you like to continue updating and build the SDK locally?',
+          false,
+        )
 
         if (!rebuildTools) {
           yield {
@@ -86,7 +85,6 @@ export default async function* updateMac(
       try {
         if (process.env.MODDABLE !== undefined) {
           // Use rm -rf for directory removal
-          const { execa } = await import('execa')
           await execa('rm', ['-rf', process.env.MODDABLE])
         }
         await execaCommand(
@@ -198,15 +196,15 @@ export default async function* updateMac(
       const currentRevResult = await execaCommand(`git rev-parse ${branch}`, {
         cwd: process.env.MODDABLE,
       })
-      const currentRev = currentRevResult.stdout
+      const currentRev = String(currentRevResult.stdout)
 
       const remoteRevResult = await execaCommand(
         `git ls-remote origin refs/heads/${branch}`,
         { cwd: process.env.MODDABLE },
       )
-      const remoteRev = remoteRevResult.stdout
+      const remoteRev = String(remoteRevResult.stdout)
 
-      if (remoteRev?.split('\t').shift() === currentRev.trim()) {
+      if (remoteRev.split('\t').shift() === currentRev.trim()) {
         yield { type: 'step:done', message: 'Moddable SDK already up to date!' }
         return
       }
@@ -240,7 +238,6 @@ export default async function* updateMac(
       )
 
       // Remove directories
-      const { execa } = await import('execa')
       await execa('rm', ['-rf', BUILD_DIR], { reject: false })
       await execa('rm', ['-rf', TMP_DIR], { reject: false })
 

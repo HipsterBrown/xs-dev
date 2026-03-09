@@ -81,19 +81,19 @@ export default async function* esp32Setup(
     yield { type: 'step:start', message: 'Installing build dependencies' }
 
     if (OS === 'darwin') {
-      for await (const event of installMacDeps()) {
+      for await (const event of installMacDeps(prompter)) {
         yield event
       }
     }
 
     if (OS === 'linux') {
-      for await (const event of installLinuxDeps()) {
+      for await (const event of installLinuxDeps(prompter)) {
         yield event
       }
     }
 
     if (isWindows) {
-      for await (const event of installWinDeps(ESP32_DIR, IDF_PATH)) {
+      for await (const event of installWinDeps(prompter)) {
         yield event
       }
     }
@@ -110,7 +110,7 @@ export default async function* esp32Setup(
       yield { type: 'info', message: 'Configuring IDF_PATH environment variable' }
       await setEnv('IDF_PATH', IDF_PATH)
     } else {
-      if (!process.env.IDF_PATH) {
+      if (typeof process.env.IDF_PATH !== 'string' || process.env.IDF_PATH.length === 0) {
         yield { type: 'info', message: 'Configuring $IDF_PATH' }
         process.env.IDF_PATH = IDF_PATH
         await upsert(EXPORTS_FILE_PATH, `export IDF_PATH=${IDF_PATH}`)
@@ -134,7 +134,7 @@ export default async function* esp32Setup(
       yield { type: 'step:start', message: 'Installing esp-idf tooling' }
       await execaCommand('./install.sh', {
         cwd: IDF_PATH,
-        shell: process.env.SHELL || '/bin/bash',
+        shell: process.env.SHELL ?? '/bin/bash',
         stdio: 'inherit',
       })
       yield { type: 'step:done' }
@@ -165,7 +165,7 @@ If there is trouble finding the correct port, pass the "--port" flag to the abov
   }
 }
 
-async function getExpectedEspIdfVersion(): Promise<string | null> {
+export async function getExpectedEspIdfVersion(): Promise<string | null> {
   if (moddableExists()) {
     try {
       const manifestPath = resolve(INSTALL_PATH, 'build', 'devices', 'esp32', 'manifest.json')
@@ -173,7 +173,9 @@ async function getExpectedEspIdfVersion(): Promise<string | null> {
         const { readFile } = await import('node:fs/promises')
         const content = await readFile(manifestPath, 'utf-8')
         // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-        return (JSON.parse(content) as Record<string, unknown>)?.build?.EXPECTED_ESP_IDF ?? null
+        const parsed = JSON.parse(content) as Record<string, unknown>
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-return, @typescript-eslint/no-explicit-any
+        return (parsed as any)?.build?.EXPECTED_ESP_IDF ?? null
       }
     } catch {
       return null

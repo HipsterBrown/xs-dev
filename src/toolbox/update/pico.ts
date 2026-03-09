@@ -1,7 +1,7 @@
 import { type as platformType } from 'node:os'
 import { existsSync } from 'node:fs'
 import { resolve } from 'node:path'
-import { execaCommand } from 'execa'
+import { execaCommand } from '../system/execa.js'
 import { INSTALL_DIR, EXPORTS_FILE_PATH } from '../setup/constants'
 import upsert from '../patching/upsert'
 import { installDeps as installMacDeps } from '../setup/pico/mac'
@@ -13,7 +13,7 @@ import type { OperationEvent } from '../../lib/events.js'
 
 export default async function* updatePico(
   _args: Record<string, unknown>,
-  _prompter: Prompter,
+  prompter: Prompter,
 ): AsyncGenerator<OperationEvent> {
   const OS = platformType().toLowerCase()
   const PICO_BRANCH = '2.0.0'
@@ -66,19 +66,19 @@ export default async function* updatePico(
         yield { type: 'step:done' }
       }
 
-      for await (const event of installMacDeps()) {
+      for await (const event of installMacDeps(prompter)) {
         yield event
       }
 
       const brewPrefixResult = await execaCommand('brew --prefix')
-      const brewPrefix = brewPrefixResult.stdout.trim()
+      const brewPrefix = String(brewPrefixResult.stdout).trim()
       process.env.PICO_GCC_ROOT = brewPrefix
       await upsert(EXPORTS_FILE_PATH, `export PICO_GCC_ROOT=${brewPrefix}`)
     }
 
     if (OS === 'linux') {
       yield { type: 'step:start', message: 'Installing build dependencies with apt' }
-      for await (const event of installLinuxDeps()) {
+      for await (const event of installLinuxDeps(prompter)) {
         yield event
       }
       process.env.PICO_GCC_ROOT = '/usr'

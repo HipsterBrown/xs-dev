@@ -1,52 +1,59 @@
-import { filesystem, print, system } from 'gluegun'
-import type { GluegunPrint } from 'gluegun'
-import { promisify } from 'util'
-import { finished } from 'stream'
-import type { Result } from '../../../types'
-import { successVoid } from '../../system/errors'
+import { createWriteStream, existsSync } from 'node:fs'
+import { resolve } from 'node:path'
+import { promisify } from 'node:util'
+import { finished } from 'node:stream'
+import { execaCommand } from '../../system/execa.js'
 import { fetchStream } from '../../system/fetch'
+import type { Prompter } from '../../../lib/prompter.js'
+import type { OperationEvent } from '../../../lib/events.js'
 
 const finishedPromise = promisify(finished)
 
 const IDF_INSTALLER =
   'https://github.com/espressif/idf-installer/releases/download/online-2.15/esp-idf-tools-setup-online-2.15.exe'
 
-export async function installDeps(
-  spinner: ReturnType<GluegunPrint['spin']>,
-  ESP32_DIR: string,
-  IDF_PATH: string,
-): Promise<Result<void>> {
+export async function* installDeps(prompter: Prompter): AsyncGenerator<OperationEvent> {
   if (esp32Exists()) {
-    print.info(`ESP-IDF tooling exists at ${process.env.IDF_PATH ?? ''}`)
-    return successVoid()
+    yield {
+      type: 'info',
+      message: `ESP-IDF tooling exists at ${process.env.IDF_PATH ?? ''}`,
+    }
+    return
   }
 
-  spinner.start('Downloading ESP-IDF Tools Installer')
-  const destination = filesystem.resolve(
-    ESP32_DIR,
-    'esp-idf-tools-setup-online-2.15.exe',
-  )
-  const writer = filesystem.createWriteStream(destination)
-  const download = await fetchStream(IDF_INSTALLER)
-  download.pipe(writer)
-  await finishedPromise(writer)
-  spinner.succeed()
+  try {
+    const ESP32_DIR = process.env.INSTALL_DIR ?? ''
+    if (typeof ESP32_DIR !== 'string' || ESP32_DIR.length === 0) {
+      yield { type: 'step:fail', message: 'INSTALL_DIR environment variable not set' }
+      return
+    }
 
-  print.info(
-    `When prompted, select "Use an Existing ESP-IDF Directory" and choose ${IDF_PATH}.`,
-  )
-  print.info('The "Full Installation" option is recommended.')
-  spinner.start('Running ESP-IDF Tools Installer')
-  await system.exec(`start /B ${destination}`)
-  spinner.succeed()
-  return successVoid()
+    yield { type: 'step:start', message: 'Downloading ESP-IDF Tools Installer' }
+    const destination = resolve(ESP32_DIR, 'esp-idf-tools-setup-online-2.15.exe')
+    const writer = createWriteStream(destination)
+    const download = await fetchStream(IDF_INSTALLER)
+    download.pipe(writer)
+    await finishedPromise(writer)
+    yield { type: 'step:done' }
+
+    yield {
+      type: 'info',
+      message: `When prompted, select "Use an Existing ESP-IDF Directory". The "Full Installation" option is recommended.`,
+    }
+
+    yield { type: 'step:start', message: 'Running ESP-IDF Tools Installer' }
+    await execaCommand(`start /B ${destination}`)
+    yield { type: 'step:done' }
+  } catch (error) {
+    yield { type: 'step:fail', message: `Error installing ESP-IDF tools: ${String(error)}` }
+  }
 }
 
 export function esp32Exists(): boolean {
   return (
     process.env.IDF_PATH !== undefined &&
     process.env.IDF_TOOLS_PATH !== undefined &&
-    filesystem.exists(process.env.IDF_TOOLS_PATH) === 'dir' &&
-    filesystem.exists(process.env.IDF_PATH) === 'dir'
+    existsSync(process.env.IDF_TOOLS_PATH) &&
+    existsSync(process.env.IDF_PATH)
   )
 }

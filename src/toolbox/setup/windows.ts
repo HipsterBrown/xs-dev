@@ -34,7 +34,7 @@ function which(bin: string): string | null {
   }
 }
 
-async function setEnv(
+export async function setEnv(
   name: string,
   permanentValue: string,
   envValue?: string,
@@ -43,7 +43,7 @@ async function setEnv(
   process.env[name] = envValue ?? permanentValue
 }
 
-async function addToPath(path: string): Promise<void> {
+export async function addToPath(path: string): Promise<void> {
   const newPath = `${path};${process.env.PATH ?? ''}`
   await setEnv('PATH', `${path};%PATH%`, newPath)
 }
@@ -257,7 +257,7 @@ export default async function* setupWindows(
   if (buildTools) {
     try {
       yield { type: 'step:start', message: 'Building Moddable SDK tools' }
-      await execa('build.bat', { cwd: BUILD_DIR, shell: true })
+      await execa('build.bat', [], { cwd: BUILD_DIR, shell: true })
       yield { type: 'step:done' }
     } catch (error) {
       yield { type: 'step:fail', message: `Error building Moddable SDK tools: ${String(error)}` }

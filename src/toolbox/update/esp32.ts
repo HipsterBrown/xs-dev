@@ -1,9 +1,10 @@
 import { type as platformType } from 'node:os'
-import { execaCommand, execa } from 'execa'
+import { execaCommand, execa } from '../system/execa.js'
 import { existsSync } from 'node:fs'
 import { resolve } from 'node:path'
 import { INSTALL_DIR, EXPORTS_FILE_PATH } from '../setup/constants'
 import { getModdableVersion, moddableExists } from '../setup/moddable'
+import { unwrapOr } from '../system/errors'
 import upsert from '../patching/upsert'
 import { installDeps as installMacDeps } from '../setup/esp32/mac'
 import { installDeps as installLinuxDeps } from '../setup/esp32/linux'
@@ -61,17 +62,18 @@ export default async function* updateEsp32(
   if (existsSync(IDF_PATH)) {
     try {
       yield { type: 'step:start', message: 'Updating esp-idf repo' }
-      const moddableVersion = await getModdableVersion()
+      const moddableVersionResult = await getModdableVersion()
+      const moddableVersion = unwrapOr(moddableVersionResult, '')
       const expectedEspIdfVersion = await getExpectedEspIdfVersion()
       const branch =
         expectedEspIdfVersion ??
-        (((moddableVersion?.includes('branch') ?? false) || getVersionSatisfies(moddableVersion ?? '', '>= 4.2.x'))
+        (((moddableVersion.includes('branch')) || getVersionSatisfies(moddableVersion, '>= 4.2.x'))
           ? ESP_BRANCH_V5
           : ESP_BRANCH_V4)
 
       if (
         branch === ESP_BRANCH_V5 &&
-        !getVersionSatisfies(moddableVersion ?? '', '>= 4.3.8' as const)
+        !getVersionSatisfies(moddableVersion, '>= 4.3.8' as const)
       ) {
         yield {
           type: 'step:fail',
@@ -97,13 +99,13 @@ export default async function* updateEsp32(
     yield { type: 'step:start', message: 'Installing build dependencies' }
 
     if (OS === 'darwin') {
-      for await (const event of installMacDeps()) {
+      for await (const event of installMacDeps(_prompter)) {
         yield event
       }
     }
 
     if (OS === 'linux') {
-      for await (const event of installLinuxDeps()) {
+      for await (const event of installLinuxDeps(_prompter)) {
         yield event
       }
     }

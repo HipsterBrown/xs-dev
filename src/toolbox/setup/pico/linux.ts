@@ -1,17 +1,21 @@
-import type { GluegunPrint } from 'gluegun'
 import { execWithSudo } from '../../system/exec'
-import { successVoid, isFailure } from '../../system/errors'
-import type { SetupResult } from '../../../types'
+import { isFailure } from '../../system/errors'
+import type { Prompter } from '../../../lib/prompter.js'
+import type { OperationEvent } from '../../../lib/events.js'
 
-export async function installDeps(
-  spinner: ReturnType<GluegunPrint['spin']>,
-): Promise<SetupResult> {
-  const result = await execWithSudo(
-    'apt-get install --yes cmake gcc-arm-none-eabi libnewlib-arm-none-eabi build-essential libusb-1.0.0-dev pkg-config',
-    { stdout: process.stdout },
-  )
-  if (isFailure(result)) return result
-  spinner.succeed()
-
-  return successVoid()
+export async function* installDeps(prompter: Prompter): AsyncGenerator<OperationEvent> {
+  try {
+    yield { type: 'step:start', message: 'Installing pico build dependencies' }
+    const result = await execWithSudo(
+      'apt-get install --yes cmake gcc-arm-none-eabi libnewlib-arm-none-eabi build-essential libusb-1.0.0-dev pkg-config',
+      { stdio: 'inherit' },
+    )
+    if (isFailure(result)) {
+      yield { type: 'step:fail', message: `Error installing dependencies: ${result.error}` }
+      return
+    }
+    yield { type: 'step:done' }
+  } catch (error) {
+    yield { type: 'step:fail', message: `Error installing pico linux dependencies: ${String(error)}` }
+  }
 }

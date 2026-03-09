@@ -74,19 +74,19 @@ export default async function* picoSetup(
         yield { type: 'step:done' }
       }
 
-      for await (const event of installMacDeps()) {
+      for await (const event of installMacDeps(prompter)) {
         yield event
       }
 
       const brewPrefixResult = await execaCommand('brew --prefix', { stdio: 'pipe' })
-      const brewPrefix = brewPrefixResult.stdout.trim()
+      const brewPrefix = String(brewPrefixResult.stdout).trim()
       process.env.PICO_GCC_ROOT = brewPrefix
       await upsert(EXPORTS_FILE_PATH, `export PICO_GCC_ROOT=${brewPrefix}`)
     }
 
     if (OS === 'linux') {
       yield { type: 'step:start', message: 'Installing build dependencies with apt' }
-      for await (const event of installLinuxDeps()) {
+      for await (const event of installLinuxDeps(prompter)) {
         yield event
       }
       process.env.PICO_GCC_ROOT = '/usr'

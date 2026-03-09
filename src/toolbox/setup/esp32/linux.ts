@@ -1,12 +1,10 @@
-import type { GluegunPrint } from 'gluegun'
 import type { Dependency } from '../../system/types'
 import { findMissingDependencies, installPackages } from '../../system/packages'
-import { isFailure, successVoid, unwrapOr } from '../../system/errors'
-import type { Result } from '../../../types'
+import { isFailure, unwrapOr } from '../../system/errors'
+import type { Prompter } from '../../../lib/prompter.js'
+import type { OperationEvent } from '../../../lib/events.js'
 
-export async function installDeps(
-  spinner: ReturnType<GluegunPrint['spin']>,
-): Promise<Result<void>> {
+export async function* installDeps(prompter: Prompter): AsyncGenerator<OperationEvent> {
   const dependencies: Dependency[] = [
     { name: 'bison', packageName: 'bison', type: 'binary' },
     { name: 'ccache', packageName: 'ccache', type: 'binary' },
@@ -26,11 +24,17 @@ export async function installDeps(
     { name: 'wget', packageName: 'wget', type: 'binary' },
   ]
 
-  const missingDependencies = unwrapOr(await findMissingDependencies(dependencies), [])
-  if (missingDependencies.length !== 0) {
-    const result = await installPackages(missingDependencies)
-    if (isFailure(result)) return result
+  try {
+    const missingDependencies = unwrapOr(await findMissingDependencies(dependencies), [])
+    if (missingDependencies.length !== 0) {
+      const result = await installPackages(missingDependencies)
+      if (isFailure(result)) {
+        yield { type: 'step:fail', message: `Error installing dependencies: ${result.error}` }
+        return
+      }
+    }
+    yield { type: 'step:done' }
+  } catch (error) {
+    yield { type: 'step:fail', message: `Error installing esp32 linux dependencies: ${String(error)}` }
   }
-  spinner.succeed()
-  return successVoid()
 }

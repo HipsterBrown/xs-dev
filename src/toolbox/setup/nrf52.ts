@@ -132,7 +132,7 @@ export default async function* nrf52Setup(
       process.env.NRF52_SDK_PATH = NRF5_SDK_PATH
       await setEnv('NRF_ROOT', NRF52_DIR)
       await setEnv('NRF52_SDK_PATH', NRF5_SDK_PATH)
-      for await (const event of installPython()) {
+      for await (const event of installPython(prompter)) {
         yield event
       }
     }
