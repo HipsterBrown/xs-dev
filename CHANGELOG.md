@@ -1,3 +1,16 @@
+# v1.2.4 (Mon Mar 09 2026)
+
+#### 🐛 Bug Fix
+
+- refactor: remove gluegun from non-generator commands [#233](https://github.com/HipsterBrown/xs-dev/pull/233) ([@HipsterBrown](https://github.com/HipsterBrown))
+- refactor: foundation abstractions for library extraction [#232](https://github.com/HipsterBrown/xs-dev/pull/232) ([@HipsterBrown](https://github.com/HipsterBrown))
+
+#### Authors: 1
+
+- Nick Hehr ([@HipsterBrown](https://github.com/HipsterBrown))
+
+---
+
 # v1.2.3 (Fri Mar 06 2026)
 
 #### 🐛 Bug Fix
