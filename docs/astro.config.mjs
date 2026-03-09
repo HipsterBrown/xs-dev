@@ -11,11 +11,13 @@ export default defineConfig({
       logo: {
         src: '/src/assets/Chip.svg'
       },
-      social: {
-        twitter: 'https://twitter.com/hipsterbrown',
-        mastodon: 'https://toot.cafe/@hipsterbrown',
-        github: 'https://github.com/hipsterbrown/xs-dev',
+      social: [{
+        icon: 'twitter', href: 'https://twitter.com/hipsterbrown', label: 'Twitter'
       },
+      { icon: 'mastodon', href: 'https://toot.cafe/@hipsterbrown', label: 'Mastodon' },
+      { icon: 'github', href: 'https://github.com/hipsterbrown/xs-dev', label: 'GitHub' },
+      { icon: 'blueSky', href: 'https://bsky.app/profile/hipsterbrown.com', label: 'GitHub' },
+      ],
       editLink: {
         baseUrl: `https://github.com/hipsterbrown/xs-dev/blob/main/docs/`
       },

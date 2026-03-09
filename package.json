@@ -67,7 +67,7 @@
     "node-liblzma": "^3.2.0"
   },
   "devDependencies": {
-    "@astrojs/starlight": "^0.25.4",
+    "@astrojs/starlight": "^0.37.7",
     "@auto-it/all-contributors": "^11.2.1",
     "@auto-it/conventional-commits": "^11.2.1",
     "@auto-it/first-time-contributor": "^11.2.1",
@@ -82,7 +82,7 @@
     "@typescript-eslint/eslint-plugin": "^8.1.0",
     "@typescript-eslint/parser": "^8.1.0",
     "all-contributors-cli": "^6.26.1",
-    "astro": "4.13.3",
+    "astro": "5.18.0",
     "auto": "^11.2.1",
     "eslint": "^8.57.0",
     "eslint-config-love": "^62.0.0",
