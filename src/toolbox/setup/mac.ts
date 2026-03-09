@@ -1,7 +1,6 @@
 import { mkdir, readdir, copyFile, symlink, chmod } from 'node:fs/promises'
 import { existsSync } from 'node:fs'
 import { resolve } from 'node:path'
-import { execSync } from 'node:child_process'
 import { execaCommand, execa } from '../system/execa.js'
 import os from 'node:os'
 import {
@@ -20,15 +19,7 @@ import type { PlatformSetupArgs } from './types'
 import type { Prompter } from '../../lib/prompter.js'
 import type { OperationEvent } from '../../lib/events.js'
 import { isFailure, unwrap } from '../system/errors'
-
-function which(bin: string): string | null {
-  try {
-    const result = execSync(`which ${bin}`, { stdio: 'pipe' }).toString().trim()
-    return result.length > 0 ? result : null
-  } catch {
-    return null
-  }
-}
+import { which } from '../system/exec'
 
 export default async function* setupMac(
   {

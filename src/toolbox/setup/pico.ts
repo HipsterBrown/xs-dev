@@ -2,25 +2,15 @@ import { mkdir, readdir } from 'node:fs/promises'
 import { existsSync } from 'node:fs'
 import { resolve } from 'node:path'
 import { type as platformType } from 'node:os'
-import { execSync } from 'node:child_process'
 import { execaCommand } from '../system/execa.js'
 import { INSTALL_DIR, EXPORTS_FILE_PATH } from './constants'
 import upsert from '../patching/upsert'
 import { installDeps as installMacDeps } from './pico/mac'
 import { installDeps as installLinuxDeps } from './pico/linux'
 import { moddableExists } from './moddable'
-import { sourceEnvironment } from '../system/exec'
+import { sourceEnvironment, which } from '../system/exec'
 import type { Prompter } from '../../lib/prompter.js'
 import type { OperationEvent } from '../../lib/events.js'
-
-function which(bin: string): string | null {
-  try {
-    const result = execSync(`which ${bin}`, { stdio: 'pipe' }).toString().trim()
-    return result.length > 0 ? result : null
-  } catch {
-    return null
-  }
-}
 
 
 export default async function* picoSetup(

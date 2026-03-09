@@ -1,4 +1,4 @@
-import { mkdir } from 'node:fs/promises'
+import { mkdir, readFile } from 'node:fs/promises'
 import { existsSync } from 'node:fs'
 import { resolve } from 'node:path'
 import { type as platformType } from 'node:os'
@@ -165,17 +165,18 @@ If there is trouble finding the correct port, pass the "--port" flag to the abov
   }
 }
 
+interface Esp32Manifest {
+  build?: { EXPECTED_ESP_IDF?: string }
+}
+
 export async function getExpectedEspIdfVersion(): Promise<string | null> {
   if (moddableExists()) {
     try {
       const manifestPath = resolve(INSTALL_PATH, 'build', 'devices', 'esp32', 'manifest.json')
       if (existsSync(manifestPath)) {
-        const { readFile } = await import('node:fs/promises')
         const content = await readFile(manifestPath, 'utf-8')
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-        const parsed = JSON.parse(content) as Record<string, unknown>
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-return, @typescript-eslint/no-explicit-any
-        return (parsed as any)?.build?.EXPECTED_ESP_IDF ?? null
+        const parsed = JSON.parse(content) as Esp32Manifest
+        return parsed.build?.EXPECTED_ESP_IDF ?? null
       }
     } catch {
       return null

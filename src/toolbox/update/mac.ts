@@ -1,6 +1,5 @@
 import os from 'node:os'
-import { promisify } from 'node:util'
-import { chmod } from 'node:fs'
+import { mkdir, readdir, copyFile, chmod } from 'node:fs/promises'
 import { execaCommand, execa } from '../system/execa.js'
 import { resolve } from 'node:path'
 import { INSTALL_PATH, MODDABLE_REPO, XSBUG_LOG_PATH } from '../setup/constants'
@@ -14,8 +13,6 @@ import type { SetupArgs } from '../setup/types'
 import { sourceEnvironment } from '../system/exec'
 import type { Prompter } from '../../lib/prompter.js'
 import type { OperationEvent } from '../../lib/events.js'
-
-const chmodPromise = promisify(chmod)
 
 export default async function* updateMac(
   args: Record<string, unknown>,
@@ -113,7 +110,6 @@ export default async function* updateMac(
           )
 
           // Create directories
-          const { mkdir } = await import('node:fs/promises')
           await mkdir(BIN_PATH, { recursive: true })
           await mkdir(DEBUG_BIN_PATH, { recursive: true })
 
@@ -141,7 +137,6 @@ export default async function* updateMac(
           }
 
           yield { type: 'info', message: 'Updating tool permissions' }
-          const { readdir } = await import('node:fs/promises')
           const tools = await readdir(BIN_PATH)
           await Promise.all(
             tools.map(async (tool) => {
@@ -153,11 +148,10 @@ export default async function* updateMac(
                   'MacOS',
                   'main',
                 )
-                await chmodPromise(mainPath, 0o751)
+                await chmod(mainPath, 0o751)
               } else {
-                await chmodPromise(resolve(BIN_PATH, tool), 0o751)
+                await chmod(resolve(BIN_PATH, tool), 0o751)
               }
-              const { copyFile } = await import('node:fs/promises')
               await copyFile(
                 resolve(BIN_PATH, tool),
                 resolve(DEBUG_BIN_PATH, tool),
