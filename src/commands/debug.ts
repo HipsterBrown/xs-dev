@@ -92,6 +92,12 @@ const command = buildCommand({
           'Target device or platform for the project, use --list-devices to select from interactive list; defaults to current OS simulator',
         optional: true,
       },
+      port: {
+        kind: 'parsed',
+        parse: String,
+        brief: 'Serial port for device communication',
+        optional: true,
+      },
       example: {
         kind: 'parsed',
         parse: String,
@@ -120,6 +126,11 @@ const command = buildCommand({
         parse: String,
         brief:
           'Output directory for build result; defaults to internal $MODDABLE build directory for project',
+        optional: true,
+      },
+      log: {
+        kind: 'boolean',
+        brief: 'Enable logging output',
         optional: true,
       },
     },

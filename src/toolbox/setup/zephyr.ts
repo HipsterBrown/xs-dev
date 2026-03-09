@@ -1,5 +1,8 @@
-import { print, filesystem, system } from 'gluegun'
-import { type as platformType } from 'os'
+import { mkdir } from 'node:fs/promises'
+import { existsSync } from 'node:fs'
+import { resolve } from 'node:path'
+import { type as platformType } from 'node:os'
+import { execaCommand } from '../system/execa.js'
 import { INSTALL_DIR, EXPORTS_FILE_PATH } from './constants'
 import upsert from '../patching/upsert'
 import { installDeps as installMacDeps } from './zephyr/mac'
@@ -7,147 +10,189 @@ import { installDeps as installLinuxDeps } from './zephyr/linux'
 import { installDeps as installWinDeps } from './zephyr/windows'
 import { moddableExists } from './moddable'
 import { sourceEnvironment } from '../system/exec'
-import { failure, successVoid, isFailure } from '../system/errors'
-import type { SetupResult } from '../../types'
 import { detectPython } from '../system/python'
-import { ensureModdableCommandPrompt, setEnv } from './windows'
+import { setEnv } from './windows'
+import type { Prompter } from '../../lib/prompter.js'
+import type { OperationEvent } from '../../lib/events.js'
 
-export default async function(): Promise<SetupResult> {
+export default async function* zephyrSetup(
+  args: Record<string, unknown>,
+  prompter: Prompter,
+): AsyncGenerator<OperationEvent> {
+  yield { type: 'step:start', message: 'Starting zephyr tooling setup' }
+
   const OS = platformType().toLowerCase()
   const isWindows = OS === 'windows_nt'
   const ZEPHYR_ROOT =
-    process.env.ZEPHYR_ROOT ?? filesystem.resolve(INSTALL_DIR, 'zephyrproject')
+    process.env.ZEPHYR_ROOT ?? resolve(INSTALL_DIR, 'zephyrproject')
   const ZEPHYR_BASE =
-    process.env.ZEPHYR_BASE ?? filesystem.resolve(ZEPHYR_ROOT, 'zephyr')
-  const ZEPHYR_VENV = filesystem.resolve(ZEPHYR_ROOT, '.venv')
-  const ZEPHYR_VENV_ACTIVATE = filesystem.resolve(ZEPHYR_VENV, 'bin', 'activate')
+    process.env.ZEPHYR_BASE ?? resolve(ZEPHYR_ROOT, 'zephyr')
+  const ZEPHYR_VENV = resolve(ZEPHYR_ROOT, '.venv')
+  const ZEPHYR_VENV_ACTIVATE = resolve(ZEPHYR_VENV, 'bin', 'activate')
 
   await sourceEnvironment()
-
-  const spinner = print.spin()
-  spinner.start('Starting zephyr tooling setup')
 
   // 0. ensure zephyr install directory and Moddable exists
   if (!moddableExists()) {
-    spinner.fail(
-      'Moddable platform tooling required. Run `xs-dev setup` before trying again.',
-    )
-    return failure('Moddable platform tooling required. Run `xs-dev setup` before trying again.')
+    yield { type: 'step:fail', message: 'Moddable platform tooling required. Run `xs-dev setup` before trying again.' }
+    return
   }
 
-  if (isWindows) {
-    const result = await ensureModdableCommandPrompt(spinner)
-    if (isFailure(result)) return result
+
+  try {
+    yield { type: 'info', message: 'Ensuring zephyr directory' }
+    await mkdir(ZEPHYR_ROOT, { recursive: true })
+  } catch (error) {
+    yield { type: 'step:fail', message: `Error creating zephyr directory: ${String(error)}` }
+    return
   }
-  spinner.info('Ensuring zephyr directory')
-  filesystem.dir(ZEPHYR_ROOT)
 
   // 1. Install required components
-  if (OS === 'darwin') {
-    const result = await installMacDeps(spinner)
-    if (isFailure(result)) return result
-  }
+  try {
+    if (OS === 'darwin') {
+      for await (const event of installMacDeps(prompter)) {
+        yield event
+      }
+    }
 
-  if (OS === 'linux') {
-    spinner.start('Installing dependencies with apt')
-    const result = await installLinuxDeps(spinner)
-    if (isFailure(result)) return result
+    if (OS === 'linux') {
+      yield { type: 'step:start', message: 'Installing dependencies with apt' }
+      for await (const event of installLinuxDeps(prompter)) {
+        yield event
+      }
+    }
+    if (isWindows) {
+      yield { type: 'step:start', message: 'Installing dependencies with winget' }
+      for await (const event of installWinDeps(prompter)) {
+        yield event
+      }
+    }
+    yield { type: 'step:done' }
+  } catch (error) {
+    yield { type: 'step:fail', message: `Error installing dependencies: ${String(error)}` }
+    return
   }
-  if (isWindows) {
-    spinner.start('Installing dependencies with winget')
-    const result = await installWinDeps(spinner)
-    if (isFailure(result)) return result
-  }
-  spinner.succeed()
 
   // 2. Create zephyr virtual environment
-  if (filesystem.exists(ZEPHYR_VENV) === false) {
-    spinner.start('Creating zephyr virtual environment')
-    const localPython = detectPython()
-    await system.exec(
-      `${localPython} -m venv ${ZEPHYR_VENV}`,
-      {
-        stdout: process.stdout,
-      },
-    )
-    spinner.succeed()
+  try {
+    if (!existsSync(ZEPHYR_VENV)) {
+      yield { type: 'step:start', message: 'Creating zephyr virtual environment' }
+      const localPython = detectPython()
+      await execaCommand(
+        `${localPython} -m venv ${ZEPHYR_VENV}`,
+        { stdio: 'inherit' },
+      )
+      yield { type: 'step:done' }
+    }
+  } catch (error) {
+    yield { type: 'step:fail', message: `Error creating virtual environment: ${String(error)}` }
+    return
   }
+
   // 3. Activate virtual environment
-  if (isWindows) {
-    await upsert(
-      EXPORTS_FILE_PATH,
-      `call "${ZEPHYR_ROOT}\\.venv\\Scripts\\activate.bat"`,
-    )
-    await system.exec(`${ZEPHYR_ROOT}\\.venv\\Scripts\\activate.bat`, {
-      stdout: process.stdout,
-      shell: true,
-    })
-  } else {
-    await upsert(EXPORTS_FILE_PATH, `source ${ZEPHYR_VENV_ACTIVATE}`)
+  try {
+    if (isWindows) {
+      await upsert(
+        EXPORTS_FILE_PATH,
+        `call "${ZEPHYR_ROOT}\\.venv\\Scripts\\activate.bat"`,
+      )
+      await execaCommand(`${ZEPHYR_ROOT}\\.venv\\Scripts\\activate.bat`, {
+        stdio: 'inherit',
+        shell: true,
+      })
+    } else {
+      await upsert(EXPORTS_FILE_PATH, `source ${ZEPHYR_VENV_ACTIVATE}`)
+    }
+    await sourceEnvironment()
+  } catch (error) {
+    yield { type: 'step:fail', message: `Error activating virtual environment: ${String(error)}` }
+    return
   }
-  await sourceEnvironment()
 
   // 4. Install West with pip
-  spinner.start('Installing west build tool')
-  await system.exec(`pip install west`, {
-    process,
-    shell: process.env.SHELL,
-  })
-  spinner.succeed()
+  try {
+    yield { type: 'step:start', message: 'Installing west build tool' }
+    await execaCommand(`pip install west`, {
+      shell: process.env.SHELL ?? '/bin/bash',
+      stdio: 'inherit',
+    })
+    yield { type: 'step:done' }
+  } catch (error) {
+    yield { type: 'step:fail', message: `Error installing west: ${String(error)}` }
+    return
+  }
 
   // 5. Install west build tools
-  spinner.start(`Initializing west tooling in ${ZEPHYR_ROOT}`)
-  await system.exec(`west init ${ZEPHYR_ROOT}`, {
-    process,
-    shell: process.env.SHELL,
-  })
-  await system.exec(`west update`, {
-    cwd: ZEPHYR_ROOT,
-    process,
-    shell: process.env.SHELL,
-  })
-  spinner.succeed()
+  try {
+    yield { type: 'step:start', message: `Initializing west tooling in ${ZEPHYR_ROOT}` }
+    await execaCommand(`west init ${ZEPHYR_ROOT}`, {
+      shell: process.env.SHELL ?? '/bin/bash',
+      stdio: 'inherit',
+    })
+    await execaCommand(`west update`, {
+      cwd: ZEPHYR_ROOT,
+      shell: process.env.SHELL ?? '/bin/bash',
+      stdio: 'inherit',
+    })
+    yield { type: 'step:done' }
+  } catch (error) {
+    yield { type: 'step:fail', message: `Error initializing west: ${String(error)}` }
+    return
+  }
 
   // 6. Install west packages
-  spinner.start(`Installing west packages`)
-  if (isWindows) {
-    await system.exec(`cmd /c zephyr\\scripts\\utils\\west-packages-pip-install.cmd`, {
-      cwd: ZEPHYR_ROOT,
-      process,
-      shell: process.env.SHELL,
-    })
-  } else {
-    await system.exec(`west packages pip --install`, {
-      process,
-      cwd: ZEPHYR_ROOT,
-      shell: process.env.SHELL,
-      stdout: process.stdout
-    })
-  }
-  spinner.succeed()
-
-  // 7. Install Zephyr SDK 
-  spinner.start(`Installing Zephyr SDK in ${ZEPHYR_BASE}`)
-  await system.exec(`west sdk install`, {
-    cwd: ZEPHYR_BASE,
-    process,
-    shell: process.env.SHELL,
-  })
-  spinner.succeed()
-
-  if (process.env.ZEPHYR_BASE === undefined) {
+  try {
+    yield { type: 'step:start', message: `Installing west packages` }
     if (isWindows) {
-      await setEnv('ZEPHYR_BASE', ZEPHYR_BASE)
+      await execaCommand(`cmd /c zephyr\\scripts\\utils\\west-packages-pip-install.cmd`, {
+        cwd: ZEPHYR_ROOT,
+        shell: process.env.SHELL ?? 'cmd.exe',
+        stdio: 'inherit',
+      })
     } else {
-      await upsert(EXPORTS_FILE_PATH, `export ZEPHYR_BASE=${ZEPHYR_BASE}`)
+      await execaCommand(`west packages pip --install`, {
+        cwd: ZEPHYR_ROOT,
+        shell: process.env.SHELL ?? '/bin/bash',
+        stdio: 'inherit',
+      })
     }
+    yield { type: 'step:done' }
+  } catch (error) {
+    yield { type: 'step:fail', message: `Error installing west packages: ${String(error)}` }
+    return
   }
 
-  print.success(`
-Successfully set up zephyr platform support for Moddable!
-Test out the setup by starting a new terminal session,
-Then run: xs-dev run --example helloworld --device zephyr/<board_name>
-  `)
+  // 7. Install Zephyr SDK
+  try {
+    yield { type: 'step:start', message: `Installing Zephyr SDK in ${ZEPHYR_BASE}` }
+    await execaCommand(`west sdk install`, {
+      cwd: ZEPHYR_BASE,
+      shell: process.env.SHELL ?? '/bin/bash',
+      stdio: 'inherit',
+    })
+    yield { type: 'step:done' }
+  } catch (error) {
+    yield { type: 'step:fail', message: `Error installing Zephyr SDK: ${String(error)}` }
+    return
+  }
 
-  return successVoid()
+  try {
+    if (process.env.ZEPHYR_BASE === undefined) {
+      if (isWindows) {
+        await setEnv('ZEPHYR_BASE', ZEPHYR_BASE)
+      } else {
+        await upsert(EXPORTS_FILE_PATH, `export ZEPHYR_BASE=${ZEPHYR_BASE}`)
+      }
+    }
+  } catch (error) {
+    yield { type: 'step:fail', message: `Error setting environment variables: ${String(error)}` }
+    return
+  }
+
+  yield {
+    type: 'step:done',
+    message: `Successfully set up zephyr platform support for Moddable!
+Test out the setup by starting a new terminal session,
+Then run: xs-dev run --example helloworld --device zephyr/<board_name>`,
+  }
 }

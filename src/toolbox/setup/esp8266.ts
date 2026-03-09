@@ -1,26 +1,34 @@
-import { print, filesystem, system } from 'gluegun'
-import { finished } from 'stream'
-import { promisify } from 'util'
+import { mkdir } from 'node:fs/promises'
+import { existsSync } from 'node:fs'
+import { resolve } from 'node:path'
+import { type as platformType } from 'node:os'
+import { finished } from 'node:stream'
+import { promisify } from 'node:util'
 import { extract } from 'tar-fs'
-import { createGunzip } from 'zlib'
+import { createGunzip } from 'node:zlib'
 import { Extract as ZipExtract } from 'unzip-stream'
-import { type as platformType } from 'os'
 import { INSTALL_DIR, EXPORTS_FILE_PATH } from './constants'
 import { moddableExists } from './moddable'
 import upsert from '../patching/upsert'
 import { installDeps as installMacDeps } from './esp8266/mac'
 import { installDeps as installLinuxDeps } from './esp8266/linux'
 import { installDeps as installWindowsDeps } from './esp8266/windows'
-import { ensureModdableCommandPrompt } from './windows'
 import { DEVICE_ALIAS } from '../prompt/devices'
-import type { Device, SetupResult } from '../../types'
+import type { Device } from '../../types'
 import { sourceEnvironment } from '../system/exec'
-import { failure, successVoid, isFailure } from '../system/errors'
 import { fetchStream } from '../system/fetch'
+import type { Prompter } from '../../lib/prompter.js'
+import type { OperationEvent } from '../../lib/events.js'
+import { execaCommand } from '../system/execa.js'
 
 const finishedPromise = promisify(finished)
 
-export default async function (): Promise<SetupResult> {
+export default async function* esp8266Setup(
+  args: Record<string, unknown>,
+  prompter: Prompter,
+): AsyncGenerator<OperationEvent> {
+  yield { type: 'step:start', message: 'Setting up esp8266 tools' }
+
   const OS = platformType().toLowerCase() as Device
   const isWindows = OS === 'windows_nt'
   const TOOLCHAIN = `https://github.com/Moddable-OpenSource/tools/releases/download/v1.0.0/esp8266.toolchain.${isWindows ? 'win32' : OS}.${isWindows ? 'zip' : 'tgz'}`
@@ -28,106 +36,124 @@ export default async function (): Promise<SetupResult> {
     'https://github.com/esp8266/Arduino/releases/download/2.3.0/esp8266-2.3.0.zip'
   const ESP_RTOS_REPO = 'https://github.com/espressif/ESP8266_RTOS_SDK.git'
   const ESP_BRANCH = 'release/v3.2'
-  const ESP_DIR = filesystem.resolve(INSTALL_DIR, 'esp')
-  const RTOS_PATH = filesystem.resolve(ESP_DIR, 'ESP8266_RTOS_SDK')
-  const TOOLCHAIN_PATH = filesystem.resolve(ESP_DIR, 'toolchain')
-  const ARDUINO_CORE_PATH = filesystem.resolve(ESP_DIR, 'esp8266-2.3.0')
+  const ESP_DIR = resolve(INSTALL_DIR, 'esp')
+  const RTOS_PATH = resolve(ESP_DIR, 'ESP8266_RTOS_SDK')
+  const TOOLCHAIN_PATH = resolve(ESP_DIR, 'toolchain')
+  const ARDUINO_CORE_PATH = resolve(ESP_DIR, 'esp8266-2.3.0')
 
   await sourceEnvironment()
 
-  const spinner = print.spin()
-  spinner.start('Setting up esp8266 tools')
-
   // 0. ensure Moddable exists
   if (!moddableExists()) {
-    spinner.fail(
-      `Moddable tooling required. Run 'xs-dev setup --device ${DEVICE_ALIAS[OS]}' before trying again.`,
-    )
-    return failure(`Moddable tooling required. Run 'xs-dev setup --device ${DEVICE_ALIAS[OS]}' before trying again.`)
+    yield { type: 'step:fail', message: `Moddable tooling required. Run 'xs-dev setup --device ${DEVICE_ALIAS[OS]}' before trying again.` }
+    return
   }
 
-  if (isWindows) {
-    const result = await ensureModdableCommandPrompt(spinner)
-    if (isFailure(result)) return result
-  }
 
   // 1. ensure ~/.local/share/esp directory
-  spinner.info('Ensuring esp8266 directory')
-  filesystem.dir(ESP_DIR)
+  try {
+    yield { type: 'info', message: 'Ensuring esp8266 directory' }
+    await mkdir(ESP_DIR, { recursive: true })
+  } catch (error) {
+    yield { type: 'step:fail', message: `Error creating esp8266 directory: ${String(error)}` }
+    return
+  }
 
   // 2. download and untar xtensa toolchain
-  if (filesystem.exists(TOOLCHAIN_PATH) === false) {
-    spinner.start('Downloading xtensa toolchain')
+  if (!existsSync(TOOLCHAIN_PATH)) {
+    try {
+      yield { type: 'step:start', message: 'Downloading xtensa toolchain' }
 
-    if (isWindows) {
-      const writer = ZipExtract({ path: ESP_DIR })
-      const download = await fetchStream(TOOLCHAIN)
-      download.pipe(writer)
-      await finishedPromise(writer)
-    } else {
-      const writer = extract(ESP_DIR, { readable: true })
-      const gunzip = createGunzip()
-      const download = await fetchStream(TOOLCHAIN)
-      download.pipe(gunzip).pipe(writer)
-      await finishedPromise(writer)
+      if (isWindows) {
+        const writer = ZipExtract({ path: ESP_DIR })
+        const download = await fetchStream(TOOLCHAIN)
+        download.pipe(writer)
+        await finishedPromise(writer)
+      } else {
+        const writer = extract(ESP_DIR, { readable: true })
+        const gunzip = createGunzip()
+        const download = await fetchStream(TOOLCHAIN)
+        download.pipe(gunzip).pipe(writer)
+        await finishedPromise(writer)
+      }
+      yield { type: 'step:done' }
+    } catch (error) {
+      yield { type: 'step:fail', message: `Error downloading toolchain: ${String(error)}` }
+      return
     }
-    spinner.succeed()
   }
 
   // 3. download and unzip esp8266 core for arduino
-  if (filesystem.exists(ARDUINO_CORE_PATH) === false) {
-    spinner.start('Downloading arduino core tooling')
-    const writer = ZipExtract({ path: ESP_DIR })
-    const download = await fetchStream(ARDUINO_CORE)
-    download.pipe(writer)
-    await finishedPromise(writer)
-    spinner.succeed()
+  if (!existsSync(ARDUINO_CORE_PATH)) {
+    try {
+      yield { type: 'step:start', message: 'Downloading arduino core tooling' }
+      const writer = ZipExtract({ path: ESP_DIR })
+      const download = await fetchStream(ARDUINO_CORE)
+      download.pipe(writer)
+      await finishedPromise(writer)
+      yield { type: 'step:done' }
+    } catch (error) {
+      yield { type: 'step:fail', message: `Error downloading arduino core: ${String(error)}` }
+      return
+    }
   }
 
   // 4. clone esp8266 RTOS SDK
-  if (filesystem.exists(RTOS_PATH) === false) {
-    spinner.start('Cloning esp8266 RTOS SDK repo')
-    await system.spawn(
-      `git clone --depth 1 --single-branch -b ${ESP_BRANCH} ${ESP_RTOS_REPO} ${RTOS_PATH}`,
-    )
-    spinner.succeed()
+  if (!existsSync(RTOS_PATH)) {
+    try {
+      yield { type: 'step:start', message: 'Cloning esp8266 RTOS SDK repo' }
+      await execaCommand(
+        `git clone --depth 1 --single-branch -b ${ESP_BRANCH} ${ESP_RTOS_REPO} ${RTOS_PATH}`,
+      )
+      yield { type: 'step:done' }
+    } catch (error) {
+      yield { type: 'step:fail', message: `Error cloning RTOS SDK: ${String(error)}` }
+      return
+    }
   }
 
   // 5. ensure python, pip, and pyserial are installed
-  if (OS === 'darwin') {
-    const result = await installMacDeps(spinner)
-    if (isFailure(result)) return result
-  }
-
-  if (OS === 'linux') {
-    const result = await installLinuxDeps(spinner)
-    if (isFailure(result)) return result
-  }
-
-  if (isWindows) {
-    const result = await installWindowsDeps(spinner, ESP_DIR)
-    if (isFailure(result)) {
-      print.error(
-        `Windows dependencies failed to install. Please review the information above.`,
-      )
-      return result
+  try {
+    if (OS === 'darwin') {
+      for await (const event of installMacDeps(prompter)) {
+        yield event
+      }
     }
+
+    if (OS === 'linux') {
+      for await (const event of installLinuxDeps(prompter)) {
+        yield event
+      }
+    }
+
+    if (isWindows) {
+      for await (const event of installWindowsDeps(prompter)) {
+        yield event
+      }
+    }
+  } catch (error) {
+    yield { type: 'step:fail', message: `Windows dependencies failed to install. Please review the information above.` }
+    return
   }
 
-  // 7. create ESP_BASE env export in shell profile
-  if (OS === 'darwin' || OS === 'linux') {
-    if (process.env.ESP_BASE === undefined) {
-      spinner.info('Configuring $ESP_BASE')
-      process.env.ESP_BASE = ESP_DIR
-      await upsert(EXPORTS_FILE_PATH, `export ESP_BASE=${process.env.ESP_BASE}`)
+  // 6. create ESP_BASE env export in shell profile
+  try {
+    if (OS === 'darwin' || OS === 'linux') {
+      if (process.env.ESP_BASE === undefined) {
+        yield { type: 'info', message: 'Configuring $ESP_BASE' }
+        process.env.ESP_BASE = ESP_DIR
+        await upsert(EXPORTS_FILE_PATH, `export ESP_BASE=${process.env.ESP_BASE}`)
+      }
     }
-  } // Windows case is handled in ./esp8266/windows.ts
+  } catch (error) {
+    yield { type: 'step:fail', message: `Error configuring ESP_BASE: ${String(error)}` }
+    return
+  }
 
-  spinner.succeed(`
-  Successfully set up esp8266 platform support for Moddable!
-  Test out the setup by starting a new ${isWindows ? 'Moddable Command Prompt' : 'terminal session'}, plugging in your device, and running: xs-dev run --example helloworld --device esp8266
-  If there is trouble finding the correct port, pass the "--port" flag to the above command with the path to the "/dev.cu.*" that matches your device.
-  `)
-
-  return successVoid()
+  yield {
+    type: 'step:done',
+    message: `Successfully set up esp8266 platform support for Moddable!
+Test out the setup by starting a new ${isWindows ? 'Moddable Command Prompt' : 'terminal session'}, plugging in your device, and running: xs-dev run --example helloworld --device esp8266
+If there is trouble finding the correct port, pass the "--port" flag to the above command with the path to the "/dev.cu.*" that matches your device.`,
+  }
 }

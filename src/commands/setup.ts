@@ -1,12 +1,15 @@
 import { type as platformType } from 'node:os'
+import ora from 'ora'
 import { buildCommand } from '@stricli/core'
 import type { LocalContext } from '../app'
-import type { Device, SetupResult } from '../types'
+import type { Device } from '../types'
 import setupEjectfix from '../toolbox/setup/ejectfix'
 import { DEVICE_ALIAS } from '../toolbox/prompt/devices'
 import { MODDABLE_REPO } from '../toolbox/setup/constants'
 import type { SetupArgs } from '../toolbox/setup/types'
-import { isFailure } from '../toolbox/system/errors'
+import { createInteractivePrompter, createNonInteractivePrompter, isInteractive } from '../lib/prompter'
+import { handleEvent } from '../lib/renderer'
+import type { OperationEvent } from '../lib/events'
 
 interface SetupOptions {
   device?: Device
@@ -17,12 +20,12 @@ interface SetupOptions {
   'source-repo'?: string
   interactive?: boolean
 }
+
 const command = buildCommand({
   docs: {
     brief: 'Download and build Moddable tooling for various platform targets',
   },
   async func(this: LocalContext, flags: SetupOptions) {
-    const { prompt, print } = this
     const currentPlatform: Device = platformType().toLowerCase() as Device
     const {
       device,
@@ -33,6 +36,12 @@ const command = buildCommand({
       'source-repo': sourceRepo = MODDABLE_REPO,
       interactive = true,
     } = flags
+
+    // Determine interactive mode and create prompter
+    const prompter = isInteractive(interactive)
+      ? createInteractivePrompter()
+      : createNonInteractivePrompter()
+
     let target: Device =
       DEVICE_ALIAS[device ?? ('' as Device)] ?? DEVICE_ALIAS[currentPlatform]
 
@@ -46,37 +55,33 @@ const command = buildCommand({
         'zephyr',
         DEVICE_ALIAS[currentPlatform],
       ]
-      const { device: selectedDevice } = await prompt.ask([
-        {
-          type: 'autocomplete',
-          name: 'device',
-          message: 'Here are the available target devices:',
-          choices,
-        },
-      ])
+      const selectedDevice = await prompter.select(
+        'Here are the available target devices:',
+        choices.map((c) => ({ label: c, value: c })),
+      )
 
       if (selectedDevice !== '' && selectedDevice !== undefined) {
         target = selectedDevice as Device
       } else {
-        print.warning('Please select a target device to run')
+        console.warn('Please select a target device to run')
         return
       }
     }
 
     if (tool !== undefined) {
       if (!['ejectfix'].includes(tool)) {
-        print.warning(`Unknown tool ${tool}`)
+        console.warn(`Unknown tool ${tool}`)
         process.exit(1)
       }
       if (tool === 'ejectfix') {
-        const result = await setupEjectfix()
-        if (isFailure(result)) {
-          print.error(result.error)
-          process.exit(1)
+        const spinner = ora()
+        for await (const event of setupEjectfix({}, prompter)) {
+          handleEvent(event, spinner)
         }
       }
       return
     }
+
     const platformDevices: Device[] = [
       'mac',
       'darwin',
@@ -88,25 +93,15 @@ const command = buildCommand({
     ]
     const { default: setup } = await import(`../toolbox/setup/${target}`)
 
+    const spinner = ora()
+
     if (platformDevices.includes(target)) {
-      const result = await setup({
-        branch,
-        release,
-        sourceRepo,
-        interactive:
-          typeof process.env.CI !== 'undefined'
-            ? process.env.CI === 'false'
-            : interactive,
-      }) as SetupResult
-      if (isFailure(result)) {
-        print.error(result.error)
-        process.exit(1)
+      for await (const event of setup({ branch, release, sourceRepo }, prompter) as AsyncGenerator<OperationEvent>) {
+        handleEvent(event, spinner)
       }
     } else {
-      const result = await setup({ branch, release }) as SetupResult
-      if (isFailure(result)) {
-        print.error(result.error)
-        process.exit(1)
+      for await (const event of setup({ branch, release }, prompter) as AsyncGenerator<OperationEvent>) {
+        handleEvent(event, spinner)
       }
     }
   },

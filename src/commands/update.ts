@@ -1,8 +1,12 @@
 import { type as platformType } from 'node:os'
+import ora from 'ora'
 import { buildCommand } from '@stricli/core'
 import type { LocalContext } from '../app'
 import type { Device } from '../types'
 import { DEVICE_ALIAS } from '../toolbox/prompt/devices'
+import { createInteractivePrompter, createNonInteractivePrompter, isInteractive } from '../lib/prompter'
+import { handleEvent } from '../lib/renderer'
+import type { OperationEvent } from '../lib/events'
 
 interface UpdateOptions {
   device?: Device
@@ -23,17 +27,17 @@ const command = buildCommand({
       release = 'latest',
       interactive = true,
     } = flags
+    const prompter = isInteractive(interactive)
+      ? createInteractivePrompter()
+      : createNonInteractivePrompter()
     const { default: update } = await import(
       `../toolbox/update/${DEVICE_ALIAS[device]}`
     )
-    await update({
-      branch,
-      release,
-      interactive:
-        typeof process.env.CI !== 'undefined'
-          ? process.env.CI === 'false'
-          : interactive,
-    })
+    const spinner = ora()
+
+    for await (const event of update({ branch, release }, prompter) as AsyncGenerator<OperationEvent>) {
+      handleEvent(event, spinner)
+    }
   },
   parameters: {
     flags: {

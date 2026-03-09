@@ -1,50 +1,84 @@
-import { print, filesystem, system } from 'gluegun'
-import { type as platformType } from 'os'
-import { INSTALL_DIR, EXPORTS_FILE_PATH } from './constants'
+import { mkdir } from 'node:fs/promises'
+import { existsSync, statSync } from 'node:fs'
+import { resolve } from 'node:path'
+import { type as platformType } from 'node:os'
+import { execaCommand, execa } from '../system/execa.js'
+import { INSTALL_DIR, INSTALL_PATH, EXPORTS_FILE_PATH } from './constants'
 import { moddableExists } from './moddable'
 import upsert from '../patching/upsert'
-import { execWithSudo, sourceEnvironment } from '../system/exec'
+import { execWithSudo, which } from '../system/exec'
 import { ensureHomebrew } from './homebrew'
-import { failure, successVoid } from '../system/errors'
-import type { SetupResult } from '../../types'
+import type { Prompter } from '../../lib/prompter.js'
+import type { OperationEvent } from '../../lib/events.js'
 
-export default async function(): Promise<SetupResult> {
+function isDir(path: string): boolean {
+  try {
+    return existsSync(path) && statSync(path).isDirectory()
+  } catch {
+    return false
+  }
+}
+
+function isFile(path: string): boolean {
+  try {
+    return existsSync(path) && statSync(path).isFile()
+  } catch {
+    return false
+  }
+}
+
+export default async function* setupWasm(
+  _args: Record<string, unknown>,
+  prompter: Prompter,
+): AsyncGenerator<OperationEvent> {
+  yield { type: 'step:start', message: 'Setting up wasm simulator tools' }
+
   const OS = platformType().toLowerCase()
   const EMSDK_REPO = 'https://github.com/emscripten-core/emsdk.git'
   const BINARYEN_REPO = 'https://github.com/WebAssembly/binaryen.git'
-  const WASM_DIR = filesystem.resolve(INSTALL_DIR, 'wasm')
-  const EMSDK_PATH = filesystem.resolve(WASM_DIR, 'emsdk')
-  const BINARYEN_PATH = filesystem.resolve(WASM_DIR, 'binaryen')
-
-  await sourceEnvironment()
-
-  const spinner = print.spin({ stream: process.stdout })
-  spinner.start('Setting up wasm simulator tools')
+  const WASM_DIR = resolve(INSTALL_DIR, 'wasm')
+  const EMSDK_PATH = resolve(WASM_DIR, 'emsdk')
+  const BINARYEN_PATH = resolve(WASM_DIR, 'binaryen')
 
   // 0. ensure wasm install directory and Moddable exists
   if (!moddableExists()) {
-    spinner.fail(
-      'Moddable platform tooling required. Run `xs-dev setup` before trying again.',
-    )
-    return failure('Moddable platform tooling required. Run `xs-dev setup` before trying again.')
+    yield { type: 'step:fail', message: 'Moddable platform tooling required. Run `xs-dev setup` before trying again.' }
+    return
   }
-  spinner.info('Ensuring wasm directory')
-  filesystem.dir(WASM_DIR)
+
+  try {
+    yield { type: 'step:start', message: 'Ensuring wasm directory' }
+    await mkdir(WASM_DIR, { recursive: true })
+    yield { type: 'step:done' }
+  } catch (error) {
+    yield { type: 'step:fail', message: `Error creating wasm directory: ${String(error)}` }
+    return
+  }
 
   // 1. Clone EM_SDK repo, install, and activate latest version
-  if (filesystem.exists(EMSDK_PATH) === false) {
-    spinner.start('Cloning emsdk repo')
-    await system.spawn(
-      `git clone --depth 1 --single-branch -b main ${EMSDK_REPO} ${EMSDK_PATH}`,
-    )
-    spinner.succeed()
+  if (!isDir(EMSDK_PATH)) {
+    try {
+      yield { type: 'step:start', message: 'Cloning emsdk repo' }
+      await execa('git', [
+        'clone',
+        '--depth', '1',
+        '--single-branch',
+        '-b', 'main',
+        EMSDK_REPO,
+        EMSDK_PATH,
+      ])
+      yield { type: 'step:done' }
+    } catch (error) {
+      yield { type: 'step:fail', message: `Error cloning emsdk repo: ${String(error)}` }
+      return
+    }
   }
 
   const shouldBuildEmsdk =
     process.env.EMSDK === undefined ||
-    filesystem.exists(process.env.EMSDK) !== 'dir' ||
-    filesystem.exists(process.env.EMSDK_NODE ?? '') !== 'file' ||
-    filesystem.exists(process.env.EMSDK_PYTHON ?? '') !== 'file'
+    !isDir(process.env.EMSDK) ||
+    !isFile(process.env.EMSDK_NODE ?? '') ||
+    !isFile(process.env.EMSDK_PYTHON ?? '')
 
   if (shouldBuildEmsdk) {
     try {
@@ -53,110 +87,115 @@ export default async function(): Promise<SetupResult> {
       process.env.EMSDK_NODE = ''
       process.env.EMSDK_PYTHON = ''
 
-      spinner.start('Installing latest EMSDK')
-      print.debug(EMSDK_PATH)
-      await system.exec('./emsdk install latest', {
-        process,
-        cwd: EMSDK_PATH,
-        stdout: process.stdout,
-      })
-      await system.exec('./emsdk activate latest', {
-        process,
-        cwd: EMSDK_PATH,
-        stdout: process.stdout,
-      })
-      await upsert(EXPORTS_FILE_PATH, `export EMSDK_QUIET=1`)
+      yield { type: 'step:start', message: 'Installing latest EMSDK' }
+      await execaCommand('./emsdk install latest', { cwd: EMSDK_PATH })
+      await execaCommand('./emsdk activate latest', { cwd: EMSDK_PATH })
+      await upsert(EXPORTS_FILE_PATH, 'export EMSDK_QUIET=1')
       await upsert(
         EXPORTS_FILE_PATH,
-        `source ${filesystem.resolve(EMSDK_PATH, 'emsdk_env.sh')} 1> /dev/null`,
+        `source ${resolve(EMSDK_PATH, 'emsdk_env.sh')} 1> /dev/null`,
       )
+      yield { type: 'step:done' }
     } catch (error) {
-      spinner.fail(`Error activating emsdk: ${String(error)}`)
-      return failure(`Error activating emsdk: ${String(error)}`)
+      yield { type: 'step:fail', message: `Error activating emsdk: ${String(error)}` }
+      return
     }
   }
-  spinner.succeed('emsdk setup complete')
+  yield { type: 'info', message: 'emsdk setup complete' }
 
   // 2. Clone Binaryen repo and build
-  if (filesystem.exists(BINARYEN_PATH) === false) {
-    spinner.start('Cloning binaryen repo')
-    await system.spawn(
-      `git clone --depth 1 --single-branch -b main --recursive ${BINARYEN_REPO} ${BINARYEN_PATH}`,
-    )
-    spinner.succeed()
+  if (!isDir(BINARYEN_PATH)) {
+    try {
+      yield { type: 'step:start', message: 'Cloning binaryen repo' }
+      await execa('git', [
+        'clone',
+        '--depth', '1',
+        '--single-branch',
+        '-b', 'main',
+        '--recursive',
+        BINARYEN_REPO,
+        BINARYEN_PATH,
+      ])
+      yield { type: 'step:done' }
+    } catch (error) {
+      yield { type: 'step:fail', message: `Error cloning binaryen repo: ${String(error)}` }
+      return
+    }
   }
 
-  if (system.which('cmake') === null) {
-    if (OS === 'darwin') {
-      try {
-        await ensureHomebrew()
-      } catch (error: unknown) {
-        if (error instanceof Error) {
-          print.info(`${error.message} cmake`)
-          return failure(`${error.message} cmake`)
+  if (which('cmake') === null) {
+    try {
+      if (OS === 'darwin') {
+        for await (const event of ensureHomebrew(prompter)) {
+          yield event
         }
+        yield { type: 'step:start', message: 'Installing cmake with Homebrew' }
+        await execaCommand('brew install cmake', { shell: process.env.SHELL ?? '/bin/bash' })
+        yield { type: 'step:done' }
       }
 
-      spinner.start('Cmake required, installing with Homebrew')
-      await system.exec('brew install cmake', { shell: process.env.SHELL })
+      if (OS === 'linux') {
+        yield { type: 'step:start', message: 'Installing cmake with apt' }
+        const result = await execWithSudo('apt --yes install build-essential cmake')
+        if (result.success) {
+          yield { type: 'step:done' }
+        } else {
+          yield { type: 'step:fail', message: `Error installing cmake: ${result.error}` }
+          return
+        }
+      }
+    } catch (error) {
+      yield { type: 'step:fail', message: `Error installing cmake: ${String(error)}` }
+      return
     }
-
-    if (OS === 'linux') {
-      spinner.start('Cmake required, installing with apt')
-      await execWithSudo('apt --yes install build-essential cmake')
-    }
-    spinner.succeed()
   }
 
-  spinner.start('Building Binaryen tooling')
-  await system.exec('cmake .', {
-    cwd: BINARYEN_PATH,
-    stdout: process.stdout,
-  })
-  spinner.succeed('cmake complete')
-  spinner.start('Start make process, this could take a couple minutes')
-  await system.exec('make', {
-    cwd: BINARYEN_PATH,
-    stdout: process.stdout,
-  })
-  spinner.succeed()
+  try {
+    yield { type: 'step:start', message: 'Building Binaryen tooling with cmake' }
+    await execaCommand('cmake .', { cwd: BINARYEN_PATH })
+    yield { type: 'step:done' }
+
+    yield { type: 'step:start', message: 'Building with make (this could take a couple minutes)' }
+    await execaCommand('make', { cwd: BINARYEN_PATH })
+    yield { type: 'step:done' }
+  } catch (error) {
+    yield { type: 'step:fail', message: `Error building Binaryen: ${String(error)}` }
+    return
+  }
 
   // 3. Setup PATH and env variables for EM_SDK and Binaryen
-  spinner.info('Sourcing adding binaryen to PATH')
-  await upsert(
-    EXPORTS_FILE_PATH,
-    `export PATH=${filesystem.resolve(BINARYEN_PATH, 'bin')}:$PATH`,
-  )
-  process.env.PATH = `${String(process.env.PATH)}:${filesystem.resolve(
-    BINARYEN_PATH,
-    'bin',
-  )}`
+  try {
+    const binaryenBinPath = resolve(BINARYEN_PATH, 'bin')
+    await upsert(
+      EXPORTS_FILE_PATH,
+      `export PATH=${binaryenBinPath}:$PATH`,
+    )
+    process.env.PATH = `${binaryenBinPath}:${String(process.env.PATH)}`
+    yield { type: 'info', message: 'Added binaryen to PATH' }
+  } catch (error) {
+    yield { type: 'step:fail', message: `Error setting up PATH: ${String(error)}` }
+    return
+  }
 
   // 4. Build Moddable WASM tools
-  if (
-    filesystem.exists(
-      filesystem.resolve(String(process.env.MODDABLE), 'build', 'bin', 'wasm'),
-    ) === false
-  ) {
-    spinner.start('Building Moddable wasm tools')
-    await system.exec(`make`, {
-      cwd: filesystem.resolve(
-        String(process.env.MODDABLE),
-        'build',
-        'makefiles',
-        'wasm',
-      ),
-      stdout: process.stdout,
-    })
+  try {
+    const wasmBinPath = resolve(INSTALL_PATH, 'build', 'bin', 'wasm')
+    if (!isDir(wasmBinPath)) {
+      yield { type: 'step:start', message: 'Building Moddable wasm tools' }
+      await execaCommand('make', {
+        cwd: resolve(
+          INSTALL_PATH,
+          'build',
+          'makefiles',
+          'wasm',
+        ),
+      })
+      yield { type: 'step:done' }
+    }
+  } catch (error) {
+    yield { type: 'step:fail', message: `Error building Moddable wasm tools: ${String(error)}` }
+    return
   }
-  await system.exec(`source ${EXPORTS_FILE_PATH}`, {
-    shell: process.env.SHELL,
-    stdout: process.stdout,
-  })
 
-  spinner.succeed(
-    `Successfully set up wasm platform support for Moddable! Test out the setup by starting a new terminal session and running: xs-dev run --example helloworld --device wasm`,
-  )
-
-  return successVoid()
+  yield { type: 'step:done', message: 'Successfully set up wasm platform support for Moddable! Test out the setup by starting a new terminal session and running: xs-dev run --example helloworld --device wasm' }
 }

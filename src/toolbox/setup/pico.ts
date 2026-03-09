@@ -1,15 +1,24 @@
-import { print, filesystem, system } from 'gluegun'
-import { type as platformType } from 'os'
+import { mkdir, readdir } from 'node:fs/promises'
+import { existsSync } from 'node:fs'
+import { resolve } from 'node:path'
+import { type as platformType } from 'node:os'
+import { execaCommand } from '../system/execa.js'
 import { INSTALL_DIR, EXPORTS_FILE_PATH } from './constants'
 import upsert from '../patching/upsert'
 import { installDeps as installMacDeps } from './pico/mac'
 import { installDeps as installLinuxDeps } from './pico/linux'
 import { moddableExists } from './moddable'
-import { sourceEnvironment } from '../system/exec'
-import { failure, successVoid, isFailure } from '../system/errors'
-import type { SetupResult } from '../../types'
+import { sourceEnvironment, which } from '../system/exec'
+import type { Prompter } from '../../lib/prompter.js'
+import type { OperationEvent } from '../../lib/events.js'
 
-export default async function (): Promise<SetupResult> {
+
+export default async function* picoSetup(
+  args: Record<string, unknown>,
+  prompter: Prompter,
+): AsyncGenerator<OperationEvent> {
+  yield { type: 'step:start', message: 'Starting pico tooling setup' }
+
   const OS = platformType().toLowerCase()
   const PICO_BRANCH = '2.0.0'
   const PICO_SDK_REPO = 'https://github.com/raspberrypi/pico-sdk'
@@ -17,213 +26,232 @@ export default async function (): Promise<SetupResult> {
   const PICO_EXAMPLES_REPO = 'https://github.com/raspberrypi/pico-examples'
   const PICOTOOL_REPO = 'https://github.com/raspberrypi/picotool'
   const PICO_ROOT =
-    process.env.PICO_ROOT ?? filesystem.resolve(INSTALL_DIR, 'pico')
-  const PICO_SDK_DIR = filesystem.resolve(PICO_ROOT, 'pico-sdk')
-  const PICO_EXTRAS_DIR = filesystem.resolve(PICO_ROOT, 'pico-extras')
-  const PICO_EXAMPLES_PATH = filesystem.resolve(PICO_ROOT, 'pico-examples')
-  const PICOTOOL_PATH = filesystem.resolve(PICO_ROOT, 'picotool')
-  const PICOTOOL_BUILD_DIR = filesystem.resolve(PICOTOOL_PATH, 'build')
-  const PICO_SDK_BUILD_DIR = filesystem.resolve(PICO_SDK_DIR, 'build')
-  const PIOASM_TOOL_PATH = filesystem.resolve(PICO_SDK_DIR, 'tools', 'pioasm')
-  const PIOASM_BUILD_PATH = filesystem.resolve(PICO_SDK_BUILD_DIR, 'pioasm')
-  const PIOASM_PATH = filesystem.resolve(PIOASM_BUILD_PATH, 'pioasm')
+    process.env.PICO_ROOT ?? resolve(INSTALL_DIR, 'pico')
+  const PICO_SDK_DIR = resolve(PICO_ROOT, 'pico-sdk')
+  const PICO_EXTRAS_DIR = resolve(PICO_ROOT, 'pico-extras')
+  const PICO_EXAMPLES_PATH = resolve(PICO_ROOT, 'pico-examples')
+  const PICOTOOL_PATH = resolve(PICO_ROOT, 'picotool')
+  const PICOTOOL_BUILD_DIR = resolve(PICOTOOL_PATH, 'build')
+  const PICO_SDK_BUILD_DIR = resolve(PICO_SDK_DIR, 'build')
+  const PIOASM_TOOL_PATH = resolve(PICO_SDK_DIR, 'tools', 'pioasm')
+  const PIOASM_BUILD_PATH = resolve(PICO_SDK_BUILD_DIR, 'pioasm')
+  const PIOASM_PATH = resolve(PIOASM_BUILD_PATH, 'pioasm')
 
   await sourceEnvironment()
 
-  const spinner = print.spin()
-  spinner.start('Starting pico tooling setup')
-
   // 0. ensure pico install directory and Moddable exists
   if (!moddableExists()) {
-    spinner.fail(
-      'Moddable platform tooling required. Run `xs-dev setup` before trying again.',
-    )
-    return failure('Moddable platform tooling required. Run `xs-dev setup` before trying again.')
+    yield { type: 'step:fail', message: 'Moddable platform tooling required. Run `xs-dev setup` before trying again.' }
+    return
   }
-  spinner.info('Ensuring pico directory')
-  filesystem.dir(PICO_ROOT)
-  if (process.env.PICO_ROOT === undefined) {
-    await upsert(EXPORTS_FILE_PATH, `export PICO_ROOT=${PICO_ROOT}`)
+  try {
+    yield { type: 'info', message: 'Ensuring pico directory' }
+    await mkdir(PICO_ROOT, { recursive: true })
+    if (process.env.PICO_ROOT === undefined) {
+      await upsert(EXPORTS_FILE_PATH, `export PICO_ROOT=${PICO_ROOT}`)
+    }
+  } catch (error) {
+    yield { type: 'step:fail', message: `Error creating pico directory: ${String(error)}` }
+    return
   }
 
   // 1. Install required components
-  if (OS === 'darwin') {
-    if (system.which('cmake') === null) {
-      spinner.start('Cmake required, installing with Homebrew')
-      await system.exec('brew install cmake')
-      spinner.succeed()
+  try {
+    if (OS === 'darwin') {
+      if (which('cmake') === null) {
+        yield { type: 'step:start', message: 'Cmake required, installing with Homebrew' }
+        await execaCommand('brew install cmake')
+        yield { type: 'step:done' }
+      }
+
+      for await (const event of installMacDeps(prompter)) {
+        yield event
+      }
+
+      const brewPrefixResult = await execaCommand('brew --prefix', { stdio: 'pipe' })
+      const brewPrefix = String(brewPrefixResult.stdout).trim()
+      process.env.PICO_GCC_ROOT = brewPrefix
+      await upsert(EXPORTS_FILE_PATH, `export PICO_GCC_ROOT=${brewPrefix}`)
     }
 
-    const result = await installMacDeps(spinner)
-    if (isFailure(result)) return result
-
-    const brewPrefix = await system.run('brew --prefix')
-    process.env.PICO_GCC_ROOT = brewPrefix
-    await upsert(EXPORTS_FILE_PATH, `export PICO_GCC_ROOT=${brewPrefix}`)
+    if (OS === 'linux') {
+      yield { type: 'step:start', message: 'Installing build dependencies with apt' }
+      for await (const event of installLinuxDeps(prompter)) {
+        yield event
+      }
+      process.env.PICO_GCC_ROOT = '/usr'
+      await upsert(EXPORTS_FILE_PATH, `export PICO_GCC_ROOT=/usr`)
+    }
+    yield { type: 'step:done' }
+  } catch (error) {
+    yield { type: 'step:fail', message: `Error during dependency installation: ${String(error)}` }
+    return
   }
-
-  if (OS === 'linux') {
-    spinner.start('Installing build dependencies with apt')
-    const result = await installLinuxDeps(spinner)
-    if (isFailure(result)) return result
-    process.env.PICO_GCC_ROOT = '/usr'
-    await upsert(EXPORTS_FILE_PATH, `export PICO_GCC_ROOT=/usr`)
-  }
-  spinner.succeed()
 
   // 2. Install the pico sdk, extras, examples, and picotool:
-  if (filesystem.exists(PICO_SDK_DIR) === false) {
-    spinner.start('Cloning pico-sdk repo')
-    await system.exec(
-      `git clone --depth 1 --single-branch -b ${PICO_BRANCH} ${PICO_SDK_REPO} ${PICO_SDK_DIR}`,
-      {
-        stdout: process.stdout,
-      },
-    )
-    await system.exec(`git submodule update --init`, {
-      cwd: PICO_SDK_DIR,
-      stdout: process.stdout,
-    })
-    spinner.succeed()
-  }
+  try {
+    if (!existsSync(PICO_SDK_DIR)) {
+      yield { type: 'step:start', message: 'Cloning pico-sdk repo' }
+      await execaCommand(
+        `git clone --depth 1 --single-branch -b ${PICO_BRANCH} ${PICO_SDK_REPO} ${PICO_SDK_DIR}`,
+        { stdio: 'inherit' },
+      )
+      await execaCommand(`git submodule update --init`, {
+        cwd: PICO_SDK_DIR,
+        stdio: 'inherit',
+      })
+      yield { type: 'step:done' }
+    }
 
-  if (filesystem.exists(PICO_EXTRAS_DIR) === false) {
-    spinner.start('Cloning pico-extras repo')
-    await system.exec(
-      `git clone --depth 1 --single-branch -b sdk-${PICO_BRANCH} ${PICO_EXTRAS_REPO} ${PICO_EXTRAS_DIR}`,
-      { stdout: process.stdout },
-    )
-    spinner.succeed()
-  }
+    if (!existsSync(PICO_EXTRAS_DIR)) {
+      yield { type: 'step:start', message: 'Cloning pico-extras repo' }
+      await execaCommand(
+        `git clone --depth 1 --single-branch -b sdk-${PICO_BRANCH} ${PICO_EXTRAS_REPO} ${PICO_EXTRAS_DIR}`,
+        { stdio: 'inherit' },
+      )
+      yield { type: 'step:done' }
+    }
 
-  if (filesystem.exists(PICO_EXAMPLES_PATH) === false) {
-    spinner.start('Cloning pico-examples repo')
-    await system.exec(
-      `git clone --depth 1 --single-branch -b sdk-${PICO_BRANCH} ${PICO_EXAMPLES_REPO} ${PICO_EXAMPLES_PATH}`,
-      { stdout: process.stdout },
-    )
-    spinner.succeed()
-  }
+    if (!existsSync(PICO_EXAMPLES_PATH)) {
+      yield { type: 'step:start', message: 'Cloning pico-examples repo' }
+      await execaCommand(
+        `git clone --depth 1 --single-branch -b sdk-${PICO_BRANCH} ${PICO_EXAMPLES_REPO} ${PICO_EXAMPLES_PATH}`,
+        { stdio: 'inherit' },
+      )
+      yield { type: 'step:done' }
+    }
 
-  if (filesystem.exists(PICOTOOL_PATH) === false) {
-    spinner.start('Cloning picotool repo')
-    await system.exec(
-      `git clone --depth 1 --single-branch -b ${PICO_BRANCH} ${PICOTOOL_REPO} ${PICOTOOL_PATH}`,
-      {
-        stdout: process.stdout,
-      },
-    )
-    spinner.succeed()
+    if (!existsSync(PICOTOOL_PATH)) {
+      yield { type: 'step:start', message: 'Cloning picotool repo' }
+      await execaCommand(
+        `git clone --depth 1 --single-branch -b ${PICO_BRANCH} ${PICOTOOL_REPO} ${PICOTOOL_PATH}`,
+        { stdio: 'inherit' },
+      )
+      yield { type: 'step:done' }
+    }
+  } catch (error) {
+    yield { type: 'step:fail', message: `Error cloning repositories: ${String(error)}` }
+    return
   }
 
   // 3. Set the PICO_SDK_PATH environment variable to point to the Pico SDK directory and PICO_EXTRAS_DIR to the Pico extras directory
-  if (process.env.PICO_SDK_DIR === undefined) {
-    spinner.info('Setting PICO_SDK_DIR')
-    process.env.PICO_SDK_DIR = PICO_SDK_DIR
-    await upsert(EXPORTS_FILE_PATH, `export PICO_SDK_DIR=${PICO_SDK_DIR}`)
-  } else {
-    spinner.info(`Using existing $PICO_SDK_DIR: ${process.env.PICO_SDK_DIR}`)
-  }
+  try {
+    if (process.env.PICO_SDK_DIR === undefined) {
+      yield { type: 'info', message: 'Setting PICO_SDK_DIR' }
+      process.env.PICO_SDK_DIR = PICO_SDK_DIR
+      await upsert(EXPORTS_FILE_PATH, `export PICO_SDK_DIR=${PICO_SDK_DIR}`)
+    } else {
+      yield { type: 'info', message: `Using existing $PICO_SDK_DIR: ${process.env.PICO_SDK_DIR}` }
+    }
 
-  if (process.env.PICO_EXTRAS_DIR === undefined) {
-    spinner.info('Setting PICO_EXTRAS_DIR')
-    process.env.PICO_EXTRAS_DIR = PICO_EXTRAS_DIR
-    await upsert(EXPORTS_FILE_PATH, `export PICO_EXTRAS_DIR=${PICO_EXTRAS_DIR}`)
-  } else {
-    spinner.info(
-      `Using existing $PICO_EXTRAS_DIR: ${process.env.PICO_EXTRAS_DIR}`,
-    )
-  }
+    if (process.env.PICO_EXTRAS_DIR === undefined) {
+      yield { type: 'info', message: 'Setting PICO_EXTRAS_DIR' }
+      process.env.PICO_EXTRAS_DIR = PICO_EXTRAS_DIR
+      await upsert(EXPORTS_FILE_PATH, `export PICO_EXTRAS_DIR=${PICO_EXTRAS_DIR}`)
+    } else {
+      yield { type: 'info', message: `Using existing $PICO_EXTRAS_DIR: ${process.env.PICO_EXTRAS_DIR}` }
+    }
 
-  if (process.env.PICO_EXAMPLES_DIR === undefined) {
-    spinner.info('Setting PICO_EXAMPLES_DIR')
-    process.env.PICO_EXAMPLES_DIR = PICO_EXAMPLES_PATH
-    await upsert(
-      EXPORTS_FILE_PATH,
-      `export PICO_EXAMPLES_DIR=${PICO_EXAMPLES_PATH}`,
-    )
-  } else {
-    spinner.info(
-      `Using existing $PICO_EXAMPLES_DIR: ${process.env.PICO_EXAMPLES_DIR}`,
-    )
+    if (process.env.PICO_EXAMPLES_DIR === undefined) {
+      yield { type: 'info', message: 'Setting PICO_EXAMPLES_DIR' }
+      process.env.PICO_EXAMPLES_DIR = PICO_EXAMPLES_PATH
+      await upsert(
+        EXPORTS_FILE_PATH,
+        `export PICO_EXAMPLES_DIR=${PICO_EXAMPLES_PATH}`,
+      )
+    } else {
+      yield { type: 'info', message: `Using existing $PICO_EXAMPLES_DIR: ${process.env.PICO_EXAMPLES_DIR}` }
+    }
+  } catch (error) {
+    yield { type: 'step:fail', message: `Error setting environment variables: ${String(error)}` }
+    return
   }
 
   // 4. Build some pico tools:
-  if (
-    filesystem.exists(PICO_SDK_BUILD_DIR) === false ||
-    filesystem.list(PICO_SDK_BUILD_DIR)?.length === 0
-  ) {
-    spinner.start('Build some pico tools')
-    filesystem.dir(PICO_SDK_BUILD_DIR)
-    await system.exec('cmake ..', {
-      shell: process.env.SHELL,
-      stdout: process.stdout,
-      cwd: PICO_SDK_BUILD_DIR,
-    })
-    await system.exec('make', {
-      shell: process.env.SHELL,
-      stdout: process.stdout,
-      cwd: PICO_SDK_BUILD_DIR,
-    })
+  try {
+    const shouldBuildPico = !existsSync(PICO_SDK_BUILD_DIR) ||
+      (await readdir(PICO_SDK_BUILD_DIR).catch(() => [])).length === 0
 
-    // Build pioasm
-    filesystem.dir(PIOASM_BUILD_PATH)
-    await system.exec(`cmake ${PIOASM_TOOL_PATH}`, {
-      shell: process.env.SHELL,
-      stdout: process.stdout,
-      cwd: PIOASM_BUILD_PATH,
-    })
-    await system.exec('make', {
-      shell: process.env.SHELL,
-      stdout: process.stdout,
-      cwd: PIOASM_BUILD_PATH,
-    })
+    if (shouldBuildPico) {
+      yield { type: 'step:start', message: 'Build some pico tools' }
+      await mkdir(PICO_SDK_BUILD_DIR, { recursive: true })
+      await execaCommand('cmake ..', {
+        shell: process.env.SHELL ?? '/bin/bash',
+        stdio: 'inherit',
+        cwd: PICO_SDK_BUILD_DIR,
+      })
+      await execaCommand('make', {
+        shell: process.env.SHELL ?? '/bin/bash',
+        stdio: 'inherit',
+        cwd: PICO_SDK_BUILD_DIR,
+      })
 
-    spinner.succeed()
+      // Build pioasm
+      await mkdir(PIOASM_BUILD_PATH, { recursive: true })
+      await execaCommand(`cmake ${PIOASM_TOOL_PATH}`, {
+        shell: process.env.SHELL ?? '/bin/bash',
+        stdio: 'inherit',
+        cwd: PIOASM_BUILD_PATH,
+      })
+      await execaCommand('make', {
+        shell: process.env.SHELL ?? '/bin/bash',
+        stdio: 'inherit',
+        cwd: PIOASM_BUILD_PATH,
+      })
+
+      yield { type: 'step:done' }
+    }
+  } catch (error) {
+    yield { type: 'step:fail', message: `Error building pico tools: ${String(error)}` }
+    return
   }
 
   // 5. Build _the_ picotool
-  if (process.env.PICO_SDK_PATH === undefined) {
-    spinner.info('Setting PICO_SDK_PATH')
-    process.env.PICO_SDK_PATH = PICO_SDK_DIR
-    await upsert(EXPORTS_FILE_PATH, `export PICO_SDK_PATH=${PICO_SDK_DIR}`)
-  } else {
-    spinner.info(`Using existing $PICO_SDK_PATH: ${process.env.PICO_SDK_PATH}`)
+  try {
+    if (process.env.PICO_SDK_PATH === undefined) {
+      yield { type: 'info', message: 'Setting PICO_SDK_PATH' }
+      process.env.PICO_SDK_PATH = PICO_SDK_DIR
+      await upsert(EXPORTS_FILE_PATH, `export PICO_SDK_PATH=${PICO_SDK_DIR}`)
+    } else {
+      yield { type: 'info', message: `Using existing $PICO_SDK_PATH: ${process.env.PICO_SDK_PATH}` }
+    }
+
+    if (process.env.PIOASM === undefined) {
+      yield { type: 'info', message: 'Setting PIOASM' }
+      process.env.PIOASM = PIOASM_PATH
+      await upsert(EXPORTS_FILE_PATH, `export PIOASM=${PIOASM_PATH}`)
+    } else {
+      yield { type: 'info', message: `Using existing $PIOASM: ${process.env.PIOASM}` }
+    }
+
+    const shouldBuildPicktool = !existsSync(PICOTOOL_BUILD_DIR) ||
+      (await readdir(PICOTOOL_BUILD_DIR).catch(() => [])).length === 0
+
+    if (shouldBuildPicktool) {
+      yield { type: 'step:start', message: 'Build the picotool CLI' }
+      await mkdir(PICOTOOL_BUILD_DIR, { recursive: true })
+      await execaCommand('cmake ..', {
+        shell: process.env.SHELL ?? '/bin/bash',
+        stdio: 'inherit',
+        cwd: PICOTOOL_BUILD_DIR,
+      })
+      await execaCommand('make', {
+        shell: process.env.SHELL ?? '/bin/bash',
+        stdio: 'inherit',
+        cwd: PICOTOOL_BUILD_DIR,
+      })
+      await upsert(EXPORTS_FILE_PATH, `export PATH="${PICOTOOL_BUILD_DIR}:$PATH"`)
+      yield { type: 'step:done' }
+    }
+  } catch (error) {
+    yield { type: 'step:fail', message: `Error building picotool: ${String(error)}` }
+    return
   }
 
-  if (process.env.PIOASM === undefined) {
-    spinner.info('Setting PIOASM')
-    process.env.PIOASM = PIOASM_PATH
-    await upsert(EXPORTS_FILE_PATH, `export PIOASM=${PIOASM_PATH}`)
-  } else {
-    spinner.info(`Using existing $PIOASM: ${process.env.PIOASM}`)
-  }
-
-  if (
-    filesystem.exists(PICOTOOL_BUILD_DIR) === false ||
-    filesystem.list(PICOTOOL_BUILD_DIR)?.length === 0
-  ) {
-    spinner.start('Build the picotool CLI')
-    filesystem.dir(PICOTOOL_BUILD_DIR)
-    await system.exec('cmake ..', {
-      shell: process.env.SHELL,
-      stdout: process.stdout,
-      cwd: PICOTOOL_BUILD_DIR,
-    })
-    await system.exec('make', {
-      shell: process.env.SHELL,
-      stdout: process.stdout,
-      cwd: PICOTOOL_BUILD_DIR,
-    })
-    await upsert(EXPORTS_FILE_PATH, `export PATH="${PICOTOOL_BUILD_DIR}:$PATH"`)
-    spinner.succeed()
-  }
-
-  spinner.succeed(`
-Successfully set up pico platform support for Moddable!
+  yield {
+    type: 'step:done',
+    message: `Successfully set up pico platform support for Moddable!
 Test out the setup by starting a new terminal session and putting the device into programming mode by holding the BOOTSEL button when powering on the Pico
-Then run: xs-dev run --example helloworld --device pico
-  `)
-
-  return successVoid()
+Then run: xs-dev run --example helloworld --device pico`,
+  }
 }

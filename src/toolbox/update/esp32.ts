@@ -1,141 +1,197 @@
-import { print, filesystem, system, patching, semver } from 'gluegun'
-import { type as platformType } from 'os'
+import { type as platformType } from 'node:os'
+import { execaCommand, execa } from '../system/execa.js'
+import { existsSync } from 'node:fs'
+import { resolve } from 'node:path'
 import { INSTALL_DIR, EXPORTS_FILE_PATH } from '../setup/constants'
 import { getModdableVersion, moddableExists } from '../setup/moddable'
+import { unwrapOr } from '../system/errors'
 import upsert from '../patching/upsert'
 import { installDeps as installMacDeps } from '../setup/esp32/mac'
 import { installDeps as installLinuxDeps } from '../setup/esp32/linux'
 import { getExpectedEspIdfVersion } from '../setup/esp32'
 import { sourceEnvironment } from '../system/exec'
-import { unwrapOr } from '../system/errors'
+import { replace as replaceInFile } from '../patching/replace'
+import type { Prompter } from '../../lib/prompter.js'
+import type { OperationEvent } from '../../lib/events.js'
 
-export default async function(): Promise<void> {
+function getVersionSatisfies(version: string, range: string): boolean {
+  const major = parseInt(version.split('.')[0], 10)
+  if (range === '>= 4.2.x') return major >= 4
+  if (range === '>= 4.3.8') {
+    const minor = parseInt(version.split('.')[1] ?? '0', 10)
+    const patch = parseInt(version.split('.')[2] ?? '0', 10)
+    return major > 4 || (major === 4 && minor > 3) || (major === 4 && minor === 3 && patch >= 8)
+  }
+  return false
+}
+
+export default async function* updateEsp32(
+  _args: Record<string, unknown>,
+  _prompter: Prompter,
+): AsyncGenerator<OperationEvent> {
   const OS = platformType().toLowerCase()
   const ESP_BRANCH_V4 = 'v4.4.3'
   const ESP_BRANCH_V5 = 'v5.5'
-  const ESP32_DIR = filesystem.resolve(INSTALL_DIR, 'esp32')
-  const IDF_PATH = filesystem.resolve(ESP32_DIR, 'esp-idf')
+  const ESP32_DIR = resolve(INSTALL_DIR, 'esp32')
+  const IDF_PATH = resolve(ESP32_DIR, 'esp-idf')
 
   await sourceEnvironment()
 
-  const spinner = print.spin()
-  spinner.start('Updating up esp32 tools')
+  yield { type: 'step:start', message: 'Updating esp32 tools' }
 
   // 0. ensure Moddable exists
   if (!moddableExists()) {
-    spinner.fail(
-      'Moddable tooling required. Run `xs-dev setup` before trying again.',
-    )
-    process.exit(1)
+    yield {
+      type: 'step:fail',
+      message: 'Moddable tooling required. Run `xs-dev setup` before trying again.',
+    }
+    return
   }
 
   // 1. ensure ~/.local/share/esp32 directory
-  spinner.info('Ensuring esp32 install directory')
-  if (
-    filesystem.exists(ESP32_DIR) === false ||
-    filesystem.exists(IDF_PATH) === false
-  ) {
-    spinner.fail(
-      'ESP32 tooling required. Run `xs-dev setup --device esp32` before trying again.',
-    )
-    process.exit(1)
+  yield { type: 'info', message: 'Ensuring esp32 install directory' }
+  if (!existsSync(ESP32_DIR) || !existsSync(IDF_PATH)) {
+    yield {
+      type: 'step:fail',
+      message: 'ESP32 tooling required. Run `xs-dev setup --device esp32` before trying again.',
+    }
+    return
   }
 
   // 2. update local esp-idf repo
-  if (filesystem.exists(IDF_PATH) === 'dir') {
-    spinner.start('Updating esp-idf repo')
-    const moddableVersionResult = await getModdableVersion()
-    const moddableVersion = unwrapOr(moddableVersionResult, '')
-    const expectedEspIdfVersion = await getExpectedEspIdfVersion()
-    const branch =
-      expectedEspIdfVersion ??
-      (moddableVersion.includes('branch') ||
-        semver.satisfies(moddableVersion, '>= 4.2.x')
-        ? ESP_BRANCH_V5
-        : ESP_BRANCH_V4)
+  if (existsSync(IDF_PATH)) {
+    try {
+      yield { type: 'step:start', message: 'Updating esp-idf repo' }
+      const moddableVersionResult = await getModdableVersion()
+      const moddableVersion = unwrapOr(moddableVersionResult, '')
+      const expectedEspIdfVersion = await getExpectedEspIdfVersion()
+      const branch =
+        expectedEspIdfVersion ??
+        (((moddableVersion.includes('branch')) || getVersionSatisfies(moddableVersion, '>= 4.2.x'))
+          ? ESP_BRANCH_V5
+          : ESP_BRANCH_V4)
 
-    if (
-      branch === ESP_BRANCH_V5 &&
-      !semver.satisfies(moddableVersion, '>= 4.3.8')
-    ) {
-      spinner.fail(
-        'Latest Moddable SDK is required before updating ESP-IDF. Run `xs-dev update` before trying again.',
-      )
-      process.exit(1)
+      if (
+        branch === ESP_BRANCH_V5 &&
+        !getVersionSatisfies(moddableVersion, '>= 4.3.8' as const)
+      ) {
+        yield {
+          type: 'step:fail',
+          message: 'Latest Moddable SDK is required before updating ESP-IDF. Run `xs-dev update` before trying again.',
+        }
+        return
+      }
+
+      await execaCommand('git fetch --all --tags', { cwd: IDF_PATH })
+      await execaCommand(`git checkout ${branch}`, { cwd: IDF_PATH })
+      await execaCommand('git submodule update --init --recursive', {
+        cwd: IDF_PATH,
+      })
+      yield { type: 'step:done' }
+    } catch (error) {
+      yield { type: 'step:fail', message: `Error updating esp-idf: ${String(error)}` }
+      return
     }
-
-    await system.spawn(`git fetch --all --tags`, { cwd: IDF_PATH })
-    await system.spawn(`git checkout ${branch}`, { cwd: IDF_PATH })
-    await system.spawn(`git submodule update --init --recursive`, {
-      cwd: IDF_PATH,
-    })
-    spinner.succeed()
   }
 
   // 3. Install build and run dependencies
-  spinner.start('Installing build dependencies')
+  try {
+    yield { type: 'step:start', message: 'Installing build dependencies' }
 
-  if (OS === 'darwin') {
-    await installMacDeps(spinner)
-  }
+    if (OS === 'darwin') {
+      for await (const event of installMacDeps(_prompter)) {
+        yield event
+      }
+    }
 
-  if (OS === 'linux') {
-    await installLinuxDeps(spinner)
+    if (OS === 'linux') {
+      for await (const event of installLinuxDeps(_prompter)) {
+        yield event
+      }
+    }
+
+    yield { type: 'step:done' }
+  } catch (error) {
+    yield { type: 'step:fail', message: `Error installing dependencies: ${String(error)}` }
+    return
   }
 
   // 4. append IDF_PATH env export to shell profile
-  if (process.env.IDF_PATH === undefined) {
-    spinner.info('Configuring $IDF_PATH')
-    process.env.IDF_PATH = IDF_PATH
-    await upsert(EXPORTS_FILE_PATH, `export IDF_PATH=${IDF_PATH}`)
+  try {
+    if (process.env.IDF_PATH === undefined) {
+      yield { type: 'info', message: 'Configuring $IDF_PATH' }
+      process.env.IDF_PATH = IDF_PATH
+      await upsert(EXPORTS_FILE_PATH, `export IDF_PATH=${IDF_PATH}`)
+    }
+  } catch (error) {
+    yield { type: 'step:fail', message: `Error configuring IDF_PATH: ${String(error)}` }
+    return
   }
 
   // remove sourced IDF_PATH/export settings before install
   // https://github.com/espressif/esp-idf/issues/8314#issuecomment-1024881587
-  await patching.replace(
-    EXPORTS_FILE_PATH,
-    `source $IDF_PATH/export.sh 1> /dev/null\n`,
-    '',
-  )
-  await system.exec(`source ${EXPORTS_FILE_PATH}`, {
-    shell: process.env.SHELL,
-  })
+  try {
+    await replaceInFile(
+      EXPORTS_FILE_PATH,
+      `source $IDF_PATH/export.sh 1> /dev/null\n`,
+      '',
+    )
+    await execaCommand(`source ${EXPORTS_FILE_PATH}`, {
+      shell: process.env.SHELL ?? '/bin/bash',
+    })
+  } catch (error) {
+    yield { type: 'info', message: `Note: Could not remove old IDF_PATH source: ${String(error)}` }
+  }
 
   // 5. cd to IDF_PATH, run install.sh
-  spinner.start('Rebuilding esp-idf tooling')
-  await system.exec('./install.sh', {
-    cwd: IDF_PATH,
-    shell: process.env.SHELL,
-    stdout: process.stdout,
-  })
-  spinner.succeed()
+  try {
+    yield { type: 'step:start', message: 'Rebuilding esp-idf tooling' }
+    await execaCommand('./install.sh', {
+      cwd: IDF_PATH,
+      shell: process.env.SHELL ?? '/bin/bash',
+      stdio: 'inherit',
+    })
+    yield { type: 'step:done' }
+  } catch (error) {
+    yield { type: 'step:fail', message: `Error running install script: ${String(error)}` }
+    return
+  }
 
   // 6. append 'source $IDF_PATH/export.sh' to shell profile
-  spinner.info('Sourcing esp-idf environment')
-  await upsert(EXPORTS_FILE_PATH, `source $IDF_PATH/export.sh 1> /dev/null\n`)
-  await system.exec('source $IDF_PATH/export.sh', {
-    shell: process.env.SHELL,
-  })
+  try {
+    yield { type: 'info', message: 'Sourcing esp-idf environment' }
+    await upsert(EXPORTS_FILE_PATH, `source $IDF_PATH/export.sh 1> /dev/null\n`)
+    await execaCommand('source $IDF_PATH/export.sh', {
+      shell: process.env.SHELL ?? '/bin/bash',
+    })
+  } catch (error) {
+    yield { type: 'info', message: `Note: ${String(error)}` }
+  }
 
   // 7. Remove existing build output directories
-  const BUILD_DIR = filesystem.resolve(
-    process.env.MODDABLE ?? '',
-    'build',
-    'bin',
-    'esp32',
-  )
-  const TMP_DIR = filesystem.resolve(
-    process.env.MODDABLE ?? '',
-    'build',
-    'tmp',
-    'esp32',
-  )
-  filesystem.remove(BUILD_DIR)
-  filesystem.remove(TMP_DIR)
+  try {
+    const BUILD_DIR = resolve(
+      process.env.MODDABLE ?? '',
+      'build',
+      'bin',
+      'esp32',
+    )
+    const TMP_DIR = resolve(
+      process.env.MODDABLE ?? '',
+      'build',
+      'tmp',
+      'esp32',
+    )
+    await execa('rm', ['-rf', BUILD_DIR], { reject: false })
+    await execa('rm', ['-rf', TMP_DIR], { reject: false })
+  } catch (error) {
+    yield { type: 'info', message: `Note: Could not clean build dirs: ${String(error)}` }
+  }
 
-  spinner.succeed(`
-  Successfully updated esp32 platform support for Moddable!
-  Test out the setup by starting a new terminal session, plugging in your device, and running: xs-dev run --example helloworld --device=esp32
-  If there is trouble finding the correct port, pass the "--port" flag to the above command with the path to the "/dev.cu.*" that matches your device.
-  `)
+  yield {
+    type: 'step:done',
+    message: `Successfully updated esp32 platform support for Moddable!
+Test out the setup by starting a new terminal session, plugging in your device, and running: xs-dev run --example helloworld --device=esp32
+If there is trouble finding the correct port, pass the "--port" flag to the above command with the path to the "/dev.cu.*" that matches your device.`,
+  }
 }
