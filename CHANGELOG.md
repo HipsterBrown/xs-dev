@@ -1,3 +1,16 @@
+# v1.2.7 (Mon Mar 09 2026)
+
+#### 🐛 Bug Fix
+
+- fix(setup/mac): correctly copy .app tools instead of using copyFile [#237](https://github.com/HipsterBrown/xs-dev/pull/237) ([@HipsterBrown](https://github.com/HipsterBrown))
+- refactor: remove gluegun dependency completely (#236) [#236](https://github.com/HipsterBrown/xs-dev/pull/236) ([@HipsterBrown](https://github.com/HipsterBrown))
+
+#### Authors: 1
+
+- Nick Hehr ([@HipsterBrown](https://github.com/HipsterBrown))
+
+---
+
 # v1.2.6 (Mon Mar 09 2026)
 
 #### 🐛 Bug Fix
