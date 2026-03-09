@@ -1,21 +1,22 @@
-import { filesystem } from 'gluegun'
-import { type as platformType } from 'os'
+import { homedir, type as platformType } from 'node:os'
+import { resolve } from 'node:path'
+import { existsSync } from 'node:fs'
 import type { Device } from '../../types'
 
 const currentPlatform: Device = platformType().toLowerCase() as Device
 const isWindows = currentPlatform === 'windows_nt'
 
-export const HOME_DIR = filesystem.homedir()
+export const HOME_DIR = homedir()
 export const INSTALL_DIR = isWindows
-  ? filesystem.resolve(HOME_DIR, 'xs-dev')
-  : filesystem.resolve(HOME_DIR, '.local', 'share')
+  ? resolve(HOME_DIR, 'xs-dev')
+  : resolve(HOME_DIR, '.local', 'share')
 export const INSTALL_PATH =
-  process.env.MODDABLE ?? filesystem.resolve(INSTALL_DIR, 'moddable')
+  process.env.MODDABLE ?? resolve(INSTALL_DIR, 'moddable')
 export const EXPORTS_FILE_PATH = isWindows
-  ? filesystem.resolve(INSTALL_DIR, 'Moddable.bat')
-  : filesystem.resolve(HOME_DIR, '.local', 'share', 'xs-dev-export.sh')
+  ? resolve(INSTALL_DIR, 'Moddable.bat')
+  : resolve(HOME_DIR, '.local', 'share', 'xs-dev-export.sh')
 export const MODDABLE_REPO = 'https://github.com/Moddable-OpenSource/moddable'
-export const XSBUG_LOG_PATH = filesystem.resolve(
+export const XSBUG_LOG_PATH = resolve(
   INSTALL_PATH,
   'tools',
   'xsbug-log',
@@ -31,10 +32,9 @@ export function getProfilePath(): string {
     profile = '.bashrc'
   }
 
-  let profilePath = filesystem.resolve(HOME_DIR, profile)
-  if (filesystem.exists(profilePath) === 'file') return profilePath
+  let profilePath = resolve(HOME_DIR, profile)
+  if (existsSync(profilePath)) return profilePath
 
-  profilePath = filesystem.resolve(HOME_DIR, '.profile')
-  filesystem.file(profilePath)
+  profilePath = resolve(HOME_DIR, '.profile')
   return profilePath
 }
