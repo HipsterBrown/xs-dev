@@ -1,22 +1,11 @@
-import { mock } from 'node:test';
+import { mock } from 'node:test'
 import { tmpdir } from 'node:os'
 import { mkdtemp, rm } from 'node:fs/promises'
 import { join } from 'node:path'
-import { run } from '@stricli/core';
-import {
-  filesystem,
-  strings,
-  system,
-  semver,
-  http,
-  patching,
-  prompt,
-  packageManager,
-} from 'gluegun'
+import { run } from '@stricli/core'
 
-
-export function buildFakeContext(options = {}) {
-  let exitCode;
+export function buildFakeContext(options: { env?: Record<string, string> } = {}) {
+  let exitCode: number | undefined
   const context = {
     process: {
       stdout: {
@@ -26,50 +15,25 @@ export function buildFakeContext(options = {}) {
         write: mock.fn(),
       },
       env: options.env ?? {},
-      exit: (code) => {
-        exitCode = code;
+      exit: (code: number) => {
+        exitCode = code
       },
       exitCode: () => exitCode,
     },
-    print: {
-      info: mock.fn(),
-      highlight: mock.fn(),
-      warning: mock.fn(),
-      error: mock.fn(),
-      success: mock.fn(),
-      table: mock.fn(),
-    },
-    filesystem,
-    strings,
-    system,
-    semver,
-    http,
-    patching,
-    prompt,
-    packageManager,
     currentVersion: 'test',
-  };
-  return context;
+  }
+  return context
 }
 
-export async function runWithInputs(app, inputs, ...args) {
-  const context = buildFakeContext(...args);
-  await run(app, inputs, context);
-  const stdout = [
-    context.process.stdout.write,
-    context.print.info,
-    context.print.warning,
-    context.print.success,
-    context.print.highlight,
-    context.print.table,
-  ].flatMap(fn => {
-    return fn.mock.calls?.[0]?.arguments ?? [];
-  }).join("");
+export async function runWithInputs(app: unknown, inputs: string[], ...args: Parameters<typeof buildFakeContext>) {
+  const context = buildFakeContext(...args)
+  await run(app as any, inputs, context as any)
+  const stdout = context.process.stdout.write.mock.calls?.map((c) => c.arguments?.join('')).join('') ?? ''
   return {
     stdout,
-    stderr: context.process.stderr.write.mock.calls?.[0]?.arguments?.join(""),
+    stderr: context.process.stderr.write.mock.calls?.map((c) => c.arguments?.join('')).join('') ?? '',
     exitCode: context.process.exitCode(),
-  };
+  }
 }
 
 export async function createTempDir() {
