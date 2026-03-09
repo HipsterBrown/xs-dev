@@ -1,62 +1,66 @@
-import { type as platformType } from 'os'
-import { finished } from 'stream'
-import { promisify } from 'util'
-import { filesystem, system } from 'gluegun'
+import { type as platformType } from 'node:os'
+import { finished } from 'node:stream'
+import { promisify } from 'node:util'
+import { existsSync } from 'node:fs'
+import { resolve } from 'node:path'
+import { execaCommand } from '../system/execa.js'
 import { Octokit, type RestEndpointMethodTypes } from '@octokit/rest'
 import { Extract as ZipExtract } from 'unzip-stream'
 import { INSTALL_PATH } from './constants'
 import type { Device, Result } from '../../types'
 import { DEVICE_ALIAS } from '../prompt/devices'
-import { failure, wrapAsync } from '../system/errors'
 import { fetchStream } from '../system/fetch'
+import { failure, wrapAsync } from '../system/errors'
 
 const finishedPromise = promisify(finished)
 
 export function moddableExists(): boolean {
   const OS = platformType().toLowerCase() as Device
-  const platformDir = DEVICE_ALIAS[OS].substr(0, 3)
-  const releaseTools = filesystem.exists(
-    filesystem.resolve(INSTALL_PATH, 'build', 'bin', platformDir, 'release'),
-  )
-  const debugTools = filesystem.exists(
-    filesystem.resolve(INSTALL_PATH, 'build', 'bin', platformDir, 'debug'),
-  )
+  const platformDir = DEVICE_ALIAS[OS].substring(0, 3)
+  const releaseToolsPath = resolve(INSTALL_PATH, 'build', 'bin', platformDir, 'release')
+  const debugToolsPath = resolve(INSTALL_PATH, 'build', 'bin', platformDir, 'debug')
+
+  const releaseTools = existsSync(releaseToolsPath)
+  const debugTools = existsSync(debugToolsPath)
+
   return (
     process.env.MODDABLE !== undefined &&
-    filesystem.exists(process.env.MODDABLE) === 'dir' &&
-    (releaseTools === 'dir' || debugTools === 'dir')
+    existsSync(process.env.MODDABLE) &&
+    (releaseTools || debugTools)
   )
 }
 
 function isGitRepo(path: string): boolean {
-  return filesystem.exists(filesystem.resolve(path, '.git')) === 'dir'
+  return existsSync(resolve(path, '.git'))
 }
 
 export async function getModdableVersion(): Promise<Result<string>> {
   if (!moddableExists() || !isGitRepo(process.env.MODDABLE ?? '')) {
-    return failure('Moddable not available on this system.')
+    return failure('Moddable SDK not found or not a git repository')
   }
 
   return await wrapAsync(async () => {
-    const tags = await system.run('git tag -l --sort=-taggerdate', {
+    const tagsResult = await execaCommand('git tag -l --sort=-taggerdate', {
       cwd: process.env.MODDABLE,
     })
-    const tag = tags.split('\n').shift()
-    const latestCommit = await system.run(`git rev-parse HEAD`, {
+    const tag = String(tagsResult.stdout).split('\n').shift()
+
+    const latestCommitResult = await execaCommand('git rev-parse HEAD', {
       cwd: process.env.MODDABLE,
     })
+    const latestCommit = String(latestCommitResult.stdout)
 
     if (tag !== undefined && tag.length > 0) {
-      const tagCommit = await system.run(`git rev-list -n 1 ${tag}`, {
+      const tagCommitResult = await execaCommand(`git rev-list -n 1 ${tag}`, {
         cwd: process.env.MODDABLE,
       })
-      if (tagCommit === latestCommit) return tag
+      if (String(tagCommitResult.stdout) === latestCommit) return tag
     }
 
-    const currentBranch = await system.run(`git branch --show-current`, {
+    const currentBranchResult = await execaCommand('git branch --show-current', {
       cwd: process.env.MODDABLE,
     })
-    return `branch: ${currentBranch.trim()}, commit: ${latestCommit}`
+    return `branch: ${String(currentBranchResult.stdout).trim()}, commit: ${String(latestCommit)}`
   })
 }
 
@@ -104,19 +108,17 @@ export async function downloadReleaseTools({
   writePath,
   assetName,
   release,
-}: DownloadToolsArgs): Promise<Result<void>> {
+}: DownloadToolsArgs): Promise<void> {
   const moddableTools = release.assets.find(({ name }) => name === assetName)
 
   if (moddableTools === undefined) {
-    return failure(`Unable to find release asset matching ${assetName}`)
+    throw new MissingReleaseAssetError(assetName)
   }
 
-  return await wrapAsync(async () => {
-    const zipWriter = ZipExtract({
-      path: writePath,
-    })
-    const download = await fetchStream(moddableTools.browser_download_url)
-    download.pipe(zipWriter)
-    await finishedPromise(zipWriter)
+  const zipWriter = ZipExtract({
+    path: writePath,
   })
+  const download = await fetchStream(moddableTools.browser_download_url)
+  download.pipe(zipWriter)
+  await finishedPromise(zipWriter)
 }

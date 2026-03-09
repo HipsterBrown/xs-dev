@@ -1,8 +1,13 @@
 import { type as platformType } from 'node:os'
+import { resolve } from 'node:path'
+import ora from 'ora'
 import { buildCommand } from '@stricli/core'
 import type { LocalContext } from '../app'
 import type { Device } from '../types'
+import build from '../toolbox/build'
 import { DEVICE_ALIAS } from '../toolbox/prompt/devices'
+import { createInteractivePrompter, createNonInteractivePrompter, isInteractive } from '../lib/prompter'
+import { handleEvent } from '../lib/renderer'
 
 type Mode = 'development' | 'production'
 
@@ -27,7 +32,6 @@ const command = buildCommand({
     // eslint-disable-next-line @typescript-eslint/no-inferrable-types
     projectPath: string = '.',
   ) {
-    const { filesystem } = this
     const currentPlatform: Device = platformType().toLowerCase() as Device
     const {
       device = currentPlatform,
@@ -39,22 +43,33 @@ const command = buildCommand({
       mode = (process.env.NODE_ENV as Mode) ?? 'development',
       output,
     } = flags
-    const { build } = await import('../toolbox/build/index')
     const targetPlatform: string = DEVICE_ALIAS[device as Device] ?? device
-    projectPath = filesystem.resolve(projectPath)
+    projectPath = resolve(projectPath)
 
-    await build({
-      port,
-      listExamples,
-      listDevices,
-      log,
-      example,
-      targetPlatform,
-      projectPath,
-      mode,
-      deployStatus: 'debug',
-      outputDir: output,
-    })
+    // Determine interactive mode
+    const prompter = isInteractive()
+      ? createInteractivePrompter()
+      : createNonInteractivePrompter()
+
+    const spinner = ora()
+
+    for await (const event of build(
+      {
+        port,
+        listExamples,
+        listDevices,
+        log,
+        example,
+        targetPlatform,
+        projectPath,
+        mode,
+        deployStatus: 'debug',
+        outputDir: output,
+      },
+      prompter,
+    )) {
+      handleEvent(event, spinner)
+    }
   },
   parameters: {
     positional: {
