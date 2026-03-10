@@ -122,8 +122,8 @@ export class Esp32Platform implements PlatformTarget {
     const activatedDeps = applicable.filter(([, dep]) => dep.requiresEnv)
 
     const bareResults = await Promise.all(
-      bareDeps.map(async ([name, dep]) =>
-        await this._checkDependency(name, dep, process.env as Record<string, string>, 'bare'),
+      bareDeps.map(([name, dep]) =>
+        this._checkDependency(name, dep, process.env as Record<string, string>, 'bare'),
       ),
     )
 
@@ -141,8 +141,8 @@ export class Esp32Platform implements PlatformTarget {
         }))
       } else {
         activatedResults = await Promise.all(
-          activatedDeps.map(async ([name, dep]) =>
-            await this._checkDependency(name, dep, resolved.activated, 'activated'),
+          activatedDeps.map(([name, dep]) =>
+            this._checkDependency(name, dep, resolved.activated, 'activated'),
           ),
         )
       }
