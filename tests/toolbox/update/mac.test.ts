@@ -8,6 +8,11 @@ describe('toolbox/update/mac', async () => {
       moddableExists: mock.fn(() => true),
       fetchRelease: mock.fn(async () => null),
       downloadReleaseTools: mock.fn(async () => {}),
+      MissingReleaseAssetError: class MissingReleaseAssetError extends Error {
+        constructor(assetName: string) {
+          super(`Unable to find release asset matching ${assetName}`)
+        }
+      },
     }
   })
   mock.module('execa', {
@@ -21,6 +26,7 @@ describe('toolbox/update/mac', async () => {
       mkdir: mock.fn(async () => {}),
       readdir: mock.fn(async () => []),
       copyFile: mock.fn(async () => {}),
+      chmod: mock.fn(async () => {}),
     }
   })
   mock.module('#src/toolbox/system/exec.js', {
