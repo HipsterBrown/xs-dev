@@ -1,7 +1,7 @@
 import os from 'node:os'
 import { execaCommand } from '../system/execa.js'
 import { existsSync } from 'node:fs'
-import upsert from '#src/toolbox/patching/upsert.js'
+import upsert from '../patching/upsert.js'
 import { getProfilePath } from './constants.js'
 import type { Prompter } from '../../lib/prompter.js'
 import type { OperationEvent } from '../../lib/events.js'
