@@ -1,0 +1,105 @@
+{
+  "name": "esp32",
+  "version": "1.0.0",
+  "displayName": "ESP32",
+  "description": "Espressif ESP32 family via ESP-IDF and Moddable SDK",
+  "sdkVendor": "Espressif",
+  "homepage": "https://docs.espressif.com/projects/esp-idf/en/latest/esp32/",
+  "moddableTarget": "esp32/nodemcu",
+
+  "dependencies": {
+    "moddable-sdk": {
+      "type": "sdk",
+      "version": ">=4.0.0",
+      "requiresEnv": true,
+      "versionCommand": "mcconfig -v",
+      "versionPattern": "Moddable SDK version (\\S+)",
+      "source": "https://github.com/Moddable-OpenSource/moddable"
+    },
+    "esp-idf": {
+      "type": "sdk",
+      "version": ">=4.4.0",
+      "requiresEnv": true,
+      "versionCommand": "idf.py --version",
+      "versionPattern": "v(\\S+)",
+      "source": "https://github.com/espressif/esp-idf",
+      "installHint": {
+        "darwin": "xs-dev setup --device esp32 handles this automatically",
+        "linux": "xs-dev setup --device esp32 handles this automatically"
+      }
+    },
+    "cmake": {
+      "type": "build-tool",
+      "version": ">=3.16.0",
+      "requiresEnv": false,
+      "versionCommand": "cmake --version",
+      "versionPattern": "cmake version (\\S+)",
+      "installHint": {
+        "darwin": "brew install cmake",
+        "linux": "sudo apt-get install cmake"
+      }
+    },
+    "python3": {
+      "type": "runtime",
+      "version": ">=3.8.0",
+      "requiresEnv": false,
+      "versionCommand": "python3 --version",
+      "versionPattern": "Python (\\S+)",
+      "installHint": {
+        "darwin": "brew install python3",
+        "linux": "sudo apt-get install python3"
+      }
+    },
+    "ninja": {
+      "type": "build-tool",
+      "version": ">=1.10.0",
+      "optional": true,
+      "requiresEnv": false,
+      "versionCommand": "ninja --version",
+      "versionPattern": "^(\\S+)$",
+      "installHint": {
+        "darwin": "brew install ninja",
+        "linux": "sudo apt-get install ninja-build"
+      }
+    },
+    "dfu-util": {
+      "type": "build-tool",
+      "version": ">=0.9.0",
+      "optional": true,
+      "requiresEnv": false,
+      "versionCommand": "dfu-util --version",
+      "versionPattern": "dfu-util (\\S+)",
+      "installHint": {
+        "darwin": "brew install dfu-util",
+        "linux": "sudo apt-get install dfu-util"
+      }
+    }
+  },
+
+  "capabilities": {
+    "setup":    { "darwin": true,  "linux": true,  "win32": false },
+    "update":   { "darwin": true,  "linux": true,  "win32": false },
+    "teardown": { "darwin": false, "linux": false, "win32": false }
+  },
+
+  "env": {
+    "IDF_PATH": {
+      "description": "Root of the ESP-IDF installation",
+      "required": true,
+      "defaultPath": "$HOME/.local/share/esp32/esp-idf"
+    },
+    "MODDABLE": {
+      "description": "Root of the Moddable SDK installation",
+      "required": true,
+      "defaultPath": "$HOME/.local/share/moddable"
+    }
+  },
+
+  "activation": {
+    "scripts": [
+      "$IDF_PATH/export.sh"
+    ]
+  },
+
+  "postSetupNotes": "Environment is resolved automatically on each command invocation. No shell restart required."
+}
