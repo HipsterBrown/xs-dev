@@ -1,5 +1,5 @@
-import { execWithSudo } from '../../system/exec'
-import { isFailure } from '../../system/errors'
+import { execWithSudo } from '../../system/exec.js'
+import { isFailure } from '../../system/errors.js'
 import type { Prompter } from '../../../lib/prompter.js'
 import type { OperationEvent } from '../../../lib/events.js'
 

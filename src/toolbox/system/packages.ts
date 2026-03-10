@@ -1,8 +1,8 @@
 import { execaCommand } from './execa.js'
-import type { Dependency } from './types'
-import { pkexec, execWithSudo, which } from '../system/exec'
-import type { Result } from '../../types'
-import { failure, wrapAsync } from './errors'
+import type { Dependency } from './types.js'
+import { pkexec, execWithSudo, which } from '../system/exec.js'
+import type { Result } from '../../types.js'
+import { failure, wrapAsync } from './errors.js'
 
 /**
  * Check if the list of dependencies are installed on the system.

@@ -5,10 +5,10 @@ import { buildCommand } from '@stricli/core'
 import { SerialPort } from 'serialport'
 import { findBySerialNumber } from 'usb'
 import ora from 'ora'
-import type { LocalContext } from '../app'
-import { parseScanResult } from '../toolbox/scan/parse'
-import { sourceEnvironment, sourceIdf } from '../toolbox/system/exec'
-import * as output from '../lib/output'
+import type { LocalContext } from '../app.js'
+import { parseScanResult } from '../toolbox/scan/parse.js'
+import { sourceEnvironment, sourceIdf } from '../toolbox/system/exec.js'
+import * as output from '../lib/output.js'
 
 const command = buildCommand({
   docs: {

@@ -4,7 +4,7 @@ import { resolve } from 'node:path'
 import { type as platformType } from 'node:os'
 import { execaCommand } from '../system/execa.js'
 import plist from 'simple-plist'
-import { INSTALL_DIR } from './constants'
+import { INSTALL_DIR } from './constants.js'
 import type { Prompter } from '../../lib/prompter.js'
 import type { OperationEvent } from '../../lib/events.js'
 

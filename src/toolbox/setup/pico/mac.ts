@@ -1,6 +1,6 @@
 import { execaCommand } from '../../system/execa.js'
-import { which } from '../../system/exec'
-import { ensureHomebrew, formulaeExists } from '../homebrew'
+import { which } from '../../system/exec.js'
+import { ensureHomebrew, formulaeExists } from '../homebrew.js'
 import type { OperationEvent } from '../../../lib/events.js'
 import type { Prompter } from '../../../lib/prompter.js'
 

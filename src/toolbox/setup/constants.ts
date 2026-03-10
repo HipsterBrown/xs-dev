@@ -1,7 +1,7 @@
 import { homedir, type as platformType } from 'node:os'
 import { resolve } from 'node:path'
 import { existsSync } from 'node:fs'
-import type { Device } from '../../types'
+import type { Device } from '../../types.js'
 
 const currentPlatform: Device = platformType().toLowerCase() as Device
 const isWindows = currentPlatform === 'windows_nt'

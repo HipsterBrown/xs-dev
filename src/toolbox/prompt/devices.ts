@@ -1,4 +1,4 @@
-import type { Device } from '../../types'
+import type { Device } from '../../types.js'
 
 export const DEVICE_ALIAS: Record<Device | 'esp', Device> = Object.freeze({
   esp: 'esp8266',

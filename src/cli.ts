@@ -2,7 +2,7 @@
 import process from 'node:process'
 import { run as runApp } from '@stricli/core'
 import { version } from '../package.json'
-import { app } from './app'
+import { app } from './app.js'
 
 /**
  * Create the cli and kick it off
