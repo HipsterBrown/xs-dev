@@ -3,7 +3,8 @@ import {
   buildRouteMap,
   type CommandContext,
 } from '@stricli/core'
-import { description, version, name } from '../package.json'
+import packageJson from '../package.json' with { type: 'json' }
+const { description, version, name } = packageJson
 
 import build from './commands/build.js'
 import clean from './commands/clean.js'
