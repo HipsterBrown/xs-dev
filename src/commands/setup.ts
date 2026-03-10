@@ -91,7 +91,7 @@ const command = buildCommand({
       'lin',
       'linux',
     ]
-    const { default: setup } = await import(`../toolbox/setup/${target}`)
+    const { default: setup } = await import(`../toolbox/setup/${target}.js`)
 
     const spinner = ora()
 

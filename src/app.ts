@@ -3,9 +3,6 @@ import {
   buildRouteMap,
   type CommandContext,
 } from '@stricli/core'
-import packageJson from '../package.json' with { type: 'json' }
-const { description, version, name } = packageJson
-
 import build from './commands/build.js'
 import clean from './commands/clean.js'
 import debug from './commands/debug.js'
@@ -18,6 +15,8 @@ import scan from './commands/scan.js'
 import setup from './commands/setup.js'
 import teardown from './commands/teardown.js'
 import update from './commands/update.js'
+import packageJson from '../package.json' with { type: 'json' }
+const { description, version, name } = packageJson
 
 export type LocalContext = CommandContext & {
   currentVersion: string

@@ -31,7 +31,7 @@ const command = buildCommand({
       ? createInteractivePrompter()
       : createNonInteractivePrompter()
     const { default: update } = await import(
-      `../toolbox/update/${DEVICE_ALIAS[device]}`
+      `../toolbox/update/${DEVICE_ALIAS[device]}.js`
     )
     const spinner = ora()
 
