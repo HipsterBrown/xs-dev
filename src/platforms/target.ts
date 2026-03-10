@@ -73,7 +73,7 @@ export interface DependencyStatus {
 
 export interface PlatformTarget {
   readonly manifest: PlatformManifest
-  supports(op: LifecycleOperation, host: HostPlatform): boolean
-  resolveEnvironment(overrides?: Record<string, string>): Promise<ResolvedEnvironment>
-  checkDependencies(): Promise<DependencyStatus[]>
+  readonly supports: (op: LifecycleOperation, host: HostPlatform) => boolean
+  readonly resolveEnvironment: (overrides?: Record<string, string>) => Promise<ResolvedEnvironment>
+  readonly checkDependencies: () => Promise<DependencyStatus[]>
 }
