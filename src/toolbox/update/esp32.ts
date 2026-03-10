@@ -5,7 +5,6 @@ import { resolve } from 'node:path'
 import { INSTALL_DIR, EXPORTS_FILE_PATH } from '../setup/constants'
 import { getModdableVersion, moddableExists } from '../setup/moddable'
 import { unwrapOr } from '../system/errors'
-import upsert from '../patching/upsert'
 import { installDeps as installMacDeps } from '../setup/esp32/mac'
 import { installDeps as installLinuxDeps } from '../setup/esp32/linux'
 import { getExpectedEspIdfVersion } from '../setup/esp32'
@@ -116,12 +115,11 @@ export default async function* updateEsp32(
     return
   }
 
-  // 4. append IDF_PATH env export to shell profile
+  // 4. set IDF_PATH in process environment
   try {
     if (process.env.IDF_PATH === undefined) {
-      yield { type: 'info', message: 'Configuring $IDF_PATH' }
+      yield { type: 'info', message: 'Configuring $IDF_PATH for current session' }
       process.env.IDF_PATH = IDF_PATH
-      await upsert(EXPORTS_FILE_PATH, `export IDF_PATH=${IDF_PATH}`)
     }
   } catch (error) {
     yield { type: 'step:fail', message: `Error configuring IDF_PATH: ${String(error)}` }
@@ -157,10 +155,9 @@ export default async function* updateEsp32(
     return
   }
 
-  // 6. append 'source $IDF_PATH/export.sh' to shell profile
+  // 6. source IDF environment in current session
   try {
     yield { type: 'info', message: 'Sourcing esp-idf environment' }
-    await upsert(EXPORTS_FILE_PATH, `source $IDF_PATH/export.sh 1> /dev/null\n`)
     await execaCommand('source $IDF_PATH/export.sh', {
       shell: process.env.SHELL ?? '/bin/bash',
     })

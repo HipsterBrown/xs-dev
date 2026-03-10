@@ -3,9 +3,8 @@ import { existsSync } from 'node:fs'
 import { resolve } from 'node:path'
 import { type as platformType } from 'node:os'
 import { execaCommand } from '../system/execa.js'
-import { INSTALL_DIR, EXPORTS_FILE_PATH, INSTALL_PATH } from './constants'
+import { INSTALL_DIR, INSTALL_PATH } from './constants'
 import { moddableExists, getModdableVersion } from './moddable'
-import upsert from '../patching/upsert'
 import { installDeps as installMacDeps } from './esp32/mac'
 import { installDeps as installLinuxDeps } from './esp32/linux'
 import { installDeps as installWinDeps } from './esp32/windows'
@@ -104,16 +103,15 @@ export default async function* esp32Setup(
     return
   }
 
-  // 4. append IDF_PATH env export to shell profile
+  // 4. set IDF_PATH in process environment
   try {
     if (isWindows) {
       yield { type: 'info', message: 'Configuring IDF_PATH environment variable' }
       await setEnv('IDF_PATH', IDF_PATH)
     } else {
       if (typeof process.env.IDF_PATH !== 'string' || process.env.IDF_PATH.length === 0) {
-        yield { type: 'info', message: 'Configuring $IDF_PATH' }
+        yield { type: 'info', message: 'Configuring $IDF_PATH for current session' }
         process.env.IDF_PATH = IDF_PATH
-        await upsert(EXPORTS_FILE_PATH, `export IDF_PATH=${IDF_PATH}`)
       }
     }
   } catch (error) {
@@ -144,18 +142,7 @@ export default async function* esp32Setup(
     return
   }
 
-  // 6. append 'source $IDF_PATH/export.sh' to shell profile
-  try {
-    if (isWindows) {
-      await upsert(
-        EXPORTS_FILE_PATH,
-        `pushd %IDF_PATH% && call "%IDF_TOOLS_PATH%\\idf_cmd_init.bat" && popd`,
-      )
-    }
-  } catch (error) {
-    yield { type: 'step:fail', message: `Error updating shell profile: ${String(error)}` }
-    return
-  }
+  // Note: Windows environment is configured via setEnv (registry) and resolved at invocation time via PlatformTarget
 
   yield {
     type: 'step:done',
