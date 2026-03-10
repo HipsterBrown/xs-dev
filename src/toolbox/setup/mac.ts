@@ -10,7 +10,7 @@ import {
   EXPORTS_FILE_PATH,
   XSBUG_LOG_PATH,
 } from './constants.js'
-import upsert from '../patching/upsert.js'
+import upsert from '#src/toolbox/patching/upsert.js'
 import {
   downloadReleaseTools,
   fetchRelease,

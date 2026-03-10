@@ -7,6 +7,8 @@ describe('toolbox/update/esp32', async () => {
     namedExports: {
       moddableExists: mock.fn(() => true),
       getModdableVersion: mock.fn(async () => null),
+      downloadReleaseTools: mock.fn(async () => {}),
+      fetchRelease: mock.fn(async () => ({ tag_name: 'v1.0.0' })),
     }
   })
   mock.module('execa', {
@@ -18,6 +20,22 @@ describe('toolbox/update/esp32', async () => {
   mock.module('node:fs', {
     namedExports: {
       existsSync: mock.fn(() => false),
+      statSync: mock.fn(() => ({ isDirectory: () => false, isFile: () => false })),
+      renameSync: mock.fn(() => {}),
+      rmSync: mock.fn(() => {}),
+      createWriteStream: mock.fn(() => ({ on: mock.fn((event, cb) => cb()) })),
+    }
+  })
+  mock.module('node:fs/promises', {
+    namedExports: {
+      mkdir: mock.fn(async () => {}),
+      readFile: mock.fn(async () => ''),
+      writeFile: mock.fn(async () => {}),
+      readdir: mock.fn(async () => []),
+      copyFile: mock.fn(async () => {}),
+      chmod: mock.fn(async () => {}),
+      symlink: mock.fn(async () => {}),
+      stat: mock.fn(async () => ({})),
     }
   })
   mock.module('#src/toolbox/system/exec.js', {
