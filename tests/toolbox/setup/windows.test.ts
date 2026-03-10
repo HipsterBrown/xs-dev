@@ -56,7 +56,7 @@ describe('toolbox/setup/windows', async () => {
     },
   })
   mock.module('#src/toolbox/patching/upsert.js', {
-    default: mock.fn(async () => {}),
+    defaultExport: mock.fn(async () => {}),
   })
 
   const { default: setupWindows } = await import('#src/toolbox/setup/windows.js')

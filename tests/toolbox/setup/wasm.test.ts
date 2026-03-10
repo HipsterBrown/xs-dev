@@ -47,11 +47,12 @@ describe('toolbox/setup/wasm', async () => {
     },
   })
   mock.module('#src/toolbox/patching/upsert.js', {
-    default: mock.fn(async () => {}),
+    defaultExport: mock.fn(async () => {}),
   })
   mock.module('#src/toolbox/system/exec.js', {
     namedExports: {
       execWithSudo: mock.fn(async () => ({ success: true, error: null })),
+      which: mock.fn(() => null),
     },
   })
   mock.module('#src/toolbox/setup/homebrew.js', {

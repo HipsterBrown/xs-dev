@@ -31,7 +31,7 @@ describe('toolbox/setup/homebrew', async () => {
     }
   })
   mock.module('#src/toolbox/patching/upsert.js', {
-    default: mock.fn(async () => {}),
+    defaultExport: mock.fn(async () => {}),
   })
 
   const { ensureHomebrew } = await import('#src/toolbox/setup/homebrew.js')
