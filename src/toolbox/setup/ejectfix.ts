@@ -8,6 +8,11 @@ import { INSTALL_DIR } from './constants.js'
 import type { Prompter } from '../../lib/prompter.js'
 import type { OperationEvent } from '../../lib/events.js'
 
+interface PlistModule {
+  readFileSync: <T>(path: string) => T
+  writeBinaryFileSync: (path: string, data: unknown) => void
+}
+
 const NC_PREFS_PLIST = 'com.apple.ncprefs.plist'
 const DISK_AGENT_NC_PREF_ID =
   '_SYSTEM_CENTER_:com.apple.DiskArbitration.DiskArbitrationAgent'
@@ -75,7 +80,7 @@ export default async function* ejectfix(
 
   try {
     yield { type: 'info', message: 'Updating notification preferences' }
-    const prefs = plist.readFileSync<{
+    const prefs = (plist as unknown as PlistModule).readFileSync<{
       apps: Array<{ 'bundle-id': string; flags: number }>
     }>(NC_PREFS_PATH)
     for (const app of prefs.apps) {
@@ -83,7 +88,7 @@ export default async function* ejectfix(
         app.flags = (Number(app.flags) & ~0b00010000) | 0b01001000
       }
     }
-    plist.writeBinaryFileSync(NC_PREFS_PATH, prefs)
+    (plist as unknown as PlistModule).writeBinaryFileSync(NC_PREFS_PATH, prefs)
   } catch (error) {
     yield {
       type: 'step:fail',
