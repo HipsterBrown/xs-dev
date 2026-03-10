@@ -142,7 +142,8 @@ export default async function* esp32Setup(
     return
   }
 
-  // Note: Windows environment is configured via setEnv (registry) and resolved at invocation time via PlatformTarget
+  // Note: Windows environment is configured via setEnv (registry). PlatformTarget.resolveEnvironment()
+  // for Windows is not yet implemented — win32 is marked unsupported in esp32/platform.json capabilities.
 
   yield {
     type: 'step:done',

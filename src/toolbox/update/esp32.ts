@@ -126,7 +126,9 @@ export default async function* updateEsp32(
     return
   }
 
-  // remove sourced IDF_PATH/export settings before install
+  // Migration cleanup: remove old `source $IDF_PATH/export.sh` line that prior xs-dev versions
+  // wrote to the exports file. IDF activation is now handled at invocation via PlatformTarget.resolveEnvironment().
+  // This block can be removed in a future PR once users have migrated away from the old exports file.
   // https://github.com/espressif/esp-idf/issues/8314#issuecomment-1024881587
   try {
     await replaceInFile(
