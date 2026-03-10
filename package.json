@@ -55,13 +55,15 @@
     "@stricli/core": "^1.1.0",
     "execa": "^9.6.1",
     "ora": "^9.3.0",
+    "semver": "^7.7.4",
     "serialport": "^13.0.0",
     "serve-handler": "^6.1.3",
     "simple-plist": "^1.3.1",
     "tar-fs": "^3.1.2",
     "unzip-stream": "^0.3.1",
     "usb": "^2.2.0",
-    "windows-shortcuts": "^0.1.6"
+    "windows-shortcuts": "^0.1.6",
+    "zod": "^4.3.6"
   },
   "optionalDependencies": {
     "node-liblzma": "^3.2.0"
@@ -76,6 +78,7 @@
     "@changesets/cli": "^2.19.0",
     "@justinribeiro/lite-youtube": "^1.5.0",
     "@types/node": "^24.0.0",
+    "@types/semver": "^7.7.1",
     "@types/serve-handler": "^6.1.1",
     "@types/tar-fs": "^2.0.1",
     "@types/unzip-stream": "^0.3.1",
