@@ -9,6 +9,7 @@ import { sourceEnvironment, which } from '../toolbox/system/exec'
 import { detectPython, getPythonVersion } from '../toolbox/system/python'
 import type { Device } from '../types'
 import { unwrapOr } from '../toolbox/system/errors'
+import { getPlatform } from '../platforms/index.js'
 
 function isDir(path: string): boolean {
   return existsSync(path) && statSync(path).isDirectory()
@@ -118,6 +119,38 @@ const command = buildCommand({
       ],
       write,
     )
+
+    // ESP32 two-tier dependency check
+    const esp32 = await getPlatform('esp32')
+    if (esp32 !== null) {
+      const statuses = await esp32.checkDependencies()
+      const bareStatuses = statuses.filter(s => s.tier === 'bare')
+      const activatedStatuses = statuses.filter(s => s.tier === 'activated')
+
+      if (bareStatuses.length > 0) {
+        write('\n  System dependencies (bare environment):\n')
+        for (const s of bareStatuses) {
+          const mark = s.healthy ? '✔' : '✘'
+          const found = s.found ?? '—'
+          write(`    ${mark} ${s.name.padEnd(16)} ${found.padEnd(12)} (expected ${s.expected})\n`)
+          if (!s.healthy && typeof s.message === 'string') {
+            write(`                         ${s.message}\n`)
+          }
+        }
+      }
+
+      if (activatedStatuses.length > 0) {
+        write('\n  Platform dependencies (activated environment):\n')
+        for (const s of activatedStatuses) {
+          const mark = s.healthy ? '✔' : '✘'
+          const found = s.found ?? '—'
+          write(`    ${mark} ${s.name.padEnd(16)} ${found.padEnd(12)} (expected ${s.expected})\n`)
+          if (!s.healthy && typeof s.message === 'string') {
+            write(`                         ${s.message}\n`)
+          }
+        }
+      }
+    }
 
     write(
       `\nIf this is related to an error when using the CLI, please create an issue at "https://github.com/hipsterbrown/xs-dev/issues/new" with the above info.\n`,
