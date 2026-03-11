@@ -1,3 +1,19 @@
+# v1.4.0 (Wed Mar 11 2026)
+
+#### 🚀 Enhancement
+
+- refactor(commands): extract manifest logic to shared toolbox [#240](https://github.com/HipsterBrown/xs-dev/pull/240) ([@HipsterBrown](https://github.com/HipsterBrown))
+
+#### ⚠️ Pushed to `main`
+
+- docs: update WIP statement in README ([@HipsterBrown](https://github.com/HipsterBrown))
+
+#### Authors: 1
+
+- Nick Hehr ([@HipsterBrown](https://github.com/HipsterBrown))
+
+---
+
 # v1.3.0 (Wed Mar 11 2026)
 
 #### 🚀 Enhancement
