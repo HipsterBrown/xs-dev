@@ -11,6 +11,7 @@ describe('toolbox/update/pico', async () => {
   mock.module('execa', {
     namedExports: {
       execaCommand: mock.fn(async () => ({ exitCode: 0, stdout: '' })),
+      execa: mock.fn(async () => ({ stdout: '' })),
     }
   })
   mock.module('node:fs', {
@@ -20,17 +21,17 @@ describe('toolbox/update/pico', async () => {
   })
   mock.module('#src/toolbox/system/exec.js', {
     namedExports: {
-      sourceEnvironment: mock.fn(async () => {}),
+      sourceEnvironment: mock.fn(async () => { }),
     }
   })
   mock.module('#src/toolbox/setup/pico/mac.js', {
     namedExports: {
-      installDeps: mock.fn(async function* () { yield { type: 'info', message: 'test' } }),
+      installDeps: mock.fn(async function*() { yield { type: 'info', message: 'test' } }),
     }
   })
   mock.module('#src/toolbox/setup/pico/linux.js', {
     namedExports: {
-      installDeps: mock.fn(async function* () { yield { type: 'info', message: 'test' } }),
+      installDeps: mock.fn(async function*() { yield { type: 'info', message: 'test' } }),
     }
   })
 

@@ -2,10 +2,10 @@ import { existsSync, statSync, readdirSync, mkdirSync, cpSync } from 'node:fs'
 import { join } from 'node:path'
 import { buildCommand } from '@stricli/core'
 import { select } from '@inquirer/prompts'
-import type { LocalContext } from '../app'
-import { collectChoicesFromTree } from '../toolbox/prompt/choices'
-import { sourceEnvironment } from '../toolbox/system/exec'
-import * as output from '../lib/output'
+import type { LocalContext } from '../app.js'
+import { collectChoicesFromTree } from '../toolbox/prompt/choices.js'
+import { sourceEnvironment } from '../toolbox/system/exec.js'
+import * as output from '../lib/output.js'
 
 interface InitOptions {
   typescript?: boolean
@@ -122,7 +122,7 @@ const command = buildCommand({
           createMain,
           createPackageJSON,
           createTSConfig,
-        } = await import('../toolbox/init/templates')
+        } = await import('../toolbox/init/templates.js')
 
         const fileTasks = [
           createMain({

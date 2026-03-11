@@ -2,25 +2,25 @@ import { mkdir, readdir, copyFile, symlink, chmod } from 'node:fs/promises'
 import { existsSync } from 'node:fs'
 import { resolve } from 'node:path'
 import { execSync } from 'node:child_process'
-import { execaCommand, execa } from '../system/execa.js'
+import { execaCommand, execa } from 'execa'
 import os from 'node:os'
 import {
   INSTALL_PATH,
   INSTALL_DIR,
   EXPORTS_FILE_PATH,
   XSBUG_LOG_PATH,
-} from './constants'
-import upsert from '../patching/upsert'
+} from './constants.js'
+import upsert from '../patching/upsert.js'
 import {
   downloadReleaseTools,
   fetchRelease,
   MissingReleaseAssetError,
-} from './moddable'
-import type { PlatformSetupArgs } from './types'
+} from './moddable.js'
+import type { PlatformSetupArgs } from './types.js'
 import type { Prompter } from '../../lib/prompter.js'
 import type { OperationEvent } from '../../lib/events.js'
-import { isFailure, unwrap } from '../system/errors'
-import { which } from '../system/exec'
+import { isFailure, unwrap } from '../system/errors.js'
+import { which } from '../system/exec.js'
 
 export default async function* setupMac(
   {

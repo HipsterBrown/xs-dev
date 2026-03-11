@@ -1,26 +1,26 @@
 import { mkdir, readdir, copyFile, chmod } from 'node:fs/promises'
 import { existsSync } from 'node:fs'
 import { resolve } from 'node:path'
-import { execaCommand, execa } from '../system/execa.js'
+import { execaCommand, execa } from 'execa'
 import os from 'node:os'
 import {
   INSTALL_PATH,
   INSTALL_DIR,
   EXPORTS_FILE_PATH,
   XSBUG_LOG_PATH,
-} from './constants'
-import upsert from '../patching/upsert'
+} from './constants.js'
+import upsert from '../patching/upsert.js'
 import {
   downloadReleaseTools,
   fetchRelease,
-} from './moddable'
-import type { PlatformSetupArgs } from './types'
+} from './moddable.js'
+import type { PlatformSetupArgs } from './types.js'
 import type { Prompter } from '../../lib/prompter.js'
 import type { OperationEvent } from '../../lib/events.js'
-import { execWithSudo, which } from '../system/exec'
-import { findMissingDependencies, installPackages } from '../system/packages'
-import type { Dependency } from '../system/types'
-import { isFailure, unwrap } from '../system/errors'
+import { execWithSudo, which } from '../system/exec.js'
+import { findMissingDependencies, installPackages } from '../system/packages.js'
+import type { Dependency } from '../system/types.js'
+import { isFailure, unwrap } from '../system/errors.js'
 
 export default async function* setupLinux(
   {

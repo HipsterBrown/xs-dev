@@ -1,12 +1,12 @@
 import { type as platformType } from 'node:os'
 import ora from 'ora'
 import { buildCommand } from '@stricli/core'
-import type { LocalContext } from '../app'
-import type { Device } from '../types'
-import { DEVICE_ALIAS } from '../toolbox/prompt/devices'
-import { createInteractivePrompter, createNonInteractivePrompter, isInteractive } from '../lib/prompter'
-import { handleEvent } from '../lib/renderer'
-import type { OperationEvent } from '../lib/events'
+import type { LocalContext } from '../app.js'
+import type { Device } from '../types.js'
+import { DEVICE_ALIAS } from '../toolbox/prompt/devices.js'
+import { createInteractivePrompter, createNonInteractivePrompter, isInteractive } from '../lib/prompter.js'
+import { handleEvent } from '../lib/renderer.js'
+import type { OperationEvent } from '../lib/events.js'
 
 interface UpdateOptions {
   device?: Device
@@ -31,7 +31,7 @@ const command = buildCommand({
       ? createInteractivePrompter()
       : createNonInteractivePrompter()
     const { default: update } = await import(
-      `../toolbox/update/${DEVICE_ALIAS[device]}`
+      `../toolbox/update/${DEVICE_ALIAS[device]}.js`
     )
     const spinner = ora()
 

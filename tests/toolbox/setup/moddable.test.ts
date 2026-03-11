@@ -5,6 +5,7 @@ describe('toolbox/setup/moddable', async () => {
   mock.module('execa', {
     namedExports: {
       execaCommand: mock.fn(async () => ({ stdout: 'v0.5.0' })),
+      execa: mock.fn(async () => ({ stdout: '' })),
     }
   })
   mock.module('node:fs', {

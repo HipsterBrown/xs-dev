@@ -1,8 +1,8 @@
-import { execaCommand } from '../../system/execa.js'
+import { execaCommand } from 'execa'
 import type { Prompter } from '../../../lib/prompter.js'
 import type { OperationEvent } from '../../../lib/events.js'
 
-export async function* installDeps(prompter: Prompter): AsyncGenerator<OperationEvent> {
+export async function* installDeps(_prompter: Prompter): AsyncGenerator<OperationEvent> {
   yield { type: 'step:start', message: 'Installing Zephyr dependencies' }
 
   try {

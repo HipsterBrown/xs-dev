@@ -2,10 +2,10 @@ import { readFile, writeFile } from 'node:fs/promises'
 import { existsSync } from 'node:fs'
 import { join } from 'node:path'
 import { buildCommand } from '@stricli/core'
-import type { LocalContext } from '../app'
-import { DEVICE_ALIAS } from '../toolbox/prompt/devices'
-import type { Device } from '../types'
-import * as output from '../lib/output'
+import type { LocalContext } from '../app.js'
+import { DEVICE_ALIAS } from '../toolbox/prompt/devices.js'
+import type { Device } from '../types.js'
+import * as output from '../lib/output.js'
 
 interface RemoveOptions {
   device?: Device

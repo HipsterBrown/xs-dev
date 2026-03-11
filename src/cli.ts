@@ -1,8 +1,9 @@
 #!/usr/bin/env node
 import process from 'node:process'
 import { run as runApp } from '@stricli/core'
-import { version } from '../package.json'
-import { app } from './app'
+import { app } from './app.js'
+import packageJson from '../package.json' with { type: 'json' }
+const { version } = packageJson
 
 /**
  * Create the cli and kick it off

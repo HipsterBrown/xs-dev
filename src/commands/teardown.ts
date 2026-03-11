@@ -4,12 +4,12 @@ import { readFile, writeFile } from 'node:fs/promises'
 import { join } from 'node:path'
 import { buildCommand } from '@stricli/core'
 import ora from 'ora'
-import type { LocalContext } from '../app'
+import type { LocalContext } from '../app.js'
 import {
   INSTALL_DIR,
   EXPORTS_FILE_PATH,
   getProfilePath,
-} from '../toolbox/setup/constants'
+} from '../toolbox/setup/constants.js'
 
 const command = buildCommand({
   docs: {

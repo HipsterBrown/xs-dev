@@ -2,7 +2,7 @@ import { mkdir, readdir, copyFile } from 'node:fs/promises'
 import { existsSync } from 'node:fs'
 import { resolve } from 'node:path'
 import { execSync } from 'node:child_process'
-import { execa } from '../system/execa.js'
+import { execa } from 'execa'
 import ws from 'windows-shortcuts'
 import { promisify } from 'util'
 import {
@@ -10,16 +10,16 @@ import {
   INSTALL_DIR,
   EXPORTS_FILE_PATH,
   XSBUG_LOG_PATH,
-} from './constants'
-import upsert from '../patching/upsert'
+} from './constants.js'
+import upsert from '../patching/upsert.js'
 import {
   downloadReleaseTools,
   fetchRelease,
-} from './moddable'
-import type { PlatformSetupArgs } from './types'
+} from './moddable.js'
+import type { PlatformSetupArgs } from './types.js'
 import type { Prompter } from '../../lib/prompter.js'
 import type { OperationEvent } from '../../lib/events.js'
-import { isFailure, unwrap } from '../system/errors'
+import { isFailure, unwrap } from '../system/errors.js'
 
 const getWsPromise = (): ((path: string, options: unknown) => Promise<void>) => promisify(ws.create)
 

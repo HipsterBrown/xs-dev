@@ -1,15 +1,15 @@
 import os from 'node:os'
 import { mkdir, readdir, copyFile, chmod } from 'node:fs/promises'
-import { execaCommand, execa } from '../system/execa.js'
+import { execaCommand, execa } from 'execa'
 import { resolve } from 'node:path'
-import { INSTALL_PATH, MODDABLE_REPO, XSBUG_LOG_PATH } from '../setup/constants'
-import type { SetupArgs } from '../setup/types'
+import { INSTALL_PATH, MODDABLE_REPO, XSBUG_LOG_PATH } from '../setup/constants.js'
+import type { SetupArgs } from '../setup/types.js'
 import {
   fetchRelease,
   moddableExists,
   downloadReleaseTools,
-} from '../setup/moddable'
-import { execWithSudo, sourceEnvironment } from '../system/exec'
+} from '../setup/moddable.js'
+import { execWithSudo, sourceEnvironment } from '../system/exec.js'
 import type { Prompter } from '../../lib/prompter.js'
 import type { OperationEvent } from '../../lib/events.js'
 

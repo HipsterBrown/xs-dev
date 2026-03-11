@@ -1,15 +1,15 @@
 import { type as platformType } from 'node:os'
 import ora from 'ora'
 import { buildCommand } from '@stricli/core'
-import type { LocalContext } from '../app'
-import type { Device } from '../types'
-import setupEjectfix from '../toolbox/setup/ejectfix'
-import { DEVICE_ALIAS } from '../toolbox/prompt/devices'
-import { MODDABLE_REPO } from '../toolbox/setup/constants'
-import type { SetupArgs } from '../toolbox/setup/types'
-import { createInteractivePrompter, createNonInteractivePrompter, isInteractive } from '../lib/prompter'
-import { handleEvent } from '../lib/renderer'
-import type { OperationEvent } from '../lib/events'
+import type { LocalContext } from '../app.js'
+import type { Device } from '../types.js'
+import setupEjectfix from '../toolbox/setup/ejectfix.js'
+import { DEVICE_ALIAS } from '../toolbox/prompt/devices.js'
+import { MODDABLE_REPO } from '../toolbox/setup/constants.js'
+import type { SetupArgs } from '../toolbox/setup/types.js'
+import { createInteractivePrompter, createNonInteractivePrompter, isInteractive } from '../lib/prompter.js'
+import { handleEvent } from '../lib/renderer.js'
+import type { OperationEvent } from '../lib/events.js'
 
 interface SetupOptions {
   device?: Device
@@ -91,7 +91,7 @@ const command = buildCommand({
       'lin',
       'linux',
     ]
-    const { default: setup } = await import(`../toolbox/setup/${target}`)
+    const { default: setup } = await import(`../toolbox/setup/${target}.js`)
 
     const spinner = ora()
 

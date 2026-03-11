@@ -1,6 +1,6 @@
-import type { Dependency } from '../../system/types'
-import { findMissingDependencies, installPackages } from '../../system/packages'
-import { isFailure, unwrapOr } from '../../system/errors'
+import type { Dependency } from '../../system/types.js'
+import { findMissingDependencies, installPackages } from '../../system/packages.js'
+import { isFailure, unwrapOr } from '../../system/errors.js'
 import type { Prompter } from '../../../lib/prompter.js'
 import type { OperationEvent } from '../../../lib/events.js'
 
