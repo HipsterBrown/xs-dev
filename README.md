@@ -6,7 +6,7 @@ The Moddable SDK and associated dev board tooling is incredibly empowering for e
 
 [Check out the documentation!](https://hipsterbrown.github.io/xs-dev/)
 
-**This project is a work in progress and currently pre-1.0, so there may be breaking changes.**
+**This project is a continual work in progress and v1, so breaking changes will be semantically-released with major version bumps.**
 
 ## Requirements
 
