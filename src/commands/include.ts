@@ -5,6 +5,7 @@ import { buildCommand } from '@stricli/core'
 import { select } from '@inquirer/prompts'
 import type { LocalContext } from '../app.js'
 import { collectChoicesFromTree } from '../toolbox/prompt/choices.js'
+import { buildTree } from '../toolbox/prompt/tree.js'
 import { sourceEnvironment } from '../toolbox/system/exec.js'
 import { DEVICE_ALIAS } from '../toolbox/prompt/devices.js'
 import type { Device } from '../types.js'
@@ -15,23 +16,6 @@ interface IncludeOptions {
 }
 
 const deviceSet = new Set(Object.values(DEVICE_ALIAS))
-
-interface TreeNode {
-  name: string
-  type: 'dir' | 'file'
-  children: TreeNode[]
-}
-
-function buildTree(dirPath: string, name: string): TreeNode {
-  const stat = statSync(dirPath)
-  if (stat.isDirectory()) {
-    const children = readdirSync(dirPath).map((entry) =>
-      buildTree(join(dirPath, entry), entry),
-    )
-    return { name, type: 'dir', children }
-  }
-  return { name, type: 'file', children: [] }
-}
 
 const command = buildCommand({
   docs: {
