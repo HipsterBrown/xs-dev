@@ -46,6 +46,12 @@ export function removeInclude(
   device = '',
 ): { manifest: Manifest; removed: string[] } {
   const clone = structuredClone(manifest) as Manifest
+
+  // If device specified but platform doesn't exist in manifest, nothing to remove
+  if (device !== '' && (!(clone.platforms as Record<string, unknown> | undefined)?.[device])) {
+    return { manifest: clone, removed: [] }
+  }
+
   const target = getTarget(clone, device)
   if (!('include' in target)) {
     return { manifest: clone, removed: [] }

@@ -1,4 +1,3 @@
-import { readFile, writeFile } from 'node:fs/promises'
 import { existsSync } from 'node:fs'
 import { join } from 'node:path'
 import { buildCommand } from '@stricli/core'
@@ -6,6 +5,7 @@ import type { LocalContext } from '../app.js'
 import { DEVICE_ALIAS } from '../toolbox/prompt/devices.js'
 import type { Device } from '../types.js'
 import * as output from '../lib/output.js'
+import { readManifest, writeManifest, removeInclude } from '../toolbox/manifest/index.js'
 
 interface RemoveOptions {
   device?: Device
@@ -25,7 +25,6 @@ const command = buildCommand({
       )
       process.exit(1)
     }
-    const { device = '' } = flags
 
     if (moduleName === undefined) {
       output.error('Module name is required')
@@ -34,42 +33,20 @@ const command = buildCommand({
 
     output.info(`Removing "${String(moduleName)}" from manifest includes`)
 
-    const raw = await readFile(manifestPath, 'utf8')
-    const data = JSON.parse(raw) as Record<string, unknown>
-    const fn = (manifestIn: Record<string, unknown>): Record<string, unknown> | undefined => {
-      let manifest = manifestIn
-      if (device !== '') {
-        manifest.platforms ??= {}
-        ;(manifest.platforms as Record<string, unknown>)[device] ??= {}
-        manifest = (manifest.platforms as Record<string, unknown>)[device] as Record<string, unknown>
-      }
+    const { device = '' } = flags
+    const manifest = await readManifest(manifestPath)
+    const { manifest: updated, removed } = removeInclude(manifest, moduleName, device)
 
-      if (!('include' in manifest)) {
-        return
-      }
-
-      if (typeof manifest.include === 'string') {
-        manifest.include = [manifest.include]
-      }
-
-      const lengthBefore = (manifest.include as string[]).length
-      const toRemove = (manifest.include as string[]).filter((mod: string) => mod.includes(moduleName))
-      toRemove.forEach((mod) => { output.info(` Removing: ${mod}`) })
-      manifest.include = (manifest.include as string[]).filter((mod: string) => !mod.includes(moduleName))
-      if ((manifest.include as string[]).length === lengthBefore) {
-        output.error(`"${moduleName}" not found. No modules removed.`)
-      }
-
-      if ((manifest.include as string[]).length === 1) {
-        manifest.include = (manifest.include as string[])[0]
-      } else if ((manifest.include as string[]).length === 0) {
-        delete manifest.include
-      }
-
-      return manifestIn
+    if (removed.length === 0) {
+      output.error(`"${moduleName}" not found. No modules removed.`)
+      return
     }
-    const result = fn(data)
-    await writeFile(manifestPath, JSON.stringify(result ?? data, null, 2), 'utf8')
+
+    for (const mod of removed) {
+      output.info(` Removing: ${mod}`)
+    }
+
+    await writeManifest(manifestPath, updated)
 
     output.success('Done!')
   },

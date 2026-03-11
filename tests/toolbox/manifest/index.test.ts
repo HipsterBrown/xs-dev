@@ -97,5 +97,12 @@ describe('manifest utility', () => {
       removeInclude(manifest, 'wifi')
       assert.deepEqual(manifest, original)
     })
+
+    it('does not create spurious platform entry when device does not exist', () => {
+      const manifest: Manifest = {}
+      const { manifest: result } = removeInclude(manifest, 'wifi', 'esp32')
+      // Should not create a platforms key if the device doesn't exist
+      assert.equal('platforms' in result, false)
+    })
   })
 })
