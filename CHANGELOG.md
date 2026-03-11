@@ -1,3 +1,15 @@
+# v1.3.0 (Wed Mar 11 2026)
+
+#### 🚀 Enhancement
+
+- chore: migrate to native ESM (nodenext) [#238](https://github.com/HipsterBrown/xs-dev/pull/238) ([@HipsterBrown](https://github.com/HipsterBrown))
+
+#### Authors: 1
+
+- Nick Hehr ([@HipsterBrown](https://github.com/HipsterBrown))
+
+---
+
 # v1.2.7 (Mon Mar 09 2026)
 
 #### 🐛 Bug Fix
