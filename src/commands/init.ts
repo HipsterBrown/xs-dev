@@ -1,9 +1,10 @@
-import { existsSync, statSync, readdirSync, mkdirSync, cpSync } from 'node:fs'
+import { existsSync, statSync, mkdirSync, cpSync, readdirSync } from 'node:fs'
 import { join } from 'node:path'
 import { buildCommand } from '@stricli/core'
 import { select } from '@inquirer/prompts'
 import type { LocalContext } from '../app.js'
 import { collectChoicesFromTree } from '../toolbox/prompt/choices.js'
+import { buildTree } from '../toolbox/prompt/tree.js'
 import { sourceEnvironment } from '../toolbox/system/exec.js'
 import * as output from '../lib/output.js'
 
@@ -15,23 +16,6 @@ interface InitOptions {
   'list-examples'?: boolean
   overwrite?: boolean
   asyncMain?: boolean
-}
-
-interface TreeNode {
-  name: string
-  type: 'dir' | 'file'
-  children: TreeNode[]
-}
-
-function buildTree(dirPath: string, name: string): TreeNode {
-  const stat = statSync(dirPath)
-  if (stat.isDirectory()) {
-    const children = readdirSync(dirPath).map((entry) =>
-      buildTree(join(dirPath, entry), entry),
-    )
-    return { name, type: 'dir', children }
-  }
-  return { name, type: 'file', children: [] }
 }
 
 const command = buildCommand({
