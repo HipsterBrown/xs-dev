@@ -3,12 +3,13 @@ import { existsSync, statSync } from 'node:fs'
 import { join } from 'node:path'
 import { buildCommand } from '@stricli/core'
 import type { LocalContext } from '../app.js'
+import { info } from '../lib/output.js'
 import { DEVICE_ALIAS } from '../toolbox/prompt/devices.js'
 import { getModdableVersion, moddableExists } from '../toolbox/setup/moddable.js'
 import { sourceEnvironment, which } from '../toolbox/system/exec.js'
 import { detectPython, getPythonVersion } from '../toolbox/system/python.js'
-import type { Device } from '../types.js'
 import { unwrapOr } from '../toolbox/system/errors.js'
+import type { Device } from '../types.js'
 
 function isDir(path: string): boolean {
   return existsSync(path) && statSync(path).isDirectory()
@@ -83,7 +84,7 @@ const command = buildCommand({
     const moddableVersion = unwrapOr(await getModdableVersion(), 'Not found')
     const moddablePath = process.env.MODDABLE ?? 'n/a'
 
-    write('xs-dev environment info:\n')
+    info('xs-dev environment info:\n')
     printTable(
       [
         ['CLI Version', currentVersion],
@@ -119,7 +120,7 @@ const command = buildCommand({
       write,
     )
 
-    write(
+    info(
       `\nIf this is related to an error when using the CLI, please create an issue at "https://github.com/hipsterbrown/xs-dev/issues/new" with the above info.\n`,
     )
   },

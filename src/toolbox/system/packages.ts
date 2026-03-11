@@ -1,4 +1,4 @@
-import { execaCommand } from './execa.js'
+import { execaCommand } from 'execa'
 import type { Dependency } from './types.js'
 import { pkexec, execWithSudo, which } from '../system/exec.js'
 import type { Result } from '../../types.js'

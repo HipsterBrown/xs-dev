@@ -5,8 +5,8 @@ import { createNonInteractivePrompter } from '#src/lib/prompter.js'
 describe('toolbox/setup/ejectfix', async () => {
   mock.module('node:fs/promises', {
     namedExports: {
-      mkdir: mock.fn(async () => {}),
-      copyFile: mock.fn(async () => {}),
+      mkdir: mock.fn(async () => { }),
+      copyFile: mock.fn(async () => { }),
     }
   })
   mock.module('node:fs', {
@@ -17,12 +17,13 @@ describe('toolbox/setup/ejectfix', async () => {
   mock.module('execa', {
     namedExports: {
       execaCommand: mock.fn(async () => ({ exitCode: 0, stdout: '' })),
+      execa: mock.fn(async () => ({ stdout: '' })),
     }
   })
   mock.module('simple-plist', {
     namedExports: {
       readFileSync: mock.fn(() => ({ apps: [] })),
-      writeBinaryFileSync: mock.fn(() => {}),
+      writeBinaryFileSync: mock.fn(() => { }),
     }
   })
 

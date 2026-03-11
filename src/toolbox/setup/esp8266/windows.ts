@@ -7,7 +7,7 @@ import { addToPath, setEnv } from '../windows.js'
 import { INSTALL_DIR } from '../constants.js'
 import { which } from '../../system/exec.js'
 import { fetchStream } from '../../system/fetch.js'
-import { execaCommand } from '../../system/execa.js'
+import { execaCommand } from 'execa'
 import type { Prompter } from '../../../lib/prompter.js'
 import type { OperationEvent } from '../../../lib/events.js'
 

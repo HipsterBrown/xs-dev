@@ -1,7 +1,7 @@
 import { type as platformType } from 'node:os'
 import { existsSync } from 'node:fs'
 import { resolve } from 'node:path'
-import { execaCommand } from '../system/execa.js'
+import { execaCommand } from 'execa'
 import { INSTALL_DIR, EXPORTS_FILE_PATH } from '../setup/constants.js'
 import upsert from '../patching/upsert.js'
 import { installDeps as installMacDeps } from '../setup/pico/mac.js'

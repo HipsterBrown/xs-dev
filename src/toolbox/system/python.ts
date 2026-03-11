@@ -1,4 +1,4 @@
-import { execaCommand } from './execa.js'
+import { execaCommand } from 'execa'
 import type { Result } from '../../types.js'
 import { failure, wrapAsync } from './errors.js'
 import { which } from './exec.js'

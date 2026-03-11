@@ -1,6 +1,6 @@
 import os from 'node:os'
 import { mkdir, readdir, copyFile, chmod } from 'node:fs/promises'
-import { execaCommand, execa } from '../system/execa.js'
+import { execaCommand, execa } from 'execa'
 import { resolve } from 'node:path'
 import { INSTALL_PATH, MODDABLE_REPO, XSBUG_LOG_PATH } from '../setup/constants.js'
 import type { SetupArgs } from '../setup/types.js'

@@ -4,6 +4,7 @@ import { resolve } from 'node:path'
 import { type as platformType } from 'node:os'
 import { finished } from 'node:stream'
 import { promisify } from 'node:util'
+import { execaCommand } from 'execa'
 import { extract } from 'tar-fs'
 import { createGunzip } from 'node:zlib'
 import { Extract as ZipExtract } from 'unzip-stream'
@@ -19,7 +20,6 @@ import { sourceEnvironment } from '../system/exec.js'
 import { fetchStream } from '../system/fetch.js'
 import type { Prompter } from '../../lib/prompter.js'
 import type { OperationEvent } from '../../lib/events.js'
-import { execaCommand } from '../system/execa.js'
 
 const finishedPromise = promisify(finished)
 

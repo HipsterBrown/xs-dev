@@ -11,17 +11,18 @@ describe('toolbox/setup/windows', async () => {
   mock.module('execa', {
     namedExports: {
       execa: mock.fn(async () => ({ stdout: '' })),
+      execaCommand: mock.fn(async () => ({ exitCode: 0, stdout: '' })),
     },
   })
   mock.module('node:fs/promises', {
     namedExports: {
-      mkdir: mock.fn(async () => {}),
+      mkdir: mock.fn(async () => { }),
       readdir: mock.fn(async () => []),
-      copyFile: mock.fn(async () => {}),
+      copyFile: mock.fn(async () => { }),
       readFile: mock.fn(async () => ''),
-      writeFile: mock.fn(async () => {}),
-      chmod: mock.fn(async () => {}),
-      symlink: mock.fn(async () => {}),
+      writeFile: mock.fn(async () => { }),
+      chmod: mock.fn(async () => { }),
+      symlink: mock.fn(async () => { }),
       stat: mock.fn(async () => ({})),
     },
   })
@@ -29,8 +30,8 @@ describe('toolbox/setup/windows', async () => {
     namedExports: {
       existsSync: mock.fn(() => false),
       statSync: mock.fn(() => ({ isDirectory: () => false, isFile: () => false })),
-      renameSync: mock.fn(() => {}),
-      rmSync: mock.fn(() => {}),
+      renameSync: mock.fn(() => { }),
+      rmSync: mock.fn(() => { }),
       createWriteStream: mock.fn(() => ({ on: mock.fn((event, cb) => cb()) })),
     },
   })
@@ -52,11 +53,11 @@ describe('toolbox/setup/windows', async () => {
           assets: [{ name: 'moddable-tools-win64.zip' }],
         },
       })),
-      downloadReleaseTools: mock.fn(async () => {}),
+      downloadReleaseTools: mock.fn(async () => { }),
     },
   })
   mock.module('#src/toolbox/patching/upsert.js', {
-    defaultExport: mock.fn(async () => {}),
+    defaultExport: mock.fn(async () => { }),
   })
 
   const { default: setupWindows } = await import('#src/toolbox/setup/windows.js')

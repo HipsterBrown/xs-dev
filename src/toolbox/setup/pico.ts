@@ -2,7 +2,7 @@ import { mkdir, readdir } from 'node:fs/promises'
 import { existsSync } from 'node:fs'
 import { resolve } from 'node:path'
 import { type as platformType } from 'node:os'
-import { execaCommand } from '../system/execa.js'
+import { execaCommand } from 'execa'
 import { INSTALL_DIR, EXPORTS_FILE_PATH } from './constants.js'
 import upsert from '../patching/upsert.js'
 import { installDeps as installMacDeps } from './pico/mac.js'
@@ -14,7 +14,7 @@ import type { OperationEvent } from '../../lib/events.js'
 
 
 export default async function* picoSetup(
-  args: Record<string, unknown>,
+  _args: Record<string, unknown>,
   prompter: Prompter,
 ): AsyncGenerator<OperationEvent> {
   yield { type: 'step:start', message: 'Starting pico tooling setup' }

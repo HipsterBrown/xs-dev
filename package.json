@@ -15,6 +15,9 @@
   "bin": {
     "xs-dev": "build/src/cli.js"
   },
+  "imports": {
+    "#src/": "./src/"
+  },
   "scripts": {
     "postinstall": "node scripts/fix-liblzma-arm64.mjs",
     "xs-dev": "tsx src/cli.ts",

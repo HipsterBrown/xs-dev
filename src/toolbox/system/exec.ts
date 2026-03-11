@@ -1,6 +1,6 @@
 import { type as platformType } from 'node:os'
 import { execSync } from 'node:child_process'
-import { execaCommand, execa } from './execa.js'
+import { execaCommand, execa } from 'execa'
 import { EXPORTS_FILE_PATH } from '../setup/constants.js'
 import type { Device, Result } from '../../types.js'
 import { success, failure, wrapAsync } from './errors.js'

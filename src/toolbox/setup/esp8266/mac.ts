@@ -1,4 +1,4 @@
-import { execaCommand } from '../../system/execa.js'
+import { execaCommand } from 'execa'
 import { which } from '../../system/exec.js'
 import { ensureHomebrew } from '../homebrew.js'
 import type { OperationEvent } from '../../../lib/events.js'

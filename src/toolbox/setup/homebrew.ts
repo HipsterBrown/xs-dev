@@ -1,5 +1,5 @@
 import os from 'node:os'
-import { execaCommand } from '../system/execa.js'
+import { execaCommand } from 'execa'
 import { existsSync } from 'node:fs'
 import upsert from '../patching/upsert.js'
 import { getProfilePath } from './constants.js'
