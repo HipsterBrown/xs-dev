@@ -19,7 +19,7 @@ function getTarget(manifest: Manifest, device: string): Manifest {
 }
 
 export function addInclude(manifest: Manifest, modulePath: string, device = ''): Manifest {
-  const clone = structuredClone(manifest) as Manifest
+  const clone = structuredClone(manifest)
   const target = getTarget(clone, device)
   if (!('include' in target)) {
     target.include = []
@@ -45,10 +45,10 @@ export function removeInclude(
   moduleName: string,
   device = '',
 ): { manifest: Manifest; removed: string[] } {
-  const clone = structuredClone(manifest) as Manifest
+  const clone = structuredClone(manifest)
 
   // If device specified but platform doesn't exist in manifest, nothing to remove
-  if (device !== '' && (!(clone.platforms as Record<string, unknown> | undefined)?.[device])) {
+  if (device !== '' && (clone.platforms as Record<string, unknown> | undefined)?.[device] === undefined) {
     return { manifest: clone, removed: [] }
   }
 
