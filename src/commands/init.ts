@@ -1,153 +1,31 @@
-import { existsSync, statSync, mkdirSync, cpSync, readdirSync } from 'node:fs'
-import { join } from 'node:path'
 import { buildCommand } from '@stricli/core'
-import { select } from '@inquirer/prompts'
+import ora from 'ora'
 import type { LocalContext } from '../app.js'
-import { collectChoicesFromTree } from '../toolbox/prompt/choices.js'
-import { buildTree } from '../toolbox/prompt/tree.js'
-import { sourceEnvironment } from '../toolbox/system/exec.js'
-import * as output from '../lib/output.js'
-
-interface InitOptions {
-  typescript?: boolean
-  io?: boolean
-  manifest?: boolean
-  example?: string
-  'list-examples'?: boolean
-  overwrite?: boolean
-  asyncMain?: boolean
-}
+import { handleEvent } from '../lib/renderer.js'
+import { createInteractivePrompter, createNonInteractivePrompter, isInteractive } from '../lib/prompter.js'
+import initProject from '../toolbox/init/index.js'
+import type { InitOptions } from '../toolbox/init/index.js'
 
 const command = buildCommand({
   docs: {
     brief: 'Scaffold a new Moddable XS project',
   },
   async func(this: LocalContext, flags: InitOptions, projectName: string) {
-    const {
-      typescript = false,
-      io = true,
-      manifest = false,
-      example,
-      'list-examples': listExamples = false,
-      overwrite = false,
-      asyncMain = false,
-    } = flags
-
-    if (projectName !== undefined) {
-      if (!overwrite && existsSync(projectName) && statSync(projectName).isDirectory()) {
-        output.warn(
-          `Directory called ${projectName} already exists. Please pass the --overwrite flag to replace an existing project.`,
-        )
-        return
-      }
-
-      await sourceEnvironment()
-
-      if (example !== undefined || listExamples) {
-        // find example project
-        const exampleProjectPath = join(String(process.env.MODDABLE), 'examples')
-        const exampleChildren = existsSync(exampleProjectPath) && statSync(exampleProjectPath).isDirectory()
-          ? readdirSync(exampleProjectPath).map((entry) =>
-              buildTree(join(exampleProjectPath, entry), entry),
-            )
-          : undefined
-        const choices =
-          exampleChildren !== undefined
-            ? exampleChildren.map((example) => collectChoicesFromTree(example)).flat()
-            : []
-        let selectedExample = choices.find((choice) => choice === example)
-
-        if (listExamples || selectedExample === undefined) {
-          const filteredChoices = choices.filter((choice) =>
-            choice.includes(String(example)),
-          )
-          selectedExample = await select({
-            message: 'Here are the available examples templates:',
-            choices: (filteredChoices.length > 0 ? filteredChoices : choices).map((c) => ({
-              name: c,
-              value: c,
-            })),
-          })
-        }
-
-        // copy files into new project directory
-        if (selectedExample !== '' && selectedExample !== undefined) {
-          const selectedExamplePath = join(exampleProjectPath, selectedExample)
-          output.info(`Generating project directory from ${selectedExample}`)
-          cpSync(selectedExamplePath, projectName, { recursive: true, force: overwrite })
-        } else {
-          output.warn('Please select an example template to use.')
-          return
-        }
-      } else {
-        output.info(`Generating Moddable project: ${projectName}`)
-
-        mkdirSync(projectName, { recursive: true })
-
-        const includes = [
-          io
-            ? [
-              '"$(MODDABLE)/modules/io/manifest.json"',
-              '"$(MODDABLE)/examples/manifest_net.json"',
-            ]
-            : '"$(MODDABLE)/examples/manifest_base.json"',
-          typescript && '"$(MODDABLE)/examples/manifest_typings.json"',
-        ]
-          .filter(Boolean)
-          .flat()
-          .join(',\n\t')
-
-        const defines: string = asyncMain
-          ? ',\n  defines: {\n    async_main: 1\n  }'
-          : ''
-
-        const {
-          createManifest,
-          createMain,
-          createPackageJSON,
-          createTSConfig,
-        } = await import('../toolbox/init/templates.js')
-
-        const fileTasks = [
-          createMain({
-            target: `${projectName}/main.${typescript ? 'ts' : 'js'}`,
-            legacy: manifest,
-          }),
-        ]
-
-        if (manifest) {
-          fileTasks.push(
-            createManifest({
-              target: `${projectName}/manifest.json`,
-              includes,
-              defines,
-            }),
-          )
-        } else {
-          fileTasks.push(
-            createPackageJSON({
-              target: `${projectName}/package.json`,
-              projectName,
-              typescript,
-              io,
-            }),
-          )
-        }
-
-        if (typescript) {
-          fileTasks.push(
-            createTSConfig({ target: `${projectName}/tsconfig.json` }),
-          )
-        }
-
-        await Promise.all(fileTasks)
-      }
-
-      this.process.stdout.write(`Run the project using: cd ${projectName} && xs-dev run\n`)
-    } else {
-      output.warn(
-        'Name is required to generate project: xs-dev init my-project-name',
+    if (projectName === undefined) {
+      // output.warn equivalent — use process.stdout since no spinner yet
+      this.process.stdout.write(
+        'Name is required to generate project: xs-dev init my-project-name\n',
       )
+      return
+    }
+
+    const prompter = isInteractive()
+      ? createInteractivePrompter()
+      : createNonInteractivePrompter()
+
+    const spinner = ora()
+    for await (const event of initProject(projectName, flags, prompter)) {
+      handleEvent(event, spinner)
     }
   },
   parameters: {
@@ -164,14 +42,12 @@ const command = buildCommand({
     flags: {
       typescript: {
         kind: 'boolean',
-        brief:
-          'Add TypeScript configuration to generated project; defaults to false',
+        brief: 'Add TypeScript configuration to generated project; defaults to false',
         optional: true,
       },
       io: {
         kind: 'boolean',
-        brief:
-          'Add ECMA-419 standard API support to generated project; defaults to true',
+        brief: 'Add ECMA-419 standard API support to generated project; defaults to true',
         optional: true,
       },
       manifest: {
@@ -200,8 +76,7 @@ const command = buildCommand({
       },
       asyncMain: {
         kind: 'boolean',
-        brief:
-          'Add top-level await configuration to generated project; defaults to false',
+        brief: 'Add top-level await configuration to generated project; defaults to false',
         optional: true,
       },
     },
