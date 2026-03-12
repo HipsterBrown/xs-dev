@@ -1,6 +1,6 @@
 import { buildCommand } from '@stricli/core'
 import ora from 'ora'
-import type { LocalContext } from '../app'
+import type { LocalContext } from '../app.js'
 import { teardown } from '../toolbox/teardown/index.js'
 
 const command = buildCommand({
