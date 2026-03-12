@@ -1,3 +1,15 @@
+# v1.5.0 (Thu Mar 12 2026)
+
+#### 🚀 Enhancement
+
+- refactor(teardown): extract cleanup logic to testable toolbox module [#241](https://github.com/HipsterBrown/xs-dev/pull/241) ([@HipsterBrown](https://github.com/HipsterBrown))
+
+#### Authors: 1
+
+- Nick Hehr ([@HipsterBrown](https://github.com/HipsterBrown))
+
+---
+
 # v1.4.0 (Wed Mar 11 2026)
 
 #### 🚀 Enhancement
