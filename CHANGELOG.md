@@ -1,3 +1,15 @@
+# v1.7.0 (Thu Mar 12 2026)
+
+#### 🚀 Enhancement
+
+- refactor: extract doctor/info and init command logic into toolbox [#243](https://github.com/HipsterBrown/xs-dev/pull/243) ([@HipsterBrown](https://github.com/HipsterBrown))
+
+#### Authors: 1
+
+- Nick Hehr ([@HipsterBrown](https://github.com/HipsterBrown))
+
+---
+
 # v1.6.0 (Thu Mar 12 2026)
 
 #### 🚀 Enhancement
