@@ -1,7 +1,7 @@
 import { buildCommand } from '@stricli/core'
 import ora from 'ora'
-import type { LocalContext } from '../app'
-import { handleEvent } from '../lib/renderer'
+import type { LocalContext } from '../app.js'
+import { handleEvent } from '../lib/renderer.js'
 import scanDevices from '../toolbox/scan/index.js'
 
 const command = buildCommand({

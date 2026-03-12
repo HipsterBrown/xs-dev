@@ -74,7 +74,7 @@ export default async function* scanDevices(): AsyncGenerator<OperationEvent> {
           try {
             if (port.vendorId === '2e8a' && hasPicotool) {
               const device = await findBySerialNumber(port.serialNumber ?? '')
-              if (device === null) {
+              if (device === null || typeof device === 'undefined') {
                 return [undefined, port.path] as [undefined, string]
               }
               const bus = String(device.busNumber)
@@ -87,7 +87,7 @@ export default async function* scanDevices(): AsyncGenerator<OperationEvent> {
             }
             const buffer = execSync(`esptool.py --port ${port.path} read_mac`)
             return [buffer, port.path] as [Buffer, string]
-          } catch {}
+          } catch { }
           return [undefined, port.path]
         }),
     )
