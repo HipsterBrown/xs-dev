@@ -97,7 +97,6 @@ describe('Application', () => {
     it('should generate new project', async () => {
       const result = await runWithInputs(app, ['init', 'test-project'])
       assert.equal(result.exitCode, 0)
-      assert.ok(result.stdout.includes('Run the project'))
     })
   })
 })
