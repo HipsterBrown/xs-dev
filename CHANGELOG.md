@@ -1,3 +1,15 @@
+# v1.6.0 (Thu Mar 12 2026)
+
+#### 🚀 Enhancement
+
+- refactor(toolbox/scan): extract device scanning to async generator [#242](https://github.com/HipsterBrown/xs-dev/pull/242) ([@HipsterBrown](https://github.com/HipsterBrown))
+
+#### Authors: 1
+
+- Nick Hehr ([@HipsterBrown](https://github.com/HipsterBrown))
+
+---
+
 # v1.5.0 (Thu Mar 12 2026)
 
 #### 🚀 Enhancement
