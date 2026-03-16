@@ -1,3 +1,15 @@
+# v1.7.1 (Mon Mar 16 2026)
+
+#### 🐛 Bug Fix
+
+- fix: update node-liblzma to v4.0.1 with macos arm64 prebuilt bindings [#244](https://github.com/HipsterBrown/xs-dev/pull/244) ([@HipsterBrown](https://github.com/HipsterBrown))
+
+#### Authors: 1
+
+- Nick Hehr ([@HipsterBrown](https://github.com/HipsterBrown))
+
+---
+
 # v1.7.0 (Thu Mar 12 2026)
 
 #### 🚀 Enhancement
