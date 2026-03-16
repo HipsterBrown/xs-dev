@@ -149,8 +149,8 @@ importers:
         version: 8.57.0(eslint@8.57.1)(typescript@5.9.3)
     optionalDependencies:
       node-liblzma:
-        specifier: ^3.2.0
-        version: 3.2.0
+        specifier: ^4.0.1
+        version: 4.0.1
 
 packages:
 
@@ -3865,8 +3865,8 @@ packages:
     resolution: {integrity: sha512-LA4ZjwlnUblHVgq0oBF3Jl/6h/Nvs5fzBLwdEF4nuxnFdsfajde4WfxtJr3CaiH+F6ewcIB/q4jQ4UzPyid+CQ==}
     hasBin: true
 
-  node-liblzma@3.2.0:
-    resolution: {integrity: sha512-nXiDY0skg4376zZ5rrUqvfkyYi02IvspFJMa9FVE31WLDJnDi8HRd9Ak1H6NqNIrkpmpDnrsRaOQP2512mcNVg==}
+  node-liblzma@4.0.1:
+    resolution: {integrity: sha512-7XPjc/PRQeQ/8xykdSXOkbrskBrdxptijKtBgydLTAWovsGh0KGOrle+soejFKrO4YYfO2BHzn5+C1Zi3XDxRg==}
     engines: {node: '>=20.0.0'}
 
   node-mock-http@1.0.4:
@@ -9972,7 +9972,7 @@ snapshots:
 
   node-gyp-build@4.8.4: {}
 
-  node-liblzma@3.2.0:
+  node-liblzma@4.0.1:
     dependencies:
       node-addon-api: 8.6.0
       node-gyp-build: 4.8.4

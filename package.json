@@ -19,7 +19,6 @@
     "#src/": "./src/"
   },
   "scripts": {
-    "postinstall": "node scripts/fix-liblzma-arm64.mjs",
     "xs-dev": "tsx src/cli.ts",
     "xs-dev:debug": "DEBUG=* tsx --trace-deprecation src/cli.ts",
     "format": "prettier --write **/*.{js,ts,json}",
@@ -45,8 +44,7 @@
     "build",
     "LICENSE",
     "README.md",
-    "docs",
-    "scripts"
+    "docs"
   ],
   "license": "MIT",
   "repository": {
@@ -68,7 +66,7 @@
     "windows-shortcuts": "^0.1.6"
   },
   "optionalDependencies": {
-    "node-liblzma": "^3.2.0"
+    "node-liblzma": "^4.0.1"
   },
   "devDependencies": {
     "@astrojs/starlight": "^0.37.7",
