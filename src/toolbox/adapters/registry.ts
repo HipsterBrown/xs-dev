@@ -1,0 +1,13 @@
+import type { TargetAdapter } from './interface.js'
+
+export const adapters: Record<string, TargetAdapter> = {}
+
+export function getAdapter(name: string): TargetAdapter | undefined {
+  return adapters[name]
+}
+
+// Maps a build target like "esp32/moddable_two" to its adapter by name prefix
+export function resolveAdapterForTarget(targetPlatform: string): TargetAdapter | undefined {
+  const name = Object.keys(adapters).find((key) => targetPlatform.startsWith(key))
+  return name !== undefined ? adapters[name] : undefined
+}
