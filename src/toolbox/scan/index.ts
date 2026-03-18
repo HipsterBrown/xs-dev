@@ -1,28 +1,16 @@
 import { setTimeout as sleep } from 'node:timers/promises'
-import { existsSync, statSync } from 'node:fs'
 import { execSync } from 'node:child_process'
 import { SerialPort } from 'serialport'
 import { findBySerialNumber } from 'usb'
 import type { OperationEvent } from '../../lib/events.js'
 import { parseScanResult } from './parse.js'
-import { sourceEnvironment, sourceIdf } from '../system/exec.js'
+import { adapters } from '../adapters/registry.js'
+import { getAdapterContext } from '../adapters/context.js'
 
 export default async function* scanDevices(): AsyncGenerator<OperationEvent> {
-  const envResult = await sourceEnvironment()
-  if (!envResult.success) {
-    yield { type: 'warning', message: `Failed to source environment: ${envResult.error}` }
-  }
-
-  if (
-    typeof process.env.IDF_PATH === 'string' &&
-    existsSync(process.env.IDF_PATH) &&
-    statSync(process.env.IDF_PATH).isDirectory()
-  ) {
-    yield { type: 'info', message: 'Found ESP_IDF, sourcing environment...' }
-    const idfResult = await sourceIdf()
-    if (!idfResult.success) {
-      yield { type: 'warning', message: `Failed to source IDF environment: ${idfResult.error}` }
-    }
+  const ctx = getAdapterContext()
+  for (const adapter of Object.values(adapters)) {
+    Object.assign(process.env, adapter.getEnvVars(ctx))
   }
 
   const esptoolPath = (() => {
