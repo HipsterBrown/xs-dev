@@ -1,5 +1,6 @@
 // src/lib/adapter.ts
 import type { OperationEvent } from './events.js'
+import type { Prompter } from './prompter.js'
 
 export type HostPlatform = 'mac' | 'lin' | 'win'
 
@@ -10,7 +11,7 @@ export interface AdapterContext {
 
 export interface VerifyResult {
   ok: boolean
-  adapter: string
+  adapter: string      // name of the adapter (matches TargetAdapter.name)
   version?: string     // detected installed version
   missing?: string[]   // unmet requirements
 }
@@ -19,9 +20,9 @@ export interface TargetAdapter {
   readonly name: string
   readonly platforms: HostPlatform[]
 
-  install: (ctx: AdapterContext) => AsyncGenerator<OperationEvent>
-  update: (ctx: AdapterContext) => AsyncGenerator<OperationEvent>
-  teardown: (ctx: AdapterContext) => AsyncGenerator<OperationEvent>
+  install: (ctx: AdapterContext, prompter: Prompter) => AsyncGenerator<OperationEvent, void, undefined>
+  update: (ctx: AdapterContext, prompter: Prompter) => AsyncGenerator<OperationEvent, void, undefined>
+  teardown: (ctx: AdapterContext, prompter: Prompter) => AsyncGenerator<OperationEvent, void, undefined>
   verify: (ctx: AdapterContext) => Promise<VerifyResult>
 
   // Pure — returns env vars this adapter needs at build/scan time
