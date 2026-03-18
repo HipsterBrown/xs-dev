@@ -5,11 +5,12 @@ import type { LocalContext } from '../app.js'
 import type { Device } from '../types.js'
 import setupEjectfix from '../toolbox/setup/ejectfix.js'
 import { DEVICE_ALIAS } from '../toolbox/prompt/devices.js'
-import { MODDABLE_REPO } from '../toolbox/setup/constants.js'
 import type { SetupArgs } from '../toolbox/setup/types.js'
 import { createInteractivePrompter, createNonInteractivePrompter, isInteractive } from '../lib/prompter.js'
 import { handleEvent } from '../lib/renderer.js'
 import type { OperationEvent } from '../lib/events.js'
+import { getAdapter } from '../toolbox/adapters/registry.js'
+import { getAdapterContext } from '../toolbox/adapters/context.js'
 
 interface SetupOptions {
   device?: Device
@@ -33,7 +34,6 @@ const command = buildCommand({
       tool,
       branch,
       release = 'latest',
-      'source-repo': sourceRepo = MODDABLE_REPO,
       interactive = true,
     } = flags
 
@@ -91,15 +91,21 @@ const command = buildCommand({
       'lin',
       'linux',
     ]
-    const { default: setup } = await import(`../toolbox/setup/${target}.js`)
 
     const spinner = ora()
 
     if (platformDevices.includes(target)) {
-      for await (const event of setup({ branch, release, sourceRepo }, prompter) as AsyncGenerator<OperationEvent>) {
+      const adapter = getAdapter('moddable')
+      if (adapter === undefined) {
+        console.warn('Moddable adapter not found')
+        process.exit(1)
+      }
+      const ctx = getAdapterContext()
+      for await (const event of adapter.install(ctx, prompter)) {
         handleEvent(event, spinner)
       }
     } else {
+      const { default: setup } = await import(`../toolbox/setup/${target}.js`)
       for await (const event of setup({ branch, release }, prompter) as AsyncGenerator<OperationEvent>) {
         handleEvent(event, spinner)
       }

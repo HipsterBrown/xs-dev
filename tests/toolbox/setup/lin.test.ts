@@ -2,7 +2,7 @@ import { describe, it, mock } from 'node:test'
 import assert from 'node:assert/strict'
 import { createNonInteractivePrompter } from '#src/lib/prompter.js'
 
-describe('toolbox/setup/lin', async () => {
+describe('toolbox/adapters/moddable/lin (install)', async () => {
   mock.module('execa', {
     namedExports: {
       execaCommand: mock.fn(async () => ({ stdout: '' })),
@@ -20,11 +20,11 @@ describe('toolbox/setup/lin', async () => {
     }
   })
 
-  const { default: setupLinux } = await import('#src/toolbox/setup/lin.js')
+  const { installLinux } = await import('#src/toolbox/adapters/moddable/lin.js')
 
   it('yields step:start and step:done events for a successful setup', async () => {
     const events = await Array.fromAsync(
-      setupLinux(
+      installLinux(
         { branch: 'public', release: 'latest', sourceRepo: 'https://github.com/Moddable-OpenSource/moddable' },
         createNonInteractivePrompter()
       )

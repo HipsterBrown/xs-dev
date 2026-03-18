@@ -7,6 +7,8 @@ import { DEVICE_ALIAS } from '../toolbox/prompt/devices.js'
 import { createInteractivePrompter, createNonInteractivePrompter, isInteractive } from '../lib/prompter.js'
 import { handleEvent } from '../lib/renderer.js'
 import type { OperationEvent } from '../lib/events.js'
+import { getAdapter } from '../toolbox/adapters/registry.js'
+import { getAdapterContext } from '../toolbox/adapters/context.js'
 
 interface UpdateOptions {
   device?: Device
@@ -30,13 +32,29 @@ const command = buildCommand({
     const prompter = isInteractive(interactive)
       ? createInteractivePrompter()
       : createNonInteractivePrompter()
-    const { default: update } = await import(
-      `../toolbox/update/${DEVICE_ALIAS[device]}.js`
-    )
-    const spinner = ora()
 
-    for await (const event of update({ branch, release }, prompter) as AsyncGenerator<OperationEvent>) {
-      handleEvent(event, spinner)
+    const platformDevices = ['mac', 'lin', 'windows']
+    const resolvedTarget = DEVICE_ALIAS[device]
+
+    if (platformDevices.includes(resolvedTarget)) {
+      const adapter = getAdapter('moddable')
+      if (adapter === undefined) {
+        console.warn('Moddable adapter not found')
+        process.exit(1)
+      }
+      if (branch !== undefined) process.env.XS_DEV_BRANCH = branch
+      if (release !== undefined) process.env.XS_DEV_RELEASE = release
+      const ctx = getAdapterContext()
+      const spinner = ora()
+      for await (const event of adapter.update(ctx, prompter)) {
+        handleEvent(event, spinner)
+      }
+    } else {
+      const { default: update } = await import(`../toolbox/update/${resolvedTarget}.js`)
+      const spinner = ora()
+      for await (const event of update({ branch, release }, prompter) as AsyncGenerator<OperationEvent>) {
+        handleEvent(event, spinner)
+      }
     }
   },
   parameters: {

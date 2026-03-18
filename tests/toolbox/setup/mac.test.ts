@@ -2,7 +2,7 @@ import { describe, it, mock } from 'node:test'
 import assert from 'node:assert/strict'
 import { createNonInteractivePrompter } from '#src/lib/prompter.js'
 
-describe('toolbox/setup/mac', async () => {
+describe('toolbox/adapters/moddable/mac (install)', async () => {
   mock.module('execa', {
     namedExports: {
       execaCommand: mock.fn(async () => ({ stdout: '' })),
@@ -21,11 +21,11 @@ describe('toolbox/setup/mac', async () => {
     }
   })
 
-  const { default: setupMac } = await import('#src/toolbox/setup/mac.js')
+  const { installMac } = await import('#src/toolbox/adapters/moddable/mac.js')
 
   it('yields step:start and step:done events for a successful setup', async () => {
     const events = await Array.fromAsync(
-      setupMac(
+      installMac(
         { branch: 'public', release: 'latest', sourceRepo: 'https://github.com/Moddable-OpenSource/moddable' },
         createNonInteractivePrompter()
       )

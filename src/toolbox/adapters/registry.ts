@@ -1,6 +1,9 @@
 import type { TargetAdapter } from './interface.js'
+import { moddableAdapter } from './moddable/index.js'
 
-export const adapters: Record<string, TargetAdapter> = {}
+export const adapters: Record<string, TargetAdapter> = {
+  moddable: moddableAdapter,
+}
 
 export function getAdapter(name: string): TargetAdapter | undefined {
   return adapters[name]

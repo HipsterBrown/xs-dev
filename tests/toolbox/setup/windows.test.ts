@@ -2,7 +2,7 @@ import { describe, it, mock } from 'node:test'
 import assert from 'node:assert/strict'
 import { createNonInteractivePrompter } from '#src/lib/prompter.js'
 
-describe('toolbox/setup/windows', async () => {
+describe('toolbox/adapters/moddable/windows (install)', async () => {
   mock.module('node:child_process', {
     namedExports: {
       execSync: mock.fn(() => Buffer.from('nmake')),
@@ -60,7 +60,7 @@ describe('toolbox/setup/windows', async () => {
     defaultExport: mock.fn(async () => { }),
   })
 
-  const { default: setupWindows } = await import('#src/toolbox/setup/windows.js')
+  const { installWindows } = await import('#src/toolbox/adapters/moddable/windows.js')
 
   it('yields step:start event for setup', async () => {
     const prompter = createNonInteractivePrompter()
@@ -70,7 +70,7 @@ describe('toolbox/setup/windows', async () => {
 
     try {
       const events = await Array.fromAsync(
-        setupWindows(
+        installWindows(
           { branch: 'public', release: 'latest', sourceRepo: 'https://github.com/Moddable-OpenSource/moddable' },
           prompter,
         ),
@@ -78,7 +78,7 @@ describe('toolbox/setup/windows', async () => {
       const types = events.map(e => e.type)
       assert.ok(types.includes('step:start'), 'should have step:start event')
     } finally {
-      if (originalVS) {
+      if (originalVS !== undefined) {
         process.env.VSINSTALLDIR = originalVS
       } else {
         delete process.env.VSINSTALLDIR
