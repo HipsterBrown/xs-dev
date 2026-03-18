@@ -10,7 +10,9 @@ import { DEVICE_ALIAS } from '../prompt/devices.js'
 import type { Device } from '../../types.js'
 import type { OperationEvent } from '../../lib/events.js'
 import type { Prompter, Choice } from '../../lib/prompter.js'
-import { sourceEnvironment, sourceIdfPythonEnv, which } from '../system/exec.js'
+import { sourceEnvironment, which } from '../system/exec.js'
+import { getAdapterContext } from '../adapters/context.js'
+import { resolveAdapterForTarget } from '../adapters/registry.js'
 
 export type DeployStatus = 'none' | 'run' | 'push' | 'clean' | 'debug'
 
@@ -92,6 +94,8 @@ export default async function* build(
 
   await sourceEnvironment()
 
+  const ctx = getAdapterContext()
+
   if (!moddableExists()) {
     yield {
       type: 'step:fail',
@@ -151,79 +155,21 @@ export default async function* build(
 
   if (targetPlatform !== '') {
     const startsWithSimulator = targetPlatform.startsWith('simulator')
-    if (targetPlatform.includes('esp32') && !startsWithSimulator) {
-      if (!(typeof process.env.IDF_PATH === 'string')) {
-        yield {
-          type: 'step:fail',
-          message:
-            'The current environment does not appear to be set up for the ESP32 build target. Please run `xs-dev setup --device esp32` before trying again.',
-        }
-        return
-      }
-      await sourceIdfPythonEnv()
-    } else if (targetPlatform.includes('esp') && !startsWithSimulator) {
-      if (!(typeof process.env.ESP_BASE === 'string')) {
-        yield {
-          type: 'step:fail',
-          message:
-            'The current environment does not appear to be set up for the ESP8266 build target. Please run `xs-dev setup --device esp8266` before trying again.',
-        }
-        return
-      }
-    }
+    if (!startsWithSimulator) {
+      const adapter = resolveAdapterForTarget(targetPlatform)
+      if (adapter !== undefined) {
+        // Apply env vars from the adapter so build tools are on PATH
+        Object.assign(process.env, adapter.getEnvVars(ctx))
 
-    if (targetPlatform.includes('wasm') && !startsWithSimulator) {
-      if (
-        !(process.env.PATH ?? '').includes('binaryen') ||
-        typeof process.env.EMSDK !== 'string' ||
-        typeof process.env.EMSDK_NODE !== 'string' ||
-        typeof process.env.EMSDK_PYTHON !== 'string'
-      ) {
-        yield {
-          type: 'step:fail',
-          message:
-            'The current environment does not appear to be set up for the wasm build target. Please run `xs-dev setup --device wasm` before trying again.',
+        // Verify the adapter is set up
+        const verifyResult = await adapter.verify(ctx)
+        if (!verifyResult.ok) {
+          yield {
+            type: 'step:fail',
+            message: `The current environment does not appear to be set up for the ${adapter.name} build target. Please run \`xs-dev setup --device ${adapter.name}\` before trying again.`,
+          }
+          return
         }
-        return
-      }
-    }
-
-    if (targetPlatform.includes('pico') && !startsWithSimulator) {
-      if (
-        !(typeof process.env.PICO_SDK_PATH === 'string') ||
-        typeof process.env.PIOASM !== 'string'
-      ) {
-        yield {
-          type: 'step:fail',
-          message:
-            'The current environment does not appear to be set up for the pico build target. Please run `xs-dev setup --device pico` before trying again.',
-        }
-        return
-      }
-    }
-
-    if (targetPlatform.includes('nrf52') && !startsWithSimulator) {
-      if (
-        typeof process.env.NRF_ROOT !== 'string' ||
-        typeof process.env.NRF_SDK_DIR !== 'string'
-      ) {
-        yield {
-          type: 'step:fail',
-          message:
-            'The current environment does not appear to be set up for the nrf52 build target. Please run `xs-dev setup --device nrf52` before trying again.',
-        }
-        return
-      }
-    }
-
-    if (targetPlatform.includes('zephyr') && !startsWithSimulator) {
-      if (typeof process.env.ZEPHYR_BASE !== 'string') {
-        yield {
-          type: 'step:fail',
-          message:
-            'The current environment does not appear to be set up for the zephyr build target. Please run `xs-dev setup --device zephyr` before trying again.',
-        }
-        return
       }
     }
   }
