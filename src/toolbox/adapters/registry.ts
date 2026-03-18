@@ -1,10 +1,12 @@
 import type { TargetAdapter } from './interface.js'
 import { moddableAdapter } from './moddable/index.js'
 import { esp32Adapter } from './esp32/index.js'
+import { picoAdapter } from './pico.js'
 
 export const adapters: Record<string, TargetAdapter> = {
   moddable: moddableAdapter,
   esp32: esp32Adapter,
+  pico: picoAdapter,
 }
 
 export function getAdapter(name: string): TargetAdapter | undefined {
