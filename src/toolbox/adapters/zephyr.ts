@@ -251,7 +251,7 @@ export const zephyrAdapter: TargetAdapter = {
     }
 
     try {
-      if (process.env.ZEPHYR_BASE === undefined) {
+      if (process.env.ZEPHYR_BASE === undefined || process.env.ZEPHYR_BASE === '') {
         if (isWindows) {
           await setEnv('ZEPHYR_BASE', ZEPHYR_BASE)
         } else {
