@@ -5,6 +5,7 @@ import { picoAdapter } from './pico.js'
 import { esp8266Adapter } from './esp8266.js'
 import { nrf52Adapter } from './nrf52.js'
 import { zephyrAdapter } from './zephyr.js'
+import { wasmAdapter } from './wasm.js'
 
 export const adapters: Record<string, TargetAdapter> = {
   moddable: moddableAdapter,
@@ -13,6 +14,7 @@ export const adapters: Record<string, TargetAdapter> = {
   esp8266: esp8266Adapter,
   nrf52: nrf52Adapter,
   zephyr: zephyrAdapter,
+  wasm: wasmAdapter,
 }
 
 export function getAdapter(name: string): TargetAdapter | undefined {
