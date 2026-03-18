@@ -4,7 +4,7 @@ import { isFailure, unwrapOr } from '../../system/errors.js'
 import type { Prompter } from '../../../lib/prompter.js'
 import type { OperationEvent } from '../../../lib/events.js'
 
-export async function* installDeps(prompter: Prompter): AsyncGenerator<OperationEvent> {
+export async function* installLinuxDeps(_prompter: Prompter): AsyncGenerator<OperationEvent> {
   const dependencies: Dependency[] = [
     { name: 'bison', packageName: 'bison', type: 'binary' },
     { name: 'ccache', packageName: 'ccache', type: 'binary' },

@@ -1,10 +1,10 @@
 import { execaCommand } from 'execa'
 import { which } from '../../system/exec.js'
-import { ensureHomebrew } from '../homebrew.js'
+import { ensureHomebrew } from '../../setup/homebrew.js'
 import type { OperationEvent } from '../../../lib/events.js'
 import type { Prompter } from '../../../lib/prompter.js'
 
-export async function* installDeps(prompter: Prompter): AsyncGenerator<OperationEvent> {
+export async function* installMacDeps(prompter: Prompter): AsyncGenerator<OperationEvent> {
   try {
     for await (const event of ensureHomebrew(prompter)) {
       yield event

@@ -2,7 +2,7 @@ import { describe, it, mock } from 'node:test'
 import assert from 'node:assert/strict'
 import { createNonInteractivePrompter } from '#src/lib/prompter.js'
 
-describe('toolbox/update/esp32', async () => {
+describe('toolbox/update/esp32 (via adapter)', async () => {
   mock.module('#src/toolbox/setup/moddable.js', {
     namedExports: {
       moddableExists: mock.fn(() => true),
@@ -23,7 +23,7 @@ describe('toolbox/update/esp32', async () => {
       statSync: mock.fn(() => ({ isDirectory: () => false, isFile: () => false })),
       renameSync: mock.fn(() => {}),
       rmSync: mock.fn(() => {}),
-      createWriteStream: mock.fn(() => ({ on: mock.fn((event, cb) => cb()) })),
+      createWriteStream: mock.fn(() => ({ on: mock.fn((event: string, cb: () => void) => cb()) })),
     }
   })
   mock.module('node:fs/promises', {
@@ -43,14 +43,14 @@ describe('toolbox/update/esp32', async () => {
       sourceEnvironment: mock.fn(async () => {}),
     }
   })
-  mock.module('#src/toolbox/setup/esp32/mac.js', {
+  mock.module('#src/toolbox/adapters/esp32/mac.js', {
     namedExports: {
-      installDeps: mock.fn(async function* () { yield { type: 'info', message: 'test' } }),
+      installMacDeps: mock.fn(async function* () { yield { type: 'info', message: 'test' } }),
     }
   })
-  mock.module('#src/toolbox/setup/esp32/linux.js', {
+  mock.module('#src/toolbox/adapters/esp32/linux.js', {
     namedExports: {
-      installDeps: mock.fn(async function* () { yield { type: 'info', message: 'test' } }),
+      installLinuxDeps: mock.fn(async function* () { yield { type: 'info', message: 'test' } }),
     }
   })
   mock.module('#src/toolbox/patching/replace.js', {
@@ -59,11 +59,11 @@ describe('toolbox/update/esp32', async () => {
     }
   })
 
-  const { default: updateEsp32 } = await import('#src/toolbox/update/esp32.js')
+  const { esp32Adapter } = await import('#src/toolbox/adapters/esp32/index.js')
 
   it('yields events during update', async () => {
     const prompter = createNonInteractivePrompter()
-    const events = await Array.fromAsync(updateEsp32({}, prompter))
+    const events = await Array.fromAsync(esp32Adapter.update({ platform: 'mac', arch: 'arm64' }, prompter))
     assert.ok(events.length > 0, 'Should yield at least one event')
     const types = events.map(e => e.type)
     assert.ok(types.some(t => t === 'info' || t === 'step:start' || t === 'step:done' || t === 'step:fail'))

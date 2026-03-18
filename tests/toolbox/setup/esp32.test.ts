@@ -2,7 +2,7 @@ import { describe, it, mock } from 'node:test'
 import assert from 'node:assert/strict'
 import { createNonInteractivePrompter } from '#src/lib/prompter.js'
 
-describe('toolbox/setup/esp32', async () => {
+describe('toolbox/setup/esp32 (via adapter)', async () => {
   mock.module('#src/toolbox/setup/moddable.js', {
     namedExports: {
       moddableExists: mock.fn(() => true),
@@ -30,7 +30,8 @@ describe('toolbox/setup/esp32', async () => {
     namedExports: {
       existsSync: mock.fn(() => false),
       statSync: mock.fn(() => ({ isFile: () => false, isDirectory: () => false })),
-      createWriteStream: mock.fn(() => ({ on: mock.fn((event, cb) => cb()) })),
+      createWriteStream: mock.fn(() => ({ on: mock.fn((event: string, cb: () => void) => cb()) })),
+      rmSync: mock.fn(() => {}),
     }
   })
   mock.module('#src/toolbox/setup/windows.js', {
@@ -41,11 +42,11 @@ describe('toolbox/setup/esp32', async () => {
     default: mock.fn(async function* () { yield { type: 'step:done' } }),
   })
 
-  const { default: setupEsp32 } = await import('#src/toolbox/setup/esp32.js')
+  const { esp32Adapter } = await import('#src/toolbox/adapters/esp32/index.js')
 
   it('yields step:start event at the beginning', async () => {
     const events = await Array.fromAsync(
-      setupEsp32({}, createNonInteractivePrompter())
+      esp32Adapter.install({ platform: 'mac', arch: 'arm64' }, createNonInteractivePrompter())
     )
     const types = events.map(e => e.type)
     assert.ok(types.includes('step:start'))

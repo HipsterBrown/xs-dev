@@ -12,7 +12,7 @@ const finishedPromise = promisify(finished)
 const IDF_INSTALLER =
   'https://github.com/espressif/idf-installer/releases/download/online-2.15/esp-idf-tools-setup-online-2.15.exe'
 
-export async function* installDeps(prompter: Prompter): AsyncGenerator<OperationEvent> {
+export async function* installWinDeps(_prompter: Prompter): AsyncGenerator<OperationEvent> {
   if (esp32Exists()) {
     yield {
       type: 'info',

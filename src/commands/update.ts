@@ -55,10 +55,18 @@ const command = buildCommand({
         delete process.env.XS_DEV_RELEASE
       }
     } else {
-      const { default: update } = await import(`../toolbox/update/${resolvedTarget}.js`)
+      const deviceAdapter = getAdapter(resolvedTarget)
       const spinner = ora()
-      for await (const event of update({ branch, release }, prompter) as AsyncGenerator<OperationEvent>) {
-        handleEvent(event, spinner)
+      if (deviceAdapter !== undefined) {
+        const ctx = getAdapterContext()
+        for await (const event of deviceAdapter.update(ctx, prompter)) {
+          handleEvent(event, spinner)
+        }
+      } else {
+        const { default: update } = await import(`../toolbox/update/${resolvedTarget}.js`)
+        for await (const event of update({ branch, release }, prompter) as AsyncGenerator<OperationEvent>) {
+          handleEvent(event, spinner)
+        }
       }
     }
   },

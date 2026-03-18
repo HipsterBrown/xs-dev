@@ -116,9 +116,17 @@ const command = buildCommand({
         delete process.env.XS_DEV_SOURCE_REPO
       }
     } else {
-      const { default: setup } = await import(`../toolbox/setup/${target}.js`)
-      for await (const event of setup({ branch, release }, prompter) as AsyncGenerator<OperationEvent>) {
-        handleEvent(event, spinner)
+      const adapter = getAdapter(target)
+      if (adapter !== undefined) {
+        const ctx = getAdapterContext()
+        for await (const event of adapter.install(ctx, prompter)) {
+          handleEvent(event, spinner)
+        }
+      } else {
+        const { default: setup } = await import(`../toolbox/setup/${target}.js`)
+        for await (const event of setup({ branch, release }, prompter) as AsyncGenerator<OperationEvent>) {
+          handleEvent(event, spinner)
+        }
       }
     }
   },
