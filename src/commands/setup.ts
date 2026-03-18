@@ -101,12 +101,19 @@ const command = buildCommand({
         console.warn('Moddable adapter not found')
         process.exit(1)
       }
+      // Pass branch/release/sourceRepo to adapter via env vars
+      process.env.XS_DEV_RELEASE = release  // always set (has 'latest' default)
+      if (sourceRepo !== undefined) process.env.XS_DEV_SOURCE_REPO = sourceRepo  // always set (has default)
       if (branch !== undefined) process.env.XS_DEV_BRANCH = branch
-      if (release !== undefined) process.env.XS_DEV_RELEASE = release
-      if (sourceRepo !== undefined) process.env.XS_DEV_SOURCE_REPO = sourceRepo
       const ctx = getAdapterContext()
-      for await (const event of adapter.install(ctx, prompter)) {
-        handleEvent(event, spinner)
+      try {
+        for await (const event of adapter.install(ctx, prompter)) {
+          handleEvent(event, spinner)
+        }
+      } finally {
+        delete process.env.XS_DEV_BRANCH
+        delete process.env.XS_DEV_RELEASE
+        delete process.env.XS_DEV_SOURCE_REPO
       }
     } else {
       const { default: setup } = await import(`../toolbox/setup/${target}.js`)

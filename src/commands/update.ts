@@ -42,12 +42,17 @@ const command = buildCommand({
         console.warn('Moddable adapter not found')
         process.exit(1)
       }
+      process.env.XS_DEV_RELEASE = release  // always set (has 'latest' default)
       if (branch !== undefined) process.env.XS_DEV_BRANCH = branch
-      if (release !== undefined) process.env.XS_DEV_RELEASE = release
       const ctx = getAdapterContext()
       const spinner = ora()
-      for await (const event of adapter.update(ctx, prompter)) {
-        handleEvent(event, spinner)
+      try {
+        for await (const event of adapter.update(ctx, prompter)) {
+          handleEvent(event, spinner)
+        }
+      } finally {
+        delete process.env.XS_DEV_BRANCH
+        delete process.env.XS_DEV_RELEASE
       }
     } else {
       const { default: update } = await import(`../toolbox/update/${resolvedTarget}.js`)
