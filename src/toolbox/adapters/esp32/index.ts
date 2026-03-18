@@ -219,39 +219,37 @@ If there is trouble finding the correct port, pass the "--port" flag to the abov
     }
 
     // 2. update local esp-idf repo
-    if (existsSync(IDF_PATH)) {
-      try {
-        yield { type: 'step:start', message: 'Updating esp-idf repo' }
-        const moddableVersionResult = await getModdableVersion()
-        const moddableVersion = unwrapOr(moddableVersionResult, '')
-        const expectedEspIdfVersion = await getExpectedEspIdfVersion()
-        const branch =
-          expectedEspIdfVersion ??
-          ((moddableVersion.includes('branch') || getVersionSatisfies(moddableVersion, '>= 4.2.x'))
-            ? ESP_BRANCH_V5
-            : ESP_BRANCH_V4)
+    try {
+      yield { type: 'step:start', message: 'Updating esp-idf repo' }
+      const moddableVersionResult = await getModdableVersion()
+      const moddableVersion = unwrapOr(moddableVersionResult, '')
+      const expectedEspIdfVersion = await getExpectedEspIdfVersion()
+      const branch =
+        expectedEspIdfVersion ??
+        ((moddableVersion.includes('branch') || getVersionSatisfies(moddableVersion, '>= 4.2.x'))
+          ? ESP_BRANCH_V5
+          : ESP_BRANCH_V4)
 
-        if (
-          branch === ESP_BRANCH_V5 &&
-          !getVersionSatisfies(moddableVersion, '>= 4.3.8' as const)
-        ) {
-          yield {
-            type: 'step:fail',
-            message: 'Latest Moddable SDK is required before updating ESP-IDF. Run `xs-dev update` before trying again.',
-          }
-          return
+      if (
+        branch === ESP_BRANCH_V5 &&
+        !getVersionSatisfies(moddableVersion, '>= 4.3.8' as const)
+      ) {
+        yield {
+          type: 'step:fail',
+          message: 'Latest Moddable SDK is required before updating ESP-IDF. Run `xs-dev update` before trying again.',
         }
-
-        await execaCommand('git fetch --all --tags', { cwd: IDF_PATH })
-        await execaCommand(`git checkout ${branch}`, { cwd: IDF_PATH })
-        await execaCommand('git submodule update --init --recursive', {
-          cwd: IDF_PATH,
-        })
-        yield { type: 'step:done' }
-      } catch (error) {
-        yield { type: 'step:fail', message: `Error updating esp-idf: ${String(error)}` }
         return
       }
+
+      await execaCommand('git fetch --all --tags', { cwd: IDF_PATH })
+      await execaCommand(`git checkout ${branch}`, { cwd: IDF_PATH })
+      await execaCommand('git submodule update --init --recursive', {
+        cwd: IDF_PATH,
+      })
+      yield { type: 'step:done' }
+    } catch (error) {
+      yield { type: 'step:fail', message: `Error updating esp-idf: ${String(error)}` }
+      return
     }
 
     // 3. Install build and run dependencies
@@ -278,7 +276,7 @@ If there is trouble finding the correct port, pass the "--port" flag to the abov
 
     // 4. append IDF_PATH env export to shell profile
     try {
-      if (process.env.IDF_PATH === undefined) {
+      if (process.env.IDF_PATH === undefined || process.env.IDF_PATH === '') {
         yield { type: 'info', message: 'Configuring $IDF_PATH' }
         process.env.IDF_PATH = IDF_PATH
         await upsert(EXPORTS_FILE_PATH, `export IDF_PATH=${IDF_PATH}`)

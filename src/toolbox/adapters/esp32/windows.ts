@@ -3,6 +3,7 @@ import { resolve } from 'node:path'
 import { promisify } from 'node:util'
 import { finished } from 'node:stream'
 import { execaCommand } from 'execa'
+import { INSTALL_DIR } from '../../setup/constants.js'
 import { fetchStream } from '../../system/fetch.js'
 import type { Prompter } from '../../../lib/prompter.js'
 import type { OperationEvent } from '../../../lib/events.js'
@@ -22,14 +23,8 @@ export async function* installWinDeps(_prompter: Prompter): AsyncGenerator<Opera
   }
 
   try {
-    const ESP32_DIR = process.env.INSTALL_DIR ?? ''
-    if (typeof ESP32_DIR !== 'string' || ESP32_DIR.length === 0) {
-      yield { type: 'step:fail', message: 'INSTALL_DIR environment variable not set' }
-      return
-    }
-
     yield { type: 'step:start', message: 'Downloading ESP-IDF Tools Installer' }
-    const destination = resolve(ESP32_DIR, 'esp-idf-tools-setup-online-2.15.exe')
+    const destination = resolve(INSTALL_DIR, 'esp-idf-tools-setup-online-2.15.exe')
     const writer = createWriteStream(destination)
     const download = await fetchStream(IDF_INSTALLER)
     download.pipe(writer)
