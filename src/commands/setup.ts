@@ -34,6 +34,7 @@ const command = buildCommand({
       tool,
       branch,
       release = 'latest',
+      'source-repo': sourceRepo,
       interactive = true,
     } = flags
 
@@ -100,6 +101,9 @@ const command = buildCommand({
         console.warn('Moddable adapter not found')
         process.exit(1)
       }
+      if (branch !== undefined) process.env.XS_DEV_BRANCH = branch
+      if (release !== undefined) process.env.XS_DEV_RELEASE = release
+      if (sourceRepo !== undefined) process.env.XS_DEV_SOURCE_REPO = sourceRepo
       const ctx = getAdapterContext()
       for await (const event of adapter.install(ctx, prompter)) {
         handleEvent(event, spinner)

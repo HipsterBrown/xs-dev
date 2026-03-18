@@ -20,9 +20,9 @@ export const moddableAdapter: TargetAdapter = {
 
   async *install(ctx: AdapterContext, prompter: Prompter): AsyncGenerator<OperationEvent, void, undefined> {
     const args: PlatformSetupArgs = {
-      release: 'latest',
-      sourceRepo: 'https://github.com/Moddable-OpenSource/moddable',
-      branch: 'public',
+      release: process.env.XS_DEV_RELEASE ?? 'latest',
+      sourceRepo: process.env.XS_DEV_SOURCE_REPO ?? 'https://github.com/Moddable-OpenSource/moddable',
+      branch: process.env.XS_DEV_BRANCH,
     }
     if (ctx.platform === 'mac') yield* installMac(args, prompter)
     else if (ctx.platform === 'lin') yield* installLinux(args, prompter)
