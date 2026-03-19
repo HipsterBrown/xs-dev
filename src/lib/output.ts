@@ -17,6 +17,10 @@ function colorizeStderr(code: string, message: string): string {
   return process.stderr.isTTY ? `${code}${message}${RESET}` : message
 }
 
+export function log(message: string): void {
+  process.stdout.write(message + '\n')
+}
+
 export function info(message: string): void {
   process.stdout.write(colorizeStdout(CYAN, message) + '\n')
 }

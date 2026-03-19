@@ -1,24 +1,24 @@
 import { buildCommand } from '@stricli/core'
 import type { LocalContext } from '../app.js'
 import { gatherEnvironmentInfo } from '../toolbox/doctor/index.js'
+import { toolchains } from '../toolbox/toolchains/registry.js'
+import { getHostContext } from '../toolbox/toolchains/context.js'
+import * as output from '../lib/output.js'
 
 function printTable(rows: string[][], write: (s: string) => void): void {
   const labelWidth = Math.max(...rows.map((r) => r[0]?.length ?? 0)) + 2
   for (const [label, value] of rows) {
-    write(`  ${(label ?? '').padEnd(labelWidth)}${value ?? ''}\n`)
+    write(`  ${(label ?? '').padEnd(labelWidth)}${value ?? ''}`)
   }
 }
 
 const command = buildCommand({
   async func(this: LocalContext) {
-    const { currentVersion, process: proc } = this
-    const write = (s: string): void => {
-      proc.stdout.write(s)
-    }
+    const { currentVersion } = this
+    const ctx = getHostContext()
+    const info = await gatherEnvironmentInfo(currentVersion, { toolchains: Object.values(toolchains), ctx })
 
-    const info = await gatherEnvironmentInfo(currentVersion)
-
-    write('xs-dev environment info:\n')
+    output.info('xs-dev environment info:\n')
     printTable(
       [
         ['CLI Version', info.cliVersion],
@@ -51,10 +51,10 @@ const command = buildCommand({
           ? [['Zephyr SDK Directory', String(process.env.ZEPHYR_BASE)]]
           : []),
       ],
-      write,
+      output.log,
     )
 
-    write(
+    output.info(
       `\nIf this is related to an error when using the CLI, please create an issue at "https://github.com/hipsterbrown/xs-dev/issues/new" with the above info.\n`,
     )
   },

@@ -1,15 +1,15 @@
-import { describe, it, mock } from 'node:test'
+import { describe, it } from 'node:test'
 import assert from 'node:assert/strict'
 import { createNonInteractivePrompter } from '#src/lib/prompter.js'
+import { wasmToolchain } from '#src/toolbox/toolchains/wasm.js'
 
-describe('toolbox/update/wasm', async () => {
-  const { default: updateWasm } = await import('#src/toolbox/update/wasm.js')
-
-  it('yields warning event', async () => {
+describe('wasmToolchain.update', () => {
+  it('yields warning that wasm update is not supported', async () => {
     const prompter = createNonInteractivePrompter()
-    const events = await Array.fromAsync(updateWasm({}, prompter))
+    const ctx = { platform: 'mac' as const, arch: 'arm64' as const }
+    const events = await Array.fromAsync(wasmToolchain.update(ctx, prompter))
     assert.ok(events.length > 0)
-    assert.strictEqual(events[0].type, 'warning')
-    assert.match(events[0].message, /Wasm update is not currently supported/)
+    assert.equal(events[0].type, 'warning')
+    assert.match(String(events[0].message), /Wasm update is not currently supported/)
   })
 })

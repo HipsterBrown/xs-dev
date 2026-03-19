@@ -11,7 +11,7 @@ describe('include command', () => {
 
   mock.module('#src/toolbox/system/exec.js', {
     namedExports: {
-      sourceEnvironment: mock.fn(async () => {}),
+      sourceEnvironment: mock.fn(async () => { }),
     },
   })
 
@@ -20,6 +20,7 @@ describe('include command', () => {
     chdir(tempDir)
     // Set MODDABLE env var so sourceEnvironment doesn't fail
     process.env.MODDABLE = tempDir
+    process.env.CI = "true"
   })
 
   afterEach(async () => {

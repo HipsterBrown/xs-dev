@@ -1,5 +1,5 @@
 export interface SetupArgs {
-  branch: 'public' | string
+  branch?: 'public' | string
   release: 'latest' | string
 }
 

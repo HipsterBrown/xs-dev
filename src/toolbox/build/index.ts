@@ -1,16 +1,15 @@
-import { type as platformType } from 'node:os'
-import { createServer } from 'http'
+import { createServer } from 'node:http'
 import { readdir, stat } from 'node:fs/promises'
 import { resolve } from 'node:path'
 import handler from 'serve-handler'
 import { execaCommand } from 'execa'
 import { collectChoicesFromTree } from '../prompt/choices.js'
-import { moddableExists } from '../setup/moddable.js'
 import { DEVICE_ALIAS } from '../prompt/devices.js'
-import type { Device } from '../../types.js'
 import type { OperationEvent } from '../../lib/events.js'
 import type { Prompter, Choice } from '../../lib/prompter.js'
-import { sourceEnvironment, sourceIdfPythonEnv, which } from '../system/exec.js'
+import { getHostContext } from '../toolchains/context.js'
+import { getToolchain, resolveToolchain } from '../toolchains/registry.js'
+import { sourceScript, which } from '../system/exec.js'
 
 export type DeployStatus = 'none' | 'run' | 'push' | 'clean' | 'debug'
 
@@ -88,14 +87,16 @@ export default async function* build(
   }: BuildArgs,
   prompter: Prompter,
 ): AsyncGenerator<OperationEvent> {
-  const OS = platformType().toLowerCase() as Device
+  const ctx = getHostContext()
+  const moddableToolchain = getToolchain('moddable')
 
-  await sourceEnvironment()
+  Object.assign(process.env, moddableToolchain?.getEnvVars(ctx))
+  const verification = await moddableToolchain?.verify(ctx)
 
-  if (!moddableExists()) {
+  if (!(verification?.ok ?? false)) {
     yield {
       type: 'step:fail',
-      message: `Moddable tooling required. Run 'xs-dev setup --device ${DEVICE_ALIAS[OS]}' before trying again.`,
+      message: `Moddable tooling required. Run 'xs-dev setup --device ${DEVICE_ALIAS[ctx.platform]}' before trying again.`,
     }
     return
   }
@@ -136,7 +137,7 @@ export default async function* build(
     }
 
     const choices: Array<Choice<string>> = deviceTargets
-      .concat(simulators, 'wasm', DEVICE_ALIAS[OS])
+      .concat(simulators, 'wasm', DEVICE_ALIAS[ctx.platform])
       .map((c) => ({ label: c, value: c }))
 
     const selectedDevice = await prompter.select('Here are the available target devices:', choices)
@@ -151,79 +152,27 @@ export default async function* build(
 
   if (targetPlatform !== '') {
     const startsWithSimulator = targetPlatform.startsWith('simulator')
-    if (targetPlatform.includes('esp32') && !startsWithSimulator) {
-      if (!(typeof process.env.IDF_PATH === 'string')) {
-        yield {
-          type: 'step:fail',
-          message:
-            'The current environment does not appear to be set up for the ESP32 build target. Please run `xs-dev setup --device esp32` before trying again.',
-        }
-        return
-      }
-      await sourceIdfPythonEnv()
-    } else if (targetPlatform.includes('esp') && !startsWithSimulator) {
-      if (!(typeof process.env.ESP_BASE === 'string')) {
-        yield {
-          type: 'step:fail',
-          message:
-            'The current environment does not appear to be set up for the ESP8266 build target. Please run `xs-dev setup --device esp8266` before trying again.',
-        }
-        return
-      }
-    }
+    if (!startsWithSimulator) {
+      const toolchain = resolveToolchain(targetPlatform)
+      if (toolchain !== undefined) {
+        // Apply env vars from the toolchain so build tools are on PATH
+        Object.assign(process.env, toolchain.getEnvVars(ctx))
 
-    if (targetPlatform.includes('wasm') && !startsWithSimulator) {
-      if (
-        !(process.env.PATH ?? '').includes('binaryen') ||
-        typeof process.env.EMSDK !== 'string' ||
-        typeof process.env.EMSDK_NODE !== 'string' ||
-        typeof process.env.EMSDK_PYTHON !== 'string'
-      ) {
-        yield {
-          type: 'step:fail',
-          message:
-            'The current environment does not appear to be set up for the wasm build target. Please run `xs-dev setup --device wasm` before trying again.',
+        // Source activation script if toolchain provides one (e.g. ESP-IDF, Zephyr)
+        const script = toolchain.getActivationScript?.(ctx)
+        if (script !== undefined && script !== null) {
+          await sourceScript(script)
         }
-        return
-      }
-    }
 
-    if (targetPlatform.includes('pico') && !startsWithSimulator) {
-      if (
-        !(typeof process.env.PICO_SDK_PATH === 'string') ||
-        typeof process.env.PIOASM !== 'string'
-      ) {
-        yield {
-          type: 'step:fail',
-          message:
-            'The current environment does not appear to be set up for the pico build target. Please run `xs-dev setup --device pico` before trying again.',
+        // Verify the toolchain is set up
+        const verifyResult = await toolchain.verify(ctx)
+        if (!verifyResult.ok) {
+          yield {
+            type: 'step:fail',
+            message: `The current environment does not appear to be set up for the ${toolchain.name} build target. Please run \`xs-dev setup --device ${toolchain.name}\` before trying again.`,
+          }
+          return
         }
-        return
-      }
-    }
-
-    if (targetPlatform.includes('nrf52') && !startsWithSimulator) {
-      if (
-        typeof process.env.NRF_ROOT !== 'string' ||
-        typeof process.env.NRF_SDK_DIR !== 'string'
-      ) {
-        yield {
-          type: 'step:fail',
-          message:
-            'The current environment does not appear to be set up for the nrf52 build target. Please run `xs-dev setup --device nrf52` before trying again.',
-        }
-        return
-      }
-    }
-
-    if (targetPlatform.includes('zephyr') && !startsWithSimulator) {
-      if (typeof process.env.ZEPHYR_BASE !== 'string') {
-        yield {
-          type: 'step:fail',
-          message:
-            'The current environment does not appear to be set up for the zephyr build target. Please run `xs-dev setup --device zephyr` before trying again.',
-        }
-        return
       }
     }
   }

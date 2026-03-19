@@ -2,8 +2,12 @@ import { describe, it, mock } from 'node:test'
 import assert from 'node:assert/strict'
 
 describe('toolbox/scan', async () => {
+  const childProcessExports = await import('node:child_process').then(({ default: _, ...rest }) => rest)
+  const fsExports = await import('node:fs').then(({ default: _, ...rest }) => rest)
+  const execExports = await import('#src/toolbox/system/exec.js').then(({ ...rest }) => rest)
   mock.module('node:fs', {
     namedExports: {
+      ...fsExports,
       existsSync: mock.fn(() => false),
       statSync: mock.fn(() => ({ isDirectory: () => false })),
     },
@@ -11,6 +15,7 @@ describe('toolbox/scan', async () => {
 
   mock.module('node:child_process', {
     namedExports: {
+      ...childProcessExports,
       execSync: mock.fn(() => {
         throw new Error('command not found')
       }),
@@ -19,6 +24,7 @@ describe('toolbox/scan', async () => {
 
   mock.module('#src/toolbox/system/exec.js', {
     namedExports: {
+      ...execExports,
       sourceEnvironment: mock.fn(async () => ({ success: true, data: undefined })),
       sourceIdf: mock.fn(async () => ({ success: true, data: undefined })),
     },

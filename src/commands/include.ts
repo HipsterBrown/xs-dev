@@ -5,11 +5,13 @@ import { select } from '@inquirer/prompts'
 import type { LocalContext } from '../app.js'
 import { collectChoicesFromTree } from '../toolbox/prompt/choices.js'
 import { buildTree } from '../toolbox/prompt/tree.js'
-import { sourceEnvironment } from '../toolbox/system/exec.js'
 import { DEVICE_ALIAS } from '../toolbox/prompt/devices.js'
 import type { Device } from '../types.js'
 import * as output from '../lib/output.js'
 import { readManifest, writeManifest, addInclude } from '../toolbox/manifest/index.js'
+import { isInteractive } from '../lib/prompter.js'
+import { getToolchain } from '../toolbox/toolchains/registry.js'
+import { getHostContext } from '../toolbox/toolchains/context.js'
 
 interface IncludeOptions {
   device?: Device
@@ -30,14 +32,18 @@ const command = buildCommand({
       process.exit(1)
     }
 
-    await sourceEnvironment()
+    const ctx = getHostContext()
+    const moddableToolchain = getToolchain('moddable')
+    Object.assign(process.env, moddableToolchain?.getEnvVars(ctx))
 
     const modulesPath = join(String(process.env.MODDABLE), 'modules')
     const { device = '' } = flags
 
     if (
-      moduleName === undefined ||
-      !existsSync(join(modulesPath, moduleName, 'manifest.json'))
+      isInteractive() && (
+        moduleName === undefined ||
+        !existsSync(join(modulesPath, moduleName, 'manifest.json'))
+      )
     ) {
       // prompt with choices from $MODDABLE/modules
       const moduleChildren = existsSync(modulesPath) && statSync(modulesPath).isDirectory()

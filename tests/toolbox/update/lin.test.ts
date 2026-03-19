@@ -2,12 +2,18 @@ import { describe, it, mock } from 'node:test'
 import assert from 'node:assert/strict'
 import { createNonInteractivePrompter } from '#src/lib/prompter.js'
 
-describe('toolbox/update/lin', async () => {
+describe('toolbox/toolchains/moddable/lin (update)', async () => {
   mock.module('#src/toolbox/setup/moddable.js', {
     namedExports: {
       moddableExists: mock.fn(() => true),
+      getModdableVersion: mock.fn(async () => null),
       fetchRelease: mock.fn(async () => null),
-      downloadReleaseTools: mock.fn(async () => {}),
+      downloadReleaseTools: mock.fn(async () => { }),
+      MissingReleaseAssetError: class MissingReleaseAssetError extends Error {
+        constructor(assetName: string) {
+          super(`Unable to find release asset matching ${assetName}`)
+        }
+      },
     }
   })
   mock.module('execa', {
@@ -18,13 +24,13 @@ describe('toolbox/update/lin', async () => {
   })
   mock.module('node:fs/promises', {
     namedExports: {
-      mkdir: mock.fn(async () => {}),
+      mkdir: mock.fn(async () => { }),
       readdir: mock.fn(async () => []),
-      copyFile: mock.fn(async () => {}),
+      copyFile: mock.fn(async () => { }),
       readFile: mock.fn(async () => ''),
-      writeFile: mock.fn(async () => {}),
-      chmod: mock.fn(async () => {}),
-      symlink: mock.fn(async () => {}),
+      writeFile: mock.fn(async () => { }),
+      chmod: mock.fn(async () => { }),
+      symlink: mock.fn(async () => { }),
       stat: mock.fn(async () => ({})),
     }
   })
@@ -32,23 +38,27 @@ describe('toolbox/update/lin', async () => {
     namedExports: {
       existsSync: mock.fn(() => false),
       statSync: mock.fn(() => ({ isDirectory: () => false, isFile: () => false })),
-      renameSync: mock.fn(() => {}),
-      rmSync: mock.fn(() => {}),
+      renameSync: mock.fn(() => { }),
+      rmSync: mock.fn(() => { }),
+      cpSync: mock.fn(() => { }),
       createWriteStream: mock.fn(() => ({ on: mock.fn((event, cb) => cb()) })),
     }
   })
   mock.module('#src/toolbox/system/exec.js', {
     namedExports: {
-      sourceEnvironment: mock.fn(async () => {}),
-      execWithSudo: mock.fn(async () => {}),
+      sourceEnvironment: mock.fn(async () => { }),
+      execWithSudo: mock.fn(async () => { }),
+      pkexec: mock.fn(async () => { }),
+      which: mock.fn(() => null),
     }
   })
 
-  const { default: updateLin } = await import('#src/toolbox/update/lin.js')
+  const { updateLinux } = await import('#src/toolbox/toolchains/moddable/lin.js')
 
   it('yields events during update', async () => {
     const prompter = createNonInteractivePrompter()
-    const events = await Array.fromAsync(updateLin({}, prompter))
+    const ctx = { platform: 'lin' as const, arch: 'x64' as const }
+    const events = await Array.fromAsync(updateLinux(ctx, prompter))
     assert.ok(events.length > 0, 'Should yield at least one event')
     const types = events.map(e => e.type)
     assert.ok(types.some(t => t === 'info' || t === 'step:start' || t === 'step:done' || t === 'step:fail'))

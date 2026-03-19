@@ -6,7 +6,17 @@ import type { Device } from '../types.js'
 import { DEVICE_ALIAS } from '../toolbox/prompt/devices.js'
 import { createInteractivePrompter, createNonInteractivePrompter, isInteractive } from '../lib/prompter.js'
 import { handleEvent } from '../lib/renderer.js'
-import type { OperationEvent } from '../lib/events.js'
+import { getToolchain } from '../toolbox/toolchains/registry.js'
+import { getHostContext } from '../toolbox/toolchains/context.js'
+
+function buildVersionString(
+  release: string | undefined,
+  branch: string | undefined,
+  sourceRepo: string | undefined,
+): string | undefined {
+  const prefix = branch !== undefined ? `branch-${branch}` : `release-${release ?? 'latest'}`
+  return sourceRepo !== undefined ? `${prefix}@${sourceRepo}` : prefix
+}
 
 interface UpdateOptions {
   device?: Device
@@ -30,13 +40,33 @@ const command = buildCommand({
     const prompter = isInteractive(interactive)
       ? createInteractivePrompter()
       : createNonInteractivePrompter()
-    const { default: update } = await import(
-      `../toolbox/update/${DEVICE_ALIAS[device]}.js`
-    )
-    const spinner = ora()
 
-    for await (const event of update({ branch, release }, prompter) as AsyncGenerator<OperationEvent>) {
-      handleEvent(event, spinner)
+    const platformDevices = ['mac', 'lin', 'windows']
+    const resolvedTarget = DEVICE_ALIAS[device]
+
+    if (platformDevices.includes(resolvedTarget)) {
+      const toolchain = getToolchain('moddable')
+      if (toolchain === undefined) {
+        console.warn('Moddable toolchain not found')
+        process.exit(1)
+      }
+      const version = buildVersionString(release, branch, undefined)
+      const ctx = { ...getHostContext(), version }
+      const spinner = ora()
+      for await (const event of toolchain.update(ctx, prompter)) {
+        handleEvent(event, spinner)
+      }
+    } else {
+      const deviceToolchain = getToolchain(resolvedTarget)
+      const spinner = ora()
+      if (deviceToolchain !== undefined) {
+        const ctx = getHostContext()
+        for await (const event of deviceToolchain.update(ctx, prompter)) {
+          handleEvent(event, spinner)
+        }
+      } else {
+        handleEvent({ type: 'step:fail', message: `No toolchain registered for device: ${resolvedTarget}` }, spinner)
+      }
     }
   },
   parameters: {

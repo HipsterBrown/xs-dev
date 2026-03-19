@@ -4,7 +4,8 @@ import type { Prompter } from '../../lib/prompter.js'
 import type { OperationEvent } from '../../lib/events.js'
 import { collectChoicesFromTree } from '../prompt/choices.js'
 import { buildTree } from '../prompt/tree.js'
-import { sourceEnvironment } from '../system/exec.js'
+import { getHostContext } from '../toolchains/context.js'
+import { getToolchain } from '../toolchains/registry.js'
 
 export interface InitOptions {
   typescript?: boolean
@@ -39,7 +40,9 @@ export default async function* initProject(
     return
   }
 
-  await sourceEnvironment()
+  const ctx = getHostContext()
+  const moddableToolchain = getToolchain('moddable')
+  Object.assign(process.env, moddableToolchain?.getEnvVars(ctx))
 
   if (example !== undefined || listExamples) {
     yield { type: 'step:start', message: 'Discovering example projects...' }
@@ -48,8 +51,8 @@ export default async function* initProject(
     const exampleChildren =
       existsSync(exampleProjectPath) && statSync(exampleProjectPath).isDirectory()
         ? readdirSync(exampleProjectPath).map((entry) =>
-            buildTree(join(exampleProjectPath, entry), entry),
-          )
+          buildTree(join(exampleProjectPath, entry), entry),
+        )
         : []
     const choices = exampleChildren.map((ex) => collectChoicesFromTree(ex)).flat()
     let selectedExample = choices.find((choice) => choice === example)
@@ -84,9 +87,9 @@ export default async function* initProject(
     const includes = [
       io
         ? [
-            '"$(MODDABLE)/modules/io/manifest.json"',
-            '"$(MODDABLE)/examples/manifest_net.json"',
-          ]
+          '"$(MODDABLE)/modules/io/manifest.json"',
+          '"$(MODDABLE)/examples/manifest_net.json"',
+        ]
         : '"$(MODDABLE)/examples/manifest_base.json"',
       typescript ? '"$(MODDABLE)/examples/manifest_typings.json"' : undefined,
     ]

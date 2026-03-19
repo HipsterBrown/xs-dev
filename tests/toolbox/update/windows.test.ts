@@ -2,14 +2,15 @@ import { describe, it, mock } from 'node:test'
 import assert from 'node:assert/strict'
 import { createNonInteractivePrompter } from '#src/lib/prompter.js'
 
-describe('toolbox/update/windows', async () => {
-  const { default: updateWindows } = await import('#src/toolbox/update/windows.js')
+describe('toolbox/toolchains/moddable/windows (update)', async () => {
+  const { updateWindows } = await import('#src/toolbox/toolchains/moddable/windows.js')
 
   it('yields warning event', async () => {
     const prompter = createNonInteractivePrompter()
-    const events = await Array.fromAsync(updateWindows({}, prompter))
+    const ctx = { platform: 'win' as const, arch: 'x64' as const }
+    const events = await Array.fromAsync(updateWindows(ctx, prompter))
     assert.ok(events.length > 0)
     assert.strictEqual(events[0].type, 'warning')
-    assert.match(events[0].message, /Windows update is not currently supported/)
+    assert.match(events[0].message ?? '', /Windows update is not currently supported/)
   })
 })

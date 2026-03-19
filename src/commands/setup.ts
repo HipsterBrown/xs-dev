@@ -5,11 +5,21 @@ import type { LocalContext } from '../app.js'
 import type { Device } from '../types.js'
 import setupEjectfix from '../toolbox/setup/ejectfix.js'
 import { DEVICE_ALIAS } from '../toolbox/prompt/devices.js'
-import { MODDABLE_REPO } from '../toolbox/setup/constants.js'
 import type { SetupArgs } from '../toolbox/setup/types.js'
 import { createInteractivePrompter, createNonInteractivePrompter, isInteractive } from '../lib/prompter.js'
+import * as output from '../lib/output.js'
 import { handleEvent } from '../lib/renderer.js'
-import type { OperationEvent } from '../lib/events.js'
+import { getToolchain } from '../toolbox/toolchains/registry.js'
+import { getHostContext } from '../toolbox/toolchains/context.js'
+
+function buildVersionString(
+  release: string | undefined,
+  branch: string | undefined,
+  sourceRepo: string | undefined,
+): string | undefined {
+  const prefix = branch !== undefined ? `branch-${branch}` : `release-${release ?? 'latest'}`
+  return sourceRepo !== undefined ? `${prefix}@${sourceRepo}` : prefix
+}
 
 interface SetupOptions {
   device?: Device
@@ -33,7 +43,7 @@ const command = buildCommand({
       tool,
       branch,
       release = 'latest',
-      'source-repo': sourceRepo = MODDABLE_REPO,
+      'source-repo': sourceRepo,
       interactive = true,
     } = flags
 
@@ -63,14 +73,14 @@ const command = buildCommand({
       if (selectedDevice !== '' && selectedDevice !== undefined) {
         target = selectedDevice as Device
       } else {
-        console.warn('Please select a target device to run')
+        output.warn('Please select a target device to run')
         return
       }
     }
 
     if (tool !== undefined) {
       if (!['ejectfix'].includes(tool)) {
-        console.warn(`Unknown tool ${tool}`)
+        output.warn(`Unknown tool ${tool}`)
         process.exit(1)
       }
       if (tool === 'ejectfix') {
@@ -91,17 +101,29 @@ const command = buildCommand({
       'lin',
       'linux',
     ]
-    const { default: setup } = await import(`../toolbox/setup/${target}.js`)
 
     const spinner = ora()
 
     if (platformDevices.includes(target)) {
-      for await (const event of setup({ branch, release, sourceRepo }, prompter) as AsyncGenerator<OperationEvent>) {
+      const toolchain = getToolchain('moddable')
+      if (toolchain === undefined) {
+        output.warn('Moddable toolchain not found')
+        process.exit(1)
+      }
+      const version = buildVersionString(release, branch, sourceRepo)
+      const ctx = { ...getHostContext(), version }
+      for await (const event of toolchain.install(ctx, prompter)) {
         handleEvent(event, spinner)
       }
     } else {
-      for await (const event of setup({ branch, release }, prompter) as AsyncGenerator<OperationEvent>) {
-        handleEvent(event, spinner)
+      const toolchain = getToolchain(target)
+      if (toolchain !== undefined) {
+        const ctx = getHostContext()
+        for await (const event of toolchain.install(ctx, prompter)) {
+          handleEvent(event, spinner)
+        }
+      } else {
+        handleEvent({ type: 'step:fail', message: `No toolchain registered for device: ${target}` }, spinner)
       }
     }
   },

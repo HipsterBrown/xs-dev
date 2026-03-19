@@ -109,3 +109,11 @@ export async function sourceIdfPythonEnv(): Promise<Result<void>> {
     `source ${process.env.IDF_PYTHON_ENV_PATH ?? ''}/bin/activate`,
   )
 }
+
+/**
+ * Source an arbitrary shell script and update process.env with the result.
+ * No-op on Windows (same behavior as updateProcessEnv).
+ */
+export async function sourceScript(scriptPath: string): Promise<Result<void>> {
+  return await updateProcessEnv(`source ${scriptPath}`)
+}
