@@ -1,18 +1,14 @@
-import { type as platformType } from 'node:os'
-import { createServer } from 'http'
+import { createServer } from 'node:http'
 import { readdir, stat } from 'node:fs/promises'
 import { resolve } from 'node:path'
 import handler from 'serve-handler'
 import { execaCommand } from 'execa'
 import { collectChoicesFromTree } from '../prompt/choices.js'
-import { moddableExists } from '../setup/moddable.js'
 import { DEVICE_ALIAS } from '../prompt/devices.js'
-import type { Device } from '../../types.js'
 import type { OperationEvent } from '../../lib/events.js'
 import type { Prompter, Choice } from '../../lib/prompter.js'
-import { sourceEnvironment, which, sourceScript } from '../system/exec.js'
 import { getHostContext } from '../toolchains/context.js'
-import { resolveToolchain } from '../toolchains/registry.js'
+import { getToolchain, resolveToolchain } from '../toolchains/registry.js'
 
 export type DeployStatus = 'none' | 'run' | 'push' | 'clean' | 'debug'
 
@@ -90,16 +86,16 @@ export default async function* build(
   }: BuildArgs,
   prompter: Prompter,
 ): AsyncGenerator<OperationEvent> {
-  const OS = platformType().toLowerCase() as Device
-
-  await sourceEnvironment()
-
   const ctx = getHostContext()
+  const moddableToolchain = getToolchain('moddable')
 
-  if (!moddableExists()) {
+  Object.assign(process.env, moddableToolchain?.getEnvVars(ctx))
+  const verification = await moddableToolchain?.verify(ctx)
+
+  if (!verification?.ok) {
     yield {
       type: 'step:fail',
-      message: `Moddable tooling required. Run 'xs-dev setup --device ${DEVICE_ALIAS[OS]}' before trying again.`,
+      message: `Moddable tooling required. Run 'xs-dev setup --device ${DEVICE_ALIAS[ctx.platform]}' before trying again.`,
     }
     return
   }
@@ -140,7 +136,7 @@ export default async function* build(
     }
 
     const choices: Array<Choice<string>> = deviceTargets
-      .concat(simulators, 'wasm', DEVICE_ALIAS[OS])
+      .concat(simulators, 'wasm', DEVICE_ALIAS[ctx.platform])
       .map((c) => ({ label: c, value: c }))
 
     const selectedDevice = await prompter.select('Here are the available target devices:', choices)

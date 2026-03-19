@@ -7,6 +7,7 @@ import setupEjectfix from '../toolbox/setup/ejectfix.js'
 import { DEVICE_ALIAS } from '../toolbox/prompt/devices.js'
 import type { SetupArgs } from '../toolbox/setup/types.js'
 import { createInteractivePrompter, createNonInteractivePrompter, isInteractive } from '../lib/prompter.js'
+import * as output from '../lib/output.js'
 import { handleEvent } from '../lib/renderer.js'
 import { getToolchain } from '../toolbox/toolchains/registry.js'
 import { getHostContext } from '../toolbox/toolchains/context.js'
@@ -72,14 +73,14 @@ const command = buildCommand({
       if (selectedDevice !== '' && selectedDevice !== undefined) {
         target = selectedDevice as Device
       } else {
-        console.warn('Please select a target device to run')
+        output.warn('Please select a target device to run')
         return
       }
     }
 
     if (tool !== undefined) {
       if (!['ejectfix'].includes(tool)) {
-        console.warn(`Unknown tool ${tool}`)
+        output.warn(`Unknown tool ${tool}`)
         process.exit(1)
       }
       if (tool === 'ejectfix') {
@@ -106,7 +107,7 @@ const command = buildCommand({
     if (platformDevices.includes(target)) {
       const toolchain = getToolchain('moddable')
       if (toolchain === undefined) {
-        console.warn('Moddable toolchain not found')
+        output.warn('Moddable toolchain not found')
         process.exit(1)
       }
       const version = buildVersionString(release, branch, sourceRepo)
