@@ -10,6 +10,7 @@ import { DEVICE_ALIAS } from '../toolbox/prompt/devices.js'
 import type { Device } from '../types.js'
 import * as output from '../lib/output.js'
 import { readManifest, writeManifest, addInclude } from '../toolbox/manifest/index.js'
+import { isInteractive } from '../lib/prompter.js'
 
 interface IncludeOptions {
   device?: Device
@@ -36,8 +37,10 @@ const command = buildCommand({
     const { device = '' } = flags
 
     if (
-      moduleName === undefined ||
-      !existsSync(join(modulesPath, moduleName, 'manifest.json'))
+      isInteractive() && (
+        moduleName === undefined ||
+        !existsSync(join(modulesPath, moduleName, 'manifest.json'))
+      )
     ) {
       // prompt with choices from $MODDABLE/modules
       const moduleChildren = existsSync(modulesPath) && statSync(modulesPath).isDirectory()
