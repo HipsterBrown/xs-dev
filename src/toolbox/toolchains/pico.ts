@@ -8,7 +8,7 @@ import { moddableExists } from '../setup/moddable.js'
 import { sourceEnvironment, which, execWithSudo } from '../system/exec.js'
 import { ensureHomebrew, formulaeExists } from '../setup/homebrew.js'
 import { isFailure } from '../system/errors.js'
-import type { TargetAdapter, AdapterContext, VerifyResult } from './interface.js'
+import type { Toolchain, HostContext, VerifyResult } from './interface.js'
 import type { OperationEvent } from '../../lib/events.js'
 import type { Prompter } from '../../lib/prompter.js'
 
@@ -70,11 +70,11 @@ async function* installLinuxDeps(_prompter: Prompter): AsyncGenerator<OperationE
   }
 }
 
-export const picoAdapter: TargetAdapter = {
+export const picoToolchain: Toolchain = {
   name: 'pico',
   platforms: ['mac', 'lin', 'win'],
 
-  async *install(ctx: AdapterContext, prompter: Prompter): AsyncGenerator<OperationEvent, void, undefined> {
+  async *install(ctx: HostContext, prompter: Prompter): AsyncGenerator<OperationEvent, void, undefined> {
     yield { type: 'step:start', message: 'Starting pico tooling setup' }
 
     const PICO_BRANCH = '2.0.0'
@@ -312,7 +312,7 @@ Then run: xs-dev run --example helloworld --device pico`,
     }
   },
 
-  async *update(ctx: AdapterContext, prompter: Prompter): AsyncGenerator<OperationEvent, void, undefined> {
+  async *update(ctx: HostContext, prompter: Prompter): AsyncGenerator<OperationEvent, void, undefined> {
     const PICO_BRANCH = '2.0.0'
     const PICO_ROOT = process.env.PICO_ROOT ?? resolve(INSTALL_DIR, 'pico')
     const PICO_SDK_DIR = resolve(PICO_ROOT, 'pico-sdk')
@@ -464,7 +464,7 @@ Then run: xs-dev run --example helloworld --device pico`,
     }
   },
 
-  async *teardown(_ctx: AdapterContext, _prompter: Prompter): AsyncGenerator<OperationEvent, void, undefined> {
+  async *teardown(_ctx: HostContext, _prompter: Prompter): AsyncGenerator<OperationEvent, void, undefined> {
     try {
       yield { type: 'step:start', message: 'Removing pico tooling' }
       rmSync(join(INSTALL_DIR, 'pico'), { recursive: true, force: true })
@@ -474,7 +474,7 @@ Then run: xs-dev run --example helloworld --device pico`,
     }
   },
 
-  async verify(_ctx: AdapterContext): Promise<VerifyResult> {
+  async verify(_ctx: HostContext): Promise<VerifyResult> {
     const missing: string[] = []
 
     if (process.env.PICO_SDK_PATH === undefined || process.env.PICO_SDK_PATH === '') {
@@ -490,13 +490,13 @@ Then run: xs-dev run --example helloworld --device pico`,
     }
 
     if (missing.length > 0) {
-      return { ok: false, adapter: 'pico', missing }
+      return { ok: false, toolchain: 'pico', missing }
     }
 
-    return { ok: true, adapter: 'pico' }
+    return { ok: true, toolchain: 'pico' }
   },
 
-  getEnvVars(ctx: AdapterContext): Record<string, string> {
+  getEnvVars(ctx: HostContext): Record<string, string> {
     // On Linux, /usr is always the GCC root. On macOS/Windows, PICO_GCC_ROOT is
     // set by install() via `brew --prefix`. The fallback '' is intentional —
     // verify() will catch a missing value before any build proceeds.

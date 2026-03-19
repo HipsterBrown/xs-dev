@@ -23,7 +23,7 @@ import { execWithSudo, sourceEnvironment, which } from '../../system/exec.js'
 import { findMissingDependencies, installPackages } from '../../system/packages.js'
 import type { Dependency } from '../../system/types.js'
 import { isFailure, unwrap } from '../../system/errors.js'
-import type { AdapterContext } from '../interface.js'
+import type { HostContext } from '../interface.js'
 import { parseModdableVersion } from './index.js'
 
 export async function* installLinux(
@@ -269,7 +269,7 @@ export async function* installLinux(
 }
 
 export async function* updateLinux(
-  ctx: AdapterContext,
+  ctx: HostContext,
   prompter: Prompter,
 ): AsyncGenerator<OperationEvent, void, undefined> {
   const { release, branch, sourceRepo } = parseModdableVersion(ctx.version)
@@ -524,7 +524,7 @@ export async function* updateLinux(
 }
 
 export async function* teardownLinux(
-  _ctx: AdapterContext,
+  _ctx: HostContext,
 ): AsyncGenerator<OperationEvent, void, undefined> {
   yield { type: 'step:start', message: 'Removing Moddable SDK directory' }
   rmSync(INSTALL_PATH, { recursive: true, force: true })

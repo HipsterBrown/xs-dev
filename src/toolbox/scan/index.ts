@@ -4,13 +4,13 @@ import { SerialPort } from 'serialport'
 import { findBySerialNumber } from 'usb'
 import type { OperationEvent } from '../../lib/events.js'
 import { parseScanResult } from './parse.js'
-import { adapters } from '../adapters/registry.js'
-import { getAdapterContext } from '../adapters/context.js'
+import { toolchains } from '../toolchains/registry.js'
+import { getHostContext } from '../toolchains/context.js'
 
 export default async function* scanDevices(): AsyncGenerator<OperationEvent> {
-  const ctx = getAdapterContext()
-  for (const adapter of Object.values(adapters).filter(a => a.platforms.includes(ctx.platform))) {
-    Object.assign(process.env, adapter.getEnvVars(ctx))
+  const ctx = getHostContext()
+  for (const toolchain of Object.values(toolchains).filter(a => a.platforms.includes(ctx.platform))) {
+    Object.assign(process.env, toolchain.getEnvVars(ctx))
   }
 
   const esptoolPath = (() => {

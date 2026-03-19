@@ -4,8 +4,8 @@ import { join } from 'node:path'
 import ora from 'ora'
 import { buildCommand } from '@stricli/core'
 import type { LocalContext } from '../app.js'
-import { adapters } from '../toolbox/adapters/registry.js'
-import { getAdapterContext } from '../toolbox/adapters/context.js'
+import { toolchains } from '../toolbox/toolchains/registry.js'
+import { getHostContext } from '../toolbox/toolchains/context.js'
 import { createNonInteractivePrompter } from '../lib/prompter.js'
 import { handleEvent } from '../lib/renderer.js'
 import { EXPORTS_FILE_PATH, INSTALL_DIR, getProfilePath } from '../toolbox/setup/constants.js'
@@ -16,14 +16,14 @@ const command = buildCommand({
   },
   async func(this: LocalContext) {
     const spinner = ora()
-    const ctx = getAdapterContext()
+    const ctx = getHostContext()
     const prompter = createNonInteractivePrompter()
 
     spinner.start('Tearing down platform dependencies')
 
-    for (const adapter of Object.values(adapters)) {
-      if (adapter.platforms.includes(ctx.platform)) {
-        for await (const event of adapter.teardown(ctx, prompter)) {
+    for (const toolchain of Object.values(toolchains)) {
+      if (toolchain.platforms.includes(ctx.platform)) {
+        for await (const event of toolchain.teardown(ctx, prompter)) {
           handleEvent(event, spinner)
         }
       }

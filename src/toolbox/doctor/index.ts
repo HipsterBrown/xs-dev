@@ -3,7 +3,7 @@ import { which } from '../system/exec.js'
 import { getModdableVersion } from '../setup/moddable.js'
 import { detectPython, getPythonVersion } from '../system/python.js'
 import { unwrapOr } from '../system/errors.js'
-import type { TargetAdapter, AdapterContext } from '../../lib/adapter.js'
+import type { Toolchain, HostContext } from '../../lib/toolchain.js'
 
 export interface EnvironmentInfo {
   cliVersion: string
@@ -21,18 +21,18 @@ export interface EnvironmentInfo {
 
 export async function gatherEnvironmentInfo(
   cliVersion: string,
-  { adapterList, ctx }: { adapterList: TargetAdapter[]; ctx: AdapterContext },
+  { adapterList, ctx }: { adapterList: Toolchain[]; ctx: HostContext },
 ): Promise<EnvironmentInfo> {
   const supportedDevices: string[] = []
 
   await Promise.all(
     adapterList
-      .filter((adapter) => adapter.platforms.includes(ctx.platform))
-      .map(async (adapter) => {
-        Object.assign(process.env, adapter.getEnvVars(ctx))
-        const result = await adapter.verify(ctx)
+      .filter((toolchain) => toolchain.platforms.includes(ctx.platform))
+      .map(async (toolchain) => {
+        Object.assign(process.env, toolchain.getEnvVars(ctx))
+        const result = await toolchain.verify(ctx)
         if (result.ok) {
-          supportedDevices.push(adapter.name)
+          supportedDevices.push(toolchain.name)
         }
       }),
   )

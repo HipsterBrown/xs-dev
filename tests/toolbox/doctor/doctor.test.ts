@@ -1,12 +1,12 @@
 import { describe, it } from 'node:test'
 import assert from 'node:assert/strict'
-import type { TargetAdapter, AdapterContext } from '../../../src/lib/adapter.js'
+import type { Toolchain, HostContext } from '../../../src/lib/toolchain.js'
 
 function makeAdapter(
   name: string,
   ok: boolean,
   platforms: Array<'mac' | 'lin' | 'win'> = ['mac', 'lin', 'win'],
-): TargetAdapter {
+): Toolchain {
   return {
     name,
     platforms,
@@ -15,16 +15,16 @@ function makeAdapter(
     async *teardown() {},
     async verify(_ctx) {
       return ok
-        ? { ok: true, adapter: name }
-        : { ok: false, adapter: name, missing: [`${name} not installed`] }
+        ? { ok: true, toolchain: name }
+        : { ok: false, toolchain: name, missing: [`${name} not installed`] }
     },
     getEnvVars(_ctx) {
       return {}
     },
-  } as unknown as TargetAdapter
+  } as unknown as Toolchain
 }
 
-const testCtx: AdapterContext = { platform: 'mac', arch: 'arm64' }
+const testCtx: HostContext = { platform: 'mac', arch: 'arm64' }
 
 describe('gatherEnvironmentInfo with adapters', () => {
   it('includes adapter name in supportedDevices when verify returns ok', async () => {

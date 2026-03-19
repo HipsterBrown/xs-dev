@@ -21,7 +21,7 @@ describe('toolbox/adapters/moddable/mac (install)', async () => {
     }
   })
 
-  const { installMac } = await import('#src/toolbox/adapters/moddable/mac.js')
+  const { installMac } = await import('#src/toolbox/toolchains/moddable/mac.js')
 
   it('yields step:start and step:done events for a successful setup', async () => {
     const events = await Array.fromAsync(

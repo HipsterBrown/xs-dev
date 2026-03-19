@@ -20,7 +20,7 @@ import type { PlatformSetupArgs } from '../../setup/types.js'
 import type { Prompter } from '../../../lib/prompter.js'
 import type { OperationEvent } from '../../../lib/events.js'
 import { isFailure, unwrap } from '../../system/errors.js'
-import type { AdapterContext } from '../interface.js'
+import type { HostContext } from '../interface.js'
 
 const getWsPromise = (): ((path: string, options: unknown) => Promise<void>) => promisify(ws.create)
 
@@ -295,7 +295,7 @@ export async function* installWindows(
 }
 
 export async function* updateWindows(
-  _ctx: AdapterContext,
+  _ctx: HostContext,
   _prompter: Prompter,
 ): AsyncGenerator<OperationEvent, void, undefined> {
   // TODO: Windows update is not currently supported
@@ -303,7 +303,7 @@ export async function* updateWindows(
 }
 
 export async function* teardownWindows(
-  _ctx: AdapterContext,
+  _ctx: HostContext,
 ): AsyncGenerator<OperationEvent, void, undefined> {
   yield { type: 'step:start', message: 'Removing Windows-specific Moddable SDK files' }
 

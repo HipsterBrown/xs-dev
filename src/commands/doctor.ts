@@ -1,8 +1,8 @@
 import { buildCommand } from '@stricli/core'
 import type { LocalContext } from '../app.js'
 import { gatherEnvironmentInfo } from '../toolbox/doctor/index.js'
-import { adapters } from '../toolbox/adapters/registry.js'
-import { getAdapterContext } from '../toolbox/adapters/context.js'
+import { toolchains } from '../toolbox/toolchains/registry.js'
+import { getHostContext } from '../toolbox/toolchains/context.js'
 
 function printTable(rows: string[][], write: (s: string) => void): void {
   const labelWidth = Math.max(...rows.map((r) => r[0]?.length ?? 0)) + 2
@@ -18,8 +18,8 @@ const command = buildCommand({
       proc.stdout.write(s)
     }
 
-    const ctx = getAdapterContext()
-    const info = await gatherEnvironmentInfo(currentVersion, { adapterList: Object.values(adapters), ctx })
+    const ctx = getHostContext()
+    const info = await gatherEnvironmentInfo(currentVersion, { adapterList: Object.values(toolchains), ctx })
 
     write('xs-dev environment info:\n')
     printTable(

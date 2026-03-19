@@ -12,7 +12,7 @@ import { installWinDeps } from './windows.js'
 import { setEnv } from '../../setup/windows.js'
 import { sourceEnvironment } from '../../system/exec.js'
 import { unwrapOr } from '../../system/errors.js'
-import type { TargetAdapter, AdapterContext, VerifyResult } from '../interface.js'
+import type { Toolchain, HostContext, VerifyResult } from '../interface.js'
 import type { OperationEvent } from '../../../lib/events.js'
 import type { Prompter } from '../../../lib/prompter.js'
 
@@ -47,11 +47,11 @@ export async function getExpectedEspIdfVersion(): Promise<string | null> {
   return null
 }
 
-export const esp32Adapter: TargetAdapter = {
+export const esp32Toolchain: Toolchain = {
   name: 'esp32',
   platforms: ['mac', 'lin', 'win'],
 
-  async *install(ctx: AdapterContext, prompter: Prompter): AsyncGenerator<OperationEvent, void, undefined> {
+  async *install(ctx: HostContext, prompter: Prompter): AsyncGenerator<OperationEvent, void, undefined> {
     yield { type: 'step:start', message: 'Setting up esp32 tools' }
 
     const isWindows = ctx.platform === 'win'
@@ -189,7 +189,7 @@ If there is trouble finding the correct port, pass the "--port" flag to the abov
     }
   },
 
-  async *update(ctx: AdapterContext, prompter: Prompter): AsyncGenerator<OperationEvent, void, undefined> {
+  async *update(ctx: HostContext, prompter: Prompter): AsyncGenerator<OperationEvent, void, undefined> {
     const ESP_BRANCH_V4 = 'v4.4.3'
     const ESP_BRANCH_V5 = 'v5.5'
     const ESP32_DIR = resolve(INSTALL_DIR, 'esp32')
@@ -354,7 +354,7 @@ If there is trouble finding the correct port, pass the "--port" flag to the abov
     }
   },
 
-  async *teardown(_ctx: AdapterContext, _prompter: Prompter): AsyncGenerator<OperationEvent, void, undefined> {
+  async *teardown(_ctx: HostContext, _prompter: Prompter): AsyncGenerator<OperationEvent, void, undefined> {
     try {
       yield { type: 'step:start', message: 'Removing esp32 tooling' }
       rmSync(join(INSTALL_DIR, 'esp32'), { recursive: true, force: true })
@@ -365,7 +365,7 @@ If there is trouble finding the correct port, pass the "--port" flag to the abov
     }
   },
 
-  async verify(_ctx: AdapterContext): Promise<VerifyResult> {
+  async verify(_ctx: HostContext): Promise<VerifyResult> {
     const missing: string[] = []
 
     if (process.env.IDF_PATH === undefined || process.env.IDF_PATH === '') {
@@ -375,19 +375,19 @@ If there is trouble finding the correct port, pass the "--port" flag to the abov
     }
 
     if (missing.length > 0) {
-      return { ok: false, adapter: 'esp32', missing }
+      return { ok: false, toolchain: 'esp32', missing }
     }
 
-    return { ok: true, adapter: 'esp32' }
+    return { ok: true, toolchain: 'esp32' }
   },
 
-  getEnvVars(_ctx: AdapterContext): Record<string, string> {
+  getEnvVars(_ctx: HostContext): Record<string, string> {
     return {
       IDF_PATH: resolve(INSTALL_DIR, 'esp32', 'esp-idf'),
     }
   },
 
-  getActivationScript(_ctx: AdapterContext): string | null {
+  getActivationScript(_ctx: HostContext): string | null {
     const idfPath = process.env.IDF_PATH
     if (idfPath === undefined || idfPath === '') {
       return null

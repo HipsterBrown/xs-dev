@@ -6,6 +6,7 @@ describe('toolbox/adapters/moddable/mac (update)', async () => {
   mock.module('#src/toolbox/setup/moddable.js', {
     namedExports: {
       moddableExists: mock.fn(() => true),
+      getModdableVersion: mock.fn(async () => null),
       fetchRelease: mock.fn(async () => null),
       downloadReleaseTools: mock.fn(async () => {}),
       MissingReleaseAssetError: class MissingReleaseAssetError extends Error {
@@ -36,10 +37,12 @@ describe('toolbox/adapters/moddable/mac (update)', async () => {
     namedExports: {
       sourceEnvironment: mock.fn(async () => {}),
       which: mock.fn(() => null),
+      execWithSudo: mock.fn(async () => ({ success: true, data: undefined })),
+      pkexec: mock.fn(async () => ({ success: true, data: undefined })),
     }
   })
 
-  const { updateMac } = await import('#src/toolbox/adapters/moddable/mac.js')
+  const { updateMac } = await import('#src/toolbox/toolchains/moddable/mac.js')
 
   it('yields events during update', async () => {
     const prompter = createNonInteractivePrompter()

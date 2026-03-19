@@ -60,7 +60,7 @@ describe('toolbox/adapters/moddable/windows (install)', async () => {
     defaultExport: mock.fn(async () => { }),
   })
 
-  const { installWindows } = await import('#src/toolbox/adapters/moddable/windows.js')
+  const { installWindows } = await import('#src/toolbox/toolchains/moddable/windows.js')
 
   it('yields step:start event for setup', async () => {
     const prompter = createNonInteractivePrompter()

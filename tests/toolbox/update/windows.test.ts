@@ -3,7 +3,7 @@ import assert from 'node:assert/strict'
 import { createNonInteractivePrompter } from '#src/lib/prompter.js'
 
 describe('toolbox/adapters/moddable/windows (update)', async () => {
-  const { updateWindows } = await import('#src/toolbox/adapters/moddable/windows.js')
+  const { updateWindows } = await import('#src/toolbox/toolchains/moddable/windows.js')
 
   it('yields warning event', async () => {
     const prompter = createNonInteractivePrompter()

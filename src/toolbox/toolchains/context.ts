@@ -1,5 +1,5 @@
 import { arch as osArch, type as osType } from 'node:os'
-import type { AdapterContext, HostPlatform } from './interface.js'
+import type { HostContext, HostPlatform } from './interface.js'
 
 function detectPlatform(): HostPlatform {
   const t = osType().toLowerCase()
@@ -12,7 +12,7 @@ function detectArch(): 'x64' | 'arm64' {
   return osArch() === 'arm64' ? 'arm64' : 'x64'
 }
 
-export function getAdapterContext(): AdapterContext {
+export function getHostContext(): HostContext {
   return {
     platform: detectPlatform(),
     arch: detectArch(),

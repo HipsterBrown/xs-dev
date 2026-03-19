@@ -14,7 +14,7 @@ import upsert from '../patching/upsert.js'
 import { isFailure } from '../system/errors.js'
 import { fetchStream } from '../system/fetch.js'
 import { execaCommand } from 'execa'
-import type { TargetAdapter, AdapterContext, VerifyResult } from './interface.js'
+import type { Toolchain, HostContext, VerifyResult } from './interface.js'
 import type { OperationEvent } from '../../lib/events.js'
 import type { Prompter } from '../../lib/prompter.js'
 
@@ -69,11 +69,11 @@ async function* installPython(prompter: Prompter): AsyncGenerator<OperationEvent
   }
 }
 
-export const nrf52Adapter: TargetAdapter = {
+export const nrf52Toolchain: Toolchain = {
   name: 'nrf52',
   platforms: ['mac', 'lin', 'win'],
 
-  async *install(ctx: AdapterContext, prompter: Prompter): AsyncGenerator<OperationEvent, void, undefined> {
+  async *install(ctx: HostContext, prompter: Prompter): AsyncGenerator<OperationEvent, void, undefined> {
     yield { type: 'step:start', message: 'Setting up nrf52 tools' }
 
     const isWindows = ctx.platform === 'win'
@@ -217,11 +217,11 @@ Test out the setup by starting a new ${isWindows ? 'Moddable Command Prompt' : '
     }
   },
 
-  async *update(_ctx: AdapterContext, _prompter: Prompter): AsyncGenerator<OperationEvent, void, undefined> {
+  async *update(_ctx: HostContext, _prompter: Prompter): AsyncGenerator<OperationEvent, void, undefined> {
     yield { type: 'warning', message: 'nRF52 update is not currently supported' }
   },
 
-  async *teardown(_ctx: AdapterContext, _prompter: Prompter): AsyncGenerator<OperationEvent, void, undefined> {
+  async *teardown(_ctx: HostContext, _prompter: Prompter): AsyncGenerator<OperationEvent, void, undefined> {
     try {
       yield { type: 'step:start', message: 'Removing nrf52 tooling' }
       rmSync(join(INSTALL_DIR, 'nrf52'), { recursive: true, force: true })
@@ -231,7 +231,7 @@ Test out the setup by starting a new ${isWindows ? 'Moddable Command Prompt' : '
     }
   },
 
-  async verify(ctx: AdapterContext): Promise<VerifyResult> {
+  async verify(ctx: HostContext): Promise<VerifyResult> {
     const missing: string[] = []
 
     if (process.env.NRF_ROOT === undefined || process.env.NRF_ROOT === '') {
@@ -250,13 +250,13 @@ Test out the setup by starting a new ${isWindows ? 'Moddable Command Prompt' : '
     }
 
     if (missing.length > 0) {
-      return { ok: false, adapter: 'nrf52', missing }
+      return { ok: false, toolchain: 'nrf52', missing }
     }
 
-    return { ok: true, adapter: 'nrf52' }
+    return { ok: true, toolchain: 'nrf52' }
   },
 
-  getEnvVars(ctx: AdapterContext): Record<string, string> {
+  getEnvVars(ctx: HostContext): Record<string, string> {
     const NRF52_DIR = resolve(INSTALL_DIR, 'nrf52')
     const sdkPath = resolve(NRF52_DIR, NRF5_SDK)
     return ctx.platform === 'win'

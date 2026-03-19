@@ -17,10 +17,11 @@ describe('toolbox/adapters/moddable/lin (install)', async () => {
       readdir: mock.fn(async () => []),
       copyFile: mock.fn(async () => {}),
       chmod: mock.fn(async () => {}),
+      symlink: mock.fn(async () => {}),
     }
   })
 
-  const { installLinux } = await import('#src/toolbox/adapters/moddable/lin.js')
+  const { installLinux } = await import('#src/toolbox/toolchains/moddable/lin.js')
 
   it('yields step:start and step:done events for a successful setup', async () => {
     const events = await Array.fromAsync(

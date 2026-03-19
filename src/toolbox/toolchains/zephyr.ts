@@ -10,7 +10,7 @@ import { isFailure } from '../system/errors.js'
 import { detectPython } from '../system/python.js'
 import { setEnv } from '../setup/windows.js'
 import upsert from '../patching/upsert.js'
-import type { TargetAdapter, AdapterContext, VerifyResult } from './interface.js'
+import type { Toolchain, HostContext, VerifyResult } from './interface.js'
 import type { OperationEvent } from '../../lib/events.js'
 import type { Prompter } from '../../lib/prompter.js'
 
@@ -89,11 +89,11 @@ async function* installWinDeps(_prompter: Prompter): AsyncGenerator<OperationEve
   }
 }
 
-export const zephyrAdapter: TargetAdapter = {
+export const zephyrToolchain: Toolchain = {
   name: 'zephyr',
   platforms: ['mac', 'lin', 'win'],
 
-  async *install(ctx: AdapterContext, prompter: Prompter): AsyncGenerator<OperationEvent, void, undefined> {
+  async *install(ctx: HostContext, prompter: Prompter): AsyncGenerator<OperationEvent, void, undefined> {
     yield { type: 'step:start', message: 'Starting zephyr tooling setup' }
 
     const isWindows = ctx.platform === 'win'
@@ -271,11 +271,11 @@ Then run: xs-dev run --example helloworld --device zephyr/<board_name>`,
     }
   },
 
-  async *update(_ctx: AdapterContext, _prompter: Prompter): AsyncGenerator<OperationEvent, void, undefined> {
+  async *update(_ctx: HostContext, _prompter: Prompter): AsyncGenerator<OperationEvent, void, undefined> {
     yield { type: 'warning', message: 'Zephyr update is not currently supported' }
   },
 
-  async *teardown(_ctx: AdapterContext, _prompter: Prompter): AsyncGenerator<OperationEvent, void, undefined> {
+  async *teardown(_ctx: HostContext, _prompter: Prompter): AsyncGenerator<OperationEvent, void, undefined> {
     try {
       yield { type: 'step:start', message: 'Removing zephyr tooling' }
       rmSync(join(INSTALL_DIR, 'zephyrproject'), { recursive: true, force: true })
@@ -285,7 +285,7 @@ Then run: xs-dev run --example helloworld --device zephyr/<board_name>`,
     }
   },
 
-  async verify(_ctx: AdapterContext): Promise<VerifyResult> {
+  async verify(_ctx: HostContext): Promise<VerifyResult> {
     const missing: string[] = []
 
     if (process.env.ZEPHYR_BASE === undefined || process.env.ZEPHYR_BASE === '') {
@@ -295,20 +295,20 @@ Then run: xs-dev run --example helloworld --device zephyr/<board_name>`,
     }
 
     if (missing.length > 0) {
-      return { ok: false, adapter: 'zephyr', missing }
+      return { ok: false, toolchain: 'zephyr', missing }
     }
 
-    return { ok: true, adapter: 'zephyr' }
+    return { ok: true, toolchain: 'zephyr' }
   },
 
-  getEnvVars(_ctx: AdapterContext): Record<string, string> {
+  getEnvVars(_ctx: HostContext): Record<string, string> {
     const ZEPHYR_ROOT = resolve(INSTALL_DIR, 'zephyrproject')
     return {
       ZEPHYR_BASE: resolve(ZEPHYR_ROOT, 'zephyr'),
     }
   },
 
-  getActivationScript(_ctx: AdapterContext): string | null {
+  getActivationScript(_ctx: HostContext): string | null {
     const ZEPHYR_ROOT = process.env.ZEPHYR_ROOT ?? resolve(INSTALL_DIR, 'zephyrproject')
     const venvActivate = resolve(ZEPHYR_ROOT, '.venv', 'bin', 'activate')
     return existsSync(venvActivate) ? venvActivate : null

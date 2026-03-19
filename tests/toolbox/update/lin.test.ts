@@ -6,8 +6,14 @@ describe('toolbox/adapters/moddable/lin (update)', async () => {
   mock.module('#src/toolbox/setup/moddable.js', {
     namedExports: {
       moddableExists: mock.fn(() => true),
+      getModdableVersion: mock.fn(async () => null),
       fetchRelease: mock.fn(async () => null),
       downloadReleaseTools: mock.fn(async () => {}),
+      MissingReleaseAssetError: class MissingReleaseAssetError extends Error {
+        constructor(assetName: string) {
+          super(`Unable to find release asset matching ${assetName}`)
+        }
+      },
     }
   })
   mock.module('execa', {
@@ -34,6 +40,7 @@ describe('toolbox/adapters/moddable/lin (update)', async () => {
       statSync: mock.fn(() => ({ isDirectory: () => false, isFile: () => false })),
       renameSync: mock.fn(() => {}),
       rmSync: mock.fn(() => {}),
+      cpSync: mock.fn(() => {}),
       createWriteStream: mock.fn(() => ({ on: mock.fn((event, cb) => cb()) })),
     }
   })
@@ -46,7 +53,7 @@ describe('toolbox/adapters/moddable/lin (update)', async () => {
     }
   })
 
-  const { updateLinux } = await import('#src/toolbox/adapters/moddable/lin.js')
+  const { updateLinux } = await import('#src/toolbox/toolchains/moddable/lin.js')
 
   it('yields events during update', async () => {
     const prompter = createNonInteractivePrompter()

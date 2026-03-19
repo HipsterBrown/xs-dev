@@ -8,8 +8,8 @@ import { DEVICE_ALIAS } from '../toolbox/prompt/devices.js'
 import type { SetupArgs } from '../toolbox/setup/types.js'
 import { createInteractivePrompter, createNonInteractivePrompter, isInteractive } from '../lib/prompter.js'
 import { handleEvent } from '../lib/renderer.js'
-import { getAdapter } from '../toolbox/adapters/registry.js'
-import { getAdapterContext } from '../toolbox/adapters/context.js'
+import { getToolchain } from '../toolbox/toolchains/registry.js'
+import { getHostContext } from '../toolbox/toolchains/context.js'
 
 function buildVersionString(
   release: string | undefined,
@@ -104,25 +104,25 @@ const command = buildCommand({
     const spinner = ora()
 
     if (platformDevices.includes(target)) {
-      const adapter = getAdapter('moddable')
-      if (adapter === undefined) {
-        console.warn('Moddable adapter not found')
+      const toolchain = getToolchain('moddable')
+      if (toolchain === undefined) {
+        console.warn('Moddable toolchain not found')
         process.exit(1)
       }
       const version = buildVersionString(release, branch, sourceRepo)
-      const ctx = { ...getAdapterContext(), version }
-      for await (const event of adapter.install(ctx, prompter)) {
+      const ctx = { ...getHostContext(), version }
+      for await (const event of toolchain.install(ctx, prompter)) {
         handleEvent(event, spinner)
       }
     } else {
-      const adapter = getAdapter(target)
-      if (adapter !== undefined) {
-        const ctx = getAdapterContext()
-        for await (const event of adapter.install(ctx, prompter)) {
+      const toolchain = getToolchain(target)
+      if (toolchain !== undefined) {
+        const ctx = getHostContext()
+        for await (const event of toolchain.install(ctx, prompter)) {
           handleEvent(event, spinner)
         }
       } else {
-        handleEvent({ type: 'step:fail', message: `No adapter registered for device: ${target}` }, spinner)
+        handleEvent({ type: 'step:fail', message: `No toolchain registered for device: ${target}` }, spinner)
       }
     }
   },

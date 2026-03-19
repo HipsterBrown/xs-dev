@@ -23,7 +23,7 @@ import type { Prompter } from '../../../lib/prompter.js'
 import type { OperationEvent } from '../../../lib/events.js'
 import { isFailure, unwrap } from '../../system/errors.js'
 import { which, sourceEnvironment } from '../../system/exec.js'
-import type { AdapterContext } from '../interface.js'
+import type { HostContext } from '../interface.js'
 import { parseModdableVersion } from './index.js'
 
 export async function* installMac(
@@ -227,7 +227,7 @@ export async function* installMac(
 }
 
 export async function* updateMac(
-  ctx: AdapterContext,
+  ctx: HostContext,
   prompter: Prompter,
 ): AsyncGenerator<OperationEvent, void, undefined> {
   const { release, branch, sourceRepo } = parseModdableVersion(ctx.version)
@@ -477,7 +477,7 @@ export async function* updateMac(
 }
 
 export async function* teardownMac(
-  _ctx: AdapterContext,
+  _ctx: HostContext,
 ): AsyncGenerator<OperationEvent, void, undefined> {
   yield { type: 'step:start', message: 'Removing macOS-specific Moddable SDK files' }
 

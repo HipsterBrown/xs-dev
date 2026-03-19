@@ -17,7 +17,7 @@ import { findMissingDependencies, installPackages } from '../system/packages.js'
 import { isFailure } from '../system/errors.js'
 import { addToPath, setEnv } from '../setup/windows.js'
 import type { Dependency } from '../system/types.js'
-import type { TargetAdapter, AdapterContext, VerifyResult } from './interface.js'
+import type { Toolchain, HostContext, VerifyResult } from './interface.js'
 import type { OperationEvent } from '../../lib/events.js'
 import type { Prompter } from '../../lib/prompter.js'
 
@@ -203,11 +203,11 @@ async function* installWindowsDeps(prompter: Prompter): AsyncGenerator<Operation
   }
 }
 
-export const esp8266Adapter: TargetAdapter = {
+export const esp8266Toolchain: Toolchain = {
   name: 'esp8266',
   platforms: ['mac', 'lin', 'win'],
 
-  async *install(ctx: AdapterContext, prompter: Prompter): AsyncGenerator<OperationEvent, void, undefined> {
+  async *install(ctx: HostContext, prompter: Prompter): AsyncGenerator<OperationEvent, void, undefined> {
     yield { type: 'step:start', message: 'Setting up esp8266 tools' }
 
     const isWindows = ctx.platform === 'win'
@@ -343,11 +343,11 @@ If there is trouble finding the correct port, pass the "--port" flag to the abov
     }
   },
 
-  async *update(_ctx: AdapterContext, _prompter: Prompter): AsyncGenerator<OperationEvent, void, undefined> {
+  async *update(_ctx: HostContext, _prompter: Prompter): AsyncGenerator<OperationEvent, void, undefined> {
     yield { type: 'warning', message: 'ESP8266 update is not currently supported' }
   },
 
-  async *teardown(_ctx: AdapterContext, _prompter: Prompter): AsyncGenerator<OperationEvent, void, undefined> {
+  async *teardown(_ctx: HostContext, _prompter: Prompter): AsyncGenerator<OperationEvent, void, undefined> {
     try {
       yield { type: 'step:start', message: 'Removing esp8266 tooling' }
       rmSync(join(INSTALL_DIR, 'esp'), { recursive: true, force: true })
@@ -357,7 +357,7 @@ If there is trouble finding the correct port, pass the "--port" flag to the abov
     }
   },
 
-  async verify(_ctx: AdapterContext): Promise<VerifyResult> {
+  async verify(_ctx: HostContext): Promise<VerifyResult> {
     const missing: string[] = []
 
     if (process.env.ESP_BASE === undefined || process.env.ESP_BASE === '') {
@@ -367,13 +367,13 @@ If there is trouble finding the correct port, pass the "--port" flag to the abov
     }
 
     if (missing.length > 0) {
-      return { ok: false, adapter: 'esp8266', missing }
+      return { ok: false, toolchain: 'esp8266', missing }
     }
 
-    return { ok: true, adapter: 'esp8266' }
+    return { ok: true, toolchain: 'esp8266' }
   },
 
-  getEnvVars(_ctx: AdapterContext): Record<string, string> {
+  getEnvVars(_ctx: HostContext): Record<string, string> {
     return {
       ESP_BASE: resolve(INSTALL_DIR, 'esp'),
     }

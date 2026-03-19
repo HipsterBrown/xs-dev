@@ -7,23 +7,23 @@ import { homedir } from 'node:os'
 const INSTALL_DIR = resolve(homedir(), '.local', 'share')
 const INSTALL_PATH = resolve(INSTALL_DIR, 'moddable')
 
-describe('moddableAdapter.getEnvVars', () => {
+describe('moddableToolchain.getEnvVars', () => {
   it('returns MODDABLE and PATH for mac', async () => {
-    const { moddableAdapter } = await import('../../../src/toolbox/adapters/moddable/index.js')
-    const result = moddableAdapter.getEnvVars({ platform: 'mac', arch: 'arm64' })
+    const { moddableToolchain } = await import('../../../src/toolbox/toolchains/moddable/index.js')
+    const result = moddableToolchain.getEnvVars({ platform: 'mac', arch: 'arm64' })
     assert.equal(result.MODDABLE, INSTALL_PATH)
     assert.ok(result.PATH?.includes(resolve(INSTALL_PATH, 'build', 'bin', 'mac', 'release')))
   })
 
   it('returns MODDABLE and PATH for lin', async () => {
-    const { moddableAdapter } = await import('../../../src/toolbox/adapters/moddable/index.js')
-    const result = moddableAdapter.getEnvVars({ platform: 'lin', arch: 'x64' })
+    const { moddableToolchain } = await import('../../../src/toolbox/toolchains/moddable/index.js')
+    const result = moddableToolchain.getEnvVars({ platform: 'lin', arch: 'x64' })
     assert.equal(result.MODDABLE, INSTALL_PATH)
     assert.ok(result.PATH?.includes(resolve(INSTALL_PATH, 'build', 'bin', 'lin', 'release')))
   })
 })
 
-describe('moddableAdapter.verify', () => {
+describe('moddableToolchain.verify', () => {
   let originalModdable: string | undefined
 
   beforeEach(() => {
@@ -40,36 +40,36 @@ describe('moddableAdapter.verify', () => {
 
   it('returns ok: false when MODDABLE is not set', async () => {
     delete process.env.MODDABLE
-    const { moddableAdapter } = await import('../../../src/toolbox/adapters/moddable/index.js')
-    const result = await moddableAdapter.verify({ platform: 'mac', arch: 'arm64' })
+    const { moddableToolchain } = await import('../../../src/toolbox/toolchains/moddable/index.js')
+    const result = await moddableToolchain.verify({ platform: 'mac', arch: 'arm64' })
     assert.equal(result.ok, false)
     assert.ok((result.missing?.length ?? 0) > 0)
   })
 
   it('returns ok: false when MODDABLE path does not exist', async () => {
     process.env.MODDABLE = '/does/not/exist'
-    const { moddableAdapter } = await import('../../../src/toolbox/adapters/moddable/index.js')
-    const result = await moddableAdapter.verify({ platform: 'mac', arch: 'arm64' })
+    const { moddableToolchain } = await import('../../../src/toolbox/toolchains/moddable/index.js')
+    const result = await moddableToolchain.verify({ platform: 'mac', arch: 'arm64' })
     assert.equal(result.ok, false)
   })
 })
 
-describe('moddableAdapter metadata', () => {
+describe('moddableToolchain metadata', () => {
   it('has correct name and supported platforms', async () => {
-    const { moddableAdapter } = await import('../../../src/toolbox/adapters/moddable/index.js')
-    assert.equal(moddableAdapter.name, 'moddable')
-    assert.deepEqual(moddableAdapter.platforms, ['mac', 'lin', 'win'])
+    const { moddableToolchain } = await import('../../../src/toolbox/toolchains/moddable/index.js')
+    assert.equal(moddableToolchain.name, 'moddable')
+    assert.deepEqual(moddableToolchain.platforms, ['mac', 'lin', 'win'])
   })
 })
 
 describe('parseModdableVersion', () => {
   it('is exported from moddable/index', async () => {
-    const mod = await import('../../../src/toolbox/adapters/moddable/index.js')
+    const mod = await import('../../../src/toolbox/toolchains/moddable/index.js')
     assert.equal(typeof (mod as Record<string, unknown>).parseModdableVersion, 'function')
   })
 
   it('undefined version → release latest, no branch, no sourceRepo', async () => {
-    const { parseModdableVersion } = await import('../../../src/toolbox/adapters/moddable/index.js') as { parseModdableVersion: (v: string | undefined) => { release: string | undefined, branch: string | undefined, sourceRepo: string | undefined } }
+    const { parseModdableVersion } = await import('../../../src/toolbox/toolchains/moddable/index.js') as { parseModdableVersion: (v: string | undefined) => { release: string | undefined, branch: string | undefined, sourceRepo: string | undefined } }
     const result = parseModdableVersion(undefined)
     assert.equal(result.release, 'latest')
     assert.equal(result.branch, undefined)
@@ -77,7 +77,7 @@ describe('parseModdableVersion', () => {
   })
 
   it('release-1.2.3 → release 1.2.3', async () => {
-    const { parseModdableVersion } = await import('../../../src/toolbox/adapters/moddable/index.js') as { parseModdableVersion: (v: string | undefined) => { release: string | undefined, branch: string | undefined, sourceRepo: string | undefined } }
+    const { parseModdableVersion } = await import('../../../src/toolbox/toolchains/moddable/index.js') as { parseModdableVersion: (v: string | undefined) => { release: string | undefined, branch: string | undefined, sourceRepo: string | undefined } }
     const result = parseModdableVersion('release-1.2.3')
     assert.equal(result.release, '1.2.3')
     assert.equal(result.branch, undefined)
@@ -85,7 +85,7 @@ describe('parseModdableVersion', () => {
   })
 
   it('branch-main → branch main', async () => {
-    const { parseModdableVersion } = await import('../../../src/toolbox/adapters/moddable/index.js') as { parseModdableVersion: (v: string | undefined) => { release: string | undefined, branch: string | undefined, sourceRepo: string | undefined } }
+    const { parseModdableVersion } = await import('../../../src/toolbox/toolchains/moddable/index.js') as { parseModdableVersion: (v: string | undefined) => { release: string | undefined, branch: string | undefined, sourceRepo: string | undefined } }
     const result = parseModdableVersion('branch-main')
     assert.equal(result.release, undefined)
     assert.equal(result.branch, 'main')
@@ -93,7 +93,7 @@ describe('parseModdableVersion', () => {
   })
 
   it('release-2.0.0@https://github.com/fork/moddable → release + sourceRepo', async () => {
-    const { parseModdableVersion } = await import('../../../src/toolbox/adapters/moddable/index.js') as { parseModdableVersion: (v: string | undefined) => { release: string | undefined, branch: string | undefined, sourceRepo: string | undefined } }
+    const { parseModdableVersion } = await import('../../../src/toolbox/toolchains/moddable/index.js') as { parseModdableVersion: (v: string | undefined) => { release: string | undefined, branch: string | undefined, sourceRepo: string | undefined } }
     const result = parseModdableVersion('release-2.0.0@https://github.com/fork/moddable')
     assert.equal(result.release, '2.0.0')
     assert.equal(result.branch, undefined)
@@ -101,7 +101,7 @@ describe('parseModdableVersion', () => {
   })
 
   it('branch-dev@https://github.com/fork/moddable → branch + sourceRepo', async () => {
-    const { parseModdableVersion } = await import('../../../src/toolbox/adapters/moddable/index.js') as { parseModdableVersion: (v: string | undefined) => { release: string | undefined, branch: string | undefined, sourceRepo: string | undefined } }
+    const { parseModdableVersion } = await import('../../../src/toolbox/toolchains/moddable/index.js') as { parseModdableVersion: (v: string | undefined) => { release: string | undefined, branch: string | undefined, sourceRepo: string | undefined } }
     const result = parseModdableVersion('branch-dev@https://github.com/fork/moddable')
     assert.equal(result.release, undefined)
     assert.equal(result.branch, 'dev')
@@ -109,7 +109,7 @@ describe('parseModdableVersion', () => {
   })
 
   it('unrecognized prefix → treated as release tag (fallback)', async () => {
-    const { parseModdableVersion } = await import('../../../src/toolbox/adapters/moddable/index.js') as { parseModdableVersion: (v: string | undefined) => { release: string | undefined, branch: string | undefined, sourceRepo: string | undefined } }
+    const { parseModdableVersion } = await import('../../../src/toolbox/toolchains/moddable/index.js') as { parseModdableVersion: (v: string | undefined) => { release: string | undefined, branch: string | undefined, sourceRepo: string | undefined } }
     const result = parseModdableVersion('v2.0.0')
     assert.equal(result.release, 'v2.0.0')
     assert.equal(result.branch, undefined)

@@ -1,33 +1,33 @@
 import { describe, it, beforeEach, afterEach } from 'node:test'
 import assert from 'node:assert/strict'
 
-describe('wasmAdapter.getEnvVars', () => {
+describe('wasmToolchain.getEnvVars', () => {
   it('returns EMSDK', async () => {
-    const { wasmAdapter } = await import('../../../src/toolbox/adapters/wasm.js')
-    const result = wasmAdapter.getEnvVars({ platform: 'mac', arch: 'arm64' })
+    const { wasmToolchain } = await import('../../../src/toolbox/toolchains/wasm.js')
+    const result = wasmToolchain.getEnvVars({ platform: 'mac', arch: 'arm64' })
     assert.ok('EMSDK' in result)
   })
 
   it('does NOT include EMSDK_NODE (comes from emsdk_env.sh, not getEnvVars)', async () => {
-    const { wasmAdapter } = await import('../../../src/toolbox/adapters/wasm.js')
-    const result = wasmAdapter.getEnvVars({ platform: 'mac', arch: 'arm64' })
+    const { wasmToolchain } = await import('../../../src/toolbox/toolchains/wasm.js')
+    const result = wasmToolchain.getEnvVars({ platform: 'mac', arch: 'arm64' })
     assert.ok(!('EMSDK_NODE' in result))
   })
 
   it('does NOT include EMSDK_PYTHON (comes from emsdk_env.sh, not getEnvVars)', async () => {
-    const { wasmAdapter } = await import('../../../src/toolbox/adapters/wasm.js')
-    const result = wasmAdapter.getEnvVars({ platform: 'mac', arch: 'arm64' })
+    const { wasmToolchain } = await import('../../../src/toolbox/toolchains/wasm.js')
+    const result = wasmToolchain.getEnvVars({ platform: 'mac', arch: 'arm64' })
     assert.ok(!('EMSDK_PYTHON' in result))
   })
 
   it('returns PATH with binaryen bin', async () => {
-    const { wasmAdapter } = await import('../../../src/toolbox/adapters/wasm.js')
-    const result = wasmAdapter.getEnvVars({ platform: 'mac', arch: 'arm64' })
+    const { wasmToolchain } = await import('../../../src/toolbox/toolchains/wasm.js')
+    const result = wasmToolchain.getEnvVars({ platform: 'mac', arch: 'arm64' })
     assert.ok('PATH' in result)
   })
 })
 
-describe('wasmAdapter.verify', () => {
+describe('wasmToolchain.verify', () => {
   let savedEmsdk: string | undefined
   let savedEmsdkNode: string | undefined
   let savedEmsdkPython: string | undefined
@@ -50,21 +50,21 @@ describe('wasmAdapter.verify', () => {
     delete process.env.EMSDK
     delete process.env.EMSDK_NODE
     delete process.env.EMSDK_PYTHON
-    const { wasmAdapter } = await import('../../../src/toolbox/adapters/wasm.js')
-    const result = await wasmAdapter.verify({ platform: 'mac', arch: 'arm64' })
+    const { wasmToolchain } = await import('../../../src/toolbox/toolchains/wasm.js')
+    const result = await wasmToolchain.verify({ platform: 'mac', arch: 'arm64' })
     assert.equal(result.ok, false)
   })
 })
 
-describe('wasmAdapter metadata', () => {
+describe('wasmToolchain metadata', () => {
   it('has name "wasm"', async () => {
-    const { wasmAdapter } = await import('../../../src/toolbox/adapters/wasm.js')
-    assert.equal(wasmAdapter.name, 'wasm')
+    const { wasmToolchain } = await import('../../../src/toolbox/toolchains/wasm.js')
+    assert.equal(wasmToolchain.name, 'wasm')
   })
 
   it('includes mac and lin in platforms', async () => {
-    const { wasmAdapter } = await import('../../../src/toolbox/adapters/wasm.js')
-    assert.ok(wasmAdapter.platforms.includes('mac'))
-    assert.ok(wasmAdapter.platforms.includes('lin'))
+    const { wasmToolchain } = await import('../../../src/toolbox/toolchains/wasm.js')
+    assert.ok(wasmToolchain.platforms.includes('mac'))
+    assert.ok(wasmToolchain.platforms.includes('lin'))
   })
 })

@@ -11,8 +11,8 @@ import type { Device } from '../../types.js'
 import type { OperationEvent } from '../../lib/events.js'
 import type { Prompter, Choice } from '../../lib/prompter.js'
 import { sourceEnvironment, which, sourceScript } from '../system/exec.js'
-import { getAdapterContext } from '../adapters/context.js'
-import { resolveAdapterForTarget } from '../adapters/registry.js'
+import { getHostContext } from '../toolchains/context.js'
+import { resolveToolchain } from '../toolchains/registry.js'
 
 export type DeployStatus = 'none' | 'run' | 'push' | 'clean' | 'debug'
 
@@ -94,7 +94,7 @@ export default async function* build(
 
   await sourceEnvironment()
 
-  const ctx = getAdapterContext()
+  const ctx = getHostContext()
 
   if (!moddableExists()) {
     yield {
@@ -156,23 +156,23 @@ export default async function* build(
   if (targetPlatform !== '') {
     const startsWithSimulator = targetPlatform.startsWith('simulator')
     if (!startsWithSimulator) {
-      const adapter = resolveAdapterForTarget(targetPlatform)
-      if (adapter !== undefined) {
-        // Apply env vars from the adapter so build tools are on PATH
-        Object.assign(process.env, adapter.getEnvVars(ctx))
+      const toolchain = resolveToolchain(targetPlatform)
+      if (toolchain !== undefined) {
+        // Apply env vars from the toolchain so build tools are on PATH
+        Object.assign(process.env, toolchain.getEnvVars(ctx))
 
-        // Source activation script if adapter provides one (e.g. ESP-IDF, Zephyr)
-        const script = adapter.getActivationScript?.(ctx)
+        // Source activation script if toolchain provides one (e.g. ESP-IDF, Zephyr)
+        const script = toolchain.getActivationScript?.(ctx)
         if (script !== undefined && script !== null) {
           await sourceScript(script)
         }
 
-        // Verify the adapter is set up
-        const verifyResult = await adapter.verify(ctx)
+        // Verify the toolchain is set up
+        const verifyResult = await toolchain.verify(ctx)
         if (!verifyResult.ok) {
           yield {
             type: 'step:fail',
-            message: `The current environment does not appear to be set up for the ${adapter.name} build target. Please run \`xs-dev setup --device ${adapter.name}\` before trying again.`,
+            message: `The current environment does not appear to be set up for the ${toolchain.name} build target. Please run \`xs-dev setup --device ${toolchain.name}\` before trying again.`,
           }
           return
         }

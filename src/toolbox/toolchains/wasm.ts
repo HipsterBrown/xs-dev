@@ -7,7 +7,7 @@ import { moddableExists } from '../setup/moddable.js'
 import upsert from '../patching/upsert.js'
 import { execWithSudo, which } from '../system/exec.js'
 import { ensureHomebrew } from '../setup/homebrew.js'
-import type { TargetAdapter, AdapterContext, VerifyResult } from './interface.js'
+import type { Toolchain, HostContext, VerifyResult } from './interface.js'
 import type { OperationEvent } from '../../lib/events.js'
 import type { Prompter } from '../../lib/prompter.js'
 
@@ -27,11 +27,11 @@ function isFile(path: string): boolean {
   }
 }
 
-export const wasmAdapter: TargetAdapter = {
+export const wasmToolchain: Toolchain = {
   name: 'wasm',
   platforms: ['mac', 'lin'],
 
-  async *install(ctx: AdapterContext, prompter: Prompter): AsyncGenerator<OperationEvent, void, undefined> {
+  async *install(ctx: HostContext, prompter: Prompter): AsyncGenerator<OperationEvent, void, undefined> {
     yield { type: 'step:start', message: 'Setting up wasm simulator tools' }
 
     const EMSDK_REPO = 'https://github.com/emscripten-core/emsdk.git'
@@ -201,11 +201,11 @@ export const wasmAdapter: TargetAdapter = {
     yield { type: 'step:done', message: 'Successfully set up wasm platform support for Moddable! Test out the setup by starting a new terminal session and running: xs-dev run --example helloworld --device wasm' }
   },
 
-  async *update(_ctx: AdapterContext, _prompter: Prompter): AsyncGenerator<OperationEvent, void, undefined> {
+  async *update(_ctx: HostContext, _prompter: Prompter): AsyncGenerator<OperationEvent, void, undefined> {
     yield { type: 'warning', message: 'Wasm update is not currently supported' }
   },
 
-  async *teardown(_ctx: AdapterContext, _prompter: Prompter): AsyncGenerator<OperationEvent, void, undefined> {
+  async *teardown(_ctx: HostContext, _prompter: Prompter): AsyncGenerator<OperationEvent, void, undefined> {
     try {
       yield { type: 'step:start', message: 'Removing wasm tooling' }
       rmSync(resolve(INSTALL_DIR, 'wasm'), { recursive: true, force: true })
@@ -215,7 +215,7 @@ export const wasmAdapter: TargetAdapter = {
     }
   },
 
-  async verify(_ctx: AdapterContext): Promise<VerifyResult> {
+  async verify(_ctx: HostContext): Promise<VerifyResult> {
     const missing: string[] = []
 
     if (process.env.EMSDK === undefined || process.env.EMSDK === '' || !existsSync(process.env.EMSDK)) {
@@ -232,13 +232,13 @@ export const wasmAdapter: TargetAdapter = {
     }
 
     if (missing.length > 0) {
-      return { ok: false, adapter: 'wasm', missing }
+      return { ok: false, toolchain: 'wasm', missing }
     }
 
-    return { ok: true, adapter: 'wasm' }
+    return { ok: true, toolchain: 'wasm' }
   },
 
-  getEnvVars(_ctx: AdapterContext): Record<string, string> {
+  getEnvVars(_ctx: HostContext): Record<string, string> {
     const WASM_DIR = resolve(INSTALL_DIR, 'wasm')
     const EMSDK_PATH = resolve(WASM_DIR, 'emsdk')
     const BINARYEN_PATH = resolve(WASM_DIR, 'binaryen')

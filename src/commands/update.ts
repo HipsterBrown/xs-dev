@@ -6,8 +6,8 @@ import type { Device } from '../types.js'
 import { DEVICE_ALIAS } from '../toolbox/prompt/devices.js'
 import { createInteractivePrompter, createNonInteractivePrompter, isInteractive } from '../lib/prompter.js'
 import { handleEvent } from '../lib/renderer.js'
-import { getAdapter } from '../toolbox/adapters/registry.js'
-import { getAdapterContext } from '../toolbox/adapters/context.js'
+import { getToolchain } from '../toolbox/toolchains/registry.js'
+import { getHostContext } from '../toolbox/toolchains/context.js'
 
 function buildVersionString(
   release: string | undefined,
@@ -45,27 +45,27 @@ const command = buildCommand({
     const resolvedTarget = DEVICE_ALIAS[device]
 
     if (platformDevices.includes(resolvedTarget)) {
-      const adapter = getAdapter('moddable')
-      if (adapter === undefined) {
-        console.warn('Moddable adapter not found')
+      const toolchain = getToolchain('moddable')
+      if (toolchain === undefined) {
+        console.warn('Moddable toolchain not found')
         process.exit(1)
       }
       const version = buildVersionString(release, branch, undefined)
-      const ctx = { ...getAdapterContext(), version }
+      const ctx = { ...getHostContext(), version }
       const spinner = ora()
-      for await (const event of adapter.update(ctx, prompter)) {
+      for await (const event of toolchain.update(ctx, prompter)) {
         handleEvent(event, spinner)
       }
     } else {
-      const deviceAdapter = getAdapter(resolvedTarget)
+      const deviceToolchain = getToolchain(resolvedTarget)
       const spinner = ora()
-      if (deviceAdapter !== undefined) {
-        const ctx = getAdapterContext()
-        for await (const event of deviceAdapter.update(ctx, prompter)) {
+      if (deviceToolchain !== undefined) {
+        const ctx = getHostContext()
+        for await (const event of deviceToolchain.update(ctx, prompter)) {
           handleEvent(event, spinner)
         }
       } else {
-        handleEvent({ type: 'step:fail', message: `No adapter registered for device: ${resolvedTarget}` }, spinner)
+        handleEvent({ type: 'step:fail', message: `No toolchain registered for device: ${resolvedTarget}` }, spinner)
       }
     }
   },
