@@ -244,8 +244,6 @@ export const wasmAdapter: TargetAdapter = {
     const BINARYEN_PATH = resolve(WASM_DIR, 'binaryen')
     return {
       EMSDK: EMSDK_PATH,
-      EMSDK_NODE: process.env.EMSDK_NODE ?? '',
-      EMSDK_PYTHON: process.env.EMSDK_PYTHON ?? '',
       PATH: `${resolve(BINARYEN_PATH, 'bin')}:${process.env.PATH ?? ''}`,
     }
   },

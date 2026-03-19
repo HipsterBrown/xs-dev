@@ -8,16 +8,16 @@ describe('wasmAdapter.getEnvVars', () => {
     assert.ok('EMSDK' in result)
   })
 
-  it('returns EMSDK_NODE', async () => {
+  it('does NOT include EMSDK_NODE (comes from emsdk_env.sh, not getEnvVars)', async () => {
     const { wasmAdapter } = await import('../../../src/toolbox/adapters/wasm.js')
     const result = wasmAdapter.getEnvVars({ platform: 'mac', arch: 'arm64' })
-    assert.ok('EMSDK_NODE' in result)
+    assert.ok(!('EMSDK_NODE' in result))
   })
 
-  it('returns EMSDK_PYTHON', async () => {
+  it('does NOT include EMSDK_PYTHON (comes from emsdk_env.sh, not getEnvVars)', async () => {
     const { wasmAdapter } = await import('../../../src/toolbox/adapters/wasm.js')
     const result = wasmAdapter.getEnvVars({ platform: 'mac', arch: 'arm64' })
-    assert.ok('EMSDK_PYTHON' in result)
+    assert.ok(!('EMSDK_PYTHON' in result))
   })
 
   it('returns PATH with binaryen bin', async () => {
