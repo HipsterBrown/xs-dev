@@ -494,6 +494,7 @@ export async function* teardownMac(
   }
   remove(join(INSTALL_DIR, 'ejectfix'))
   remove('/Applications/xsbug.app')
+  remove(INSTALL_PATH)
 
   yield { type: 'step:done' }
 }

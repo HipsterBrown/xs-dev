@@ -1,5 +1,5 @@
 import { mkdir, readdir, copyFile, chmod } from 'node:fs/promises'
-import { existsSync } from 'node:fs'
+import { existsSync, rmSync } from 'node:fs'
 import { resolve } from 'node:path'
 import { execaCommand, execa } from 'execa'
 import os from 'node:os'
@@ -526,7 +526,7 @@ export async function* updateLinux(
 export async function* teardownLinux(
   _ctx: AdapterContext,
 ): AsyncGenerator<OperationEvent, void, undefined> {
-  // Linux has no OS-specific teardown (the Darwin block in teardown/index.ts is mac-only)
-  yield { type: 'step:start', message: 'Linux teardown complete (no OS-specific steps)' }
+  yield { type: 'step:start', message: 'Removing Moddable SDK directory' }
+  rmSync(INSTALL_PATH, { recursive: true, force: true })
   yield { type: 'step:done' }
 }
