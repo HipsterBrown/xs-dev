@@ -24,6 +24,7 @@ import { findMissingDependencies, installPackages } from '../../system/packages.
 import type { Dependency } from '../../system/types.js'
 import { isFailure, unwrap } from '../../system/errors.js'
 import type { AdapterContext } from '../interface.js'
+import { parseModdableVersion } from './index.js'
 
 export async function* installLinux(
   {
@@ -268,12 +269,10 @@ export async function* installLinux(
 }
 
 export async function* updateLinux(
-  _ctx: AdapterContext,
+  ctx: AdapterContext,
   prompter: Prompter,
 ): AsyncGenerator<OperationEvent, void, undefined> {
-  // TODO(Task 7): wire branch/release from command args
-  const branch: string | undefined = process.env.XS_DEV_BRANCH
-  const release: string | undefined = process.env.XS_DEV_RELEASE
+  const { release, branch, sourceRepo } = parseModdableVersion(ctx.version)
 
   await sourceEnvironment()
 
@@ -344,7 +343,7 @@ export async function* updateLinux(
           await execa('rm', ['-rf', process.env.MODDABLE])
         }
         await execaCommand(
-          `git clone ${MODDABLE_REPO} ${INSTALL_PATH} --depth 1 --branch ${remoteRelease.tag_name} --single-branch`,
+          `git clone ${sourceRepo ?? MODDABLE_REPO} ${INSTALL_PATH} --depth 1 --branch ${remoteRelease.tag_name} --single-branch`,
         )
       } catch (error) {
         yield { type: 'step:fail', message: `Error cloning repo: ${String(error)}` }

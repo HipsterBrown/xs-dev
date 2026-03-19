@@ -24,6 +24,7 @@ import type { OperationEvent } from '../../../lib/events.js'
 import { isFailure, unwrap } from '../../system/errors.js'
 import { which, sourceEnvironment } from '../../system/exec.js'
 import type { AdapterContext } from '../interface.js'
+import { parseModdableVersion } from './index.js'
 
 export async function* installMac(
   {
@@ -226,12 +227,10 @@ export async function* installMac(
 }
 
 export async function* updateMac(
-  _ctx: AdapterContext,
+  ctx: AdapterContext,
   prompter: Prompter,
 ): AsyncGenerator<OperationEvent, void, undefined> {
-  // TODO(Task 7): wire branch/release from command args
-  const branch: string | undefined = process.env.XS_DEV_BRANCH
-  const release: string | undefined = process.env.XS_DEV_RELEASE
+  const { release, branch, sourceRepo } = parseModdableVersion(ctx.version)
 
   yield { type: 'info', message: 'Checking for SDK changes' }
 
@@ -297,7 +296,7 @@ export async function* updateMac(
           await execa('rm', ['-rf', process.env.MODDABLE])
         }
         await execaCommand(
-          `git clone ${MODDABLE_REPO} ${INSTALL_PATH} --depth 1 --branch ${remoteRelease.tag_name} --single-branch`,
+          `git clone ${sourceRepo ?? MODDABLE_REPO} ${INSTALL_PATH} --depth 1 --branch ${remoteRelease.tag_name} --single-branch`,
         )
       } catch (error) {
         yield { type: 'step:fail', message: `Error cloning repo: ${String(error)}` }
