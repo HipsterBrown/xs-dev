@@ -9,7 +9,7 @@ import { getAdapterContext } from '../adapters/context.js'
 
 export default async function* scanDevices(): AsyncGenerator<OperationEvent> {
   const ctx = getAdapterContext()
-  for (const adapter of Object.values(adapters)) {
+  for (const adapter of Object.values(adapters).filter(a => a.platforms.includes(ctx.platform))) {
     Object.assign(process.env, adapter.getEnvVars(ctx))
   }
 
