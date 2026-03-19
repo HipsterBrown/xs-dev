@@ -8,7 +8,6 @@ import { DEVICE_ALIAS } from '../toolbox/prompt/devices.js'
 import type { SetupArgs } from '../toolbox/setup/types.js'
 import { createInteractivePrompter, createNonInteractivePrompter, isInteractive } from '../lib/prompter.js'
 import { handleEvent } from '../lib/renderer.js'
-import type { OperationEvent } from '../lib/events.js'
 import { getAdapter } from '../toolbox/adapters/registry.js'
 import { getAdapterContext } from '../toolbox/adapters/context.js'
 
@@ -123,10 +122,7 @@ const command = buildCommand({
           handleEvent(event, spinner)
         }
       } else {
-        const { default: setup } = await import(`../toolbox/setup/${target}.js`)
-        for await (const event of setup({ branch, release }, prompter) as AsyncGenerator<OperationEvent>) {
-          handleEvent(event, spinner)
-        }
+        handleEvent({ type: 'step:fail', message: `No adapter registered for device: ${target}` }, spinner)
       }
     }
   },
