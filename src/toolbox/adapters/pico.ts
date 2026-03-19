@@ -496,10 +496,15 @@ Then run: xs-dev run --example helloworld --device pico`,
     return { ok: true, adapter: 'pico' }
   },
 
-  getEnvVars(_ctx: AdapterContext): Record<string, string> {
+  getEnvVars(ctx: AdapterContext): Record<string, string> {
+    // On Linux, /usr is always the GCC root. On macOS/Windows, PICO_GCC_ROOT is
+    // set by install() via `brew --prefix`. The fallback '' is intentional —
+    // verify() will catch a missing value before any build proceeds.
+    const defaultGccRoot = ctx.platform === 'lin' ? '/usr' : ''
     return {
       PICO_SDK_PATH: resolve(INSTALL_DIR, 'pico', 'pico-sdk'),
       PIOASM: resolve(INSTALL_DIR, 'pico', 'pico-sdk', 'build', 'pioasm', 'pioasm'),
+      PICO_GCC_ROOT: process.env.PICO_GCC_ROOT ?? defaultGccRoot,
     }
   },
 }

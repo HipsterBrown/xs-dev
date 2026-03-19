@@ -8,6 +8,37 @@ describe('picoAdapter.getEnvVars', () => {
     assert.ok('PICO_SDK_PATH' in result)
     assert.ok('PIOASM' in result)
   })
+
+  it('returns PICO_GCC_ROOT', async () => {
+    const { picoAdapter } = await import('../../../src/toolbox/adapters/pico.js')
+    const result = picoAdapter.getEnvVars({ platform: 'mac', arch: 'arm64' })
+    assert.ok('PICO_GCC_ROOT' in result)
+  })
+
+  it('returns /usr as PICO_GCC_ROOT default on lin', async () => {
+    const savedGccRoot = process.env.PICO_GCC_ROOT
+    delete process.env.PICO_GCC_ROOT
+    try {
+      const { picoAdapter } = await import('../../../src/toolbox/adapters/pico.js')
+      const result = picoAdapter.getEnvVars({ platform: 'lin', arch: 'x64' })
+      assert.equal(result.PICO_GCC_ROOT, '/usr')
+    } finally {
+      if (savedGccRoot !== undefined) process.env.PICO_GCC_ROOT = savedGccRoot
+    }
+  })
+
+  it('returns process.env.PICO_GCC_ROOT when set', async () => {
+    const savedGccRoot = process.env.PICO_GCC_ROOT
+    process.env.PICO_GCC_ROOT = '/opt/homebrew'
+    try {
+      const { picoAdapter } = await import('../../../src/toolbox/adapters/pico.js')
+      const result = picoAdapter.getEnvVars({ platform: 'mac', arch: 'arm64' })
+      assert.equal(result.PICO_GCC_ROOT, '/opt/homebrew')
+    } finally {
+      if (savedGccRoot !== undefined) process.env.PICO_GCC_ROOT = savedGccRoot
+      else delete process.env.PICO_GCC_ROOT
+    }
+  })
 })
 
 describe('picoAdapter.verify', () => {
