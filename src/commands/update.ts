@@ -10,6 +10,15 @@ import type { OperationEvent } from '../lib/events.js'
 import { getAdapter } from '../toolbox/adapters/registry.js'
 import { getAdapterContext } from '../toolbox/adapters/context.js'
 
+function buildVersionString(
+  release: string | undefined,
+  branch: string | undefined,
+  sourceRepo: string | undefined,
+): string | undefined {
+  const prefix = branch !== undefined ? `branch-${branch}` : `release-${release ?? 'latest'}`
+  return sourceRepo !== undefined ? `${prefix}@${sourceRepo}` : prefix
+}
+
 interface UpdateOptions {
   device?: Device
   branch?: 'public' | string
@@ -42,17 +51,11 @@ const command = buildCommand({
         console.warn('Moddable adapter not found')
         process.exit(1)
       }
-      process.env.XS_DEV_RELEASE = release  // always set (has 'latest' default)
-      if (branch !== undefined) process.env.XS_DEV_BRANCH = branch
-      const ctx = getAdapterContext()
+      const version = buildVersionString(release, branch, undefined)
+      const ctx = { ...getAdapterContext(), version }
       const spinner = ora()
-      try {
-        for await (const event of adapter.update(ctx, prompter)) {
-          handleEvent(event, spinner)
-        }
-      } finally {
-        delete process.env.XS_DEV_BRANCH
-        delete process.env.XS_DEV_RELEASE
+      for await (const event of adapter.update(ctx, prompter)) {
+        handleEvent(event, spinner)
       }
     } else {
       const deviceAdapter = getAdapter(resolvedTarget)

@@ -12,6 +12,15 @@ import type { OperationEvent } from '../lib/events.js'
 import { getAdapter } from '../toolbox/adapters/registry.js'
 import { getAdapterContext } from '../toolbox/adapters/context.js'
 
+function buildVersionString(
+  release: string | undefined,
+  branch: string | undefined,
+  sourceRepo: string | undefined,
+): string | undefined {
+  const prefix = branch !== undefined ? `branch-${branch}` : `release-${release ?? 'latest'}`
+  return sourceRepo !== undefined ? `${prefix}@${sourceRepo}` : prefix
+}
+
 interface SetupOptions {
   device?: Device
   'list-devices'?: boolean
@@ -101,19 +110,10 @@ const command = buildCommand({
         console.warn('Moddable adapter not found')
         process.exit(1)
       }
-      // Pass branch/release/sourceRepo to adapter via env vars
-      process.env.XS_DEV_RELEASE = release  // always set (has 'latest' default)
-      if (sourceRepo !== undefined) process.env.XS_DEV_SOURCE_REPO = sourceRepo  // always set (has default)
-      if (branch !== undefined) process.env.XS_DEV_BRANCH = branch
-      const ctx = getAdapterContext()
-      try {
-        for await (const event of adapter.install(ctx, prompter)) {
-          handleEvent(event, spinner)
-        }
-      } finally {
-        delete process.env.XS_DEV_BRANCH
-        delete process.env.XS_DEV_RELEASE
-        delete process.env.XS_DEV_SOURCE_REPO
+      const version = buildVersionString(release, branch, sourceRepo)
+      const ctx = { ...getAdapterContext(), version }
+      for await (const event of adapter.install(ctx, prompter)) {
+        handleEvent(event, spinner)
       }
     } else {
       const adapter = getAdapter(target)
