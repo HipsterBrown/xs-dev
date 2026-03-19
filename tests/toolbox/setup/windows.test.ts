@@ -2,7 +2,7 @@ import { describe, it, mock } from 'node:test'
 import assert from 'node:assert/strict'
 import { createNonInteractivePrompter } from '#src/lib/prompter.js'
 
-describe('toolbox/adapters/moddable/windows (install)', async () => {
+describe('toolbox/toolchains/moddable/windows (install)', async () => {
   mock.module('node:child_process', {
     namedExports: {
       execSync: mock.fn(() => Buffer.from('nmake')),

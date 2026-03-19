@@ -21,12 +21,12 @@ export interface EnvironmentInfo {
 
 export async function gatherEnvironmentInfo(
   cliVersion: string,
-  { adapterList, ctx }: { adapterList: Toolchain[]; ctx: HostContext },
+  { toolchains, ctx }: { toolchains: Toolchain[]; ctx: HostContext },
 ): Promise<EnvironmentInfo> {
   const supportedDevices: string[] = []
 
   await Promise.all(
-    adapterList
+    toolchains
       .filter((toolchain) => toolchain.platforms.includes(ctx.platform))
       .map(async (toolchain) => {
         Object.assign(process.env, toolchain.getEnvVars(ctx))

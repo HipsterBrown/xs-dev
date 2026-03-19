@@ -2,13 +2,13 @@ import { describe, it, mock } from 'node:test'
 import assert from 'node:assert/strict'
 import { createNonInteractivePrompter } from '#src/lib/prompter.js'
 
-describe('toolbox/adapters/moddable/lin (update)', async () => {
+describe('toolbox/toolchains/moddable/lin (update)', async () => {
   mock.module('#src/toolbox/setup/moddable.js', {
     namedExports: {
       moddableExists: mock.fn(() => true),
       getModdableVersion: mock.fn(async () => null),
       fetchRelease: mock.fn(async () => null),
-      downloadReleaseTools: mock.fn(async () => {}),
+      downloadReleaseTools: mock.fn(async () => { }),
       MissingReleaseAssetError: class MissingReleaseAssetError extends Error {
         constructor(assetName: string) {
           super(`Unable to find release asset matching ${assetName}`)
@@ -24,13 +24,13 @@ describe('toolbox/adapters/moddable/lin (update)', async () => {
   })
   mock.module('node:fs/promises', {
     namedExports: {
-      mkdir: mock.fn(async () => {}),
+      mkdir: mock.fn(async () => { }),
       readdir: mock.fn(async () => []),
-      copyFile: mock.fn(async () => {}),
+      copyFile: mock.fn(async () => { }),
       readFile: mock.fn(async () => ''),
-      writeFile: mock.fn(async () => {}),
-      chmod: mock.fn(async () => {}),
-      symlink: mock.fn(async () => {}),
+      writeFile: mock.fn(async () => { }),
+      chmod: mock.fn(async () => { }),
+      symlink: mock.fn(async () => { }),
       stat: mock.fn(async () => ({})),
     }
   })
@@ -38,17 +38,17 @@ describe('toolbox/adapters/moddable/lin (update)', async () => {
     namedExports: {
       existsSync: mock.fn(() => false),
       statSync: mock.fn(() => ({ isDirectory: () => false, isFile: () => false })),
-      renameSync: mock.fn(() => {}),
-      rmSync: mock.fn(() => {}),
-      cpSync: mock.fn(() => {}),
+      renameSync: mock.fn(() => { }),
+      rmSync: mock.fn(() => { }),
+      cpSync: mock.fn(() => { }),
       createWriteStream: mock.fn(() => ({ on: mock.fn((event, cb) => cb()) })),
     }
   })
   mock.module('#src/toolbox/system/exec.js', {
     namedExports: {
-      sourceEnvironment: mock.fn(async () => {}),
-      execWithSudo: mock.fn(async () => {}),
-      pkexec: mock.fn(async () => {}),
+      sourceEnvironment: mock.fn(async () => { }),
+      execWithSudo: mock.fn(async () => { }),
+      pkexec: mock.fn(async () => { }),
       which: mock.fn(() => null),
     }
   })

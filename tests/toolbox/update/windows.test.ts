@@ -2,7 +2,7 @@ import { describe, it, mock } from 'node:test'
 import assert from 'node:assert/strict'
 import { createNonInteractivePrompter } from '#src/lib/prompter.js'
 
-describe('toolbox/adapters/moddable/windows (update)', async () => {
+describe('toolbox/toolchains/moddable/windows (update)', async () => {
   const { updateWindows } = await import('#src/toolbox/toolchains/moddable/windows.js')
 
   it('yields warning event', async () => {

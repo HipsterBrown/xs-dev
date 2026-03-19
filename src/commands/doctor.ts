@@ -19,7 +19,7 @@ const command = buildCommand({
     }
 
     const ctx = getHostContext()
-    const info = await gatherEnvironmentInfo(currentVersion, { adapterList: Object.values(toolchains), ctx })
+    const info = await gatherEnvironmentInfo(currentVersion, { toolchains: Object.values(toolchains), ctx })
 
     write('xs-dev environment info:\n')
     printTable(

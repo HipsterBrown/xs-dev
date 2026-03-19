@@ -25,7 +25,7 @@ describe('toolbox/doctor', async () => {
 
   mock.module('#src/toolbox/system/exec.js', {
     namedExports: {
-      sourceEnvironment: mock.fn(async () => {}),
+      sourceEnvironment: mock.fn(async () => { }),
       which: mock.fn(() => null),
     },
   })
@@ -40,7 +40,7 @@ describe('toolbox/doctor', async () => {
   const { gatherEnvironmentInfo } = await import('#src/toolbox/doctor/index.js')
 
   it('returns environment info structure', async () => {
-    const info = await gatherEnvironmentInfo('1.0.0', { adapterList: [], ctx: { platform: 'lin', arch: 'x64' } })
+    const info = await gatherEnvironmentInfo('1.0.0', { toolchains: [], ctx: { platform: 'lin', arch: 'x64' } })
     assert.ok(typeof info.cliVersion === 'string', 'cliVersion should be string')
     assert.ok(Array.isArray(info.supportedDevices), 'supportedDevices should be array')
     assert.ok(typeof info.moddableVersion === 'string', 'moddableVersion should be string')
@@ -52,7 +52,7 @@ describe('toolbox/doctor', async () => {
     delete process.env.IDF_PATH
 
     try {
-      const info = await gatherEnvironmentInfo('1.0.0', { adapterList: [], ctx: { platform: 'lin', arch: 'x64' } })
+      const info = await gatherEnvironmentInfo('1.0.0', { toolchains: [], ctx: { platform: 'lin', arch: 'x64' } })
       assert.ok(!info.supportedDevices.includes('esp32'), 'Should not include esp32 without IDF_PATH')
     } finally {
       if (savedIdfPath !== undefined) process.env.IDF_PATH = savedIdfPath

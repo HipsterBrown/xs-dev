@@ -2,7 +2,7 @@ import { describe, it, mock } from 'node:test'
 import assert from 'node:assert/strict'
 import { createNonInteractivePrompter } from '#src/lib/prompter.js'
 
-describe('toolbox/adapters/moddable/mac (install)', async () => {
+describe('toolbox/toolchains/moddable/mac (install)', async () => {
   mock.module('execa', {
     namedExports: {
       execaCommand: mock.fn(async () => ({ stdout: '' })),
@@ -11,13 +11,13 @@ describe('toolbox/adapters/moddable/mac (install)', async () => {
   })
   mock.module('node:fs/promises', {
     namedExports: {
-      mkdir: mock.fn(async () => {}),
+      mkdir: mock.fn(async () => { }),
       readFile: mock.fn(async () => ''),
-      writeFile: mock.fn(async () => {}),
+      writeFile: mock.fn(async () => { }),
       readdir: mock.fn(async () => []),
-      copyFile: mock.fn(async () => {}),
-      symlink: mock.fn(async () => {}),
-      chmod: mock.fn(async () => {}),
+      copyFile: mock.fn(async () => { }),
+      symlink: mock.fn(async () => { }),
+      chmod: mock.fn(async () => { }),
     }
   })
 

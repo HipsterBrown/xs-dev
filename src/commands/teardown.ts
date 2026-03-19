@@ -29,7 +29,7 @@ const command = buildCommand({
       }
     }
 
-    // Non-adapter cleanup: fontbm, exports file, shell profile
+    // Non-toolchain cleanup: fontbm, exports file, shell profile
     const remove = (path: string): void => {
       rmSync(path, { recursive: true, force: true })
     }

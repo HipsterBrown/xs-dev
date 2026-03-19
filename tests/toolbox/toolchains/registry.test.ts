@@ -11,46 +11,46 @@ describe('resolveToolchain', () => {
     assert.equal(resolveToolchain(''), undefined)
   })
 
-  it('resolves exact name "esp32" to esp32 adapter', () => {
-    const adapter = resolveToolchain('esp32')
-    assert.ok(adapter !== undefined)
-    assert.equal(adapter.name, 'esp32')
+  it('resolves exact name "esp32" to esp32 toolchain', () => {
+    const toolchain = resolveToolchain('esp32')
+    assert.ok(toolchain !== undefined)
+    assert.equal(toolchain.name, 'esp32')
   })
 
-  it('resolves "esp32/moddable_two" by prefix to esp32 adapter', () => {
-    const adapter = resolveToolchain('esp32/moddable_two')
-    assert.ok(adapter !== undefined)
-    assert.equal(adapter.name, 'esp32')
+  it('resolves "esp32/moddable_two" by prefix to esp32 toolchain', () => {
+    const toolchain = resolveToolchain('esp32/moddable_two')
+    assert.ok(toolchain !== undefined)
+    assert.equal(toolchain.name, 'esp32')
   })
 
-  it('resolves "pico" to pico adapter', () => {
-    const adapter = resolveToolchain('pico')
-    assert.ok(adapter !== undefined)
-    assert.equal(adapter.name, 'pico')
+  it('resolves "pico" to pico toolchain', () => {
+    const toolchain = resolveToolchain('pico')
+    assert.ok(toolchain !== undefined)
+    assert.equal(toolchain.name, 'pico')
   })
 
-  it('resolves "wasm" to wasm adapter', () => {
-    const adapter = resolveToolchain('wasm')
-    assert.ok(adapter !== undefined)
-    assert.equal(adapter.name, 'wasm')
+  it('resolves "wasm" to wasm toolchain', () => {
+    const toolchain = resolveToolchain('wasm')
+    assert.ok(toolchain !== undefined)
+    assert.equal(toolchain.name, 'wasm')
   })
 
-  it('resolves "nrf52" to nrf52 adapter', () => {
-    const adapter = resolveToolchain('nrf52')
-    assert.ok(adapter !== undefined)
-    assert.equal(adapter.name, 'nrf52')
+  it('resolves "nrf52" to nrf52 toolchain', () => {
+    const toolchain = resolveToolchain('nrf52')
+    assert.ok(toolchain !== undefined)
+    assert.equal(toolchain.name, 'nrf52')
   })
 
-  it('resolves "esp8266" to esp8266 adapter', () => {
-    const adapter = resolveToolchain('esp8266')
-    assert.ok(adapter !== undefined)
-    assert.equal(adapter.name, 'esp8266')
+  it('resolves "esp8266" to esp8266 toolchain', () => {
+    const toolchain = resolveToolchain('esp8266')
+    assert.ok(toolchain !== undefined)
+    assert.equal(toolchain.name, 'esp8266')
   })
 
-  it('resolves "zephyr" to zephyr adapter', () => {
-    const adapter = resolveToolchain('zephyr')
-    assert.ok(adapter !== undefined)
-    assert.equal(adapter.name, 'zephyr')
+  it('resolves "zephyr" to zephyr toolchain', () => {
+    const toolchain = resolveToolchain('zephyr')
+    assert.ok(toolchain !== undefined)
+    assert.equal(toolchain.name, 'zephyr')
   })
 })
 
@@ -59,45 +59,45 @@ describe('getToolchain', () => {
     assert.equal(getToolchain('unknown'), undefined)
   })
 
-  it('returns moddable adapter by name', () => {
-    const adapter = getToolchain('moddable')
-    assert.ok(adapter !== undefined)
-    assert.equal(adapter.name, 'moddable')
+  it('returns moddable toolchain by name', () => {
+    const toolchain = getToolchain('moddable')
+    assert.ok(toolchain !== undefined)
+    assert.equal(toolchain.name, 'moddable')
   })
 
-  it('returns esp32 adapter by name', () => {
-    const adapter = getToolchain('esp32')
-    assert.ok(adapter !== undefined)
-    assert.equal(adapter.name, 'esp32')
+  it('returns esp32 toolchain by name', () => {
+    const toolchain = getToolchain('esp32')
+    assert.ok(toolchain !== undefined)
+    assert.equal(toolchain.name, 'esp32')
   })
 
-  it('returns pico adapter by name', () => {
-    const adapter = getToolchain('pico')
-    assert.ok(adapter !== undefined)
-    assert.equal(adapter.name, 'pico')
+  it('returns pico toolchain by name', () => {
+    const toolchain = getToolchain('pico')
+    assert.ok(toolchain !== undefined)
+    assert.equal(toolchain.name, 'pico')
   })
 
-  it('returns wasm adapter by name', () => {
-    const adapter = getToolchain('wasm')
-    assert.ok(adapter !== undefined)
-    assert.equal(adapter.name, 'wasm')
+  it('returns wasm toolchain by name', () => {
+    const toolchain = getToolchain('wasm')
+    assert.ok(toolchain !== undefined)
+    assert.equal(toolchain.name, 'wasm')
   })
 
-  it('returns nrf52 adapter by name', () => {
-    const adapter = getToolchain('nrf52')
-    assert.ok(adapter !== undefined)
-    assert.equal(adapter.name, 'nrf52')
+  it('returns nrf52 toolchain by name', () => {
+    const toolchain = getToolchain('nrf52')
+    assert.ok(toolchain !== undefined)
+    assert.equal(toolchain.name, 'nrf52')
   })
 
-  it('returns esp8266 adapter by name', () => {
-    const adapter = getToolchain('esp8266')
-    assert.ok(adapter !== undefined)
-    assert.equal(adapter.name, 'esp8266')
+  it('returns esp8266 toolchain by name', () => {
+    const toolchain = getToolchain('esp8266')
+    assert.ok(toolchain !== undefined)
+    assert.equal(toolchain.name, 'esp8266')
   })
 
-  it('returns zephyr adapter by name', () => {
-    const adapter = getToolchain('zephyr')
-    assert.ok(adapter !== undefined)
-    assert.equal(adapter.name, 'zephyr')
+  it('returns zephyr toolchain by name', () => {
+    const toolchain = getToolchain('zephyr')
+    assert.ok(toolchain !== undefined)
+    assert.equal(toolchain.name, 'zephyr')
   })
 })
