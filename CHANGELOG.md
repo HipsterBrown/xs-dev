@@ -1,3 +1,15 @@
+# v1.8.0 (Thu Mar 19 2026)
+
+#### 🚀 Enhancement
+
+- feat: introduce Toolchain interface refactor for managing platform/device support [#245](https://github.com/HipsterBrown/xs-dev/pull/245) ([@HipsterBrown](https://github.com/HipsterBrown))
+
+#### Authors: 1
+
+- Nick Hehr ([@HipsterBrown](https://github.com/HipsterBrown))
+
+---
+
 # v1.7.1 (Mon Mar 16 2026)
 
 #### 🐛 Bug Fix
