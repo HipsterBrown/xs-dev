@@ -10,7 +10,7 @@ import { DEVICE_ALIAS } from '../prompt/devices.js'
 import type { Device } from '../../types.js'
 import type { OperationEvent } from '../../lib/events.js'
 import type { Prompter, Choice } from '../../lib/prompter.js'
-import { sourceEnvironment, which } from '../system/exec.js'
+import { sourceEnvironment, which, sourceScript } from '../system/exec.js'
 import { getAdapterContext } from '../adapters/context.js'
 import { resolveAdapterForTarget } from '../adapters/registry.js'
 
@@ -160,6 +160,12 @@ export default async function* build(
       if (adapter !== undefined) {
         // Apply env vars from the adapter so build tools are on PATH
         Object.assign(process.env, adapter.getEnvVars(ctx))
+
+        // Source activation script if adapter provides one (e.g. ESP-IDF, Zephyr)
+        const script = adapter.getActivationScript?.(ctx)
+        if (script !== undefined && script !== null) {
+          await sourceScript(script)
+        }
 
         // Verify the adapter is set up
         const verifyResult = await adapter.verify(ctx)
