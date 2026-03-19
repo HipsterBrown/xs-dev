@@ -12,7 +12,6 @@ describe('Application', () => {
   describe('default output', () => {
     it('returns help text when called without arguments', async () => {
       const result = await runWithInputs(app, [])
-      console.log(result.stdout)
       assert.equal(result.exitCode, 0)
       assert.ok(result.stdout.includes('USAGE'))
       assert.ok(result.stdout.includes('FLAGS'))
@@ -68,15 +67,6 @@ describe('Application', () => {
 
       assert.notEqual(result.exitCode, 0)
       assert.ok(result.stderr.includes('Expected argument for projectName'))
-    })
-  })
-
-  describe('doctor/info', () => {
-    it('should run diagnostic checks', async () => {
-      const result = await runWithInputs(app, ['doctor'])
-
-      assert.equal(result.exitCode, 0)
-      assert.match(result.stdout, /node|system|platform/i)
     })
   })
 

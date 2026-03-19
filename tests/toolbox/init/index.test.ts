@@ -3,19 +3,24 @@ import assert from 'node:assert/strict'
 import { createNonInteractivePrompter } from '#src/lib/prompter.js'
 
 describe('toolbox/init', async () => {
+  const fsExports = await import('node:fs').then(({ default: _, ...rest }) => rest)
   mock.module('node:fs', {
     namedExports: {
+      ...fsExports,
       existsSync: mock.fn(() => false),
       statSync: mock.fn(() => ({ isDirectory: () => false })),
       readdirSync: mock.fn(() => []),
-      mkdirSync: mock.fn(() => {}),
-      cpSync: mock.fn(() => {}),
+      mkdirSync: mock.fn(() => { }),
+      cpSync: mock.fn(() => { }),
     },
   })
 
+  const execExports = await import('#src/toolbox/system/exec.js')
   mock.module('#src/toolbox/system/exec.js', {
     namedExports: {
-      sourceEnvironment: mock.fn(async () => {}),
+      ...execExports,
+      which: mock.fn(() => ''),
+      sourceScript: mock.fn(async () => ({})),
     },
   })
 
@@ -37,10 +42,10 @@ describe('toolbox/init', async () => {
 
   mock.module('#src/toolbox/init/templates.js', {
     namedExports: {
-      createMain: mock.fn(async () => {}),
-      createManifest: mock.fn(async () => {}),
-      createPackageJSON: mock.fn(async () => {}),
-      createTSConfig: mock.fn(async () => {}),
+      createMain: mock.fn(async () => { }),
+      createManifest: mock.fn(async () => { }),
+      createPackageJSON: mock.fn(async () => { }),
+      createTSConfig: mock.fn(async () => { }),
     },
   })
 
@@ -60,8 +65,8 @@ describe('toolbox/init', async () => {
 
   it('yields warning when project directory already exists', async () => {
     const { existsSync, statSync } = await import('node:fs')
-    ;(existsSync as ReturnType<typeof mock.fn>).mock.mockImplementation(() => true)
-    ;(statSync as ReturnType<typeof mock.fn>).mock.mockImplementation(() => ({ isDirectory: () => true }))
+      ; (existsSync as ReturnType<typeof mock.fn>).mock.mockImplementation(() => true)
+      ; (statSync as ReturnType<typeof mock.fn>).mock.mockImplementation(() => ({ isDirectory: () => true }))
 
     const prompter = createNonInteractivePrompter()
     const events = await Array.fromAsync(

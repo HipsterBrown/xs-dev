@@ -9,6 +9,7 @@ import type { OperationEvent } from '../../lib/events.js'
 import type { Prompter, Choice } from '../../lib/prompter.js'
 import { getHostContext } from '../toolchains/context.js'
 import { getToolchain, resolveToolchain } from '../toolchains/registry.js'
+import { sourceScript, which } from '../system/exec.js'
 
 export type DeployStatus = 'none' | 'run' | 'push' | 'clean' | 'debug'
 
