@@ -107,4 +107,12 @@ describe('parseModdableVersion', () => {
     assert.equal(result.branch, 'dev')
     assert.equal(result.sourceRepo, 'https://github.com/fork/moddable')
   })
+
+  it('unrecognized prefix → treated as release tag (fallback)', async () => {
+    const { parseModdableVersion } = await import('../../../src/toolbox/adapters/moddable/index.js') as { parseModdableVersion: (v: string | undefined) => { release: string | undefined, branch: string | undefined, sourceRepo: string | undefined } }
+    const result = parseModdableVersion('v2.0.0')
+    assert.equal(result.release, 'v2.0.0')
+    assert.equal(result.branch, undefined)
+    assert.equal(result.sourceRepo, undefined)
+  })
 })
