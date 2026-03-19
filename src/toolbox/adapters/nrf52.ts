@@ -78,7 +78,12 @@ export const nrf52Adapter: TargetAdapter = {
 
     const isWindows = ctx.platform === 'win'
     const archKey = `${ctx.platform}_${ctx.arch}`
-    const TOOLCHAIN = `arm-gnu-toolchain-12.2.rel1-${ARCH_ALIAS[archKey]}-arm-none-eabi`
+    const archAlias = ARCH_ALIAS[archKey]
+    if (archAlias === undefined) {
+      yield { type: 'step:fail', message: `Unsupported platform/arch combination for nrf52: ${archKey}` }
+      return
+    }
+    const TOOLCHAIN = `arm-gnu-toolchain-12.2.rel1-${archAlias}-arm-none-eabi`
     const TOOLCHAIN_DOWNLOAD = `https://developer.arm.com/-/media/Files/downloads/gnu/12.2.rel1/binrel/${TOOLCHAIN}.${isWindows ? 'zip' : 'tar.xz'}`
     const ADAFRUIT_NRF52_BOOTLOADER_UF2CONV_DOWNLOAD =
       'https://github.com/Moddable-OpenSource/tools/releases/download/v1.0.0/uf2conv.py'
@@ -226,7 +231,7 @@ Test out the setup by starting a new ${isWindows ? 'Moddable Command Prompt' : '
     }
   },
 
-  async verify(_ctx: AdapterContext): Promise<VerifyResult> {
+  async verify(ctx: AdapterContext): Promise<VerifyResult> {
     const missing: string[] = []
 
     if (process.env.NRF_ROOT === undefined || process.env.NRF_ROOT === '') {
@@ -235,10 +240,13 @@ Test out the setup by starting a new ${isWindows ? 'Moddable Command Prompt' : '
       missing.push(`NRF_ROOT path does not exist: ${process.env.NRF_ROOT}`)
     }
 
-    if (process.env.NRF_SDK_DIR === undefined || process.env.NRF_SDK_DIR === '') {
-      missing.push('NRF_SDK_DIR env var not set')
-    } else if (!existsSync(process.env.NRF_SDK_DIR)) {
-      missing.push(`NRF_SDK_DIR path does not exist: ${process.env.NRF_SDK_DIR}`)
+    // Windows install sets NRF52_SDK_PATH; other platforms set NRF_SDK_DIR
+    const sdkDir = ctx.platform === 'win' ? process.env.NRF52_SDK_PATH : process.env.NRF_SDK_DIR
+    const sdkEnvName = ctx.platform === 'win' ? 'NRF52_SDK_PATH' : 'NRF_SDK_DIR'
+    if (sdkDir === undefined || sdkDir === '') {
+      missing.push(`${sdkEnvName} env var not set`)
+    } else if (!existsSync(sdkDir)) {
+      missing.push(`${sdkEnvName} path does not exist: ${sdkDir}`)
     }
 
     if (missing.length > 0) {
@@ -248,11 +256,11 @@ Test out the setup by starting a new ${isWindows ? 'Moddable Command Prompt' : '
     return { ok: true, adapter: 'nrf52' }
   },
 
-  getEnvVars(_ctx: AdapterContext): Record<string, string> {
+  getEnvVars(ctx: AdapterContext): Record<string, string> {
     const NRF52_DIR = resolve(INSTALL_DIR, 'nrf52')
-    return {
-      NRF_ROOT: NRF52_DIR,
-      NRF_SDK_DIR: resolve(NRF52_DIR, NRF5_SDK),
-    }
+    const sdkPath = resolve(NRF52_DIR, NRF5_SDK)
+    return ctx.platform === 'win'
+      ? { NRF_ROOT: NRF52_DIR, NRF52_SDK_PATH: sdkPath }
+      : { NRF_ROOT: NRF52_DIR, NRF_SDK_DIR: sdkPath }
   },
 }

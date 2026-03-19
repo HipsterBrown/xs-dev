@@ -33,3 +33,19 @@ describe('nrf52Adapter metadata', () => {
     assert.equal(nrf52Adapter.name, 'nrf52')
   })
 })
+
+describe('nrf52Adapter.getEnvVars platform differences', () => {
+  it('returns NRF_SDK_DIR on mac', async () => {
+    const { nrf52Adapter } = await import('../../../src/toolbox/adapters/nrf52.js')
+    const result = nrf52Adapter.getEnvVars({ platform: 'mac', arch: 'arm64' })
+    assert.ok('NRF_SDK_DIR' in result)
+    assert.ok(!('NRF52_SDK_PATH' in result))
+  })
+
+  it('returns NRF52_SDK_PATH on win', async () => {
+    const { nrf52Adapter } = await import('../../../src/toolbox/adapters/nrf52.js')
+    const result = nrf52Adapter.getEnvVars({ platform: 'win', arch: 'x64' })
+    assert.ok('NRF52_SDK_PATH' in result)
+    assert.ok(!('NRF_SDK_DIR' in result))
+  })
+})
