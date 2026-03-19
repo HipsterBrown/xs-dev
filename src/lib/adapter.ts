@@ -7,6 +7,7 @@ export type HostPlatform = 'mac' | 'lin' | 'win'
 export interface AdapterContext {
   platform: HostPlatform
   arch: 'x64' | 'arm64'
+  version?: string  // adapter-specific; format is adapter-defined
 }
 
 export interface VerifyResult {
