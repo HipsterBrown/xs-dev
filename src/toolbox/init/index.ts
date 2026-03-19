@@ -4,7 +4,6 @@ import type { Prompter } from '../../lib/prompter.js'
 import type { OperationEvent } from '../../lib/events.js'
 import { collectChoicesFromTree } from '../prompt/choices.js'
 import { buildTree } from '../prompt/tree.js'
-import { sourceEnvironment } from '../system/exec.js'
 import { getHostContext } from '../toolchains/context.js'
 import { getToolchain } from '../toolchains/registry.js'
 

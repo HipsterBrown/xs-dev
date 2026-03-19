@@ -92,7 +92,7 @@ export default async function* build(
   Object.assign(process.env, moddableToolchain?.getEnvVars(ctx))
   const verification = await moddableToolchain?.verify(ctx)
 
-  if (!verification?.ok) {
+  if (!(verification?.ok ?? false)) {
     yield {
       type: 'step:fail',
       message: `Moddable tooling required. Run 'xs-dev setup --device ${DEVICE_ALIAS[ctx.platform]}' before trying again.`,
