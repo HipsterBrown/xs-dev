@@ -14,15 +14,40 @@ function getBinPath(ctx: AdapterContext): string {
   return resolve(INSTALL_PATH, 'build', 'bin', ctx.platform, 'release')
 }
 
+export function parseModdableVersion(version: string | undefined): {
+  release: string | undefined
+  branch: string | undefined
+  sourceRepo: string | undefined
+} {
+  if (version === undefined) {
+    return { release: 'latest', branch: undefined, sourceRepo: undefined }
+  }
+
+  // Split on the first '@' only — HTTPS URLs don't contain '@'
+  const atIdx = version.indexOf('@')
+  const prefix = atIdx >= 0 ? version.slice(0, atIdx) : version
+  const sourceRepo = atIdx >= 0 ? version.slice(atIdx + 1) : undefined
+
+  if (prefix.startsWith('branch-')) {
+    return { release: undefined, branch: prefix.slice('branch-'.length), sourceRepo }
+  }
+  if (prefix.startsWith('release-')) {
+    return { release: prefix.slice('release-'.length), branch: undefined, sourceRepo }
+  }
+  // Unrecognized prefix: treat whole string as a release tag (safe fallback)
+  return { release: prefix, branch: undefined, sourceRepo }
+}
+
 export const moddableAdapter: TargetAdapter = {
   name: 'moddable',
   platforms: ['mac', 'lin', 'win'],
 
   async *install(ctx: AdapterContext, prompter: Prompter): AsyncGenerator<OperationEvent, void, undefined> {
+    const { release, branch, sourceRepo } = parseModdableVersion(ctx.version)
     const args: PlatformSetupArgs = {
-      release: process.env.XS_DEV_RELEASE ?? 'latest',
-      sourceRepo: process.env.XS_DEV_SOURCE_REPO ?? 'https://github.com/Moddable-OpenSource/moddable',
-      branch: process.env.XS_DEV_BRANCH,
+      release: release ?? 'latest',
+      sourceRepo: sourceRepo ?? 'https://github.com/Moddable-OpenSource/moddable',
+      branch,
     }
     if (ctx.platform === 'mac') yield* installMac(args, prompter)
     else if (ctx.platform === 'lin') yield* installLinux(args, prompter)

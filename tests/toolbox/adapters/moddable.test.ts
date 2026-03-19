@@ -61,3 +61,50 @@ describe('moddableAdapter metadata', () => {
     assert.deepEqual(moddableAdapter.platforms, ['mac', 'lin', 'win'])
   })
 })
+
+describe('parseModdableVersion', () => {
+  it('is exported from moddable/index', async () => {
+    const mod = await import('../../../src/toolbox/adapters/moddable/index.js')
+    assert.equal(typeof (mod as Record<string, unknown>).parseModdableVersion, 'function')
+  })
+
+  it('undefined version → release latest, no branch, no sourceRepo', async () => {
+    const { parseModdableVersion } = await import('../../../src/toolbox/adapters/moddable/index.js') as { parseModdableVersion: (v: string | undefined) => { release: string | undefined, branch: string | undefined, sourceRepo: string | undefined } }
+    const result = parseModdableVersion(undefined)
+    assert.equal(result.release, 'latest')
+    assert.equal(result.branch, undefined)
+    assert.equal(result.sourceRepo, undefined)
+  })
+
+  it('release-1.2.3 → release 1.2.3', async () => {
+    const { parseModdableVersion } = await import('../../../src/toolbox/adapters/moddable/index.js') as { parseModdableVersion: (v: string | undefined) => { release: string | undefined, branch: string | undefined, sourceRepo: string | undefined } }
+    const result = parseModdableVersion('release-1.2.3')
+    assert.equal(result.release, '1.2.3')
+    assert.equal(result.branch, undefined)
+    assert.equal(result.sourceRepo, undefined)
+  })
+
+  it('branch-main → branch main', async () => {
+    const { parseModdableVersion } = await import('../../../src/toolbox/adapters/moddable/index.js') as { parseModdableVersion: (v: string | undefined) => { release: string | undefined, branch: string | undefined, sourceRepo: string | undefined } }
+    const result = parseModdableVersion('branch-main')
+    assert.equal(result.release, undefined)
+    assert.equal(result.branch, 'main')
+    assert.equal(result.sourceRepo, undefined)
+  })
+
+  it('release-2.0.0@https://github.com/fork/moddable → release + sourceRepo', async () => {
+    const { parseModdableVersion } = await import('../../../src/toolbox/adapters/moddable/index.js') as { parseModdableVersion: (v: string | undefined) => { release: string | undefined, branch: string | undefined, sourceRepo: string | undefined } }
+    const result = parseModdableVersion('release-2.0.0@https://github.com/fork/moddable')
+    assert.equal(result.release, '2.0.0')
+    assert.equal(result.branch, undefined)
+    assert.equal(result.sourceRepo, 'https://github.com/fork/moddable')
+  })
+
+  it('branch-dev@https://github.com/fork/moddable → branch + sourceRepo', async () => {
+    const { parseModdableVersion } = await import('../../../src/toolbox/adapters/moddable/index.js') as { parseModdableVersion: (v: string | undefined) => { release: string | undefined, branch: string | undefined, sourceRepo: string | undefined } }
+    const result = parseModdableVersion('branch-dev@https://github.com/fork/moddable')
+    assert.equal(result.release, undefined)
+    assert.equal(result.branch, 'dev')
+    assert.equal(result.sourceRepo, 'https://github.com/fork/moddable')
+  })
+})
