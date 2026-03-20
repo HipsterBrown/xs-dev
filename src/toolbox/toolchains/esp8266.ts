@@ -1,16 +1,16 @@
-import { mkdir } from 'node:fs/promises'
-import { existsSync, rmSync, renameSync } from 'node:fs'
+import { mkdir, rename, rm } from 'node:fs/promises'
+import { existsSync } from 'node:fs'
 import { resolve, join } from 'node:path'
 import { finished } from 'node:stream'
-import { promisify } from 'node:util'
+import { promisify, debuglog } from 'node:util'
+import { createGunzip } from 'node:zlib'
 import { execaCommand } from 'execa'
 import { extract } from 'tar-fs'
-import { createGunzip } from 'node:zlib'
 import { Extract as ZipExtract } from 'unzip-stream'
+import { parallelMerge } from 'streaming-iterables'
 import { INSTALL_DIR, EXPORTS_FILE_PATH } from '../setup/constants.js'
-import { moddableExists } from '../setup/moddable.js'
 import upsert from '../patching/upsert.js'
-import { sourceEnvironment, which } from '../system/exec.js'
+import { which } from '../system/exec.js'
 import { fetchStream } from '../system/fetch.js'
 import { ensureHomebrew } from '../setup/homebrew.js'
 import { findMissingDependencies, installPackages } from '../system/packages.js'
@@ -21,6 +21,7 @@ import type { Toolchain, HostContext, VerifyResult } from './interface.js'
 import type { OperationEvent } from '../../lib/events.js'
 import type { Prompter } from '../../lib/prompter.js'
 
+const debug = debuglog('xs-dev:toolchains:esp8266')
 const finishedPromise = promisify(finished)
 
 const ESP_TOOL_URL =
@@ -36,7 +37,6 @@ async function* installMacDeps(prompter: Prompter): AsyncGenerator<OperationEven
     }
   } catch (error: unknown) {
     if (error instanceof Error) {
-      yield { type: 'info', message: `${error.message} python` }
       yield { type: 'step:fail', message: `${error.message} python` }
     }
     return
@@ -47,9 +47,9 @@ async function* installMacDeps(prompter: Prompter): AsyncGenerator<OperationEven
 
     if (maybePython3Path === null) {
       try {
-        yield { type: 'step:start', message: 'Installing python from homebrew' }
+        debug('Installing python from homebrew')
         await execaCommand('brew install python', { shell: process.env.SHELL ?? '/bin/bash' })
-        yield { type: 'step:done' }
+        debug('Python installed')
       } catch (error: unknown) {
         if (error instanceof Error && error.message.includes('xcode-select')) {
           yield {
@@ -67,9 +67,9 @@ async function* installMacDeps(prompter: Prompter): AsyncGenerator<OperationEven
 
   if (which('pip') === null || which('pip3') === null) {
     try {
-      yield { type: 'step:start', message: 'Installing pip through ensurepip' }
+      debug('Installing pip through ensurepip')
       await execaCommand('python3 -m ensurepip --user', { shell: process.env.SHELL ?? '/bin/bash' })
-      yield { type: 'step:done' }
+      debug('pip installed')
     } catch (error: unknown) {
       yield { type: 'step:fail', message: `Error installing pip: ${String(error)}` }
       return
@@ -77,16 +77,16 @@ async function* installMacDeps(prompter: Prompter): AsyncGenerator<OperationEven
   }
 
   try {
-    yield { type: 'step:start', message: 'Installing pyserial through pip' }
+    debug('Installing pyserial through pip')
     await execaCommand('python3 -m pip install pyserial', { shell: process.env.SHELL ?? '/bin/bash' })
-    yield { type: 'step:done' }
+    debug('Pyserial installed')
   } catch (error: unknown) {
-    yield { type: 'warning', message: `Error installing pyserial: ${String(error)}` }
+    yield { type: 'step:fail', message: `Error installing pyserial: ${String(error)}` }
   }
 }
 
 async function* installLinuxDeps(_prompter: Prompter): AsyncGenerator<OperationEvent, void, undefined> {
-  yield { type: 'step:start', message: 'Installing python deps with apt-get' }
+  debug('Installing python deps with apt-get')
 
   try {
     const dependencies: Dependency[] = [
@@ -108,7 +108,7 @@ async function* installLinuxDeps(_prompter: Prompter): AsyncGenerator<OperationE
         return
       }
     }
-    yield { type: 'step:done' }
+    debug('Linux deps installed')
   } catch (error) {
     yield {
       type: 'step:fail',
@@ -117,7 +117,7 @@ async function* installLinuxDeps(_prompter: Prompter): AsyncGenerator<OperationE
   }
 }
 
-async function* installWindowsDeps(prompter: Prompter): AsyncGenerator<OperationEvent, void, undefined> {
+async function* installWindowsDeps(_prompter: Prompter): AsyncGenerator<OperationEvent, void, undefined> {
   try {
     const ESP_DIR = INSTALL_DIR
     const ESP_TOOL_DIR = resolve(ESP_DIR, ESP_TOOL_VERSION)
@@ -125,54 +125,56 @@ async function* installWindowsDeps(prompter: Prompter): AsyncGenerator<Operation
     const ESP_TOOL_DESTINATION = resolve(ESP_DIR, 'esptool.exe')
     const CYGWIN_BIN = resolve(ESP_DIR, 'cygwin', 'bin')
 
-    yield { type: 'step:start', message: 'Downloading ESP Tool' }
-    const writer = ZipExtract({ path: ESP_DIR })
-    const download = await fetchStream(ESP_TOOL_URL)
-    download.pipe(writer)
-    await finishedPromise(writer)
-    renameSync(ESP_TOOL_EXE, ESP_TOOL_DESTINATION)
-    rmSync(ESP_TOOL_DIR, { recursive: true, force: true })
-    yield { type: 'step:done' }
+    const esptoolInstall = async function(): Promise<void> {
+      debug('Downloading ESP Tool')
+      const writer = ZipExtract({ path: ESP_DIR })
+      const download = await fetchStream(ESP_TOOL_URL)
+      download.pipe(writer)
+      await finishedPromise(writer)
+      await rename(ESP_TOOL_EXE, ESP_TOOL_DESTINATION)
+      await rm(ESP_TOOL_DIR, { recursive: true, force: true })
+      debug('ESP Tool installed')
+    }
 
-    yield { type: 'step:start', message: 'Downloading Cygwin toolchain support package' }
-    const cygwinWriter = ZipExtract({ path: ESP_DIR })
-    const cygwinDownload = await fetchStream(CYGWIN_URL)
-    cygwinDownload.pipe(cygwinWriter)
-    await finishedPromise(cygwinWriter)
-    yield { type: 'step:done' }
+    const cygwinInstall = async function(): Promise<void> {
+      debug('Downloading Cygwin toolchain support package')
+      const cygwinWriter = ZipExtract({ path: ESP_DIR })
+      const cygwinDownload = await fetchStream(CYGWIN_URL)
+      cygwinDownload.pipe(cygwinWriter)
+      await finishedPromise(cygwinWriter)
+      debug('Cygwin toolchain installed')
+    }
 
-    yield { type: 'step:start', message: 'Setting environment variables' }
+    await Promise.all([esptoolInstall(), cygwinInstall()])
+
+    debug('Setting environment variables')
     await setEnv('BASE_DIR', INSTALL_DIR)
     await addToPath(CYGWIN_BIN)
-    yield { type: 'step:done' }
+    debug('Environment variables set')
 
     if (which('python') === null) {
       try {
         await execaCommand('where winget')
       } catch (error) {
         yield {
-          type: 'info',
+          type: 'warning',
           message:
             'Python is required. You can download it from python.org/downloads or install via Windows Package Manager (winget).',
-        }
-        yield {
-          type: 'info',
-          message:
-            'Install winget from the Microsoft Store if needed, then re-run this setup.',
         }
         yield { type: 'step:fail', message: 'Python is required' }
         return
       }
 
       try {
-        yield { type: 'step:start', message: 'Installing python from winget' }
+        debug('Installing python from winget')
         await execaCommand('winget install -e --id Python.Python.3 --silent')
-        yield { type: 'step:done' }
+        debug('Python installed')
         yield {
           type: 'info',
           message:
             'Python installed. Please close this window, launch a new Command Prompt, and re-run setup.',
         }
+        return
       } catch (error) {
         yield { type: 'step:fail', message: `Error installing Python: ${String(error)}` }
       }
@@ -180,20 +182,20 @@ async function* installWindowsDeps(prompter: Prompter): AsyncGenerator<Operation
 
     if (which('pip') === null) {
       try {
-        yield { type: 'step:start', message: 'Installing pip through ensurepip' }
+        debug('Installing pip through ensurepip')
         await execaCommand('python -m ensurepip')
-        yield { type: 'step:done' }
+        debug('Pip installed')
       } catch (error) {
-        yield { type: 'warning', message: `Error installing pip: ${String(error)}` }
+        yield { type: 'step:fail', message: `Error installing pip: ${String(error)}` }
       }
     }
 
     try {
-      yield { type: 'step:start', message: 'Installing pyserial through pip' }
+      debug('Installing pyserial with pip')
       await execaCommand('python -m pip install pyserial')
-      yield { type: 'step:done' }
+      debug('Pyserial installed')
     } catch (error) {
-      yield { type: 'warning', message: `Error installing pyserial: ${String(error)}` }
+      yield { type: 'step:fail', message: `Error installing pyserial: ${String(error)}` }
     }
   } catch (error) {
     yield {
@@ -221,30 +223,20 @@ export const esp8266Toolchain: Toolchain = {
     const TOOLCHAIN_PATH = resolve(ESP_DIR, 'toolchain')
     const ARDUINO_CORE_PATH = resolve(ESP_DIR, 'esp8266-2.3.0')
 
-    await sourceEnvironment()
-
-    // 0. ensure Moddable exists
-    if (!moddableExists()) {
-      yield {
-        type: 'step:fail',
-        message: `Moddable tooling required. Run 'xs-dev setup' before trying again.`,
-      }
-      return
-    }
-
     // 1. ensure ~/.local/share/esp directory
     try {
-      yield { type: 'info', message: 'Ensuring esp8266 directory' }
+      debug('Ensuring esp8266 directory')
       await mkdir(ESP_DIR, { recursive: true })
     } catch (error) {
       yield { type: 'step:fail', message: `Error creating esp8266 directory: ${String(error)}` }
       return
     }
 
-    // 2. download and untar xtensa toolchain
-    if (!existsSync(TOOLCHAIN_PATH)) {
+    // parallelize esp8266 tooling install / setup
+    const xtensaToolchainTask = async function*(): AsyncGenerator<OperationEvent, void, undefined> {
+      if (existsSync(TOOLCHAIN_PATH)) return
       try {
-        yield { type: 'step:start', message: 'Downloading xtensa toolchain' }
+        debug('Downloading xtensa toolchain')
 
         if (isWindows) {
           const writer = ZipExtract({ path: ESP_DIR })
@@ -258,74 +250,70 @@ export const esp8266Toolchain: Toolchain = {
           download.pipe(gunzip).pipe(writer)
           await finishedPromise(writer)
         }
-        yield { type: 'step:done' }
+        debug('xtensa toolchain installed')
       } catch (error) {
         yield { type: 'step:fail', message: `Error downloading toolchain: ${String(error)}` }
-        return
+
       }
     }
 
-    // 3. download and unzip esp8266 core for arduino
-    if (!existsSync(ARDUINO_CORE_PATH)) {
+    const arduinoCoreTask = async function*(): AsyncGenerator<OperationEvent, void, undefined> {
+      if (existsSync(ARDUINO_CORE_PATH)) return
       try {
-        yield { type: 'step:start', message: 'Downloading arduino core tooling' }
+        debug('Downloading arduino core tooling')
         const writer = ZipExtract({ path: ESP_DIR })
         const download = await fetchStream(ARDUINO_CORE)
         download.pipe(writer)
         await finishedPromise(writer)
-        yield { type: 'step:done' }
+        debug('Arduino core tooling installed')
       } catch (error) {
         yield { type: 'step:fail', message: `Error downloading arduino core: ${String(error)}` }
-        return
+
       }
     }
 
-    // 4. clone esp8266 RTOS SDK
-    if (!existsSync(RTOS_PATH)) {
+    const rtosTask = async function*(): AsyncGenerator<OperationEvent, void, undefined> {
+      if (existsSync(RTOS_PATH)) return
       try {
-        yield { type: 'step:start', message: 'Cloning esp8266 RTOS SDK repo' }
+        debug('Cloning esp8266 RTOS SDK repo')
         await execaCommand(
           `git clone --depth 1 --single-branch -b ${ESP_BRANCH} ${ESP_RTOS_REPO} ${RTOS_PATH}`,
         )
-        yield { type: 'step:done' }
+        debug('esp8266 RTOS installed')
       } catch (error) {
         yield { type: 'step:fail', message: `Error cloning RTOS SDK: ${String(error)}` }
-        return
+
       }
     }
 
-    // 5. ensure python, pip, and pyserial are installed
-    try {
-      if (ctx.platform === 'mac') {
-        for await (const event of installMacDeps(prompter)) {
-          yield event
-        }
-      }
+    const depsInstallTask = (() => {
+      if (ctx.platform === 'mac') return installMacDeps
+      if (ctx.platform === 'lin') return installLinuxDeps
+      return installWindowsDeps
+    })()
 
-      if (ctx.platform === 'lin') {
-        for await (const event of installLinuxDeps(prompter)) {
-          yield event
-        }
+    let hasFailure = false
+    const tasks = parallelMerge(xtensaToolchainTask(), arduinoCoreTask(), rtosTask(), depsInstallTask(prompter))
+    yield { type: 'step:start', message: 'Installing ESP8266 toolchain and dependencies' }
+    for await (const event of tasks) {
+      if (event.type === 'step:fail') {
+        hasFailure = true
       }
+      yield event
+    }
 
-      if (ctx.platform === 'win') {
-        for await (const event of installWindowsDeps(prompter)) {
-          yield event
-        }
-      }
-    } catch (error) {
-      yield {
-        type: 'step:fail',
-        message: `Dependencies failed to install. Please review the information above.`,
-      }
+    if (hasFailure) {
+      yield { type: 'step:fail', message: `Error installing ESP8266 toolchain` }
       return
+    } else {
+      yield { type: 'step:done', message: 'ESP8266 toolchian and deps installed successfully' }
     }
 
     // 6. create ESP_BASE env export in shell profile
     try {
       if (ctx.platform === 'mac' || ctx.platform === 'lin') {
         if (process.env.ESP_BASE === undefined || process.env.ESP_BASE === '') {
-          yield { type: 'info', message: 'Configuring $ESP_BASE' }
+          debug('Configuring $ESP_BASE')
           process.env.ESP_BASE = ESP_DIR
           await upsert(EXPORTS_FILE_PATH, `export ESP_BASE=${process.env.ESP_BASE}`)
         }
@@ -349,9 +337,9 @@ If there is trouble finding the correct port, pass the "--port" flag to the abov
 
   async *teardown(_ctx: HostContext, _prompter: Prompter): AsyncGenerator<OperationEvent, void, undefined> {
     try {
-      yield { type: 'step:start', message: 'Removing esp8266 tooling' }
-      rmSync(join(INSTALL_DIR, 'esp'), { recursive: true, force: true })
-      yield { type: 'step:done' }
+      debug('Removing esp8266 tooling')
+      await rm(join(INSTALL_DIR, 'esp'), { recursive: true, force: true })
+      debug('esp8266 toolchain removed')
     } catch (error) {
       yield { type: 'step:fail', message: `Error removing esp8266 tooling: ${String(error)}` }
     }
