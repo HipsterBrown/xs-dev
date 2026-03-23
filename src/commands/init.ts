@@ -2,7 +2,11 @@ import { buildCommand } from '@stricli/core'
 import ora from 'ora'
 import type { LocalContext } from '../app.js'
 import { handleEvent } from '../lib/renderer.js'
-import { createInteractivePrompter, createNonInteractivePrompter, isInteractive } from '../lib/prompter.js'
+import {
+  createInteractivePrompter,
+  createNonInteractivePrompter,
+  isInteractive,
+} from '../lib/prompter.js'
 import initProject from '../toolbox/init/index.js'
 import type { InitOptions } from '../toolbox/init/index.js'
 
@@ -42,12 +46,14 @@ const command = buildCommand({
     flags: {
       typescript: {
         kind: 'boolean',
-        brief: 'Add TypeScript configuration to generated project; defaults to false',
+        brief:
+          'Add TypeScript configuration to generated project; defaults to false',
         optional: true,
       },
       io: {
         kind: 'boolean',
-        brief: 'Add ECMA-419 standard API support to generated project; defaults to true',
+        brief:
+          'Add ECMA-419 standard API support to generated project; defaults to true',
         optional: true,
       },
       manifest: {
@@ -76,7 +82,8 @@ const command = buildCommand({
       },
       asyncMain: {
         kind: 'boolean',
-        brief: 'Add top-level await configuration to generated project; defaults to false',
+        brief:
+          'Add top-level await configuration to generated project; defaults to false',
         optional: true,
       },
     },

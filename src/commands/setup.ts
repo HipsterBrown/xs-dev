@@ -6,7 +6,11 @@ import type { Device } from '../types.js'
 import setupEjectfix from '../toolbox/setup/ejectfix.js'
 import { DEVICE_ALIAS } from '../toolbox/prompt/devices.js'
 import type { SetupArgs } from '../toolbox/setup/types.js'
-import { createInteractivePrompter, createNonInteractivePrompter, isInteractive } from '../lib/prompter.js'
+import {
+  createInteractivePrompter,
+  createNonInteractivePrompter,
+  isInteractive,
+} from '../lib/prompter.js'
 import * as output from '../lib/output.js'
 import { handleEvent } from '../lib/renderer.js'
 import { getToolchain } from '../toolbox/toolchains/registry.js'
@@ -17,7 +21,8 @@ function buildVersionString(
   branch: string | undefined,
   sourceRepo: string | undefined,
 ): string | undefined {
-  const prefix = branch !== undefined ? `branch-${branch}` : `release-${release ?? 'latest'}`
+  const prefix =
+    branch !== undefined ? `branch-${branch}` : `release-${release ?? 'latest'}`
   return sourceRepo !== undefined ? `${prefix}@${sourceRepo}` : prefix
 }
 

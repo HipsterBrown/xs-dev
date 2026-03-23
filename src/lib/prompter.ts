@@ -1,4 +1,7 @@
-import { confirm as inquirerConfirm, select as inquirerSelect } from '@inquirer/prompts'
+import {
+  confirm as inquirerConfirm,
+  select as inquirerSelect,
+} from '@inquirer/prompts'
 
 /**
  * Returns whether the current session is interactive.
@@ -42,7 +45,10 @@ export function createInteractivePrompter(): Prompter {
     async select<T>(message: string, choices: Array<Choice<T>>): Promise<T> {
       return await inquirerSelect({
         message,
-        choices: choices.map((c: Choice<T>) => ({ name: c.label, value: c.value })),
+        choices: choices.map((c: Choice<T>) => ({
+          name: c.label,
+          value: c.value,
+        })),
       })
     },
   }

@@ -20,9 +20,18 @@ export interface Toolchain {
   readonly name: string
   readonly platforms: HostPlatform[]
 
-  install: (ctx: HostContext, prompter: Prompter) => AsyncGenerator<OperationEvent, void, undefined>
-  update: (ctx: HostContext, prompter: Prompter) => AsyncGenerator<OperationEvent, void, undefined>
-  teardown: (ctx: HostContext, prompter: Prompter) => AsyncGenerator<OperationEvent, void, undefined>
+  install: (
+    ctx: HostContext,
+    prompter: Prompter,
+  ) => AsyncGenerator<OperationEvent, void, undefined>
+  update: (
+    ctx: HostContext,
+    prompter: Prompter,
+  ) => AsyncGenerator<OperationEvent, void, undefined>
+  teardown: (
+    ctx: HostContext,
+    prompter: Prompter,
+  ) => AsyncGenerator<OperationEvent, void, undefined>
   verify: (ctx: HostContext) => Promise<VerifyResult>
 
   getEnvVars: (ctx: HostContext) => Record<string, string>

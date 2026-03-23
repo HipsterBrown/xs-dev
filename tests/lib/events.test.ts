@@ -4,7 +4,10 @@ import type { OperationEvent } from '#src/lib/events.js'
 
 describe('OperationEvent', () => {
   it('step:start events carry a message', () => {
-    const event: OperationEvent = { type: 'step:start', message: 'Cloning repo' }
+    const event: OperationEvent = {
+      type: 'step:start',
+      message: 'Cloning repo',
+    }
     assert.equal(event.type, 'step:start')
     assert.equal(event.message, 'Cloning repo')
   })

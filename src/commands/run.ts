@@ -6,7 +6,11 @@ import type { LocalContext } from '../app.js'
 import type { Device } from '../types.js'
 import build from '../toolbox/build/index.js'
 import { DEVICE_ALIAS } from '../toolbox/prompt/devices.js'
-import { createInteractivePrompter, createNonInteractivePrompter, isInteractive } from '../lib/prompter.js'
+import {
+  createInteractivePrompter,
+  createNonInteractivePrompter,
+  isInteractive,
+} from '../lib/prompter.js'
 import { handleEvent } from '../lib/renderer.js'
 
 type Mode = 'development' | 'production'
@@ -27,7 +31,7 @@ const command = buildCommand({
   docs: {
     brief: 'Build and launch project on target device or simulator',
   },
-  // eslint-disable-next-line @typescript-eslint/no-inferrable-types
+  // oxlint-disable-next-line @typescript-eslint/no-inferrable-types
   async func(this: LocalContext, flags: RunOptions, projectPath: string = '.') {
     const currentPlatform: Device = platformType().toLowerCase() as Device
     const {
