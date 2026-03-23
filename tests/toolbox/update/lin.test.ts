@@ -24,6 +24,7 @@ describe('toolbox/toolchains/moddable/lin (update)', async () => {
   })
   mock.module('node:fs/promises', {
     namedExports: {
+      cp: mock.fn(async () => { }),
       mkdir: mock.fn(async () => { }),
       readdir: mock.fn(async () => []),
       copyFile: mock.fn(async () => { }),
@@ -32,6 +33,7 @@ describe('toolbox/toolchains/moddable/lin (update)', async () => {
       chmod: mock.fn(async () => { }),
       symlink: mock.fn(async () => { }),
       stat: mock.fn(async () => ({})),
+      rm: mock.fn(async () => { }),
     }
   })
   mock.module('node:fs', {

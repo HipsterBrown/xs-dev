@@ -38,6 +38,9 @@ importers:
       simple-plist:
         specifier: 1.4.0-0
         version: 1.4.0-0
+      streaming-iterables:
+        specifier: ^8.0.1
+        version: 8.0.1
       tar-fs:
         specifier: ^3.1.2
         version: 3.1.2
@@ -4694,6 +4697,10 @@ packages:
 
   stream-replace-string@2.0.0:
     resolution: {integrity: sha512-TlnjJ1C0QrmxRNrON00JvaFFlNh5TTG00APw23j74ET7gkQpTASi6/L2fuiav8pzK715HXtUeClpBTw2NPSn6w==}
+
+  streaming-iterables@8.0.1:
+    resolution: {integrity: sha512-yfQdmUB1b+rGLZkD/r6YisT/eNOjZxBAckXKlzYNmRJnwSzHaiScykD8gsQceFcShtK09qAbLhOqvzIpnBPoDQ==}
+    engines: {node: '>=18'}
 
   streamx@2.23.0:
     resolution: {integrity: sha512-kn+e44esVfn2Fa/O0CPFcex27fjIL6MkVae0Mm6q+E6f0hWv578YCERbv+4m02cjxvDsPKLnmxral/rR6lBMAg==}
@@ -10968,6 +10975,8 @@ snapshots:
   stream-buffers@2.2.0: {}
 
   stream-replace-string@2.0.0: {}
+
+  streaming-iterables@8.0.1: {}
 
   streamx@2.23.0:
     dependencies:

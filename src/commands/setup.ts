@@ -123,7 +123,7 @@ const command = buildCommand({
           handleEvent(event, spinner)
         }
       } else {
-        handleEvent({ type: 'step:fail', message: `No toolchain registered for device: ${target}` }, spinner)
+        output.error(`No toolchain registered for device: ${target}`)
       }
     }
   },

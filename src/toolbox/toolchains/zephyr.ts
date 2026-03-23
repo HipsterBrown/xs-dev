@@ -1,11 +1,12 @@
-import { existsSync, rmSync } from 'node:fs'
-import { mkdir } from 'node:fs/promises'
+import { existsSync } from 'node:fs'
+import { mkdir, rm } from 'node:fs/promises'
 import { resolve, join } from 'node:path'
+import { debuglog } from 'node:util'
 import { execaCommand } from 'execa'
 import { INSTALL_DIR, EXPORTS_FILE_PATH } from '../setup/constants.js'
-import { moddableExists } from '../setup/moddable.js'
 import { ensureHomebrew } from '../setup/homebrew.js'
 import { execWithSudo, sourceEnvironment } from '../system/exec.js'
+import { exists } from '../system/filesystem.js'
 import { isFailure } from '../system/errors.js'
 import { detectPython } from '../system/python.js'
 import { setEnv } from '../setup/windows.js'
@@ -14,6 +15,8 @@ import type { Toolchain, HostContext, VerifyResult } from './interface.js'
 import type { OperationEvent } from '../../lib/events.js'
 import type { Prompter } from '../../lib/prompter.js'
 
+const debug = debuglog('xs-dev:toolchains:zephyr')
+
 async function* installMacDeps(prompter: Prompter): AsyncGenerator<OperationEvent, void, undefined> {
   try {
     for await (const event of ensureHomebrew(prompter)) {
@@ -21,18 +24,17 @@ async function* installMacDeps(prompter: Prompter): AsyncGenerator<OperationEven
     }
   } catch (error: unknown) {
     if (error instanceof Error) {
-      yield { type: 'info', message: `${error.message} cmake, ninja, gperf, python3, python-tk, ccache, qemu, dtc, libmagic, wget, openocd` }
       yield { type: 'step:fail', message: `${error.message} cmake, ninja, gperf, python3, python-tk, ccache, qemu, dtc, libmagic, wget, openocd` }
     }
     return
   }
 
   try {
-    yield { type: 'step:start', message: 'Installing zephyr dependencies' }
+    debug('Installing zephyr dependencies')
     await execaCommand('brew install cmake ninja gperf python3 python-tk ccache qemu dtc libmagic wget openocd', {
       shell: process.env.SHELL ?? '/bin/bash',
     })
-    yield { type: 'step:done' }
+    debug('zephyr dependencies installed')
   } catch (error: unknown) {
     yield { type: 'step:fail', message: `Error installing zephyr dependencies: ${String(error)}` }
   }
@@ -40,7 +42,7 @@ async function* installMacDeps(prompter: Prompter): AsyncGenerator<OperationEven
 
 async function* installLinuxDeps(_prompter: Prompter): AsyncGenerator<OperationEvent, void, undefined> {
   try {
-    yield { type: 'step:start', message: 'Installing zephyr dependencies' }
+    debug('Installing zephyr dependencies')
     const result = await execWithSudo(
       `apt-get install --yes \
 cmake gcc-arm-none-eabi libnewlib-arm-none-eabi build-essential libusb-1.0.0-dev pkg-config \
@@ -51,26 +53,22 @@ xz-utils file make gcc gcc-multilib g++-multilib libsdl2-dev libmagic1`,
       yield { type: 'step:fail', message: `Error installing dependencies: ${result.error}` }
       return
     }
-    yield { type: 'step:done' }
+    debug('zephyr dependencies installed')
   } catch (error) {
     yield { type: 'step:fail', message: `Error installing zephyr linux dependencies: ${String(error)}` }
   }
 }
 
 async function* installWinDeps(_prompter: Prompter): AsyncGenerator<OperationEvent, void, undefined> {
-  yield { type: 'step:start', message: 'Installing Zephyr dependencies' }
+  debug('Installing Zephyr dependencies')
 
   try {
     await execaCommand('where winget')
   } catch (error) {
     yield {
-      type: 'info',
+      type: 'step:fail',
       message:
         'winget is required to install Zephyr dependencies. You can install it via the App Installer package in the Microsoft Store.',
-    }
-    yield {
-      type: 'step:fail',
-      message: 'winget is required to install dependencies for Zephyr tooling.',
     }
     return
   }
@@ -80,7 +78,7 @@ async function* installWinDeps(_prompter: Prompter): AsyncGenerator<OperationEve
       'winget install Kitware.CMake Ninja-build.Ninja oss-winget.gperf Python.Python.3.12 Git.Git oss-winget.dtc wget 7zip.7zip',
       { stdio: 'inherit', shell: true },
     )
-    yield { type: 'step:done' }
+    debug('zephyr dependencies installed')
   } catch (error) {
     yield {
       type: 'step:fail',
@@ -106,14 +104,8 @@ export const zephyrToolchain: Toolchain = {
 
     await sourceEnvironment()
 
-    // 0. ensure zephyr install directory and Moddable exists
-    if (!moddableExists()) {
-      yield { type: 'step:fail', message: 'Moddable platform tooling required. Run `xs-dev setup` before trying again.' }
-      return
-    }
-
     try {
-      yield { type: 'info', message: 'Ensuring zephyr directory' }
+      debug('Ensuring zephyr directory')
       await mkdir(ZEPHYR_ROOT, { recursive: true })
     } catch (error) {
       yield { type: 'step:fail', message: `Error creating zephyr directory: ${String(error)}` }
@@ -141,7 +133,6 @@ export const zephyrToolchain: Toolchain = {
           yield event
         }
       }
-      yield { type: 'step:done' }
     } catch (error) {
       yield { type: 'step:fail', message: `Error installing dependencies: ${String(error)}` }
       return
@@ -149,14 +140,14 @@ export const zephyrToolchain: Toolchain = {
 
     // 2. Create zephyr virtual environment
     try {
-      if (!existsSync(ZEPHYR_VENV)) {
-        yield { type: 'step:start', message: 'Creating zephyr virtual environment' }
+      if (!(await exists(ZEPHYR_VENV))) {
+        debug('Creating zephyr virtual environment')
         const localPython = detectPython()
         await execaCommand(
           `${localPython} -m venv ${ZEPHYR_VENV}`,
           { stdio: 'inherit' },
         )
-        yield { type: 'step:done' }
+        debug('zephyr virtualenv created')
       }
     } catch (error) {
       yield { type: 'step:fail', message: `Error creating virtual environment: ${String(error)}` }
@@ -185,12 +176,12 @@ export const zephyrToolchain: Toolchain = {
 
     // 4. Install West with pip
     try {
-      yield { type: 'step:start', message: 'Installing west build tool' }
+      debug('Installing west build tool')
       await execaCommand(`pip install west`, {
         shell: process.env.SHELL ?? '/bin/bash',
         stdio: 'inherit',
       })
-      yield { type: 'step:done' }
+      debug('west build tool installed')
     } catch (error) {
       yield { type: 'step:fail', message: `Error installing west: ${String(error)}` }
       return
@@ -198,7 +189,7 @@ export const zephyrToolchain: Toolchain = {
 
     // 5. Install west build tools
     try {
-      yield { type: 'step:start', message: `Initializing west tooling in ${ZEPHYR_ROOT}` }
+      debug(`Initializing west tooling in ${ZEPHYR_ROOT}`)
       await execaCommand(`west init ${ZEPHYR_ROOT}`, {
         shell: process.env.SHELL ?? '/bin/bash',
         stdio: 'inherit',
@@ -208,7 +199,7 @@ export const zephyrToolchain: Toolchain = {
         shell: process.env.SHELL ?? '/bin/bash',
         stdio: 'inherit',
       })
-      yield { type: 'step:done' }
+      debug('west tooling initialized')
     } catch (error) {
       yield { type: 'step:fail', message: `Error initializing west: ${String(error)}` }
       return
@@ -216,7 +207,7 @@ export const zephyrToolchain: Toolchain = {
 
     // 6. Install west packages
     try {
-      yield { type: 'step:start', message: `Installing west packages` }
+      yield { type: 'step:start', message: `Installing west packages (this could take a few minutes)` }
       if (isWindows) {
         await execaCommand(`cmd /c zephyr\\scripts\\utils\\west-packages-pip-install.cmd`, {
           cwd: ZEPHYR_ROOT,
@@ -230,7 +221,7 @@ export const zephyrToolchain: Toolchain = {
           stdio: 'inherit',
         })
       }
-      yield { type: 'step:done' }
+      yield { type: 'step:done', message: 'west packages installed' }
     } catch (error) {
       yield { type: 'step:fail', message: `Error installing west packages: ${String(error)}` }
       return
@@ -244,7 +235,7 @@ export const zephyrToolchain: Toolchain = {
         shell: process.env.SHELL ?? '/bin/bash',
         stdio: 'inherit',
       })
-      yield { type: 'step:done' }
+      yield { type: 'step:done', message: 'Zephyr SDK installed' }
     } catch (error) {
       yield { type: 'step:fail', message: `Error installing Zephyr SDK: ${String(error)}` }
       return
@@ -277,9 +268,9 @@ Then run: xs-dev run --example helloworld --device zephyr/<board_name>`,
 
   async *teardown(_ctx: HostContext, _prompter: Prompter): AsyncGenerator<OperationEvent, void, undefined> {
     try {
-      yield { type: 'step:start', message: 'Removing zephyr tooling' }
-      rmSync(join(INSTALL_DIR, 'zephyrproject'), { recursive: true, force: true })
-      yield { type: 'step:done' }
+      debug('Removing zephyr tooling')
+      await rm(join(INSTALL_DIR, 'zephyrproject'), { recursive: true, force: true })
+      debug('zephyr tooling removed')
     } catch (error) {
       yield { type: 'step:fail', message: `Error removing zephyr tooling: ${String(error)}` }
     }
@@ -290,7 +281,7 @@ Then run: xs-dev run --example helloworld --device zephyr/<board_name>`,
 
     if (process.env.ZEPHYR_BASE === undefined || process.env.ZEPHYR_BASE === '') {
       missing.push('ZEPHYR_BASE env var not set')
-    } else if (!existsSync(process.env.ZEPHYR_BASE)) {
+    } else if (!(await exists(process.env.ZEPHYR_BASE))) {
       missing.push(`ZEPHYR_BASE path does not exist: ${process.env.ZEPHYR_BASE}`)
     }
 

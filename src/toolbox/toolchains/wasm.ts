@@ -1,31 +1,18 @@
-import { mkdir } from 'node:fs/promises'
-import { existsSync, rmSync, statSync } from 'node:fs'
+import { mkdir, rm } from 'node:fs/promises'
 import { resolve } from 'node:path'
+import { debuglog } from 'node:util'
 import { execa, execaCommand } from 'execa'
 import { INSTALL_DIR, INSTALL_PATH, EXPORTS_FILE_PATH } from '../setup/constants.js'
 import { moddableExists } from '../setup/moddable.js'
 import upsert from '../patching/upsert.js'
-import { execWithSudo, which } from '../system/exec.js'
+import { execWithSudo, sourceEnvironment, which } from '../system/exec.js'
+import { exists, isDir, isFile } from '../system/filesystem.js'
 import { ensureHomebrew } from '../setup/homebrew.js'
 import type { Toolchain, HostContext, VerifyResult } from './interface.js'
 import type { OperationEvent } from '../../lib/events.js'
 import type { Prompter } from '../../lib/prompter.js'
 
-function isDir(path: string): boolean {
-  try {
-    return existsSync(path) && statSync(path).isDirectory()
-  } catch {
-    return false
-  }
-}
-
-function isFile(path: string): boolean {
-  try {
-    return existsSync(path) && statSync(path).isFile()
-  } catch {
-    return false
-  }
-}
+const debug = debuglog('xs-dev:toolchain:wasm')
 
 export const wasmToolchain: Toolchain = {
   name: 'wasm',
@@ -40,6 +27,8 @@ export const wasmToolchain: Toolchain = {
     const EMSDK_PATH = resolve(WASM_DIR, 'emsdk')
     const BINARYEN_PATH = resolve(WASM_DIR, 'binaryen')
 
+    await sourceEnvironment()
+
     // 0. ensure wasm install directory and Moddable exists
     if (!moddableExists()) {
       yield { type: 'step:fail', message: 'Moddable platform tooling required. Run `xs-dev setup` before trying again.' }
@@ -47,18 +36,18 @@ export const wasmToolchain: Toolchain = {
     }
 
     try {
-      yield { type: 'step:start', message: 'Ensuring wasm directory' }
+      debug('Ensuring wasm directory')
       await mkdir(WASM_DIR, { recursive: true })
-      yield { type: 'step:done' }
+      debug('wasm directory available')
     } catch (error) {
       yield { type: 'step:fail', message: `Error creating wasm directory: ${String(error)}` }
       return
     }
 
     // 1. Clone EM_SDK repo, install, and activate latest version
-    if (!isDir(EMSDK_PATH)) {
+    if (!(await isDir(EMSDK_PATH))) {
       try {
-        yield { type: 'step:start', message: 'Cloning emsdk repo' }
+        debug('Cloning emsdk repo')
         await execa('git', [
           'clone',
           '--depth', '1',
@@ -67,7 +56,7 @@ export const wasmToolchain: Toolchain = {
           EMSDK_REPO,
           EMSDK_PATH,
         ])
-        yield { type: 'step:done' }
+        debug('emsdk repo cloned')
       } catch (error) {
         yield { type: 'step:fail', message: `Error cloning emsdk repo: ${String(error)}` }
         return
@@ -77,9 +66,9 @@ export const wasmToolchain: Toolchain = {
     const shouldBuildEmsdk =
       process.env.EMSDK === undefined ||
       process.env.EMSDK === '' ||
-      !isDir(process.env.EMSDK) ||
-      !isFile(process.env.EMSDK_NODE ?? '') ||
-      !isFile(process.env.EMSDK_PYTHON ?? '')
+      !(await isDir(process.env.EMSDK)) ||
+      !(await isFile(process.env.EMSDK_NODE ?? '')) ||
+      !(await isFile(process.env.EMSDK_PYTHON ?? ''))
 
     if (shouldBuildEmsdk) {
       try {
@@ -88,7 +77,7 @@ export const wasmToolchain: Toolchain = {
         process.env.EMSDK_NODE = ''
         process.env.EMSDK_PYTHON = ''
 
-        yield { type: 'step:start', message: 'Installing latest EMSDK' }
+        debug('Installing latest EMSDK')
         await execaCommand('./emsdk install latest', { cwd: EMSDK_PATH })
         await execaCommand('./emsdk activate latest', { cwd: EMSDK_PATH })
         await upsert(EXPORTS_FILE_PATH, 'export EMSDK_QUIET=1')
@@ -96,18 +85,18 @@ export const wasmToolchain: Toolchain = {
           EXPORTS_FILE_PATH,
           `source ${resolve(EMSDK_PATH, 'emsdk_env.sh')} 1> /dev/null`,
         )
-        yield { type: 'step:done' }
+        debug('emsdk installed')
       } catch (error) {
         yield { type: 'step:fail', message: `Error activating emsdk: ${String(error)}` }
         return
       }
     }
-    yield { type: 'info', message: 'emsdk setup complete' }
+    debug('emsdk setup complete')
 
     // 2. Clone Binaryen repo and build
-    if (!isDir(BINARYEN_PATH)) {
+    if (!(await isDir(BINARYEN_PATH))) {
       try {
-        yield { type: 'step:start', message: 'Cloning binaryen repo' }
+        debug('Cloning binaryen repo')
         await execa('git', [
           'clone',
           '--depth', '1',
@@ -117,7 +106,7 @@ export const wasmToolchain: Toolchain = {
           BINARYEN_REPO,
           BINARYEN_PATH,
         ])
-        yield { type: 'step:done' }
+        debug('binaryen repo cloned')
       } catch (error) {
         yield { type: 'step:fail', message: `Error cloning binaryen repo: ${String(error)}` }
         return
@@ -130,16 +119,16 @@ export const wasmToolchain: Toolchain = {
           for await (const event of ensureHomebrew(prompter)) {
             yield event
           }
-          yield { type: 'step:start', message: 'Installing cmake with Homebrew' }
+          debug('Installing cmake with Homebrew')
           await execaCommand('brew install cmake', { shell: process.env.SHELL ?? '/bin/bash' })
-          yield { type: 'step:done' }
+          debug('cmaked installed')
         }
 
         if (ctx.platform === 'lin') {
-          yield { type: 'step:start', message: 'Installing cmake with apt' }
+          debug('Installing cmake with apt')
           const result = await execWithSudo('apt --yes install build-essential cmake')
           if (result.success) {
-            yield { type: 'step:done' }
+            debug('cmake installed')
           } else {
             yield { type: 'step:fail', message: `Error installing cmake: ${result.error}` }
             return
@@ -152,13 +141,13 @@ export const wasmToolchain: Toolchain = {
     }
 
     try {
-      yield { type: 'step:start', message: 'Building Binaryen tooling with cmake' }
+      debug('Building Binaryen tooling with cmake')
       await execaCommand('cmake .', { cwd: BINARYEN_PATH })
-      yield { type: 'step:done' }
+      debug('cmake execution complete')
 
       yield { type: 'step:start', message: 'Building with make (this could take a couple minutes)' }
       await execaCommand('make', { cwd: BINARYEN_PATH })
-      yield { type: 'step:done' }
+      yield { type: 'step:done', message: 'Binaryen tooling built successfully' }
     } catch (error) {
       yield { type: 'step:fail', message: `Error building Binaryen: ${String(error)}` }
       return
@@ -172,7 +161,7 @@ export const wasmToolchain: Toolchain = {
         `export PATH=${binaryenBinPath}:$PATH`,
       )
       process.env.PATH = `${binaryenBinPath}:${String(process.env.PATH)}`
-      yield { type: 'info', message: 'Added binaryen to PATH' }
+      debug('Added binaryen to PATH')
     } catch (error) {
       yield { type: 'step:fail', message: `Error setting up PATH: ${String(error)}` }
       return
@@ -181,8 +170,8 @@ export const wasmToolchain: Toolchain = {
     // 4. Build Moddable WASM tools
     try {
       const wasmBinPath = resolve(INSTALL_PATH, 'build', 'bin', 'wasm')
-      if (!isDir(wasmBinPath)) {
-        yield { type: 'step:start', message: 'Building Moddable wasm tools' }
+      if (!(await isDir(wasmBinPath))) {
+        debug('Building Moddable wasm tools')
         await execaCommand('make', {
           cwd: resolve(
             INSTALL_PATH,
@@ -191,7 +180,7 @@ export const wasmToolchain: Toolchain = {
             'wasm',
           ),
         })
-        yield { type: 'step:done' }
+        debug('Moddable wasm tools installed')
       }
     } catch (error) {
       yield { type: 'step:fail', message: `Error building Moddable wasm tools: ${String(error)}` }
@@ -207,9 +196,9 @@ export const wasmToolchain: Toolchain = {
 
   async *teardown(_ctx: HostContext, _prompter: Prompter): AsyncGenerator<OperationEvent, void, undefined> {
     try {
-      yield { type: 'step:start', message: 'Removing wasm tooling' }
-      rmSync(resolve(INSTALL_DIR, 'wasm'), { recursive: true, force: true })
-      yield { type: 'step:done' }
+      debug('Removing wasm tooling')
+      await rm(resolve(INSTALL_DIR, 'wasm'), { recursive: true, force: true })
+      debug('wasm tooling removed')
     } catch (error) {
       yield { type: 'step:fail', message: `Error removing wasm tooling: ${String(error)}` }
     }
@@ -218,13 +207,13 @@ export const wasmToolchain: Toolchain = {
   async verify(_ctx: HostContext): Promise<VerifyResult> {
     const missing: string[] = []
 
-    if (process.env.EMSDK === undefined || process.env.EMSDK === '' || !existsSync(process.env.EMSDK)) {
+    if (process.env.EMSDK === undefined || process.env.EMSDK === '' || !(await exists(process.env.EMSDK))) {
       missing.push('EMSDK env var not set or path does not exist')
     }
-    if (process.env.EMSDK_NODE === undefined || process.env.EMSDK_NODE === '' || !existsSync(process.env.EMSDK_NODE)) {
+    if (process.env.EMSDK_NODE === undefined || process.env.EMSDK_NODE === '' || !(await exists(process.env.EMSDK_NODE))) {
       missing.push('EMSDK_NODE env var not set or path does not exist')
     }
-    if (process.env.EMSDK_PYTHON === undefined || process.env.EMSDK_PYTHON === '' || !existsSync(process.env.EMSDK_PYTHON)) {
+    if (process.env.EMSDK_PYTHON === undefined || process.env.EMSDK_PYTHON === '' || !(await exists(process.env.EMSDK_PYTHON))) {
       missing.push('EMSDK_PYTHON env var not set or path does not exist')
     }
     if (which('wasm-opt') === null) {

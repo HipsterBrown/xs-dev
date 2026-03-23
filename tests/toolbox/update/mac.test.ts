@@ -24,6 +24,7 @@ describe('toolbox/toolchains/moddable/mac (update)', async () => {
   })
   mock.module('node:fs/promises', {
     namedExports: {
+      cp: mock.fn(async () => { }),
       mkdir: mock.fn(async () => { }),
       readdir: mock.fn(async () => []),
       copyFile: mock.fn(async () => { }),
@@ -31,6 +32,8 @@ describe('toolbox/toolchains/moddable/mac (update)', async () => {
       readFile: mock.fn(async () => ''),
       writeFile: mock.fn(async () => { }),
       symlink: mock.fn(async () => { }),
+      stat: mock.fn(async () => { }),
+      rm: mock.fn(async () => { }),
     }
   })
   mock.module('#src/toolbox/system/exec.js', {

@@ -1,9 +1,10 @@
-import { mkdir, readdir, copyFile, symlink, chmod } from 'node:fs/promises'
-import { existsSync, cpSync, statSync, rmSync } from 'node:fs'
+import { cp, mkdir, readdir, copyFile, symlink, chmod, rm } from 'node:fs/promises'
+import { existsSync } from 'node:fs'
 import { resolve, join } from 'node:path'
 import { execSync } from 'node:child_process'
-import { execaCommand, execa } from 'execa'
 import os, { homedir } from 'node:os'
+import { debuglog } from 'node:util'
+import { execaCommand, execa } from 'execa'
 import {
   INSTALL_PATH,
   INSTALL_DIR,
@@ -23,8 +24,11 @@ import type { Prompter } from '../../../lib/prompter.js'
 import type { OperationEvent } from '../../../lib/events.js'
 import { isFailure, unwrap } from '../../system/errors.js'
 import { which, sourceEnvironment } from '../../system/exec.js'
+import { exists, isFile } from '../../system/filesystem.js'
 import type { HostContext } from '../interface.js'
 import { parseModdableVersion } from './index.js'
+
+const debug = debuglog('xs-dev:toolchains:moddable:mac')
 
 export async function* installMac(
   {
@@ -77,7 +81,7 @@ export async function* installMac(
   }
 
   if (existsSync(INSTALL_PATH)) {
-    yield { type: 'info', message: 'Moddable repo already installed' }
+    debug('Moddable repo already installed')
   } else {
     try {
       if (release !== undefined && (branch === undefined || branch === null)) {
@@ -89,7 +93,6 @@ export async function* installMac(
         const remoteRelease = unwrap(remoteReleaseResult)
 
         if (remoteRelease.assets.length === 0) {
-          yield { type: 'step:done' }
           yield { type: 'warning', message: `Moddable release ${release} does not have any pre-built assets.` }
           buildTools = await prompter.confirm(
             'Would you like to continue setting up and build the SDK locally?',
@@ -97,10 +100,10 @@ export async function* installMac(
           )
 
           if (!buildTools) {
-            yield { type: 'info', message: 'Please select another release version with pre-built assets: https://github.com/Moddable-OpenSource/moddable/releases' }
+            yield { type: 'step:fail', message: 'Please select another release version with pre-built assets: https://github.com/Moddable-OpenSource/moddable/releases' }
             return
           }
-          yield { type: 'step:start', message: 'Cloning repository' }
+          debug('Cloning repository')
         }
 
         await execa('git', [
@@ -116,7 +119,7 @@ export async function* installMac(
           await mkdir(BIN_PATH, { recursive: true })
           await mkdir(DEBUG_BIN_PATH, { recursive: true })
 
-          yield { type: 'info', message: 'Downloading release tools' }
+          debug('Downloading release tools')
           try {
             const universalAssetName = `moddable-tools-macuniversal.zip`
             await downloadReleaseTools({
@@ -161,7 +164,7 @@ export async function* installMac(
           )
         }
       } else if (branch !== undefined && branch !== null) {
-        yield { type: 'step:start', message: `Cloning ${sourceRepo} repo` }
+        debug(`Cloning ${sourceRepo} repo`)
         await execa('git', [
           'clone',
           sourceRepo,
@@ -175,7 +178,7 @@ export async function* installMac(
         yield { type: 'step:fail', message: 'Either a release or branch must be specified' }
         return
       }
-      yield { type: 'step:done' }
+      debug('repo cloned')
     } catch (error) {
       yield { type: 'step:fail', message: `Error cloning moddable repo: ${String(error)}` }
       return
@@ -194,7 +197,7 @@ export async function* installMac(
     try {
       yield { type: 'step:start', message: 'Building platform tooling' }
       await execaCommand('make', { cwd: BUILD_DIR })
-      yield { type: 'step:done' }
+      debug('SDK tooling built successfully')
     } catch (error) {
       yield { type: 'step:fail', message: `Error building mac tooling: ${String(error)}` }
       return
@@ -212,15 +215,15 @@ export async function* installMac(
       yield { type: 'step:fail', message: `Issue creating symlink for xsbug.app: ${String(error)}` }
       return
     } else {
-      yield { type: 'info', message: 'xsbug.app symlink already exists' }
+      debug('xsbug.app symlink already exists')
     }
   }
 
   // 5. install xsbug-log dependencies
   if (which('npm') !== null) {
-    yield { type: 'step:start', message: 'Installing xsbug-log dependencies' }
+    debug('Installing xsbug-log dependencies')
     await execaCommand('npm install', { cwd: XSBUG_LOG_PATH })
-    yield { type: 'step:done' }
+    debug('xsbug-log dependencies installed')
   }
 
   yield { type: 'step:done', message: 'Moddable SDK successfully set up! Start a new terminal session and run the "helloworld example": xs-dev run --example helloworld' }
@@ -232,7 +235,7 @@ export async function* updateMac(
 ): AsyncGenerator<OperationEvent, void, undefined> {
   const { release, branch, sourceRepo } = parseModdableVersion(ctx.version)
 
-  yield { type: 'info', message: 'Checking for SDK changes' }
+  yield { type: 'step:start', message: 'Checking for SDK changes' }
 
   await sourceEnvironment()
 
@@ -280,7 +283,7 @@ export async function* updateMac(
 
         if (!rebuildTools) {
           yield {
-            type: 'info',
+            type: 'step:fail',
             message: 'Please select another release version with pre-built assets: https://github.com/Moddable-OpenSource/moddable/releases',
           }
           return
@@ -347,7 +350,7 @@ export async function* updateMac(
             }
           }
 
-          yield { type: 'info', message: 'Updating tool permissions' }
+          debug('Updating tool permissions')
           const tools = await readdir(BIN_PATH)
           await Promise.all(
             tools.map(async (tool) => {
@@ -373,9 +376,9 @@ export async function* updateMac(
           // Check for npm
           const npmCheck = await execaCommand('which npm', { reject: false })
           if (npmCheck.exitCode === 0) {
-            yield { type: 'step:start', message: 'Installing xsbug-log dependencies' }
+            debug('Installing xsbug-log dependencies')
             await execaCommand('npm install', { cwd: XSBUG_LOG_PATH })
-            yield { type: 'step:done' }
+            debug('xsbug-log dependencies installed')
           }
 
           yield {
@@ -417,12 +420,12 @@ export async function* updateMac(
       rebuildTools = true
 
       yield { type: 'step:start', message: 'Updating Moddable SDK!' }
-      yield { type: 'info', message: 'Stashing any unsaved changes before committing' }
+      yield { type: 'warning', message: 'Stashing any unsaved changes before committing' }
       await execaCommand('git stash', { cwd: process.env.MODDABLE, reject: false })
       await execaCommand(`git pull origin ${branch}`, {
         cwd: process.env.MODDABLE,
       })
-      yield { type: 'step:done' }
+      yield { type: 'step:done', message: 'Moddable SDK repo updated' }
     } catch (error) {
       yield { type: 'step:fail', message: `Error in branch update: ${String(error)}` }
       return
@@ -461,9 +464,9 @@ export async function* updateMac(
       // Check for npm
       const npmCheck = await execaCommand('which npm', { reject: false })
       if (npmCheck.exitCode === 0) {
-        yield { type: 'step:start', message: 'Installing xsbug-log dependencies' }
+        debug('Installing xsbug-log dependencies')
         await execaCommand('npm install', { cwd: XSBUG_LOG_PATH })
-        yield { type: 'step:done' }
+        debug('xsbug-log dependencies installed')
       }
 
       yield {
@@ -479,22 +482,19 @@ export async function* updateMac(
 export async function* teardownMac(
   _ctx: HostContext,
 ): AsyncGenerator<OperationEvent, void, undefined> {
-  yield { type: 'step:start', message: 'Removing macOS-specific Moddable SDK files' }
+  debug('Removing macOS-specific Moddable SDK files')
 
-  const remove = (path: string): void => {
-    rmSync(path, { recursive: true, force: true })
+  const remove = async (path: string): Promise<void> => {
+    await rm(path, { recursive: true, force: true })
   }
 
   const NC_PREFS_BACKUP = join(INSTALL_DIR, 'ejectfix', 'com.apple.ncprefs.plist')
-  if (existsSync(NC_PREFS_BACKUP) && statSync(NC_PREFS_BACKUP).isFile()) {
-    cpSync(
+  if (await exists(NC_PREFS_BACKUP) && await isFile(NC_PREFS_BACKUP)) {
+    await cp(
       NC_PREFS_BACKUP,
       join(homedir(), 'Library', 'Preferences', 'com.apple.ncprefs.plist'),
     )
   }
-  remove(join(INSTALL_DIR, 'ejectfix'))
-  remove('/Applications/xsbug.app')
-  remove(INSTALL_PATH)
-
-  yield { type: 'step:done' }
+  await Promise.all([remove(join(INSTALL_DIR, 'ejectfix')), remove('/Applications/xsbug.app'), remove(INSTALL_PATH)])
+  debug('Moddable SDK removed')
 }

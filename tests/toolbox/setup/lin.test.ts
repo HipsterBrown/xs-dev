@@ -11,6 +11,7 @@ describe('toolbox/toolchains/moddable/lin (install)', async () => {
   })
   mock.module('node:fs/promises', {
     namedExports: {
+      cp: mock.fn(async () => { }),
       mkdir: mock.fn(async () => { }),
       readFile: mock.fn(async () => ''),
       writeFile: mock.fn(async () => { }),
@@ -18,6 +19,8 @@ describe('toolbox/toolchains/moddable/lin (install)', async () => {
       copyFile: mock.fn(async () => { }),
       chmod: mock.fn(async () => { }),
       symlink: mock.fn(async () => { }),
+      stat: mock.fn(async () => { }),
+      rm: mock.fn(async () => { }),
     }
   })
 

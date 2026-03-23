@@ -29,7 +29,7 @@ export async function* installWinDeps(_prompter: Prompter): AsyncGenerator<Opera
     const download = await fetchStream(IDF_INSTALLER)
     download.pipe(writer)
     await finishedPromise(writer)
-    yield { type: 'step:done' }
+    yield { type: 'step:done', message: 'Downloaded ESP-IDF Tools Installer' }
 
     yield {
       type: 'info',
@@ -38,7 +38,7 @@ export async function* installWinDeps(_prompter: Prompter): AsyncGenerator<Opera
 
     yield { type: 'step:start', message: 'Running ESP-IDF Tools Installer' }
     await execaCommand(`start /B ${destination}`)
-    yield { type: 'step:done' }
+    yield { type: 'step:done', message: 'ESP-IDF Tools installed' }
   } catch (error) {
     yield { type: 'step:fail', message: `Error installing ESP-IDF tools: ${String(error)}` }
   }

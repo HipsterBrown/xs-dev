@@ -1,10 +1,10 @@
-import { mkdir, readdir, copyFile } from 'node:fs/promises'
-import { existsSync, rmSync } from 'node:fs'
+import { mkdir, readdir, copyFile, rm } from 'node:fs/promises'
+import { existsSync } from 'node:fs'
 import { resolve } from 'node:path'
 import { execSync } from 'node:child_process'
+import { promisify, debuglog } from 'node:util'
 import { execa } from 'execa'
 import ws from 'windows-shortcuts'
-import { promisify } from 'util'
 import {
   INSTALL_PATH,
   INSTALL_DIR,
@@ -25,6 +25,7 @@ import type { HostContext } from '../interface.js'
 const getWsPromise = (): ((path: string, options: unknown) => Promise<void>) => promisify(ws.create)
 
 const SHORTCUT = resolve(INSTALL_DIR, 'Moddable Command Prompt.lnk')
+const debug = debuglog('xs-dev:toolchains:moddable:windows')
 
 function which(bin: string): string | null {
   try {
@@ -99,11 +100,11 @@ export async function* installWindows(
     )
 
     if (!installVS) {
-      yield { type: 'info', message: 'Please manually install VS 2022 Community from https://www.visualstudio.com/downloads/ and run xs-dev setup from the x86 Native Tools Command Prompt for VS 2022' }
+      yield { type: 'step:fail', message: 'Please manually install VS 2022 Community from https://www.visualstudio.com/downloads/ and run xs-dev setup from the x86 Native Tools Command Prompt for VS 2022' }
       return
     }
 
-    yield { type: 'step:start', message: 'Installing Visual Studio 2022 Community' }
+    debug('Installing Visual Studio 2022 Community')
     try {
       await execa('winget', [
         'install',
@@ -111,7 +112,7 @@ export async function* installWindows(
         '--id', 'Microsoft.VisualStudio.2022.Community',
         '--silent',
       ])
-      yield { type: 'step:done' }
+      debug('Visual Studio 2022 installed')
       yield { type: 'info', message: 'The "Desktop development for C++" workload must be manually installed. From Start Menu, select Visual Studio Installer, then Modify, then select Desktop development with C++' }
       return
     } catch (error) {
@@ -128,7 +129,7 @@ export async function* installWindows(
       return
     }
 
-    yield { type: 'step:start', message: 'Installing git from winget' }
+    debug('Installing git from winget')
     try {
       await execa('winget', [
         'install',
@@ -136,7 +137,7 @@ export async function* installWindows(
         '--id', 'Git.Git',
         '--silent',
       ])
-      yield { type: 'step:done' }
+      debug('git installed')
       yield { type: 'info', message: 'git successfully installed. Please close this window and re-launch the x86 Native Tools Command Prompt for VS 2022, then re-run this setup.' }
       return
     } catch (error) {
@@ -165,7 +166,7 @@ export async function* installWindows(
 
   // 1. clone moddable repo into INSTALL_DIR directory if it does not exist yet
   if (existsSync(INSTALL_PATH)) {
-    yield { type: 'info', message: 'Moddable repo already installed' }
+    debug('Moddable repo already installed')
   } else {
     try {
       if (release !== undefined && (branch === undefined || branch === null)) {
@@ -177,7 +178,6 @@ export async function* installWindows(
         const remoteRelease = unwrap(remoteReleaseResult)
 
         if (remoteRelease.assets.length === 0) {
-          yield { type: 'step:done' }
           yield { type: 'warning', message: `Moddable release ${release} does not have any pre-built assets.` }
           buildTools = await prompter.confirm(
             'Would you like to continue setting up and build the SDK locally?',
@@ -185,10 +185,10 @@ export async function* installWindows(
           )
 
           if (!buildTools) {
-            yield { type: 'info', message: 'Please select another release version with pre-built assets: https://github.com/Moddable-OpenSource/moddable/releases' }
+            yield { type: 'step:fail', message: 'Please select another release version with pre-built assets: https://github.com/Moddable-OpenSource/moddable/releases' }
             return
           }
-          yield { type: 'step:start', message: 'Cloning repository' }
+          debug('Cloning repository')
         }
 
         await execa('git', [
@@ -204,7 +204,7 @@ export async function* installWindows(
           await mkdir(BIN_PATH, { recursive: true })
           await mkdir(DEBUG_BIN_PATH, { recursive: true })
 
-          yield { type: 'info', message: 'Downloading release tools' }
+          debug('Downloading release tools')
 
           const assetName = 'moddable-tools-win64.zip'
           await downloadReleaseTools({
@@ -224,7 +224,7 @@ export async function* installWindows(
           )
         }
       } else if (branch !== undefined) {
-        yield { type: 'step:start', message: `Cloning ${sourceRepo} repo` }
+        debug(`Cloning ${sourceRepo} repo`)
         await execa('git', [
           'clone',
           sourceRepo,
@@ -235,7 +235,7 @@ export async function* installWindows(
         ])
         buildTools = true
       }
-      yield { type: 'step:done' }
+      debug('repo cloned')
     } catch (error) {
       yield { type: 'step:fail', message: `Error cloning moddable repo: ${String(error)}` }
       return
@@ -244,11 +244,11 @@ export async function* installWindows(
 
   // 2. configure MODDABLE env variable, add release binaries dir to PATH
   try {
-    yield { type: 'step:start', message: 'Creating Moddable SDK Environment Batch File' }
+    debug('Creating Moddable SDK Environment Batch File')
     await setEnv('MODDABLE', INSTALL_PATH)
     await addToPath(BIN_PATH)
     await setEnv('ISMODDABLECOMMANDPROMPT', '1')
-    yield { type: 'step:done' }
+    debug('batch file created')
   } catch (error) {
     yield { type: 'step:fail', message: `Error setting environment: ${String(error)}` }
     return
@@ -259,7 +259,7 @@ export async function* installWindows(
     try {
       yield { type: 'step:start', message: 'Building Moddable SDK tools' }
       await execa('build.bat', [], { cwd: BUILD_DIR, shell: true })
-      yield { type: 'step:done' }
+      yield { type: 'step:done', message: 'SDK tools built successfully' }
     } catch (error) {
       yield { type: 'step:fail', message: `Error building Moddable SDK tools: ${String(error)}` }
       return
@@ -268,7 +268,7 @@ export async function* installWindows(
 
   // 4. create Windows shortcut
   try {
-    yield { type: 'step:start', message: 'Creating Moddable Command Prompt Shortcut' }
+    debug('Creating Moddable Command Prompt Shortcut')
     const wsPromise = getWsPromise()
     await wsPromise(SHORTCUT, {
       target: '^%comspec^%',
@@ -276,16 +276,16 @@ export async function* installWindows(
       workingDir: INSTALL_PATH,
       desc: 'Moddable Command Prompt',
     })
-    yield { type: 'step:done' }
+    debug('Command prompt shortcut created')
   } catch (error) {
     yield { type: 'warning', message: `Error creating Moddable Command Prompt shortcut: ${String(error)}` }
   }
 
   if (which('npm') !== null) {
     try {
-      yield { type: 'step:start', message: 'Installing xsbug-log dependencies' }
+      debug('Installing xsbug-log dependencies')
       await execa('npm', ['install'], { cwd: XSBUG_LOG_PATH })
-      yield { type: 'step:done' }
+      debug('xsbug-log installed')
     } catch (error) {
       yield { type: 'warning', message: `Error installing xsbug-log dependencies: ${String(error)}` }
     }
@@ -305,17 +305,16 @@ export async function* updateWindows(
 export async function* teardownWindows(
   _ctx: HostContext,
 ): AsyncGenerator<OperationEvent, void, undefined> {
-  yield { type: 'step:start', message: 'Removing Windows-specific Moddable SDK files' }
+  debug('Removing Windows-specific Moddable SDK files')
 
-  const remove = (path: string): void => {
-    rmSync(path, { recursive: true, force: true })
+  const remove = async (path: string): Promise<void> => {
+    await rm(path, { recursive: true, force: true })
   }
 
-  // Remove the Moddable Command Prompt shortcut (.lnk file)
-  remove(SHORTCUT)
+  await Promise.all([
+    remove(SHORTCUT),
+    remove(EXPORTS_FILE_PATH),
+  ])
 
-  // Remove the Moddable.bat file (EXPORTS_FILE_PATH on Windows)
-  remove(EXPORTS_FILE_PATH)
-
-  yield { type: 'step:done' }
+  debug('Moddable SDK removed')
 }

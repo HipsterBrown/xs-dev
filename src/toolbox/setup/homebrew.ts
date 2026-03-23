@@ -1,10 +1,13 @@
 import os from 'node:os'
+import { debuglog } from 'node:util'
 import { execaCommand } from 'execa'
 import { existsSync } from 'node:fs'
 import upsert from '../patching/upsert.js'
 import { getProfilePath } from './constants.js'
 import type { Prompter } from '../../lib/prompter.js'
 import type { OperationEvent } from '../../lib/events.js'
+
+const debug = debuglog('xs-dev:homebrew')
 
 function getBrewPath(): string {
   if (os.arch() === 'arm64') return '/opt/homebrew/bin'
@@ -22,7 +25,7 @@ export async function* ensureHomebrew(prompter: Prompter): AsyncGenerator<Operat
 
       if (existsSync(brewPath)) {
         process.env.PATH = `${brewPath}:${String(process.env.PATH)}`
-        yield { type: 'info', message: 'Homebrew found in PATH' }
+        debug('Homebrew found in PATH')
         return
       }
 
@@ -56,10 +59,10 @@ export async function* ensureHomebrew(prompter: Prompter): AsyncGenerator<Operat
         type: 'step:fail',
         message: `Visit https://brew.sh/ to learn more about installing Homebrew. If you don't want to use Homebrew, please install the following packages manually before trying this command again.`,
       }
-      return
+      
     }
 
-    yield { type: 'info', message: 'Homebrew is available' }
+    // yield { type: 'info', message: 'Homebrew is available' }
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error)
     yield { type: 'step:fail', message: `Error checking for Homebrew: ${message}` }
