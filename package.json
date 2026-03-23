@@ -20,7 +20,7 @@
   },
   "scripts": {
     "xs-dev": "tsx src/cli.ts",
-    "xs-dev:debug": "DEBUG=* tsx --trace-deprecation src/cli.ts",
+    "xs-dev:debug": "NODE_DEBUG=xs-dev* tsx --trace-deprecation src/cli.ts",
     "format": "vp fmt **/**/*.{js,ts,json}",
     "lint": "vp lint src/",
     "clean-build": "rm -rf ./build",
