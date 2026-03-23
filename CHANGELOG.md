@@ -1,3 +1,15 @@
+# v1.8.1 (Mon Mar 23 2026)
+
+#### 🐛 Bug Fix
+
+- feat: reduce setup message noise, speed up some tasks [#246](https://github.com/HipsterBrown/xs-dev/pull/246) ([@HipsterBrown](https://github.com/HipsterBrown))
+
+#### Authors: 1
+
+- Nick Hehr ([@HipsterBrown](https://github.com/HipsterBrown))
+
+---
+
 # v1.8.0 (Thu Mar 19 2026)
 
 #### 🚀 Enhancement
