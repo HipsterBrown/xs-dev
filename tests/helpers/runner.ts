@@ -4,7 +4,9 @@ import { mkdtemp, rm } from 'node:fs/promises'
 import { join } from 'node:path'
 import { run } from '@stricli/core'
 
-export function buildFakeContext(options: { env?: Record<string, string> } = {}) {
+export function buildFakeContext(
+  options: { env?: Record<string, string> } = {},
+) {
   let exitCode: number | undefined
   const context = {
     process: {
@@ -25,14 +27,27 @@ export function buildFakeContext(options: { env?: Record<string, string> } = {})
   return context
 }
 
-export async function runWithInputs(app: unknown, inputs: string[], ...args: Parameters<typeof buildFakeContext>) {
+export async function runWithInputs(
+  app: unknown,
+  inputs: string[],
+  ...args: Parameters<typeof buildFakeContext>
+) {
   const context = buildFakeContext(...args)
   await run(app as any, inputs, context as any)
-  const stdout = context.process.stdout.write.mock.calls?.map((c) => c.arguments?.join('')).join('') ?? ''
-  const exitCode = typeof context.process.exitCode === 'function' ? context.process.exitCode() : context.process.exitCode as unknown as number | undefined
+  const stdout =
+    context.process.stdout.write.mock.calls
+      ?.map((c) => c.arguments?.join(''))
+      .join('') ?? ''
+  const exitCode =
+    typeof context.process.exitCode === 'function'
+      ? context.process.exitCode()
+      : (context.process.exitCode as unknown as number | undefined)
   return {
     stdout,
-    stderr: context.process.stderr.write.mock.calls?.map((c) => c.arguments?.join('')).join('') ?? '',
+    stderr:
+      context.process.stderr.write.mock.calls
+        ?.map((c) => c.arguments?.join(''))
+        .join('') ?? '',
     exitCode,
   }
 }

@@ -123,7 +123,12 @@ describe('remove command', () => {
       ),
     )
 
-    const result = await runWithInputs(app, ['remove', 'wifi', '--device', 'esp32'])
+    const result = await runWithInputs(app, [
+      'remove',
+      'wifi',
+      '--device',
+      'esp32',
+    ])
     assert.equal(result.exitCode, 0)
 
     const updated = JSON.parse(readFileSync(manifestPath, 'utf8'))

@@ -5,7 +5,11 @@ import type { LocalContext } from '../app.js'
 import { DEVICE_ALIAS } from '../toolbox/prompt/devices.js'
 import type { Device } from '../types.js'
 import * as output from '../lib/output.js'
-import { readManifest, writeManifest, removeInclude } from '../toolbox/manifest/index.js'
+import {
+  readManifest,
+  writeManifest,
+  removeInclude,
+} from '../toolbox/manifest/index.js'
 
 interface RemoveOptions {
   device?: Device
@@ -35,7 +39,11 @@ const command = buildCommand({
 
     const { device = '' } = flags
     const manifest = await readManifest(manifestPath)
-    const { manifest: updated, removed } = removeInclude(manifest, moduleName, device)
+    const { manifest: updated, removed } = removeInclude(
+      manifest,
+      moduleName,
+      device,
+    )
 
     if (removed.length === 0) {
       output.error(`"${moduleName}" not found. No modules removed.`)

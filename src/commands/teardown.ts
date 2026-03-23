@@ -8,12 +8,17 @@ import { toolchains } from '../toolbox/toolchains/registry.js'
 import { getHostContext } from '../toolbox/toolchains/context.js'
 import { createNonInteractivePrompter } from '../lib/prompter.js'
 import { handleEvent } from '../lib/renderer.js'
-import { EXPORTS_FILE_PATH, INSTALL_DIR, getProfilePath } from '../toolbox/setup/constants.js'
+import {
+  EXPORTS_FILE_PATH,
+  INSTALL_DIR,
+  getProfilePath,
+} from '../toolbox/setup/constants.js'
 import { parallelMerge } from 'streaming-iterables'
 
 const command = buildCommand({
   docs: {
-    brief: 'Remove all installed git repos and toolchains, unset environment changes',
+    brief:
+      'Remove all installed git repos and toolchains, unset environment changes',
   },
   async func(this: LocalContext) {
     const spinner = ora()
@@ -22,8 +27,12 @@ const command = buildCommand({
 
     spinner.start('Tearing down platform dependencies')
 
-    const removableToolchains = Object.values(toolchains).filter(toolchain => toolchain.platforms.includes(ctx.platform))
-    const tasks = removableToolchains.map(toolchain => toolchain.teardown(ctx, prompter))
+    const removableToolchains = Object.values(toolchains).filter((toolchain) =>
+      toolchain.platforms.includes(ctx.platform),
+    )
+    const tasks = removableToolchains.map((toolchain) =>
+      toolchain.teardown(ctx, prompter),
+    )
     for await (const event of parallelMerge(...tasks)) {
       handleEvent(event, spinner)
     }

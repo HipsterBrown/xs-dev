@@ -4,7 +4,11 @@ import { buildCommand } from '@stricli/core'
 import type { LocalContext } from '../app.js'
 import type { Device } from '../types.js'
 import { DEVICE_ALIAS } from '../toolbox/prompt/devices.js'
-import { createInteractivePrompter, createNonInteractivePrompter, isInteractive } from '../lib/prompter.js'
+import {
+  createInteractivePrompter,
+  createNonInteractivePrompter,
+  isInteractive,
+} from '../lib/prompter.js'
 import { handleEvent } from '../lib/renderer.js'
 import { getToolchain } from '../toolbox/toolchains/registry.js'
 import { getHostContext } from '../toolbox/toolchains/context.js'
@@ -14,7 +18,8 @@ function buildVersionString(
   branch: string | undefined,
   sourceRepo: string | undefined,
 ): string | undefined {
-  const prefix = branch !== undefined ? `branch-${branch}` : `release-${release ?? 'latest'}`
+  const prefix =
+    branch !== undefined ? `branch-${branch}` : `release-${release ?? 'latest'}`
   return sourceRepo !== undefined ? `${prefix}@${sourceRepo}` : prefix
 }
 
@@ -65,7 +70,13 @@ const command = buildCommand({
           handleEvent(event, spinner)
         }
       } else {
-        handleEvent({ type: 'step:fail', message: `No toolchain registered for device: ${resolvedTarget}` }, spinner)
+        handleEvent(
+          {
+            type: 'step:fail',
+            message: `No toolchain registered for device: ${resolvedTarget}`,
+          },
+          spinner,
+        )
       }
     }
   },

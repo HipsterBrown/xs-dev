@@ -16,7 +16,10 @@ const command = buildCommand({
   async func(this: LocalContext) {
     const { currentVersion } = this
     const ctx = getHostContext()
-    const info = await gatherEnvironmentInfo(currentVersion, { toolchains: Object.values(toolchains), ctx })
+    const info = await gatherEnvironmentInfo(currentVersion, {
+      toolchains: Object.values(toolchains),
+      ctx,
+    })
 
     output.info('xs-dev environment info:\n')
     printTable(
@@ -27,10 +30,15 @@ const command = buildCommand({
         ['Shell', info.shell],
         ['NodeJS Version', `${info.nodeVersion} (${info.nodePath})`],
         ['Python Version', `${info.pythonVersion} (${info.pythonPath})`],
-        ['Moddable SDK Version', `${info.moddableVersion} (${info.moddablePath})`],
+        [
+          'Moddable SDK Version',
+          `${info.moddableVersion} (${info.moddablePath})`,
+        ],
         [
           'Supported target devices',
-          info.supportedDevices.length > 0 ? info.supportedDevices.join(', ') : 'None',
+          info.supportedDevices.length > 0
+            ? info.supportedDevices.join(', ')
+            : 'None',
         ],
         ...(info.supportedDevices.includes('esp32')
           ? [['ESP32 IDF Directory', String(process.env.IDF_PATH)]]
@@ -45,7 +53,12 @@ const command = buildCommand({
           ? [['Pico SDK Directory', String(process.env.PICO_SDK_PATH)]]
           : []),
         ...(info.supportedDevices.includes('nrf52')
-          ? [['NRF52 SDK Directory', String(process.env.NRF_SDK_DIR ?? process.env.NRF52_SDK_PATH)]]
+          ? [
+              [
+                'NRF52 SDK Directory',
+                String(process.env.NRF_SDK_DIR ?? process.env.NRF52_SDK_PATH),
+              ],
+            ]
           : []),
         ...(info.supportedDevices.includes('zephyr')
           ? [['Zephyr SDK Directory', String(process.env.ZEPHYR_BASE)]]

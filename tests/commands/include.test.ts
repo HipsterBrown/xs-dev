@@ -11,7 +11,7 @@ describe('include command', () => {
 
   mock.module('#src/toolbox/system/exec.js', {
     namedExports: {
-      sourceEnvironment: mock.fn(async () => { }),
+      sourceEnvironment: mock.fn(async () => {}),
     },
   })
 
@@ -20,7 +20,7 @@ describe('include command', () => {
     chdir(tempDir)
     // Set MODDABLE env var so sourceEnvironment doesn't fail
     process.env.MODDABLE = tempDir
-    process.env.CI = "true"
+    process.env.CI = 'true'
   })
 
   afterEach(async () => {
@@ -132,7 +132,12 @@ describe('include command', () => {
     mkdirSync(modulesPath, { recursive: true })
     writeFileSync(join(modulesPath, 'manifest.json'), '{}')
 
-    const result = await runWithInputs(app, ['include', 'network', '--device', 'esp32'])
+    const result = await runWithInputs(app, [
+      'include',
+      'network',
+      '--device',
+      'esp32',
+    ])
     assert.equal(result.exitCode, 0)
 
     const updated = JSON.parse(readFileSync(manifestPath, 'utf8'))

@@ -12,7 +12,10 @@ describe('handleEvent', () => {
       info: mock.fn(),
     }
 
-    handleEvent({ type: 'step:start', message: 'Starting...' }, mockSpinner as any)
+    handleEvent(
+      { type: 'step:start', message: 'Starting...' },
+      mockSpinner as any,
+    )
     assert.equal(mockSpinner.start.mock.callCount(), 1)
     assert.deepEqual(mockSpinner.start.mock.calls[0].arguments, ['Starting...'])
   })
@@ -39,7 +42,10 @@ describe('handleEvent', () => {
       info: mock.fn(),
     }
 
-    handleEvent({ type: 'warning', message: 'Warning message' }, mockSpinner as any)
+    handleEvent(
+      { type: 'warning', message: 'Warning message' },
+      mockSpinner as any,
+    )
     assert.equal(mockSpinner.warn.mock.callCount(), 1)
   })
 

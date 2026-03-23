@@ -8,7 +8,11 @@ import { buildTree } from '../toolbox/prompt/tree.js'
 import { DEVICE_ALIAS } from '../toolbox/prompt/devices.js'
 import type { Device } from '../types.js'
 import * as output from '../lib/output.js'
-import { readManifest, writeManifest, addInclude } from '../toolbox/manifest/index.js'
+import {
+  readManifest,
+  writeManifest,
+  addInclude,
+} from '../toolbox/manifest/index.js'
 import { isInteractive } from '../lib/prompter.js'
 import { getToolchain } from '../toolbox/toolchains/registry.js'
 import { getHostContext } from '../toolbox/toolchains/context.js'
@@ -40,15 +44,17 @@ const command = buildCommand({
     const { device = '' } = flags
 
     if (
-      isInteractive() && (
-        moduleName === undefined ||
-        !existsSync(join(modulesPath, moduleName, 'manifest.json'))
-      )
+      isInteractive() &&
+      (moduleName === undefined ||
+        !existsSync(join(modulesPath, moduleName, 'manifest.json')))
     ) {
       // prompt with choices from $MODDABLE/modules
-      const moduleChildren = existsSync(modulesPath) && statSync(modulesPath).isDirectory()
-        ? readdirSync(modulesPath).map((entry) => buildTree(join(modulesPath, entry), entry))
-        : undefined
+      const moduleChildren =
+        existsSync(modulesPath) && statSync(modulesPath).isDirectory()
+          ? readdirSync(modulesPath).map((entry) =>
+              buildTree(join(modulesPath, entry), entry),
+            )
+          : undefined
       const choices =
         moduleChildren !== undefined
           ? moduleChildren.map((mod) => collectChoicesFromTree(mod)).flat()
@@ -59,7 +65,10 @@ const command = buildCommand({
           : choices
       const selectedModule = await select({
         message: 'Here are the available modules:',
-        choices: (filtered.length > 0 ? filtered : choices).map((c) => ({ name: c, value: c })),
+        choices: (filtered.length > 0 ? filtered : choices).map((c) => ({
+          name: c,
+          value: c,
+        })),
       })
       moduleName = selectedModule
     }
