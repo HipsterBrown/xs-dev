@@ -1,8 +1,11 @@
+import { debuglog } from 'node:util'
 import { execaCommand } from 'execa'
 import { which } from '../../system/exec.js'
 import { ensureHomebrew } from '../../setup/homebrew.js'
 import type { OperationEvent } from '../../../lib/events.js'
 import type { Prompter } from '../../../lib/prompter.js'
+
+const debug = debuglog('xs-dev:toolchains:esp32:mac')
 
 export async function* installMacDeps(prompter: Prompter): AsyncGenerator<OperationEvent> {
   try {
@@ -11,72 +14,43 @@ export async function* installMacDeps(prompter: Prompter): AsyncGenerator<Operat
     }
   } catch (error: unknown) {
     if (error instanceof Error) {
-      yield { type: 'info', message: `${error.message} python 3, cmake, ninja, dfu-util` }
-      yield { type: 'step:fail', message: error.message }
+      yield { type: 'step:fail', message: `${error.message} python 3, cmake, ninja, dfu-util` }
     }
     return
   }
 
-  const pythonPath = which('python')
-  if (pythonPath === null) {
-    const maybePython3Path = which('python3')
+  const missingDeps = Object.entries({
+    python: ['python', 'python3'],
+    cmake: ['cmake'],
+    ninja: ['ninja'],
+    'dfu-util': ['dfu-util'],
+  }).reduce<string[]>((result, [dep, whichRefs]) => {
+    if (whichRefs.some(ref => which(ref) === null)) return result.concat(dep)
+    return result
+  }, [])
 
-    if (maybePython3Path === null) {
-      try {
-        yield { type: 'step:start', message: 'Installing python through Homebrew' }
-        await execaCommand('brew install python', { shell: process.env.SHELL ?? '/bin/bash' })
-        yield { type: 'step:done' }
-      } catch (error: unknown) {
-        if (error instanceof Error && error.message.includes('xcode-select')) {
-          yield { type: 'step:fail', message: 'Apple Command Line Tools must be installed in order to install python from Homebrew. Please run `xcode-select --install` before trying again.' }
-        } else {
-          yield { type: 'step:fail', message: `Error installing python: ${String(error)}` }
-        }
-        return
-      }
+  try {
+    if (missingDeps.length > 0) {
+      debug('Installing missing dependencies with Homebrew')
+      await execaCommand(`brew install ${missingDeps.join(' ')}`, { shell: process.env.SHELL ?? '/bin/bash' })
+      debug(`${missingDeps.join(' ')} dependencies installed`)
     }
-  }
-
-  if (which('cmake') === null) {
-    try {
-      yield { type: 'step:start', message: 'Installing cmake' }
-      await execaCommand('brew install cmake', { shell: process.env.SHELL ?? '/bin/bash' })
-      yield { type: 'step:done' }
-    } catch (error: unknown) {
-      yield { type: 'step:fail', message: `Error installing cmake: ${String(error)}` }
-      return
+  } catch (error: unknown) {
+    if (error instanceof Error && error.message.includes('xcode-select')) {
+      yield { type: 'step:fail', message: 'Apple Command Line Tools must be installed in order to install dependencies from Homebrew. Please run `xcode-select --install` before trying again.' }
+    } else {
+      yield { type: 'step:fail', message: `Error installing dependencies: ${String(error)}` }
     }
-  }
-
-  if (which('ninja') === null) {
-    try {
-      yield { type: 'step:start', message: 'Installing ninja' }
-      await execaCommand('brew install ninja', { shell: process.env.SHELL ?? '/bin/bash' })
-      yield { type: 'step:done' }
-    } catch (error: unknown) {
-      yield { type: 'step:fail', message: `Error installing ninja: ${String(error)}` }
-      return
-    }
-  }
-
-  if (which('dfu-util') === null) {
-    try {
-      yield { type: 'step:start', message: 'Installing dfu-util' }
-      await execaCommand('brew install dfu-util', { shell: process.env.SHELL ?? '/bin/bash' })
-      yield { type: 'step:done' }
-    } catch (error: unknown) {
-      yield { type: 'step:fail', message: `Error installing dfu-util: ${String(error)}` }
-      return
-    }
+    return
   }
 
   if (which('pip3') === null) {
     try {
-      yield { type: 'step:start', message: 'Ensuring pip is available' }
+      debug('Installing pip through ensurepip')
       await execaCommand('python3 -m ensurepip --user', {
         shell: process.env.SHELL ?? '/bin/bash',
       })
-      yield { type: 'step:done' }
+      debug('pip installed')
     } catch (error: unknown) {
       yield { type: 'step:fail', message: `Error ensuring pip: ${String(error)}` }
       return
@@ -84,11 +58,11 @@ export async function* installMacDeps(prompter: Prompter): AsyncGenerator<Operat
   }
 
   try {
-    yield { type: 'step:start', message: 'Installing pyserial through python3 -m pip' }
+    debug('Installing pyserial through python3 -m pip')
     await execaCommand('python3 -m pip install --user pyserial', {
       shell: process.env.SHELL ?? '/bin/bash',
     })
-    yield { type: 'step:done' }
+    debug('Pyserial installed')
   } catch (error: unknown) {
     yield { type: 'warning', message: 'Unable to install pyserial through the available Python environment. This may be required by the ESP-IDF. If you encounter issues, please try manually installing pyserial.' }
   }

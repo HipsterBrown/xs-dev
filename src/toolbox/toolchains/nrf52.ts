@@ -1,13 +1,12 @@
 import { createWriteStream, existsSync, rmSync } from 'node:fs'
 import { mkdir } from 'node:fs/promises'
 import { finished, Transform, type TransformOptions } from 'node:stream'
-import { promisify } from 'node:util'
+import { debuglog, promisify } from 'node:util'
 import { resolve, join } from 'node:path'
 import { extract } from 'tar-fs'
 import { Extract as ZipExtract } from 'unzip-stream'
 import type { LZMAOptions, Unxz } from 'node-liblzma'
 import { INSTALL_DIR, EXPORTS_FILE_PATH } from '../setup/constants.js'
-import { moddableExists } from '../setup/moddable.js'
 import { execWithSudo, sourceEnvironment, which } from '../system/exec.js'
 import { setEnv } from '../setup/windows.js'
 import upsert from '../patching/upsert.js'
@@ -19,6 +18,7 @@ import type { OperationEvent } from '../../lib/events.js'
 import type { Prompter } from '../../lib/prompter.js'
 
 const finishedPromise = promisify(finished)
+const debug = debuglog('xs-dev:toolchains:nrf52')
 
 const ARCH_ALIAS: Record<string, string> = {
   mac_arm64: 'darwin-arm64',
@@ -35,18 +35,9 @@ async function* installPython(prompter: Prompter): AsyncGenerator<OperationEvent
       await execaCommand('where winget')
     } catch (error) {
       yield {
-        type: 'info',
+        type: 'step:fail',
         message:
           'Python 2.7 is required. You can download it from python.org/downloads or install via Windows Package Manager (winget).',
-      }
-      yield {
-        type: 'info',
-        message:
-          'Install winget from the Microsoft Store if needed, then re-run this setup.',
-      }
-      yield {
-        type: 'step:fail',
-        message: 'Python is required',
       }
       return
     }
@@ -54,9 +45,8 @@ async function* installPython(prompter: Prompter): AsyncGenerator<OperationEvent
     try {
       yield { type: 'step:start', message: 'Installing python from winget' }
       await execaCommand('winget install -e --id Python.Python.2 --silent')
-      yield { type: 'step:done' }
       yield {
-        type: 'info',
+        type: 'step:done',
         message:
           'Python installed. Please close this window, launch a new Command Prompt, and re-run setup.',
       }
@@ -91,24 +81,16 @@ export const nrf52Toolchain: Toolchain = {
     const NRF52_DIR = resolve(INSTALL_DIR, 'nrf52')
     const TOOLCHAIN_PATH = resolve(NRF52_DIR, TOOLCHAIN)
     const UF2CONV_PATH = resolve(NRF52_DIR, 'uf2conv.py')
-    const NRF5_SDK_PATH = resolve(NRF52_DIR, NRF5_SDK)
+    const NRF52_SDK_PATH = resolve(NRF52_DIR, NRF5_SDK)
 
     await sourceEnvironment()
-
-    if (!moddableExists()) {
-      yield {
-        type: 'step:fail',
-        message: `Moddable tooling required. Run 'xs-dev setup' before trying again.`,
-      }
-      return
-    }
 
     let createUnxz: ((lzmaOption?: LZMAOptions, transformOption?: TransformOptions) => Unxz) = () => {
       return new Transform() as Unxz
     }
     if (!isWindows) {
       try {
-        ;({ createUnxz } = await import('node-liblzma'))
+        ; ({ createUnxz } = await import('node-liblzma'))
       } catch (error) {
         yield {
           type: 'step:fail',
@@ -120,44 +102,49 @@ export const nrf52Toolchain: Toolchain = {
     }
 
     try {
-      yield { type: 'info', message: 'Ensuring nrf52 directory' }
+      debug('Ensuring nrf52 directory')
       await mkdir(NRF52_DIR, { recursive: true })
     } catch (error) {
       yield { type: 'step:fail', message: `Error creating nrf52 directory: ${String(error)}` }
       return
     }
 
+    const toolchainDownloadTask = async (): Promise<void> => {
+      if (existsSync(TOOLCHAIN_PATH)) return
+
+      debug('Downloading GNU Arm Embedded Toolchain')
+      const writer = isWindows
+        ? ZipExtract({ path: NRF52_DIR })
+        : extract(NRF52_DIR, { readable: true })
+      const download = await fetchStream(TOOLCHAIN_DOWNLOAD)
+      const stream = isWindows ? download : download.pipe(createUnxz())
+      stream.pipe(writer)
+      await finishedPromise(writer)
+      debug('GNU Arm Embedded toolchain downloaded')
+    }
+    const bootloaderDownloadTask = async (): Promise<void> => {
+      if (existsSync(UF2CONV_PATH)) return
+
+      debug('Downloading Adafruit nRF52 Bootloader')
+      const writer = createWriteStream(UF2CONV_PATH, { mode: 0o755 })
+      const download = await fetchStream(ADAFRUIT_NRF52_BOOTLOADER_UF2CONV_DOWNLOAD)
+      download.pipe(writer)
+      await finishedPromise(writer)
+      debug('Bootloader downloaded')
+    }
+    const sdkDownloadTask = async (): Promise<void> => {
+      if (existsSync(NRF52_SDK_PATH)) return
+
+      debug('Downloading nRF52 SDK')
+      const writer = ZipExtract({ path: NRF52_DIR })
+      const download = await fetchStream(NRF5_SDK_DOWNLOAD)
+      download.pipe(writer)
+      await finishedPromise(writer)
+      debug('nRF52 SDK downloaded')
+    }
+
     try {
-      if (!existsSync(TOOLCHAIN_PATH)) {
-        yield { type: 'step:start', message: 'Downloading GNU Arm Embedded Toolchain' }
-
-        const writer = isWindows
-          ? ZipExtract({ path: NRF52_DIR })
-          : extract(NRF52_DIR, { readable: true })
-        const download = await fetchStream(TOOLCHAIN_DOWNLOAD)
-        const stream = isWindows ? download : download.pipe(createUnxz())
-        stream.pipe(writer)
-        await finishedPromise(writer)
-        yield { type: 'step:done' }
-      }
-
-      if (!existsSync(UF2CONV_PATH)) {
-        yield { type: 'step:start', message: 'Downloading Adafruit nRF52 Bootloader' }
-        const writer = createWriteStream(UF2CONV_PATH, { mode: 0o755 })
-        const download = await fetchStream(ADAFRUIT_NRF52_BOOTLOADER_UF2CONV_DOWNLOAD)
-        download.pipe(writer)
-        await finishedPromise(writer)
-        yield { type: 'step:done' }
-      }
-
-      if (!existsSync(NRF5_SDK_PATH)) {
-        yield { type: 'step:start', message: 'Downloading nRF5 SDK' }
-        const writer = ZipExtract({ path: NRF52_DIR })
-        const download = await fetchStream(NRF5_SDK_DOWNLOAD)
-        download.pipe(writer)
-        await finishedPromise(writer)
-        yield { type: 'step:done' }
-      }
+      await Promise.all([toolchainDownloadTask(), bootloaderDownloadTask(), sdkDownloadTask()])
     } catch (error) {
       yield { type: 'step:fail', message: `Error downloading dependencies: ${String(error)}` }
       return
@@ -171,9 +158,9 @@ export const nrf52Toolchain: Toolchain = {
           process.env.NRF_SDK_DIR === undefined ||
           process.env.NRF_SDK_DIR === ''
         ) {
-          yield { type: 'info', message: 'Configuring $NRF_ROOT and $NRF_SDK_DIR' }
+          debug('Configuring $NRF_ROOT and $NRF_SDK_DIR')
           process.env.NRF_ROOT = NRF52_DIR
-          process.env.NRF_SDK_DIR = NRF5_SDK_PATH
+          process.env.NRF_SDK_DIR = NRF52_SDK_PATH
           await upsert(
             EXPORTS_FILE_PATH,
             `export NRF_ROOT=${process.env.NRF_ROOT}\nexport NRF_SDK_DIR=${process.env.NRF_SDK_DIR}`,
@@ -181,9 +168,9 @@ export const nrf52Toolchain: Toolchain = {
         }
       } else {
         process.env.NRF_ROOT = NRF52_DIR
-        process.env.NRF52_SDK_PATH = NRF5_SDK_PATH
+        process.env.NRF52_SDK_PATH = NRF52_SDK_PATH
         await setEnv('NRF_ROOT', NRF52_DIR)
-        await setEnv('NRF52_SDK_PATH', NRF5_SDK_PATH)
+        await setEnv('NRF52_SDK_PATH', NRF52_SDK_PATH)
         for await (const event of installPython(prompter)) {
           yield event
         }
@@ -223,9 +210,9 @@ Test out the setup by starting a new ${isWindows ? 'Moddable Command Prompt' : '
 
   async *teardown(_ctx: HostContext, _prompter: Prompter): AsyncGenerator<OperationEvent, void, undefined> {
     try {
-      yield { type: 'step:start', message: 'Removing nrf52 tooling' }
+      debug('Removing nrf52 tooling')
       rmSync(join(INSTALL_DIR, 'nrf52'), { recursive: true, force: true })
-      yield { type: 'step:done' }
+      debug('nrf52 tooling removed')
     } catch (error) {
       yield { type: 'step:fail', message: `Error removing nrf52 tooling: ${String(error)}` }
     }

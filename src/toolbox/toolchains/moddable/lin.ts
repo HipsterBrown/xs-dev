@@ -1,8 +1,9 @@
-import { mkdir, readdir, copyFile, chmod } from 'node:fs/promises'
-import { existsSync, rmSync } from 'node:fs'
+import { mkdir, readdir, copyFile, chmod, rm } from 'node:fs/promises'
+import { existsSync } from 'node:fs'
 import { resolve } from 'node:path'
-import { execaCommand, execa } from 'execa'
 import os from 'node:os'
+import { debuglog } from 'node:util'
+import { execaCommand, execa } from 'execa'
 import {
   INSTALL_PATH,
   INSTALL_DIR,
@@ -25,6 +26,8 @@ import type { Dependency } from '../../system/types.js'
 import { isFailure, unwrap } from '../../system/errors.js'
 import type { HostContext } from '../interface.js'
 import { parseModdableVersion } from './index.js'
+
+const debug = debuglog('xs-dev:toolchains:moddable:linux')
 
 export async function* installLinux(
   {
@@ -82,7 +85,7 @@ export async function* installLinux(
   ]
 
   try {
-    yield { type: 'step:start', message: 'Checking for missing dependencies' }
+    debug('Checking for missing dependencies')
     const missingDependenciesResult = await findMissingDependencies(dependencies)
     if (isFailure(missingDependenciesResult)) {
       yield { type: 'step:fail', message: `Error checking dependencies: ${missingDependenciesResult.error}` }
@@ -91,14 +94,14 @@ export async function* installLinux(
 
     // 2. Install or update packages required to compile
     if (missingDependenciesResult.data.length !== 0) {
-      yield { type: 'step:start', message: 'Attempting to install dependencies' }
+      debug('Attempting to install dependencies')
       const installResult = await installPackages(missingDependenciesResult.data)
       if (isFailure(installResult)) {
         yield { type: 'step:fail', message: `Error installing dependencies: ${installResult.error}` }
         return
       }
     }
-    yield { type: 'step:done' }
+    debug('Dependencies installed')
   } catch (error) {
     yield { type: 'step:fail', message: `Error during dependency check: ${String(error)}` }
     return
@@ -106,7 +109,7 @@ export async function* installLinux(
 
   // 3. Download the Moddable repository or use git to clone
   if (existsSync(INSTALL_PATH)) {
-    yield { type: 'info', message: 'Moddable repo already installed' }
+    debug('Moddable repo already installed')
   } else {
     try {
       if (release !== undefined && (branch === undefined || branch === null)) {
@@ -118,7 +121,6 @@ export async function* installLinux(
         const remoteRelease = unwrap(remoteReleaseResult)
 
         if (remoteRelease.assets.length === 0) {
-          yield { type: 'step:done' }
           yield { type: 'warning', message: `Moddable release ${release} does not have any pre-built assets.` }
           buildTools = await prompter.confirm(
             'Would you like to continue setting up and build the SDK locally?',
@@ -126,10 +128,10 @@ export async function* installLinux(
           )
 
           if (!buildTools) {
-            yield { type: 'info', message: 'Please select another release version with pre-built assets: https://github.com/Moddable-OpenSource/moddable/releases' }
+            yield { type: 'step:fail', message: 'Please select another release version with pre-built assets: https://github.com/Moddable-OpenSource/moddable/releases' }
             return
           }
-          yield { type: 'step:start', message: 'Cloning repository' }
+          debug('Cloning repository')
         }
 
         await execa('git', [
@@ -145,7 +147,7 @@ export async function* installLinux(
           await mkdir(BIN_PATH, { recursive: true })
           await mkdir(DEBUG_BIN_PATH, { recursive: true })
 
-          yield { type: 'info', message: 'Downloading release tools' }
+          debug('Downloading release tools')
           const isArm = os.arch() === 'arm64'
           const assetName = isArm
             ? 'moddable-tools-lin64arm.zip'
@@ -167,7 +169,7 @@ export async function* installLinux(
           )
         }
       } else if (branch !== undefined) {
-        yield { type: 'step:start', message: `Cloning ${sourceRepo} repo` }
+        debug(`Cloning ${sourceRepo} repo`)
         await execa('git', [
           'clone',
           sourceRepo,
@@ -178,7 +180,7 @@ export async function* installLinux(
         ])
         buildTools = true
       }
-      yield { type: 'step:done' }
+      debug('source repo cloned')
     } catch (error) {
       yield { type: 'step:fail', message: `Error cloning moddable repo: ${String(error)}` }
       return
@@ -197,7 +199,7 @@ export async function* installLinux(
     try {
       yield { type: 'step:start', message: 'Building platform tooling' }
       await execaCommand('make', { cwd: BUILD_DIR })
-      yield { type: 'step:done' }
+      yield { type: 'step:done', message: 'Platform tooling built successfully' }
     } catch (error) {
       yield { type: 'step:fail', message: `Error building linux tooling: ${String(error)}` }
       return
@@ -247,7 +249,7 @@ export async function* installLinux(
       yield { type: 'step:fail', message: `Error installing simulator: ${installResult.error}` }
       return
     }
-    yield { type: 'step:done' }
+    yield { type: 'step:done', message: 'Simulator installed' }
   } catch (error) {
     yield { type: 'step:fail', message: `Error during simulator installation: ${String(error)}` }
     return
@@ -256,9 +258,9 @@ export async function* installLinux(
   // 7. Install xsbug-log dependencies if npm is available
   if (which('npm') !== null) {
     try {
-      yield { type: 'step:start', message: 'Installing xsbug-log dependencies' }
+      debug('Installing xsbug-log dependencies')
       await execaCommand('npm install', { cwd: XSBUG_LOG_PATH })
-      yield { type: 'step:done' }
+      debug('xsbug-log dependencies installed')
     } catch (error) {
       yield { type: 'step:fail', message: `Error installing xsbug-log dependencies: ${String(error)}` }
       return
@@ -285,7 +287,7 @@ export async function* updateLinux(
     return
   }
 
-  yield { type: 'info', message: 'Checking for SDK changes' }
+  yield { type: 'step:start', message: 'Checking for SDK changes' }
 
   const BUILD_DIR = resolve(
     INSTALL_PATH,
@@ -328,7 +330,7 @@ export async function* updateLinux(
 
         if (!rebuildTools) {
           yield {
-            type: 'info',
+            type: 'step:fail',
             message: 'Please select another release version with pre-built assets: https://github.com/Moddable-OpenSource/moddable/releases',
           }
           return
@@ -376,14 +378,14 @@ export async function* updateLinux(
             ? 'moddable-tools-lin64arm.zip'
             : 'moddable-tools-lin64.zip'
 
-          yield { type: 'info', message: 'Downloading release tools' }
+          debug('Downloading release tools')
           await downloadReleaseTools({
             writePath: BIN_PATH,
             assetName,
             release: remoteRelease,
           })
 
-          yield { type: 'info', message: 'Updating tool permissions' }
+          debug('Updating tool permissions')
           const tools = await readdir(BIN_PATH)
           await Promise.all(
             tools.map(async (tool) => {
@@ -395,7 +397,7 @@ export async function* updateLinux(
             }),
           )
 
-          yield { type: 'info', message: 'Reinstalling simulator' }
+          yield { type: 'step:start', message: 'Reinstalling simulator' }
           const simDir = resolve(
             BUILD_DIR,
             '..',
@@ -427,13 +429,14 @@ export async function* updateLinux(
             cwd: BUILD_DIR,
             stdio: 'inherit',
           })
+          yield { type: 'step:done', message: 'Simulator reinstalled' }
 
           // Check for npm
           const npmCheck = await execaCommand('which npm', { reject: false })
           if (npmCheck.exitCode === 0) {
-            yield { type: 'step:start', message: 'Installing xsbug-log dependencies' }
+            debug('Installing xsbug-log dependencies')
             await execaCommand('npm install', { cwd: XSBUG_LOG_PATH })
-            yield { type: 'step:done' }
+            debug('xsbug-log dependencies installed')
           }
 
           yield {
@@ -473,13 +476,13 @@ export async function* updateLinux(
       }
 
       yield { type: 'step:start', message: 'Updating Moddable SDK!' }
-      yield { type: 'info', message: 'Stashing any unsaved changes before committing' }
+      yield { type: 'warning', message: 'Stashing any unsaved changes before committing' }
       await execaCommand('git stash', { cwd: process.env.MODDABLE, reject: false })
       await execaCommand(`git pull origin ${branch}`, {
         cwd: process.env.MODDABLE,
       })
       rebuildTools = true
-      yield { type: 'step:done' }
+      yield { type: 'step:done', message: 'Moddable SDK repo updated' }
     } catch (error) {
       yield { type: 'step:fail', message: `Error in branch update: ${String(error)}` }
       return
@@ -496,21 +499,21 @@ export async function* updateLinux(
         cwd: BUILD_DIR,
         stdio: 'inherit',
       })
-      yield { type: 'step:done' }
+      yield { type: 'step:done', message: 'Platform tools rebuilt' }
 
       yield { type: 'step:start', message: 'Reinstalling simulator' }
       await execWithSudo('make install', {
         cwd: BUILD_DIR,
         stdio: 'inherit',
       })
-      yield { type: 'step:done' }
+      yield { type: 'step:done', message: 'Simulator reinstalled' }
 
       // Check for npm
       const npmCheck = await execaCommand('which npm', { reject: false })
       if (npmCheck.exitCode === 0) {
-        yield { type: 'step:start', message: 'Installing xsbug-log dependencies' }
+        debug('Installing xsbug-log dependencies')
         await execaCommand('npm install', { cwd: XSBUG_LOG_PATH })
-        yield { type: 'step:done' }
+        debug('xsbug-log dependencies installed')
       }
 
       yield {
@@ -526,7 +529,7 @@ export async function* updateLinux(
 export async function* teardownLinux(
   _ctx: HostContext,
 ): AsyncGenerator<OperationEvent, void, undefined> {
-  yield { type: 'step:start', message: 'Removing Moddable SDK directory' }
-  rmSync(INSTALL_PATH, { recursive: true, force: true })
-  yield { type: 'step:done' }
+  debug('Removing Moddable SDK directory')
+  await rm(INSTALL_PATH, { recursive: true, force: true })
+  debug('moddable toolchain removed')
 }

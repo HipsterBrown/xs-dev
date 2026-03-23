@@ -1,5 +1,4 @@
 import { mkdir, rename, rm } from 'node:fs/promises'
-import { existsSync } from 'node:fs'
 import { resolve, join } from 'node:path'
 import { finished } from 'node:stream'
 import { promisify, debuglog } from 'node:util'
@@ -14,6 +13,7 @@ import { which } from '../system/exec.js'
 import { fetchStream } from '../system/fetch.js'
 import { ensureHomebrew } from '../setup/homebrew.js'
 import { findMissingDependencies, installPackages } from '../system/packages.js'
+import { exists } from '../system/filesystem.js'
 import { isFailure } from '../system/errors.js'
 import { addToPath, setEnv } from '../setup/windows.js'
 import type { Dependency } from '../system/types.js'
@@ -234,7 +234,7 @@ export const esp8266Toolchain: Toolchain = {
 
     // parallelize esp8266 tooling install / setup
     const xtensaToolchainTask = async function*(): AsyncGenerator<OperationEvent, void, undefined> {
-      if (existsSync(TOOLCHAIN_PATH)) return
+      if (await exists(TOOLCHAIN_PATH)) return
       try {
         debug('Downloading xtensa toolchain')
 
@@ -258,7 +258,7 @@ export const esp8266Toolchain: Toolchain = {
     }
 
     const arduinoCoreTask = async function*(): AsyncGenerator<OperationEvent, void, undefined> {
-      if (existsSync(ARDUINO_CORE_PATH)) return
+      if (await exists(ARDUINO_CORE_PATH)) return
       try {
         debug('Downloading arduino core tooling')
         const writer = ZipExtract({ path: ESP_DIR })
@@ -273,7 +273,7 @@ export const esp8266Toolchain: Toolchain = {
     }
 
     const rtosTask = async function*(): AsyncGenerator<OperationEvent, void, undefined> {
-      if (existsSync(RTOS_PATH)) return
+      if (await exists(RTOS_PATH)) return
       try {
         debug('Cloning esp8266 RTOS SDK repo')
         await execaCommand(
@@ -350,7 +350,7 @@ If there is trouble finding the correct port, pass the "--port" flag to the abov
 
     if (process.env.ESP_BASE === undefined || process.env.ESP_BASE === '') {
       missing.push('ESP_BASE env var not set')
-    } else if (!existsSync(process.env.ESP_BASE)) {
+    } else if (!(await exists(process.env.ESP_BASE))) {
       missing.push(`ESP_BASE path does not exist: ${process.env.ESP_BASE}`)
     }
 

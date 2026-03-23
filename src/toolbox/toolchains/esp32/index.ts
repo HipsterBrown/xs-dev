@@ -1,6 +1,6 @@
-import { mkdir, readFile } from 'node:fs/promises'
-import { existsSync, rmSync } from 'node:fs'
+import { mkdir, readFile, rm } from 'node:fs/promises'
 import { resolve, join } from 'node:path'
+import { debuglog } from 'node:util'
 import { execaCommand, execa } from 'execa'
 import { INSTALL_DIR, EXPORTS_FILE_PATH, INSTALL_PATH } from '../../setup/constants.js'
 import { moddableExists, getModdableVersion } from '../../setup/moddable.js'
@@ -11,10 +11,13 @@ import { installLinuxDeps } from './linux.js'
 import { installWinDeps } from './windows.js'
 import { setEnv } from '../../setup/windows.js'
 import { sourceEnvironment } from '../../system/exec.js'
+import { exists } from '../../system/filesystem.js'
 import { unwrapOr } from '../../system/errors.js'
 import type { Toolchain, HostContext, VerifyResult } from '../interface.js'
 import type { OperationEvent } from '../../../lib/events.js'
 import type { Prompter } from '../../../lib/prompter.js'
+
+const debug = debuglog('xs-dev:toolchains:esp32')
 
 function getVersionSatisfies(version: string, range: string): boolean {
   const major = parseInt(version.split('.')[0], 10)
@@ -35,7 +38,7 @@ export async function getExpectedEspIdfVersion(): Promise<string | null> {
   if (moddableExists()) {
     try {
       const manifestPath = resolve(INSTALL_PATH, 'build', 'devices', 'esp32', 'manifest.json')
-      if (existsSync(manifestPath)) {
+      if (await exists(manifestPath)) {
         const content = await readFile(manifestPath, 'utf-8')
         const parsed = JSON.parse(content) as Esp32Manifest
         return parsed.build?.EXPECTED_ESP_IDF ?? null
@@ -63,15 +66,14 @@ export const esp32Toolchain: Toolchain = {
 
     await sourceEnvironment()
 
-    // 0. ensure Moddable exists
     if (!moddableExists()) {
-      yield { type: 'step:fail', message: 'Moddable tooling required. Run `xs-dev setup` before trying again.' }
+      yield { type: 'step:fail', message: 'Moddable platform tooling required. Run `xs-dev setup` before trying again.' }
       return
     }
 
     // 1. ensure ~/.local/share/esp32 directory
     try {
-      yield { type: 'info', message: 'Ensuring esp32 install directory' }
+      debug('Ensuring esp32 install directory')
       await mkdir(ESP32_DIR, { recursive: true })
     } catch (error) {
       yield { type: 'step:fail', message: `Error creating esp32 directory: ${String(error)}` }
@@ -79,9 +81,9 @@ export const esp32Toolchain: Toolchain = {
     }
 
     // 2. clone esp-idf into ~/.local/share/esp32/esp-idf
-    if (!existsSync(IDF_PATH)) {
+    if (!(await exists(IDF_PATH))) {
       try {
-        yield { type: 'step:start', message: 'Cloning esp-idf repo' }
+        debug('Cloning esp-idf repo')
         const moddableVersionResult = await getModdableVersion()
         const moddableVersion = unwrapOr(moddableVersionResult, '')
         const expectedEspIdfVersion = await getExpectedEspIdfVersion()
@@ -91,9 +93,9 @@ export const esp32Toolchain: Toolchain = {
             ? ESP_BRANCH_V5
             : ESP_BRANCH_V4)
         await execaCommand(
-          `git clone --depth 1 --single-branch -b ${branch} --recursive ${ESP_IDF_REPO} ${IDF_PATH}`,
+          `git clone --depth 1 --single-branch -b ${branch} --recurse-submodules --shallow-submodules ${ESP_IDF_REPO} ${IDF_PATH}`,
         )
-        yield { type: 'step:done' }
+        debug('ESP-IDF repo cloned')
       } catch (error) {
         yield { type: 'step:fail', message: `Error cloning esp-idf: ${String(error)}` }
         return
@@ -102,7 +104,7 @@ export const esp32Toolchain: Toolchain = {
 
     // 3. Install build and run dependencies
     try {
-      yield { type: 'step:start', message: 'Installing build dependencies' }
+      debug('Installing build dependencies')
 
       if (ctx.platform === 'mac') {
         for await (const event of installMacDeps(prompter)) {
@@ -122,7 +124,7 @@ export const esp32Toolchain: Toolchain = {
         }
       }
 
-      yield { type: 'step:done' }
+      debug('Dependencies installed')
     } catch (error) {
       yield { type: 'step:fail', message: `Error installing dependencies: ${String(error)}` }
       return
@@ -131,11 +133,11 @@ export const esp32Toolchain: Toolchain = {
     // 4. append IDF_PATH env export to shell profile
     try {
       if (isWindows) {
-        yield { type: 'info', message: 'Configuring IDF_PATH environment variable' }
+        debug('Configuring IDF_PATH environment variable')
         await setEnv('IDF_PATH', IDF_PATH)
       } else {
         if (typeof process.env.IDF_PATH !== 'string' || process.env.IDF_PATH.length === 0) {
-          yield { type: 'info', message: 'Configuring $IDF_PATH' }
+          debug('Configuring $IDF_PATH')
           process.env.IDF_PATH = IDF_PATH
           await upsert(EXPORTS_FILE_PATH, `export IDF_PATH=${IDF_PATH}`)
         }
@@ -148,20 +150,18 @@ export const esp32Toolchain: Toolchain = {
     // 5. cd to IDF_PATH, run install.sh
     try {
       if (isWindows) {
-        yield { type: 'step:start', message: 'Running ESP-IDF Tools install.bat' }
+        debug('Running ESP-IDF Tools install.bat')
         await execaCommand(`${IDF_PATH}\\install.bat`, {
           cwd: IDF_PATH,
-          stdio: 'inherit',
         })
-        yield { type: 'step:done' }
+        debug('ESP-IDF tools installed')
       } else {
-        yield { type: 'step:start', message: 'Installing esp-idf tooling' }
+        debug('Installing esp-idf tooling')
         await execaCommand('./install.sh', {
           cwd: IDF_PATH,
           shell: process.env.SHELL ?? '/bin/bash',
-          stdio: 'inherit',
         })
-        yield { type: 'step:done' }
+        debug('ESP-IDF tools installed')
       }
     } catch (error) {
       yield { type: 'step:fail', message: `Error running install script: ${String(error)}` }
@@ -197,20 +197,16 @@ If there is trouble finding the correct port, pass the "--port" flag to the abov
 
     await sourceEnvironment()
 
-    yield { type: 'step:start', message: 'Updating esp32 tools' }
-
-    // 0. ensure Moddable exists
     if (!moddableExists()) {
-      yield {
-        type: 'step:fail',
-        message: 'Moddable tooling required. Run `xs-dev setup` before trying again.',
-      }
+      yield { type: 'step:fail', message: 'Moddable platform tooling required. Run `xs-dev setup` before trying again.' }
       return
     }
 
+    yield { type: 'step:start', message: 'Updating esp32 tools' }
+
     // 1. ensure esp32 directories exist
-    yield { type: 'info', message: 'Ensuring esp32 install directory' }
-    if (!existsSync(ESP32_DIR) || !existsSync(IDF_PATH)) {
+    debug('Ensuring esp32 install directory')
+    if (!(await exists(ESP32_DIR)) || !(await exists(IDF_PATH))) {
       yield {
         type: 'step:fail',
         message: 'ESP32 tooling required. Run `xs-dev setup --device esp32` before trying again.',
@@ -220,7 +216,7 @@ If there is trouble finding the correct port, pass the "--port" flag to the abov
 
     // 2. update local esp-idf repo
     try {
-      yield { type: 'step:start', message: 'Updating esp-idf repo' }
+      debug('Updating esp-idf repo')
       const moddableVersionResult = await getModdableVersion()
       const moddableVersion = unwrapOr(moddableVersionResult, '')
       const expectedEspIdfVersion = await getExpectedEspIdfVersion()
@@ -246,7 +242,7 @@ If there is trouble finding the correct port, pass the "--port" flag to the abov
       await execaCommand('git submodule update --init --recursive', {
         cwd: IDF_PATH,
       })
-      yield { type: 'step:done' }
+      debug('esp-idf repo updated')
     } catch (error) {
       yield { type: 'step:fail', message: `Error updating esp-idf: ${String(error)}` }
       return
@@ -254,7 +250,7 @@ If there is trouble finding the correct port, pass the "--port" flag to the abov
 
     // 3. Install build and run dependencies
     try {
-      yield { type: 'step:start', message: 'Installing build dependencies' }
+      debug('Installing build dependencies')
 
       if (ctx.platform === 'mac') {
         for await (const event of installMacDeps(prompter)) {
@@ -268,7 +264,7 @@ If there is trouble finding the correct port, pass the "--port" flag to the abov
         }
       }
 
-      yield { type: 'step:done' }
+      debug('Dependencies rebuilt')
     } catch (error) {
       yield { type: 'step:fail', message: `Error installing dependencies: ${String(error)}` }
       return
@@ -277,7 +273,7 @@ If there is trouble finding the correct port, pass the "--port" flag to the abov
     // 4. append IDF_PATH env export to shell profile
     try {
       if (process.env.IDF_PATH === undefined || process.env.IDF_PATH === '') {
-        yield { type: 'info', message: 'Configuring $IDF_PATH' }
+        debug('Configuring $IDF_PATH')
         process.env.IDF_PATH = IDF_PATH
         await upsert(EXPORTS_FILE_PATH, `export IDF_PATH=${IDF_PATH}`)
       }
@@ -298,18 +294,17 @@ If there is trouble finding the correct port, pass the "--port" flag to the abov
         shell: process.env.SHELL ?? '/bin/bash',
       })
     } catch (error) {
-      yield { type: 'info', message: `Note: Could not remove old IDF_PATH source: ${String(error)}` }
+      yield { type: 'warning', message: `Note: Could not remove old IDF_PATH source: ${String(error)}` }
     }
 
     // 5. cd to IDF_PATH, run install.sh
     try {
-      yield { type: 'step:start', message: 'Rebuilding esp-idf tooling' }
+      debug('Rebuilding esp-idf tooling')
       await execaCommand('./install.sh', {
         cwd: IDF_PATH,
         shell: process.env.SHELL ?? '/bin/bash',
-        stdio: 'inherit',
       })
-      yield { type: 'step:done' }
+      debug('esp-idf tooling rebuilt successfully')
     } catch (error) {
       yield { type: 'step:fail', message: `Error running install script: ${String(error)}` }
       return
@@ -317,13 +312,13 @@ If there is trouble finding the correct port, pass the "--port" flag to the abov
 
     // 6. append 'source $IDF_PATH/export.sh' to shell profile
     try {
-      yield { type: 'info', message: 'Sourcing esp-idf environment' }
+      debug('Sourcing esp-idf environment')
       await upsert(EXPORTS_FILE_PATH, `source $IDF_PATH/export.sh 1> /dev/null\n`)
       await execaCommand('source $IDF_PATH/export.sh', {
         shell: process.env.SHELL ?? '/bin/bash',
       })
     } catch (error) {
-      yield { type: 'info', message: `Note: ${String(error)}` }
+      yield { type: 'warning', message: `Note: ${String(error)}` }
     }
 
     // 7. Remove existing build output directories
@@ -343,7 +338,7 @@ If there is trouble finding the correct port, pass the "--port" flag to the abov
       await execa('rm', ['-rf', BUILD_DIR], { reject: false })
       await execa('rm', ['-rf', TMP_DIR], { reject: false })
     } catch (error) {
-      yield { type: 'info', message: `Note: Could not clean build dirs: ${String(error)}` }
+      yield { type: 'warning', message: `Note: Could not clean build dirs: ${String(error)}` }
     }
 
     yield {
@@ -356,10 +351,9 @@ If there is trouble finding the correct port, pass the "--port" flag to the abov
 
   async *teardown(_ctx: HostContext, _prompter: Prompter): AsyncGenerator<OperationEvent, void, undefined> {
     try {
-      yield { type: 'step:start', message: 'Removing esp32 tooling' }
-      rmSync(join(INSTALL_DIR, 'esp32'), { recursive: true, force: true })
-      rmSync(join(INSTALL_DIR, 'esp'), { recursive: true, force: true })
-      yield { type: 'step:done' }
+      debug('Removing esp32 tooling')
+      await rm(join(INSTALL_DIR, 'esp32'), { recursive: true, force: true })
+      debug('esp32 toolchain removed')
     } catch (error) {
       yield { type: 'step:fail', message: `Error removing esp32 tooling: ${String(error)}` }
     }
@@ -370,7 +364,7 @@ If there is trouble finding the correct port, pass the "--port" flag to the abov
 
     if (process.env.IDF_PATH === undefined || process.env.IDF_PATH === '') {
       missing.push('IDF_PATH env var not set')
-    } else if (!existsSync(process.env.IDF_PATH)) {
+    } else if (!(await exists(process.env.IDF_PATH))) {
       missing.push(`IDF_PATH path does not exist: ${process.env.IDF_PATH}`)
     }
 
