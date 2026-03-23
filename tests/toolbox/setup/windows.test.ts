@@ -24,6 +24,7 @@ describe('toolbox/toolchains/moddable/windows (install)', async () => {
       chmod: mock.fn(async () => { }),
       symlink: mock.fn(async () => { }),
       stat: mock.fn(async () => ({})),
+      rm: mock.fn(async () => { }),
     },
   })
   mock.module('node:fs', {
