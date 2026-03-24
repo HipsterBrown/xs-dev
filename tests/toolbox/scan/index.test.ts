@@ -1,4 +1,4 @@
-import { describe, it, mock } from 'node:test'
+import { describe, it, mock, beforeEach } from 'node:test'
 import assert from 'node:assert/strict'
 
 describe('toolbox/scan', async () => {
@@ -12,6 +12,10 @@ describe('toolbox/scan', async () => {
 
   const { default: scanDevices } = await import('#src/toolbox/scan/index.js')
   const { SerialPort } = await import('serialport')
+
+  beforeEach(() => {
+    ;(SerialPort.list as ReturnType<typeof mock.fn>).mock.mockImplementation(async () => [])
+  })
 
   it('yields a step:start event', async () => {
     const events = await Array.fromAsync(scanDevices())
