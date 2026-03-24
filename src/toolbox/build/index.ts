@@ -10,6 +10,7 @@ import type { Prompter, Choice } from '../../lib/prompter.js'
 import { getHostContext } from '../toolchains/context.js'
 import { getToolchain, resolveToolchain } from '../toolchains/registry.js'
 import { sourceScript, which } from '../system/exec.js'
+import { isFile } from '../system/filesystem.js'
 
 export type DeployStatus = 'none' | 'run' | 'push' | 'clean' | 'debug'
 
@@ -264,7 +265,8 @@ export default async function* build(
     if (!exampleHasManifest) {
       try {
         const manifestPath = resolve(contributedProjectPath, 'manifest.json')
-        await stat(manifestPath)
+        const packageJSONPath = resolve(contributedProjectPath, 'package.json')
+          ; (await isFile(manifestPath) || await isFile(packageJSONPath))
       } catch {
         yield {
           type: 'step:fail',
