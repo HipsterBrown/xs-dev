@@ -32,19 +32,27 @@ const BRIDGE_VENDORS: Record<number, string> = {
   0x067b: 'PL2303',
 }
 
-export function identifyDevice(vendorId: number, productId: number): DeviceInfo | null {
-  const exactMatch = KNOWN_DEVICES[vendorId]?.[productId]
+export function identifyDevice(vendorId: string | undefined, productId: string | undefined): DeviceInfo | null {
+  if (vendorId === undefined) return null
+  const vid = parseInt(vendorId, 16)
+  const pid = productId !== undefined ? parseInt(productId, 16) : 0
+  if (isNaN(vid)) return null
+
+  const exactMatch = KNOWN_DEVICES[vid]?.[pid]
   if (exactMatch !== undefined) {
+    // features require chip-level probing (e.g. picoboot protocol) — not available via VID/PID alone
     return { device: exactMatch, features: '' }
   }
 
-  const vendorFallback = VENDOR_FALLBACKS[vendorId]
+  const vendorFallback = VENDOR_FALLBACKS[vid]
   if (vendorFallback !== undefined) {
+    // features require chip-level probing (e.g. picoboot protocol) — not available via VID/PID alone
     return { device: vendorFallback, features: '' }
   }
 
-  const bridge = BRIDGE_VENDORS[vendorId]
+  const bridge = BRIDGE_VENDORS[vid]
   if (bridge !== undefined) {
+    // features require chip-level probing (e.g. picoboot protocol) — not available via VID/PID alone
     return { device: `ESP Device (${bridge})`, features: '' }
   }
 
