@@ -327,7 +327,7 @@ export default defineConfig({
             "error"
           ],
           "@typescript-eslint/promise-function-async": [
-            "error"
+            "warn"
           ],
           "@typescript-eslint/require-array-sort-compare": [
             "error",

@@ -1,4 +1,4 @@
-import { mkdir, readdir, rm } from 'node:fs/promises'
+import { chmod, mkdir, readdir, rm, symlink } from 'node:fs/promises'
 import { resolve, join } from 'node:path'
 import { debuglog } from 'node:util'
 import { execaCommand } from 'execa'
@@ -11,6 +11,8 @@ import { exists } from '../system/filesystem.js'
 import type { Toolchain, HostContext, VerifyResult } from './interface.js'
 import type { OperationEvent } from '../../lib/events.js'
 import type { Prompter } from '../../lib/prompter.js'
+import { Octokit } from '@octokit/rest'
+import { downloadReleaseTools } from '../setup/moddable.js'
 
 const debug = debuglog('xs-dev:toolchains:pico')
 
@@ -75,31 +77,34 @@ async function* installLinuxDeps(_prompter: Prompter): AsyncGenerator<OperationE
   }
 }
 
+const PICO_VERSION = '2.0.0'
+const repos = {
+  PICO_SDK: {
+    branch: PICO_VERSION,
+    url: 'https://github.com/raspberrypi/pico-sdk'
+  },
+  PICO_EXTRAS: { branch: `sdk-${PICO_VERSION}`, url: 'https://github.com/raspberrypi/pico-extras' },
+  PICO_EXAMPLES: { branch: `sdk-${PICO_VERSION}`, url: 'https://github.com/raspberrypi/pico-examples' },
+  PICOTOOL: { branch: PICO_VERSION, url: 'https://github.com/raspberrypi/picotool' },
+  PICO_SDK_TOOLS: { branch: 'v2.0.0-5', url: 'https://github.com/raspberrypi/pico-sdk-tools' }
+}
+
 export const picoToolchain: Toolchain = {
   name: 'pico',
-  platforms: ['mac', 'lin', 'win'],
+  platforms: ['mac', 'lin'],
 
   async *install(ctx: HostContext, prompter: Prompter): AsyncGenerator<OperationEvent, void, undefined> {
     yield { type: 'step:start', message: 'Starting pico tooling setup' }
 
-    const PICO_BRANCH = '2.0.0'
-    const PICO_SDK_REPO = 'https://github.com/raspberrypi/pico-sdk'
-    const PICO_EXTRAS_REPO = 'https://github.com/raspberrypi/pico-extras'
-    const PICO_EXAMPLES_REPO = 'https://github.com/raspberrypi/pico-examples'
-    const PICOTOOL_REPO = 'https://github.com/raspberrypi/picotool'
     const PICO_ROOT = process.env.PICO_ROOT ?? resolve(INSTALL_DIR, 'pico')
     const PICO_SDK_DIR = resolve(PICO_ROOT, 'pico-sdk')
     const PICO_EXTRAS_DIR = resolve(PICO_ROOT, 'pico-extras')
     const PICO_EXAMPLES_PATH = resolve(PICO_ROOT, 'pico-examples')
     const PICOTOOL_PATH = resolve(PICO_ROOT, 'picotool')
     const PICOTOOL_BUILD_DIR = resolve(PICOTOOL_PATH, 'build')
-    const PICO_SDK_BUILD_DIR = resolve(PICO_SDK_DIR, 'build')
-    const PIOASM_TOOL_PATH = resolve(PICO_SDK_DIR, 'tools', 'pioasm')
-    const PIOASM_BUILD_PATH = resolve(PICO_SDK_BUILD_DIR, 'pioasm')
-    const PIOASM_PATH = resolve(PIOASM_BUILD_PATH, 'pioasm')
+    const PIOASM_PATH = resolve(PICO_ROOT, 'pioasm', 'pioasm')
 
     await sourceEnvironment()
-
 
     try {
       debug('Ensuring pico directory')
@@ -141,10 +146,9 @@ export const picoToolchain: Toolchain = {
 
     // 2. Install the pico sdk, extras, examples, and picotool:
     const gitDeps = [
-      { branch: PICO_BRANCH, url: PICO_SDK_REPO, dest: PICO_SDK_DIR },
-      { branch: `sdk-${PICO_BRANCH}`, url: PICO_EXTRAS_REPO, dest: PICO_EXTRAS_DIR },
-      { branch: `sdk-${PICO_BRANCH}`, url: PICO_EXAMPLES_REPO, dest: PICO_EXAMPLES_PATH },
-      { branch: PICO_BRANCH, url: PICOTOOL_REPO, dest: PICOTOOL_PATH },
+      { ...repos.PICO_SDK, dest: PICO_SDK_DIR },
+      { ...repos.PICO_EXTRAS, dest: PICO_EXTRAS_DIR },
+      { ...repos.PICO_EXAMPLES, dest: PICO_EXAMPLES_PATH },
     ]
     const clone = async ({ branch, url, dest }: { branch: string, url: string, dest: string }): Promise<void> => {
       if (await exists(dest)) return
@@ -157,6 +161,49 @@ export const picoToolchain: Toolchain = {
       await Promise.all(gitDeps.map(async dep => { await clone(dep); }))
     } catch (error) {
       yield { type: 'step:fail', message: `Error cloning repositories: ${String(error)}` }
+      return
+    }
+
+    // download pico-sdk-tools release
+    const octokit = new Octokit()
+    const { data: taggedRelease } = await octokit.rest.repos.getReleaseByTag({
+      owner: 'raspberrypi',
+      repo: 'pico-sdk-tools',
+      tag: repos.PICO_SDK_TOOLS.branch,
+    })
+    const assets = [`pico-sdk-tools-${PICO_VERSION}`, `picotool-${PICO_VERSION}`].map(asset => {
+      switch (ctx.platform) {
+        case 'mac':
+          return `${asset}-mac.zip`
+        case 'win':
+          return `${asset}-x64-win.zip`
+        case 'lin': {
+          if (ctx.arch === 'arm64') return `${asset}-aarch64-lin.tar.gz`
+          return `${asset}-x86_64-lin.tar.gz`
+        }
+        default:
+          return 'N/A'
+      }
+    })
+    try {
+      debug('Downloading pico-sdk-tools')
+      await Promise.all(assets.map(assetName => downloadReleaseTools({ writePath: PICO_ROOT, assetName, release: taggedRelease })))
+      debug('Downloaded pico-sdk-tools to PICO_ROOT')
+
+      const toolPaths = [resolve(PICO_ROOT, 'pioasm', 'pioasm'), resolve(PICO_ROOT, 'picotool', 'picotool')]
+      await Promise.all(toolPaths.map(toolPath => chmod(toolPath, 0o751)))
+      debug('Set executable permissions on tool binaries')
+
+      const symlinkDir = resolve(PICO_SDK_DIR, 'build', '_deps', 'picotool')
+      const symlinkPath = resolve(symlinkDir, 'picotool')
+      await mkdir(symlinkDir, { recursive: true })
+      await rm(symlinkPath, { force: true })
+      await symlink(resolve(PICO_ROOT, 'picotool', 'picotool'), symlinkPath)
+      debug('Created picotool compatibility symlink for Moddable make.pico.mk')
+
+      yield { type: 'step:done', message: 'Ending earlier to investigate results' }
+    } catch (error) {
+      yield { type: 'step:fail', message: `Unable to download pico-sdk-tools release assets: ${error instanceof Error ? error.message : 'Unknown'}` }
       return
     }
 
@@ -193,41 +240,6 @@ export const picoToolchain: Toolchain = {
       return
     }
 
-    // 4. Build some pico tools:
-    try {
-      const shouldBuildPico = !(await exists(PICO_SDK_BUILD_DIR)) ||
-        (await readdir(PICO_SDK_BUILD_DIR).catch(() => [])).length === 0
-
-      if (shouldBuildPico) {
-        debug('Build some pico tools')
-        await mkdir(PICO_SDK_BUILD_DIR, { recursive: true })
-        await execaCommand('cmake ..', {
-          shell: process.env.SHELL ?? '/bin/bash',
-          cwd: PICO_SDK_BUILD_DIR,
-        })
-        await execaCommand('make', {
-          shell: process.env.SHELL ?? '/bin/bash',
-          cwd: PICO_SDK_BUILD_DIR,
-        })
-
-        // Build pioasm
-        await mkdir(PIOASM_BUILD_PATH, { recursive: true })
-        await execaCommand(`cmake ${PIOASM_TOOL_PATH}`, {
-          shell: process.env.SHELL ?? '/bin/bash',
-          cwd: PIOASM_BUILD_PATH,
-        })
-        await execaCommand('make', {
-          shell: process.env.SHELL ?? '/bin/bash',
-          cwd: PIOASM_BUILD_PATH,
-        })
-
-        debug('Pico tools built successfully')
-      }
-    } catch (error) {
-      yield { type: 'step:fail', message: `Error building pico tools: ${String(error)}` }
-      return
-    }
-
     // 5. Build _the_ picotool
     try {
       if (process.env.PICO_SDK_PATH === undefined) {
@@ -246,8 +258,10 @@ export const picoToolchain: Toolchain = {
         debug(`Using existing $PIOASM: ${process.env.PIOASM}`)
       }
 
-      const shouldBuildPicotool = !(await exists(PICOTOOL_BUILD_DIR)) ||
-        (await readdir(PICOTOOL_BUILD_DIR).catch(() => [])).length === 0
+      const shouldBuildPicotool = !(await exists(PICOTOOL_PATH)) ||
+        (await readdir(PICOTOOL_PATH).catch(() => [])).length === 0
+
+      await upsert(EXPORTS_FILE_PATH, `export PATH="${PICOTOOL_PATH}:$PATH"`)
 
       if (shouldBuildPicotool) {
         debug('Build the picotool CLI')
@@ -260,7 +274,6 @@ export const picoToolchain: Toolchain = {
           shell: process.env.SHELL ?? '/bin/bash',
           cwd: PICOTOOL_BUILD_DIR,
         })
-        await upsert(EXPORTS_FILE_PATH, `export PATH="${PICOTOOL_BUILD_DIR}:$PATH"`)
         debug('picotool CLI built successfully')
       }
     } catch (error) {
@@ -277,14 +290,11 @@ Then run: xs-dev run --example helloworld --device pico`,
   },
 
   async *update(ctx: HostContext, prompter: Prompter): AsyncGenerator<OperationEvent, void, undefined> {
-    const PICO_BRANCH = '2.0.0'
     const PICO_ROOT = process.env.PICO_ROOT ?? resolve(INSTALL_DIR, 'pico')
     const PICO_SDK_DIR = resolve(PICO_ROOT, 'pico-sdk')
     const PICO_EXTRAS_DIR = resolve(PICO_ROOT, 'pico-extras')
     const PICO_EXAMPLES_PATH = resolve(PICO_ROOT, 'pico-examples')
     const PICOTOOL_PATH = resolve(PICO_ROOT, 'picotool')
-    const PICOTOOL_BUILD_DIR = resolve(PICOTOOL_PATH, 'build')
-    const PICO_SDK_BUILD_DIR = resolve(PICO_SDK_DIR, 'build')
 
     await sourceEnvironment()
 
@@ -339,7 +349,7 @@ Then run: xs-dev run --example helloworld --device pico`,
       if (await exists(PICO_SDK_DIR)) {
         debug('Updating pico-sdk repo')
         await execaCommand('git fetch --all --tags', { cwd: PICO_SDK_DIR })
-        await execaCommand(`git checkout ${PICO_BRANCH}`, { cwd: PICO_SDK_DIR })
+        await execaCommand(`git checkout ${PICO_VERSION}`, { cwd: PICO_SDK_DIR })
         await execaCommand('git submodule update --init --recursive', {
           cwd: PICO_SDK_DIR,
         })
@@ -349,7 +359,7 @@ Then run: xs-dev run --example helloworld --device pico`,
       if (await exists(PICO_EXTRAS_DIR)) {
         debug('Updating pico-extras repo')
         await execaCommand('git fetch --all --tags', { cwd: PICO_EXTRAS_DIR })
-        await execaCommand(`git checkout sdk-${PICO_BRANCH}`, {
+        await execaCommand(`git checkout sdk-${PICO_VERSION}`, {
           cwd: PICO_EXTRAS_DIR,
         })
         debug('pico-extras repo updates')
@@ -358,44 +368,55 @@ Then run: xs-dev run --example helloworld --device pico`,
       if (await exists(PICO_EXAMPLES_PATH)) {
         debug('Updating pico-examples repo')
         await execaCommand('git fetch --all --tags', { cwd: PICO_EXAMPLES_PATH })
-        await execaCommand(`git checkout sdk-${PICO_BRANCH}`, {
+        await execaCommand(`git checkout sdk-${PICO_VERSION}`, {
           cwd: PICO_EXAMPLES_PATH,
         })
         debug('pico-examples repo updated')
       }
 
-      if (await exists(PICOTOOL_PATH)) {
-        debug('Updating picotool repo')
-        await execaCommand('git fetch --all --tags', { cwd: PICOTOOL_PATH })
-        await execaCommand('git checkout master', { cwd: PICOTOOL_PATH })
-        debug('picotool repo updated')
+      const octokit = new Octokit()
+      const { data: taggedRelease } = await octokit.rest.repos.getReleaseByTag({
+        owner: 'raspberrypi',
+        repo: 'pico-sdk-tools',
+        tag: repos.PICO_SDK_TOOLS.branch,
+      })
+      const assets = [`pico-sdk-tools-${PICO_VERSION}`, `picotool-${PICO_VERSION}`].map(asset => {
+        switch (ctx.platform) {
+          case 'mac':
+            return `${asset}-mac.zip`
+          case 'win':
+            return `${asset}-x64-win.zip`
+          case 'lin': {
+            if (ctx.arch === 'arm64') return `${asset}-aarch64-lin.tar.gz`
+            return `${asset}-x86_64-lin.tar.gz`
+          }
+          default:
+            return 'N/A'
+        }
+      })
+      try {
+        debug('Downloading pico-sdk-tools')
+        // oxlint-disable-next-line @typescript-eslint/promise-function-async
+        await Promise.all(assets.map(assetName => downloadReleaseTools({ writePath: PICO_ROOT, assetName, release: taggedRelease })))
+        debug('Downloaded pico-sdk-tools to PICO_ROOT')
+
+        const toolPaths = [resolve(PICO_ROOT, 'pioasm', 'pioasm'), resolve(PICO_ROOT, 'picotool', 'picotool')]
+        // oxlint-disable-next-line @typescript-eslint/promise-function-async
+        await Promise.all(toolPaths.map(toolPath => chmod(toolPath, 0o751)))
+        debug('Set executable permissions on tool binaries')
+
+        const symlinkDir = resolve(PICO_SDK_DIR, 'build', '_deps', 'picotool')
+        const symlinkPath = resolve(symlinkDir, 'picotool')
+        await mkdir(symlinkDir, { recursive: true })
+        await rm(symlinkPath, { force: true })
+        await symlink(resolve(PICO_ROOT, 'picotool', 'picotool'), symlinkPath)
+        debug('Created picotool compatibility symlink for Moddable make.pico.mk')
+
+        yield { type: 'step:done', message: 'Ending earlier to investigate results' }
+      } catch (error) {
+        yield { type: 'step:fail', message: `Unable to download pico-sdk-tools release assets: ${error instanceof Error ? error.message : 'Unknown'}` }
+        return
       }
-
-      // Build some pico tools:
-      debug('Building pico tools')
-      await mkdir(PICO_SDK_BUILD_DIR, { recursive: true })
-      await execaCommand('cmake ..', {
-        shell: process.env.SHELL,
-        cwd: PICO_SDK_BUILD_DIR,
-      })
-      await execaCommand('make', {
-        shell: process.env.SHELL,
-        cwd: PICO_SDK_BUILD_DIR,
-      })
-      debug('pico tools rebuilt successfully')
-
-      // Build _the_ picotool
-      debug('Building the picotool CLI')
-      await mkdir(PICOTOOL_BUILD_DIR, { recursive: true })
-      await execaCommand('cmake ..', {
-        shell: process.env.SHELL,
-        cwd: PICOTOOL_BUILD_DIR,
-      })
-      await execaCommand('make', {
-        shell: process.env.SHELL,
-        cwd: PICOTOOL_BUILD_DIR,
-      })
-      debug('picotool CLI rebuilt successfully')
 
       yield {
         type: 'step:done',
@@ -449,7 +470,8 @@ Then run: xs-dev run --example helloworld --device pico`,
       PICO_ROOT: resolve(INSTALL_DIR, 'pico'),
       PICO_SDK_PATH: resolve(INSTALL_DIR, 'pico', 'pico-sdk'),
       PICO_SDK_DIR: resolve(INSTALL_DIR, 'pico', 'pico-sdk'),
-      PIOASM: resolve(INSTALL_DIR, 'pico', 'pico-sdk', 'build', 'pioasm', 'pioasm'),
+      PIOASM: resolve(INSTALL_DIR, 'pico', 'pioasm', 'pioasm'),
+      UF2CONV: resolve(INSTALL_DIR, 'pico', 'picotool', 'picotool'),
       PICO_GCC_ROOT: process.env.PICO_GCC_ROOT ?? defaultGccRoot,
     }
   },
