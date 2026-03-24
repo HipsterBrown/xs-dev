@@ -98,5 +98,10 @@ describe('toolbox/scan/devices', () => {
       const result = identifyDevice(undefined, undefined)
       assert.equal(result, null)
     })
+
+    it('falls back to vendor name when productId is undefined', () => {
+      const result = identifyDevice('303a', undefined)
+      assert.deepEqual(result, { device: 'Espressif ESP Device', features: '' })
+    })
   })
 })
