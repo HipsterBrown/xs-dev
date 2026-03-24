@@ -1,4 +1,4 @@
-import { chmod, mkdir, readdir, rm } from 'node:fs/promises'
+import { chmod, mkdir, readdir, rm, symlink } from 'node:fs/promises'
 import { resolve, join } from 'node:path'
 import { debuglog } from 'node:util'
 import { execaCommand } from 'execa'
@@ -195,6 +195,14 @@ export const picoToolchain: Toolchain = {
       // oxlint-disable-next-line @typescript-eslint/promise-function-async
       await Promise.all(toolPaths.map(toolPath => chmod(toolPath, 0o751)))
       debug('Set executable permissions on tool binaries')
+
+      const symlinkDir = resolve(PICO_SDK_DIR, 'build', '_deps', 'picotool')
+      const symlinkPath = resolve(symlinkDir, 'picotool')
+      await mkdir(symlinkDir, { recursive: true })
+      await rm(symlinkPath, { force: true })
+      await symlink(resolve(PICO_ROOT, 'picotool', 'picotool'), symlinkPath)
+      debug('Created picotool compatibility symlink for Moddable make.pico.mk')
+
       yield { type: 'step:done', message: 'Ending earlier to investigate results' }
     } catch (error) {
       yield { type: 'step:fail', message: `Unable to download pico-sdk-tools release assets: ${error instanceof Error ? error.message : 'Unknown'}` }
@@ -398,6 +406,14 @@ Then run: xs-dev run --example helloworld --device pico`,
         // oxlint-disable-next-line @typescript-eslint/promise-function-async
         await Promise.all(toolPaths.map(toolPath => chmod(toolPath, 0o751)))
         debug('Set executable permissions on tool binaries')
+
+        const symlinkDir = resolve(PICO_SDK_DIR, 'build', '_deps', 'picotool')
+        const symlinkPath = resolve(symlinkDir, 'picotool')
+        await mkdir(symlinkDir, { recursive: true })
+        await rm(symlinkPath, { force: true })
+        await symlink(resolve(PICO_ROOT, 'picotool', 'picotool'), symlinkPath)
+        debug('Created picotool compatibility symlink for Moddable make.pico.mk')
+
         yield { type: 'step:done', message: 'Ending earlier to investigate results' }
       } catch (error) {
         yield { type: 'step:fail', message: `Unable to download pico-sdk-tools release assets: ${error instanceof Error ? error.message : 'Unknown'}` }
