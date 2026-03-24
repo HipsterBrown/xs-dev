@@ -187,12 +187,10 @@ export const picoToolchain: Toolchain = {
     })
     try {
       debug('Downloading pico-sdk-tools')
-      // oxlint-disable-next-line @typescript-eslint/promise-function-async
       await Promise.all(assets.map(assetName => downloadReleaseTools({ writePath: PICO_ROOT, assetName, release: taggedRelease })))
       debug('Downloaded pico-sdk-tools to PICO_ROOT')
 
       const toolPaths = [resolve(PICO_ROOT, 'pioasm', 'pioasm'), resolve(PICO_ROOT, 'picotool', 'picotool')]
-      // oxlint-disable-next-line @typescript-eslint/promise-function-async
       await Promise.all(toolPaths.map(toolPath => chmod(toolPath, 0o751)))
       debug('Set executable permissions on tool binaries')
 
