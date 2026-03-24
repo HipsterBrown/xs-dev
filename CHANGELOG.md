@@ -1,3 +1,19 @@
+# v1.9.0 (Tue Mar 24 2026)
+
+#### 🚀 Enhancement
+
+- feat(pico): use prebuilt pico-sdk-tools binaries [#248](https://github.com/HipsterBrown/xs-dev/pull/248) ([@HipsterBrown](https://github.com/HipsterBrown))
+
+#### 🐛 Bug Fix
+
+- chore: upgrade linter, formatter, docs builder [#247](https://github.com/HipsterBrown/xs-dev/pull/247) ([@HipsterBrown](https://github.com/HipsterBrown))
+
+#### Authors: 1
+
+- Nick Hehr ([@HipsterBrown](https://github.com/HipsterBrown))
+
+---
+
 # v1.8.1 (Mon Mar 23 2026)
 
 #### 🐛 Bug Fix
