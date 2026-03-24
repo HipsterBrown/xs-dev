@@ -52,8 +52,8 @@ export function identifyDevice(vendorId: string | undefined, productId: string |
 
   const bridge = BRIDGE_VENDORS[vid]
   if (bridge !== undefined) {
-    // features require chip-level probing (e.g. picoboot protocol) — not available via VID/PID alone
-    return { device: `ESP Device (${bridge})`, features: '' }
+    // serial bridge chip identified — features require chip-level probing (e.g. picoboot protocol) — not available via VID/PID alone
+    return { device: `Serial Device (${bridge})`, features: '' }
   }
 
   return null

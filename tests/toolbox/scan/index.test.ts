@@ -14,6 +14,7 @@ describe('toolbox/scan', async () => {
   const { SerialPort } = await import('serialport')
 
   beforeEach(() => {
+    ;(SerialPort.list as ReturnType<typeof mock.fn>).mock.resetCalls()
     ;(SerialPort.list as ReturnType<typeof mock.fn>).mock.mockImplementation(async () => [])
   })
 
@@ -55,13 +56,13 @@ describe('toolbox/scan', async () => {
     assert.ok(infos.some((e) => e.message.includes('Raspberry Pi Pico')))
   })
 
-  it('yields info rows for a bridge-based ESP device', async () => {
+  it('yields info rows for a bridge-based serial device', async () => {
     ;(SerialPort.list as ReturnType<typeof mock.fn>).mock.mockImplementation(
       async () => [{ path: '/dev/cu.usbserial-0001', vendorId: '10c4', productId: 'ea60' }],
     )
     const events = await Array.fromAsync(scanDevices())
     const infos = events.filter((e) => e.type === 'info')
-    assert.ok(infos.some((e) => e.message.includes('ESP Device (CP210x)')))
+    assert.ok(infos.some((e) => e.message.includes('Serial Device (CP210x)')))
   })
 
   it('normalizes tty paths to cu on macOS', async () => {

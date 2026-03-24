@@ -70,22 +70,22 @@ describe('toolbox/scan/devices', () => {
     // Tier 3: USB-UART bridge chips
     it('identifies Silicon Labs CP210x bridge', () => {
       const result = identifyDevice('10c4', 'ea60')
-      assert.deepEqual(result, { device: 'ESP Device (CP210x)', features: '' })
+      assert.deepEqual(result, { device: 'Serial Device (CP210x)', features: '' })
     })
 
     it('identifies WCH CH340 bridge', () => {
       const result = identifyDevice('1a86', '7523')
-      assert.deepEqual(result, { device: 'ESP Device (CH340)', features: '' })
+      assert.deepEqual(result, { device: 'Serial Device (CH340)', features: '' })
     })
 
     it('identifies FTDI bridge', () => {
       const result = identifyDevice('0403', '6001')
-      assert.deepEqual(result, { device: 'ESP Device (FTDI)', features: '' })
+      assert.deepEqual(result, { device: 'Serial Device (FTDI)', features: '' })
     })
 
     it('identifies Prolific PL2303 bridge', () => {
       const result = identifyDevice('067b', '2303')
-      assert.deepEqual(result, { device: 'ESP Device (PL2303)', features: '' })
+      assert.deepEqual(result, { device: 'Serial Device (PL2303)', features: '' })
     })
 
     // Unknown — not an xs-dev target
