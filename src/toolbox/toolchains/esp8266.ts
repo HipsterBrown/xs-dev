@@ -364,6 +364,7 @@ If there is trouble finding the correct port, pass the "--port" flag to the abov
   getEnvVars(_ctx: HostContext): Record<string, string> {
     return {
       ESP_BASE: resolve(INSTALL_DIR, 'esp'),
+      ARDUINO_ROOT: resolve(INSTALL_DIR, 'esp', 'esp8266-2.3.0'),
     }
   },
 }
