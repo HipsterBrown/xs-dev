@@ -2,34 +2,6 @@ import { describe, it, mock } from 'node:test'
 import assert from 'node:assert/strict'
 
 describe('toolbox/scan', async () => {
-  const childProcessExports = await import('node:child_process').then(({ default: _, ...rest }) => rest)
-  const fsExports = await import('node:fs').then(({ default: _, ...rest }) => rest)
-  const execExports = await import('#src/toolbox/system/exec.js').then(({ ...rest }) => rest)
-  mock.module('node:fs', {
-    namedExports: {
-      ...fsExports,
-      existsSync: mock.fn(() => false),
-      statSync: mock.fn(() => ({ isDirectory: () => false })),
-    },
-  })
-
-  mock.module('node:child_process', {
-    namedExports: {
-      ...childProcessExports,
-      execSync: mock.fn(() => {
-        throw new Error('command not found')
-      }),
-    },
-  })
-
-  mock.module('#src/toolbox/system/exec.js', {
-    namedExports: {
-      ...execExports,
-      sourceEnvironment: mock.fn(async () => ({ success: true, data: undefined })),
-      sourceIdf: mock.fn(async () => ({ success: true, data: undefined })),
-    },
-  })
-
   mock.module('serialport', {
     namedExports: {
       SerialPort: {
@@ -38,35 +10,72 @@ describe('toolbox/scan', async () => {
     },
   })
 
-  mock.module('usb', {
-    namedExports: {
-      findBySerialNumber: mock.fn(async () => null),
-    },
-  })
-
-  mock.module('#src/toolbox/scan/parse.js', {
-    namedExports: {
-      parseScanResult: mock.fn(() => ({})),
-    },
-  })
-
   const { default: scanDevices } = await import('#src/toolbox/scan/index.js')
+  const { SerialPort } = await import('serialport')
 
-  it('yields esptool warning when esptool.py is not found', async () => {
+  it('yields a step:start event', async () => {
     const events = await Array.fromAsync(scanDevices())
-    const warnings = events.filter((e) => e.type === 'warning')
-    assert.ok(
-      warnings.some((e) => e.message.includes('esptool.py required')),
-      `Should warn about missing esptool.py, got warnings: ${warnings.map((w) => w.message).join(', ')}`,
-    )
+    assert.ok(events.some((e) => e.type === 'step:start'))
   })
 
-  it('yields warning when no devices found', async () => {
+  it('yields warning when no ports are found', async () => {
     const events = await Array.fromAsync(scanDevices())
     const warnings = events.filter((e) => e.type === 'warning')
-    assert.ok(
-      warnings.some((e) => e.message.includes('No available devices')),
-      'Should warn when no devices found',
+    assert.ok(warnings.some((e) => e.message.includes('No available devices')))
+  })
+
+  it('excludes ports with undefined vendorId', async () => {
+    ;(SerialPort.list as ReturnType<typeof mock.fn>).mock.mockImplementation(
+      async () => [{ path: '/dev/tty.usbserial', vendorId: undefined, productId: undefined }],
     )
+    const events = await Array.fromAsync(scanDevices())
+    const warnings = events.filter((e) => e.type === 'warning')
+    assert.ok(warnings.some((e) => e.message.includes('No available devices')))
+  })
+
+  it('excludes ports with unrecognized VID', async () => {
+    ;(SerialPort.list as ReturnType<typeof mock.fn>).mock.mockImplementation(
+      async () => [{ path: '/dev/tty.usbserial', vendorId: 'dead', productId: 'beef' }],
+    )
+    const events = await Array.fromAsync(scanDevices())
+    const warnings = events.filter((e) => e.type === 'warning')
+    assert.ok(warnings.some((e) => e.message.includes('No available devices')))
+  })
+
+  it('yields info rows for a recognized Pico device', async () => {
+    ;(SerialPort.list as ReturnType<typeof mock.fn>).mock.mockImplementation(
+      async () => [{ path: '/dev/cu.usbmodem1234', vendorId: '2e8a', productId: '0003' }],
+    )
+    const events = await Array.fromAsync(scanDevices())
+    const infos = events.filter((e) => e.type === 'info')
+    assert.ok(infos.some((e) => e.message.includes('Raspberry Pi Pico')))
+  })
+
+  it('yields info rows for a bridge-based ESP device', async () => {
+    ;(SerialPort.list as ReturnType<typeof mock.fn>).mock.mockImplementation(
+      async () => [{ path: '/dev/cu.usbserial-0001', vendorId: '10c4', productId: 'ea60' }],
+    )
+    const events = await Array.fromAsync(scanDevices())
+    const infos = events.filter((e) => e.type === 'info')
+    assert.ok(infos.some((e) => e.message.includes('ESP Device (CP210x)')))
+  })
+
+  it('normalizes tty paths to cu on macOS', async () => {
+    ;(SerialPort.list as ReturnType<typeof mock.fn>).mock.mockImplementation(
+      async () => [{ path: '/dev/tty.usbmodem1234', vendorId: '2e8a', productId: '0003' }],
+    )
+    const events = await Array.fromAsync(scanDevices())
+    const infos = events.filter((e) => e.type === 'info')
+    assert.ok(infos.some((e) => e.message.includes('/dev/cu.usbmodem1234')))
+    assert.ok(infos.every((e) => !e.message.includes('/dev/tty.')))
+  })
+
+  it('does not normalize non-macOS paths', async () => {
+    ;(SerialPort.list as ReturnType<typeof mock.fn>).mock.mockImplementation(
+      async () => [{ path: '/dev/ttyUSB0', vendorId: '10c4', productId: 'ea60' }],
+    )
+    const events = await Array.fromAsync(scanDevices())
+    const infos = events.filter((e) => e.type === 'info')
+    assert.ok(infos.some((e) => e.message.includes('/dev/ttyUSB0')))
   })
 })
