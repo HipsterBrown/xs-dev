@@ -1,3 +1,15 @@
+# v1.9.1 (Tue Mar 24 2026)
+
+#### 🐛 Bug Fix
+
+- fix(toolchains/esp8266): set ARDUINO_ROOT env var [#249](https://github.com/HipsterBrown/xs-dev/pull/249) ([@HipsterBrown](https://github.com/HipsterBrown))
+
+#### Authors: 1
+
+- Nick Hehr ([@HipsterBrown](https://github.com/HipsterBrown))
+
+---
+
 # v1.9.0 (Tue Mar 24 2026)
 
 #### 🚀 Enhancement
