@@ -17,17 +17,17 @@ describe('toolbox/scan/devices', () => {
 
     it('identifies Raspberry Pi Pico (MicroPython) via VID/PID', () => {
       const result = identifyDevice('2e8a', '0005')
-      assert.deepEqual(result, { device: 'Raspberry Pi Pico', features: '' })
+      assert.deepEqual(result, { device: 'RP2040 MicroPython', features: '' })
     })
 
-    it('identifies Raspberry Pi Pico W via VID/PID', () => {
+    it('identifies Raspberry Pi Pico 2 via VID/PID', () => {
       const result = identifyDevice('2e8a', '0009')
-      assert.deepEqual(result, { device: 'Raspberry Pi Pico W', features: '' })
+      assert.deepEqual(result, { device: 'RP2350 CDC Serial', features: '' })
     })
 
-    it('identifies Raspberry Pi Pico 2 (BOOTSEL) via VID/PID', () => {
+    it('identifies Raspberry Pi Pico (BOOTSEL) via VID/PID', () => {
       const result = identifyDevice('2e8a', '000a')
-      assert.deepEqual(result, { device: 'Raspberry Pi Pico 2', features: '' })
+      assert.deepEqual(result, { device: 'RP2040 CDC Serial', features: '' })
     })
 
     it('identifies Raspberry Pi Pico 2 (CDC) via VID/PID', () => {
