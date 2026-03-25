@@ -1,3 +1,15 @@
+# v1.10.0 (Wed Mar 25 2026)
+
+#### 🚀 Enhancement
+
+- feat(scan): simplify querying for devices [#250](https://github.com/HipsterBrown/xs-dev/pull/250) ([@HipsterBrown](https://github.com/HipsterBrown))
+
+#### Authors: 1
+
+- Nick Hehr ([@HipsterBrown](https://github.com/HipsterBrown))
+
+---
+
 # v1.9.1 (Tue Mar 24 2026)
 
 #### 🐛 Bug Fix
