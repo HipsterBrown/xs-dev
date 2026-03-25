@@ -1,6 +1,9 @@
+import { debuglog } from 'node:util'
 import { SerialPort } from 'serialport'
 import type { OperationEvent } from '../../lib/events.js'
 import { identifyDevice } from './devices.js'
+
+const debug = debuglog('xs-dev:scan')
 
 function normalizePath(portPath: string): string {
   return portPath.replace('/dev/tty.', '/dev/cu.')
@@ -14,6 +17,7 @@ export default async function* scanDevices(): AsyncGenerator<OperationEvent> {
   const rows = ports
     .filter((port) => port.vendorId !== undefined)
     .flatMap((port) => {
+      debug(JSON.stringify(port, null, 2))
       const info = identifyDevice(port.vendorId, port.productId)
       if (info === null) return []
       return [[normalizePath(port.path), info.device, info.features]]

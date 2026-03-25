@@ -6,12 +6,16 @@ export interface DeviceInfo {
 const KNOWN_DEVICES: Record<number, Record<number, string>> = {
   0x2e8a: {
     0x0003: 'Raspberry Pi Pico',
+    0x000f: 'Raspberry Pi Pico 2',
     0x0004: 'Raspberry Pi Pico',
-    0x0005: 'Raspberry Pi Pico',
-    0x0009: 'Raspberry Pi Pico W',
-    0x000a: 'Raspberry Pi Pico 2',
+    0x0005: 'RP2040 MicroPython',
+    0x0009: 'RP2350 CDC Serial',
+    0x000a: 'RP2040 CDC Serial',
     0x000b: 'Raspberry Pi Pico 2',
     0x000c: 'Raspberry Pi Pico 2 W',
+  },
+  0x1b4f: {
+    0x0046: 'SparkFun XRP 2350',
   },
   0x303a: {
     0x0002: 'ESP32-S2',
