@@ -74,6 +74,7 @@ const command = buildCommand({
         deployStatus: 'clean',
         outputDir: output,
         config: parsedConfig,
+        verbose: false,
       },
       prompter,
     )) {

@@ -77,7 +77,7 @@ This will still open the "mcsim" simulator app when running locally.
 Use the `--config` flag to provide [config arguments](https://github.com/Moddable-OpenSource/moddable/blob/public/documentation/tools/tools.md#arguments) to the `mc/config` module. This mechanism is often used to configure Wi-Fi credentials when running on a device:
 
 ```
-xs-dev run --example network/http/httpgetjson --device esp32 --config.ssid=mySSID --config.password="a secret"
+xs-dev run --example network/http/httpgetjson --device esp32 --config ssid=mySSID --config password="a secret"
 ```
 
 ## Building projects for release
