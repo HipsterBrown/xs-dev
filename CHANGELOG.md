@@ -1,3 +1,15 @@
+# v1.10.1 (Fri Mar 27 2026)
+
+#### 🐛 Bug Fix
+
+- fix(build): reduce default output noise, update config flag docs [#251](https://github.com/HipsterBrown/xs-dev/pull/251) ([@HipsterBrown](https://github.com/HipsterBrown))
+
+#### Authors: 1
+
+- Nick Hehr ([@HipsterBrown](https://github.com/HipsterBrown))
+
+---
+
 # v1.10.0 (Wed Mar 25 2026)
 
 #### 🚀 Enhancement
