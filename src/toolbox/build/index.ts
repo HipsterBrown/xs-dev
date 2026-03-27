@@ -26,6 +26,7 @@ export interface BuildArgs {
   deployStatus: DeployStatus
   outputDir?: string
   config?: Record<string, string>
+  verbose: boolean
 }
 
 const DEPLOY_TARGET: Readonly<Record<DeployStatus, string>> = Object.freeze({
@@ -84,6 +85,7 @@ export default async function* build(
     mode,
     deployStatus,
     outputDir,
+    verbose,
     config = {},
   }: BuildArgs,
   prompter: Prompter,
@@ -290,13 +292,13 @@ export default async function* build(
   let statusMessage = ''
   switch (deployStatus) {
     case 'clean':
-      statusMessage = `Cleaning up build artifacts for project ${projectPath} on ${targetPlatform}`
+      statusMessage = `Cleaning up build artifacts for project ${projectPath} on ${targetPlatform} - `
       break
     case 'debug':
-      statusMessage = `Connecting to running debug session for ${projectPath} on ${targetPlatform}`
+      statusMessage = `Connecting to running debug session for ${projectPath} on ${targetPlatform} - `
       break
     default:
-      statusMessage = `Building${deployStatus !== 'none' ? ' and deploying project' : ''} ${projectPath} on ${targetPlatform}`
+      statusMessage = `Building${deployStatus !== 'none' ? ' and deploying project' : ''} ${projectPath} on ${targetPlatform} - `
   }
 
   yield { type: 'step:start', message: statusMessage }
@@ -342,7 +344,9 @@ export default async function* build(
     const command = `${rootCommand} ${configArgs.join(' ')}`
     await execaCommand(command, {
       cwd: projectPath,
-      stdio: 'inherit',
+      stdout: verbose ? 'inherit' : 'ignore',
+      stderr: 'inherit',
+      stdin: 'inherit',
       shell: true,
     })
   } catch (error) {
@@ -357,7 +361,8 @@ export default async function* build(
       const deployCommand = `mcconfig -t deploy -p ${targetPlatform} -o ${outputDir}`
       await execaCommand(deployCommand, {
         cwd: projectPath,
-        stdio: 'inherit',
+        stdout: verbose ? 'inherit' : 'ignore',
+        stderr: 'inherit',
         shell: true,
       })
     } catch (error) {

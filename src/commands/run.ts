@@ -25,6 +25,7 @@ interface RunOptions {
   mode?: Mode
   output?: string
   config?: string[]
+  verbose?: boolean
 }
 
 const command = buildCommand({
@@ -44,6 +45,7 @@ const command = buildCommand({
       output,
       port,
       config = [],
+      verbose = false,
     } = flags
     const targetPlatform: string = DEVICE_ALIAS[device as Device] ?? device
     projectPath = resolve(projectPath)
@@ -72,6 +74,7 @@ const command = buildCommand({
         port,
         projectPath,
         mode,
+        verbose,
         deployStatus: 'run',
         outputDir: output,
         config: parsedConfig,
@@ -150,11 +153,17 @@ const command = buildCommand({
         optional: true,
         variadic: true,
       },
+      verbose: {
+        kind: 'boolean',
+        brief: 'Log additional details. Useful for debugging',
+        optional: true,
+      },
     },
     aliases: {
       d: 'device',
       m: 'mode',
       o: 'output',
+      v: 'verbose',
     },
   },
 })

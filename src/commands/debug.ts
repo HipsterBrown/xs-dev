@@ -69,6 +69,7 @@ const command = buildCommand({
         mode,
         deployStatus: 'debug',
         outputDir: output,
+        verbose: false,
       },
       prompter,
     )) {
