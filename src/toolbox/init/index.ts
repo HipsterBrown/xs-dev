@@ -87,6 +87,7 @@ export default async function* initProject(
     const includes = [
       io
         ? [
+          '"$(MODDABLE)/examples/manifest_base.json"',
           '"$(MODDABLE)/modules/io/manifest.json"',
           '"$(MODDABLE)/examples/manifest_net.json"',
         ]
