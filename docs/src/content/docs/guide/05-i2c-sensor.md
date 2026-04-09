@@ -177,7 +177,7 @@ const response = new Uint8Array(6);
 
 Timer.repeat(() => {
   sensor.write(cmd.buffer);
-  Timer.delay(15);
+  Timer.delay(15);  // blocking spin-wait; acceptable here for a simple 1-second polling loop
 
   sensor.read(response.buffer);
 

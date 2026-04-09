@@ -135,7 +135,7 @@ Once the code is running, slowly rotate the potentiometer. The LED should dim an
 
 ## Keep exploring!
 
-Add a `console.log` (or `trace`) inside the `Timer.repeat` callback to watch the raw and scaled values scroll past in xsbug:
+Add a `trace` call inside the `Timer.repeat` callback to watch the raw and scaled values scroll past in xsbug:
 
 ```javascript
 Timer.repeat(() => {
