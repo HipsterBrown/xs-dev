@@ -26,7 +26,7 @@ A minimal project without any extra modules looks like this:
 }
 ```
 
-An empty `moddable` object is enough to let xs-dev know this is a Moddable project. The build tooling (`mcpack`) reads the field and passes it through to the underlying Moddable SDK build system.
+An empty `moddable` object is enough to let xs-dev know this is a Moddable project. xs-dev reads this field and passes it through to `mcconfig`, the underlying Moddable SDK build tool.
 
 ### Adding IO support
 
