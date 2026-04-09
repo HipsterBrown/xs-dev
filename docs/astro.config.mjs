@@ -41,6 +41,10 @@ export default defineConfig({
           autogenerate: { directory: 'guide' },
         },
         {
+          label: 'Reference',
+          autogenerate: { directory: 'reference' },
+        },
+        {
           label: 'Troubleshooting',
           link: '/troubleshooting',
         }
