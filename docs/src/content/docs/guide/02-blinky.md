@@ -20,6 +20,8 @@ Generating Moddable project: guiding-light
 Run the project using: cd guiding-light && xs-dev run
 ```
 
+_Note: the scaffolded hint shows `xs-dev run` without a device target. For physical hardware you will always pass `--device <device>` — covered in the next section._
+
 The `guiding-light` directory will contain `main.js` and `package.json` files. The initialized `package.json` should look like this:
 
 ```json
@@ -75,6 +77,12 @@ mac
 ```
 
 _You may see different options depending on what operating system or version of xs-dev you are using._
+
+If you already know your target device, you can skip the interactive prompt and pass `--device` directly:
+
+```
+xs-dev setup --device pico
+```
 
 Once this process is done, you should see a success message (where `<device>` is the selected target device):
 
