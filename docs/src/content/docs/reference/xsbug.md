@@ -48,11 +48,7 @@ From that point the standard controls apply: step over, step into, step out, res
 
 xsbug can connect to a device over a WiFi network rather than USB. This is useful when the device is deployed somewhere that makes a wired connection impractical, or when you want to debug networking code that conflicts with serial communication.
 
-The device initiates the connection to xsbug running on the host machine. The host IP address and port are typically provided at build time via configuration flags.
-
-The device-side API commonly cited for this is `Debug.login(host, port)`. However, this API has not been verified against the current Moddable SDK source and may not exist in the form documented elsewhere.
-
-> **Note:** Treat any `Debug.login` usage you encounter as unverified. Refer to the official xsbug documentation linked below for authoritative details on network debugging.
+The device initiates the connection to xsbug running on the host machine. The host IP address and port are typically provided at build time via configuration flags. Refer to the official xsbug documentation linked below for setup details.
 
 ## Further reading
 
