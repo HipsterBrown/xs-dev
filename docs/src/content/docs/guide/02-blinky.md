@@ -1,16 +1,16 @@
 ---
 title: Guiding Light
-description: Initialize a new project and start to interact with some hardware!
+description: Initialize a new project and blink an LED using hardware IO
 ---
 
-**Initialize a new project and start to interact with some hardware!**
+**Initialize a new project and blink an LED using hardware IO**
 
 ## Project creation
 
-The [`init` command](/features/init) will create a new directory with the name provided and scaffold the starting files based on a template or example:
+The [`init` command](/features/init) will create a new directory with the name provided and scaffold the starting files. To include the [ECMA-419](https://419.ecma-international.org/) hardware IO APIs, pass the `--io` flag:
 
 ```
-xs-dev init guiding-light
+xs-dev init --io guiding-light
 ```
 
 The above command should result in the following output:
@@ -20,19 +20,7 @@ Generating Moddable project: guiding-light
 Run the project using: cd guiding-light && xs-dev run
 ```
 
-The `guiding-light` directory should contain `main.js` and `package.json` files. `main.js` contains that was run from the [Hello Console example](/guide/01-hello-console#run-the-hello-world-example):
-
-```javascript
-debugger;
-
-let message = "Hello, world - sample";
-console.log(message);
-```
-
-The first line is a [debugger statement](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/debugger) for setting a breakpoint in [xsbug](https://github.com/Moddable-OpenSource/moddable/blob/public/documentation/xs/xsbug.md).
-The third and fourth lines save a string to a variable and log it to the xsbug console using the global [`console.log` function](https://developer.mozilla.org/en-US/docs/Web/API/console/log_static).
-
-The initialized `package.json` in the `guiding-light` project should look like this:
+The `guiding-light` directory will contain `main.js` and `package.json` files. The initialized `package.json` should look like this:
 
 ```json
 {
@@ -44,24 +32,39 @@ The initialized `package.json` in the `guiding-light` project should look like t
     "build": "xs-dev build",
     "start": "xs-dev run"
   },
-  "devDependencies": {}
+  "devDependencies": {},
+  "moddable": {
+    "manifest": {
+      "build": {
+        "MODULES": "$(MODDABLE)/modules"
+      },
+      "include": ["$(MODULES)/io/manifest.json"]
+    }
+  }
 }
 ```
 
-The `main` field points to the generated `main.js` as the entrypoint for the program.
+The `moddable.manifest` field tells xs-dev which Moddable SDK modules to pull into the build. In this case it includes the TC53 IO module bundle, which makes `device.io.Digital` and related hardware APIs available to your code. See [Manifest Anatomy](/reference/manifest-anatomy) for a full breakdown of this configuration.
 
-Executing the `start` script using the package manager of your choice, i.e. `npm start`, or `xs-dev run` will provide the same experience as the [Hello Console guide](/guide/01-hello-console).
+The generated `main.js` starts with a familiar hello world:
 
-_Quick tip: check out all the available simulators by using the [`--list-devices` flag](/features/run#select-a-device-target) with the `run` command and typing "simulator" to filter the list._
+```javascript
+debugger;
+
+let message = "Hello, world - sample";
+console.log(message);
+```
+
+The first line is a [debugger statement](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/debugger) for setting a breakpoint in [xsbug](https://github.com/Moddable-OpenSource/moddable/blob/public/documentation/xs/xsbug.md). You will replace this with LED blink code in a moment.
 
 ## Down to the metal
 
-At this point, we have our [chosen hardware in hand](/guide/00-prepare#choose-your-hardware-adventure) and need to set up the dev environment to start running code on the device. 
+At this point, we have our [chosen hardware in hand](/guide/00-prepare#choose-your-hardware-adventure) and need to set up the dev environment to start running code on the device.
 
 Just like the [previous step](/guide/01-hello-console#setup-system-tooling), the `setup` command will automate the installation and building of tooling required for the target device. The `--list-devices` flag will provide an interactive list of supported device platforms:
 
 ```
-❯ xs-dev setup --list-devices
+xs-dev setup --list-devices
 ? Here are the available target devices: …
 esp8266
 esp32
@@ -81,7 +84,9 @@ Test out the setup by starting a new terminal session, plugging in your device, 
 If there is trouble finding the correct port, pass the "--port" flag to the above command with the path to the /dev.cu.* that matches your device.
 ```
 
-Running our project on the selected device (which should be connected to the computer somehow, presumable over USB) is the same command as before with the additional `--device` flag to pass in the target device platform:
+If you are unsure which port your device is connected to, use [`xs-dev scan`](https://xs-dev.js.org/features/scan/) to list connected serial devices and identify the correct port.
+
+Running our project on the selected device (which should be connected to the computer over USB) uses the same command as before with the additional `--device` flag:
 
 ```
 xs-dev run --device <device>
@@ -89,15 +94,15 @@ xs-dev run --device <device>
 
 This will take some time to compile and send the code over to the device. When it has succeeded, the debugger will open like before but now it is tracing the logs coming from the hardware!
 
-👏 Give yourself a round of applause! You have now run JavaScript on an embedded device! 🎉
-
 ## Hello blinky
 
-Now that we know we can run code on our device, it is time to shed a little light on hardware control. We will use the [ECMA-419 standard APIs](https://419.ecma-international.org/) to perform this task.
-
-With that default `package.json` the ECMA-419 APIs are included in the compiled program, so the `main.js` file can be updated with the following code:
+Now that we know we can run code on our device, it is time to shed a little light on hardware control. Replace the contents of `main.js` with the following:
 
 ```javascript
+if (device?.pin?.led === undefined) {
+  throw new Error("no LED pin provided by device");
+}
+
 const Digital = device.io.Digital;
 const led = new Digital({
   pin: device.pin.led,
@@ -108,15 +113,11 @@ led.write(1);
 let state = 0;
 System.setInterval(() => {
   led.write(state);
-  if (state === 0) {
-    state = 1;
-  } else {
-    state = 0;
-  }
+  state ^= 1;
 }, 200);
 ```
 
-Using the [global `device` variable](https://embedded.js.org/api/host-provider) provided by the `io` module, we can access the [`Digital` IO class](https://embedded.js.org/api/io-class/digital/) for controlling the digital output to an LED. In this example, the `Digital` class is instantiated with the `pin` property set to the built-in led as [defined on the global `device`](https://embedded.js.org/api/host-provider) and the `mode` set to the [`Digital.Output`](https://embedded.js.org/api/io-class/digital/#output) static property found on the class. With that Digital instance variable called `led`, the [`write` method](https://embedded.js.org/api/io-class/digital/#write) is called with a value of `1` to send power to the LED.
+### Digital setup
 
 ```javascript
 const Digital = device.io.Digital;
@@ -127,30 +128,62 @@ const led = new Digital({
 led.write(1);
 ```
 
-To make the light blink, the next value to be written is stored as the `state` variable. The global [`System` class](https://github.com/Moddable-OpenSource/moddable/blob/public/modules/io/system/system.js) provides the well-known [`setInterval`](https://developer.mozilla.org/en-US/docs/Web/API/setInterval) function that is found in other JavaScript runtimes like the Web and Node.js. Every 200 milliseconds, the `state` is written to the LED before being updated to the opposite value.
+`device.io.Digital` is the [ECMA-419 Digital IO class](https://embedded.js.org/api/io-class/digital/) provided by the device's IO provider — it is available because the `$(MODULES)/io/manifest.json` entry in your `package.json` pulls in the TC53 IO module bundle.
+
+`device.pin.led` is a built-in pin alias set by the device platform. It resolves to the pin number of the onboard LED so you do not have to look it up in the datasheet. The guard at the top of the file (`if (device?.pin?.led === undefined)`) makes this explicit: if the platform does not define that alias, the program throws a clear error rather than silently doing nothing.
+
+`Digital.Output` sets the direction so the pin drives voltage rather than reading it. With that, calling `led.write(1)` sends power to the LED and turns it on.
+
+### Blink loop
 
 ```javascript
 let state = 0;
 System.setInterval(() => {
   led.write(state);
-  if (state === 0) {
-    state = 1;
-  } else {
-    state = 0;
-  }
+  state ^= 1;
 }, 200);
 ```
 
-The project can be run using the same command as before: `xs-dev run --device <device>`. If it succeeds, you should see a blinking LED somewhere on your device! ✨
+The global [`System` class](https://github.com/Moddable-OpenSource/moddable/blob/public/modules/io/system/system.js) provides the well-known [`setInterval`](https://developer.mozilla.org/en-US/docs/Web/API/setInterval) function familiar from browser and Node.js environments. Every 200 milliseconds, the current `state` is written to the LED, then toggled using the XOR assignment (`state ^= 1`), which flips between `0` and `1` each tick.
+
+Run the project with:
+
+```
+xs-dev run --device <device>
+```
+
+If it succeeds, you should see a blinking LED somewhere on your device! ✨
+
+👏 Give yourself a round of applause! You are now controlling hardware with JavaScript!
 
 ## Keep exploring!
 
-Tried adding some `console.log` calls to log the state to the debugger or updating the timer code to send a message in [Morse code](https://ledask.com/morse-code-lights/).
+Try adding some `console.log` calls to trace the state in the debugger, or update the timer interval to send a message in [Morse code](https://ledask.com/morse-code-lights/).
 
-_Coming soon: react to digital input by pressing some buttons_
+Ready to add more interactivity? Continue to [Button Input with Debounce](/guide/03-button).
 
 In the meantime, check out the [many examples available in the Moddable SDK](https://github.com/Moddable-OpenSource/moddable/tree/public/examples).
 
 ## Troubleshooting
 
-If you're working with a device that doesn't have an on-board LED or encounter an error while trying to use the `device.pin.led` value, the [pin specifier](https://embedded.js.org/glossary/#pin-specifier) can be set to a custom value based on the device datasheet or pinout diagram, like [this one for the Pico](https://pico.pinout.xyz/). The pin value can match the on-board LED or [an external LED](https://www.sparkfun.com/products/12062) connected to a GPIO, most likely by using a [breadboard](https://learn.sparkfun.com/tutorials/how-to-use-a-breadboard#building-your-first-breadboard-circuit).
+**`device.pin.led` is undefined**
+
+Not every device defines a built-in LED pin alias. If the guard at the top throws, your platform does not provide `device.pin.led`. You can supply the pin number directly instead:
+
+```javascript
+const led = new Digital({
+  pin: 25, // Pico onboard LED
+  mode: Digital.Output,
+});
+```
+
+Check your board's pinout diagram to find the correct number — for example, [pico.pinout.xyz](https://pico.pinout.xyz/) for the Raspberry Pi Pico.
+
+**Connecting an external LED**
+
+If your device has no onboard LED, connect one to a GPIO pin on a breadboard:
+
+- Connect the LED anode (longer leg) to the GPIO pin.
+- Connect the LED cathode (shorter leg) to GND through a current-limiting resistor (220 Ohm to 330 Ohm is typical for 3.3 V systems).
+
+Then set `pin` in the `Digital` constructor to the GPIO pin number from your board's pinout diagram.
