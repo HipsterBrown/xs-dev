@@ -21,7 +21,7 @@ Create a new project with the `--io` flag to include the ECMA-419 hardware IO AP
 xs-dev init --io i2c-sensor
 ```
 
-If you are new to the project layout and `package.json` manifest this generates, see [Guiding Light](/guide/02-blinky) for a full walkthrough. The `device.io.I2C` class needed for this guide is already included in the IO manifest — no additional manifest entries are required. Once the project is ready, run it on your connected device with:
+If you are new to the project layout and `package.json` manifest this generates, see the [LED blink guide](/guide/02-blinky) for a full walkthrough. The `device.io.I2C` class needed for this guide is already included in the IO manifest — no additional manifest entries are required. Once the project is ready, run it on your connected device with:
 
 ```
 xs-dev run --device <device>

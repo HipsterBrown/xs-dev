@@ -50,7 +50,9 @@ xsbug can connect to a device over a WiFi network rather than USB. This is usefu
 
 The device initiates the connection to xsbug running on the host machine. The host IP address and port are typically provided at build time via configuration flags.
 
-> **Note:** The specific API for initiating a network connection from device code is not yet verified in this documentation. Refer to the official xsbug documentation linked below for authoritative details on this feature.
+The device-side API commonly cited for this is `Debug.login(host, port)`. However, this API has not been verified against the current Moddable SDK source and may not exist in the form documented elsewhere.
+
+> **Note:** Treat any `Debug.login` usage you encounter as unverified. Refer to the official xsbug documentation linked below for authoritative details on network debugging.
 
 ## Further reading
 

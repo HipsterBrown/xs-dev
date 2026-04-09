@@ -57,7 +57,7 @@ let message = "Hello, world - sample";
 console.log(message);
 ```
 
-The first line is a [debugger statement](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/debugger) for setting a breakpoint in [xsbug](https://github.com/Moddable-OpenSource/moddable/blob/public/documentation/xs/xsbug.md). You will replace this with LED blink code in a moment.
+The first line is a [debugger statement](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/debugger) for setting a breakpoint in [xsbug](/reference/xsbug). You will replace this with LED blink code in a moment.
 
 ## Down to the metal
 
@@ -92,7 +92,7 @@ Test out the setup by starting a new terminal session, plugging in your device, 
 If there is trouble finding the correct port, pass the "--port" flag to the above command with the path to the /dev.cu.* that matches your device.
 ```
 
-If you are unsure which port your device is connected to, use [`xs-dev scan`](https://xs-dev.js.org/features/scan/) to list connected serial devices and identify the correct port.
+If you are unsure which port your device is connected to, use [`xs-dev scan`](/features/scan) to list connected serial devices and identify the correct port.
 
 Running our project on the selected device (which should be connected to the computer over USB) uses the same command as before with the additional `--device` flag:
 
@@ -100,7 +100,7 @@ Running our project on the selected device (which should be connected to the com
 xs-dev run --device <device>
 ```
 
-This will take some time to compile and send the code over to the device. When it has succeeded, the debugger will open like before but now it is tracing the logs coming from the hardware!
+This will take some time to compile and send the code over to the device. When it has succeeded, [xsbug](/reference/xsbug) will open and begin tracing logs from the hardware. See the [Build Tools](/reference/build-tools) reference if you are curious what `xs-dev run` invokes under the hood.
 
 ## Hello blinky
 
@@ -166,7 +166,7 @@ If it succeeds, you should see a blinking LED somewhere on your device! ✨
 
 ## Keep exploring!
 
-Try adding some `console.log` calls to trace the state in the debugger, or update the timer interval to send a message in [Morse code](https://ledask.com/morse-code-lights/).
+Try adding `trace` calls to log the state to the [xsbug](/reference/xsbug) console, or update the timer interval to send a message in [Morse code](https://ledask.com/morse-code-lights/). In Moddable/XS, `trace()` is the primary output function — `console.log` also works but `trace` is more idiomatic in SDK examples.
 
 Ready to add more interactivity? Continue to [Button Input with Debounce](/guide/03-button).
 

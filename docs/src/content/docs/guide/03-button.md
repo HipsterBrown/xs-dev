@@ -79,7 +79,7 @@ Left unhandled, this means a single button press fires your callback many times 
 A simple software debounce tracks the time of the last handled transition and ignores any that arrive too soon after it. Update `main.js` with the following:
 
 ```javascript
-import Time from "timer";
+import Time from "time";
 
 const Digital = device.io.Digital;
 let lastTime = 0;
@@ -91,7 +91,7 @@ const button = new Digital({
   edge: Digital.Rising | Digital.Falling,
   onReadable() {
     const now = Time.ticks;
-    if ((now - lastTime) < DEBOUNCE_MS) return;
+    if (Time.delta(lastTime, now) < DEBOUNCE_MS) return;
     lastTime = now;
     const value = this.read();
     trace(`Button: ${value ? "pressed" : "released"}\n`);
@@ -99,7 +99,7 @@ const button = new Digital({
 });
 ```
 
-`Time.ticks` returns the number of milliseconds elapsed since the device booted — similar to `Date.now()` in a browser, but counting from boot rather than the Unix epoch. It comes from the `"timer"` module, which is included automatically via `manifest_base.json` in all xs-dev projects, so no extra manifest entry is needed.
+`Time.ticks` returns the number of milliseconds elapsed since the device booted — similar to `Date.now()` in a browser, but counting from boot rather than the Unix epoch. `Time.delta(start, end)` computes the elapsed time between two ticks values, handling counter rollover correctly (preferable to raw subtraction `now - lastTime`). Both come from the `"time"` module — distinct from the `"timer"` module used for `Timer.repeat` and `Timer.set`. Both are included automatically via `manifest_base.json` in all xs-dev projects, so no extra manifest entries are needed.
 
 The guard `if ((now - lastTime) < DEBOUNCE_MS) return` silently discards any transition that arrives within 50 milliseconds of the previous one. After the window passes, the next transition is treated as a fresh event and `lastTime` is updated. Fifty milliseconds is a reasonable starting point; most buttons settle well within that window, and the delay is imperceptible to a human.
 

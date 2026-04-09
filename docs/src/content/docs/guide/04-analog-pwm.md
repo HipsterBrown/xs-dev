@@ -15,7 +15,7 @@ Create a new project with the `--io` flag to include the ECMA-419 hardware IO AP
 xs-dev init --io pot-led
 ```
 
-If you are new to the project layout and `package.json` manifest this generates, see [Guiding Light](/guide/02-blinky) for a full walkthrough. Once the project is ready, run it on your connected device with:
+If you are new to the project layout and `package.json` manifest this generates, see the [LED blink guide](/guide/02-blinky) for a full walkthrough. Once the project is ready, run it on your connected device with:
 
 ```
 xs-dev run --device <device>

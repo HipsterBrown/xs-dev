@@ -16,7 +16,7 @@ export default defineConfig({
       },
       { icon: 'mastodon', href: 'https://toot.cafe/@hipsterbrown', label: 'Mastodon' },
       { icon: 'github', href: 'https://github.com/hipsterbrown/xs-dev', label: 'GitHub' },
-      { icon: 'blueSky', href: 'https://bsky.app/profile/hipsterbrown.com', label: 'GitHub' },
+      { icon: 'blueSky', href: 'https://bsky.app/profile/hipsterbrown.com', label: 'Bluesky' },
       ],
       editLink: {
         baseUrl: `https://github.com/hipsterbrown/xs-dev/blob/main/docs/`
