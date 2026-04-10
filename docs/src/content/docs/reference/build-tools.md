@@ -5,25 +5,25 @@ description: Understanding mcconfig, mcrun, mcpack and how xs-dev wraps them
 
 ## Overview
 
-The Moddable SDK ships with a set of low-level command-line build tools: `mcconfig`, `mcrun`, and `mcpack`. In normal development you will not call these directly. `xs-dev run`, `xs-dev build`, and `xs-dev debug` act as a higher-level interface that invokes the right tool with the right flags based on your project and target device.
+The Moddable SDK ships with a set of low-level command-line build tools: `mcconfig`, `mcrun`, and `mcpack`. In normal development with xs-dev, you will not call these directly. `xs-dev run`, `xs-dev build`, and `xs-dev debug` act as a higher-level interface that invokes the right tool with the right flags based on your project and target device.
 
-Think of the relationship the same way you think of npm scripts and webpack: npm scripts give you a consistent, project-aware interface while webpack handles the actual bundling. `xs-dev` is the npm scripts layer; `mcconfig` (and friends) is the bundler underneath.
+Think of the relationship the same way you think of Vite and `package.json` scripts: `package.json` scripts give you a consistent, project-aware interface while Vite handles the actual bundling and dev server. `xs-dev` is the scripts layer; `mcconfig` (and friends) is the build engine underneath.
 
 ## The Low-Level Tools
 
 ### mcconfig
 
-`mcconfig` is the primary build tool. It reads your project's `manifest.json`, generates a `Makefile`, and then drives the compile-and-deploy pipeline. It accepts arguments that control the target platform, serial port, output directory, build mode, and per-module configuration values.
+`mcconfig` is the primary build tool. It reads your project's `manifest.json`, generates a `Makefile`, and then drives the compile-and-deploy pipeline. It accepts arguments that control the target platform, output directory, build mode, and per-module configuration values.
 
 This is the tool that `xs-dev run` and `xs-dev build` call under the hood.
 
 ### mcrun
 
-`mcrun` runs a program that has already been compiled. It is used when you want to launch an existing build artifact without recompiling.
+`mcrun` builds and runs *mods* — lightweight `.xsa` archives of JS bytecode and assets that can be installed on a device without reflashing the firmware. Reach for `mcrun` instead of `mcconfig` when your changes are logic-only (no native C code): the mod is pushed over the existing firmware, which dramatically shortens the edit-compile-run cycle. Because mods run on top of an already-flashed host, they cannot contain native extensions; all hardware access goes through the modules the host exposes.
 
 ### mcpack
 
-`mcpack` packages a compiled program for distribution or over-the-air deployment. It is not involved in the typical edit-compile-run cycle.
+`mcpack` is a build-time preprocessor for `package.json`-based projects. It scans your source files for well-known globals — `setTimeout`, `console.log`, `fetch`, `TextDecoder`, `Worker`, and others — and automatically injects the corresponding Moddable SDK modules into the build, so you do not have to wire them up in `manifest.json` by hand. `mcpack` is not a standalone compiler; it wraps `mcconfig` or `mcrun` and forwards its arguments to them (for example, `mcpack mcconfig -d -m -p esp32/nodemcu`). It is the recommended entry point when you are starting from an npm-style project or when you want to share code between a device target and a Node.js host using the `"moddable"` package import condition.
 
 ## How xs-dev Wraps Them
 
@@ -53,7 +53,6 @@ The equivalent raw `mcconfig` invocation would require knowing the exact platfor
 Most developers never need to touch `mcconfig` directly. The cases where it becomes relevant are:
 
 - **Custom build scripts** — if you are writing a shell script or `Makefile` that integrates the Moddable SDK into a larger pipeline, you may need `mcconfig` flags that xs-dev does not expose.
-- **CI/CD pipelines needing fine-grained control** — for example, to split compilation and flashing into separate pipeline steps, or to produce artifacts for multiple targets in parallel.
 - **Diagnosing a build failure xs-dev cannot surface** — run `xs-dev run --verbose` first. If the output is still not enough, you can copy the underlying `mcconfig` invocation from the verbose output and run it directly to see the full compiler and linker output.
 
 For full documentation on `mcconfig`, `mcrun`, and `mcpack` arguments and flags, see the [Moddable tools reference](https://github.com/Moddable-OpenSource/moddable/blob/public/documentation/tools/tools.md).
