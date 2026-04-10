@@ -51,7 +51,9 @@ const button = new Digital({
 });
 ```
 
-<!-- TODO: make a note about the `pin` value when wiring up manually -->
+:::tip[Finding your pin number]
+The `pin` value is the GPIO number — not the physical header pin position. These are different on most boards. Consult your board's pinout diagram to find the right number. On boards supported by xs-dev, `device.pin` exposes named aliases (for example, `device.pin.button`) so you can avoid hardcoding a number entirely.
+:::
 
 ### What each option does
 
