@@ -97,10 +97,8 @@ led.write(maxWrite);   // full brightness
 Now combine both sides. The strategy is straightforward: read the potentiometer, scale the raw value from the ADC range into the PWM range, write the result to the LED.
 
 Replace `main.js` with:
-<!-- TODO: use `System.setInterval` instead of `Timer.repeat` -->
 
 ```javascript
-import Timer from "timer";
 
 const pot = new device.io.Analog({
   pin: 26   // change to your board's ADC-capable pin
@@ -113,7 +111,7 @@ const led = new device.io.PWM({
 const maxRead = (1 << pot.resolution) - 1;
 const maxWrite = (1 << led.resolution) - 1;
 
-Timer.repeat(() => {
+System.setInterval(() => {
   const raw = pot.read();
   const brightness = Math.round((raw / maxRead) * maxWrite);
   led.write(brightness);
@@ -124,7 +122,7 @@ The scaling expression `(raw / maxRead) * maxWrite` maps the ADC reading proport
 
 ### Why 20 ms?
 
-`Timer.repeat` calls the callback on a fixed interval. 20 milliseconds gives a polling rate of roughly 50 times per second (50 Hz), which is fast enough to make the LED response feel immediate as you turn the knob, without burning unnecessary CPU cycles. Analog sensors like potentiometers do not generate interrupts the way a button does — polling is the right model here.
+`System.setInterval` calls the callback on a fixed interval. 20 milliseconds gives a polling rate of roughly 50 times per second (50 Hz), which is fast enough to make the LED response feel immediate as you turn the knob, without burning unnecessary CPU cycles. Analog sensors like potentiometers do not generate interrupts the way a button does — polling is the right model here.
 
 ## Run it
 
@@ -138,10 +136,10 @@ Once the code is running, slowly rotate the potentiometer. The LED should dim an
 
 ## Keep exploring!
 
-Add a `console.log` call inside the `Timer.repeat` callback to watch the raw and scaled values scroll past in xsbug:
+Add a `console.log` call inside the `System.setInterval` callback to watch the raw and scaled values scroll past in xsbug:
 
 ```javascript
-Timer.repeat(() => {
+System.setInterval(() => {
   const raw = pot.read();
   const brightness = Math.round((raw / maxRead) * maxWrite);
   console.log(`raw: ${raw}  brightness: ${brightness}`);
