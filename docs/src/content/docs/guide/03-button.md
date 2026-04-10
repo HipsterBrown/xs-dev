@@ -23,6 +23,8 @@ The `moddable.manifest` field in `package.json` already includes the TC53 IO mod
 
 ## Wiring
 
+<!-- TODO: make a Fritzing diagram to include in the guide -->
+
 Connect one leg of the button to a GPIO pin and the other leg to 3.3V. That is all the hardware you need — no external resistor required. The `Digital.InputPullDown` mode enables an internal pull-down resistor, which holds the pin at a known LOW state when the button is not pressed. When the button is pressed, the circuit to 3.3V pulls the pin HIGH.
 
 This means the logic is intuitive: reading `1` means pressed, reading `0` means released.
@@ -31,7 +33,9 @@ To find the correct GPIO pin numbers for your board, refer to its pinout diagram
 
 ## Reading the button
 
-Digital input with an interrupt callback is the idiomatic ECMA-419 pattern for responding to hardware events. If you have written browser JavaScript, the mental model is similar to `addEventListener`: you register a callback that fires when something changes, rather than checking the value repeatedly.
+<!-- TODO: define what an "interrupt" is -->
+
+Digital input with an interrupt callback is the idiomatic ECMA-419 pattern for responding to hardware events. If you have written JavaScript for the web or server, the mental model is similar to `addEventListener`: you register a callback that fires when something changes, rather than checking the value repeatedly.
 
 Replace the contents of `main.js` with the following:
 
@@ -44,10 +48,12 @@ const button = new Digital({
   edge: Digital.Rising | Digital.Falling,
   onReadable() {
     const value = this.read();
-    trace(`Button: ${value ? "pressed" : "released"}\n`);
+    console.log(`Button: ${value ? "pressed" : "released"}`);
   }
 });
 ```
+
+<!-- TODO: make a note about the `pin` value when wiring up manually -->
 
 ### What each option does
 
@@ -62,9 +68,9 @@ const button = new Digital({
 
 `device.pin.button` is a built-in pin alias, the input equivalent of `device.pin.led` from the previous guide. It resolves to the pin number of the primary button on supported platforms.
 
-`Digital.InputPullDown` sets the pin as an input and activates the internal pull-down resistor, giving it a stable LOW baseline when nothing is connected to 3.3V.
+`Digital.InputPullDown` sets the pin as an input and activates the internal [pull-down resistor](https://embedded.js.org/glossary/#pull-down), giving it a stable LOW baseline when nothing is connected to 3.3V.
 
-`edge: Digital.Rising | Digital.Falling` tells the runtime to invoke `onReadable` on both transitions — LOW to HIGH (rising, button pressed) and HIGH to LOW (falling, button released). You can listen for only one direction by omitting the other flag.
+`edge: Digital.Rising | Digital.Falling` tells the runtime to call `onReadable` on both transitions — LOW to HIGH (rising, button pressed) and HIGH to LOW (falling, button released). You can listen for only one direction by omitting the other flag.
 
 `onReadable` is the callback that fires on each detected edge. Inside it, `this.read()` returns the current pin value: `1` when the button is held down, `0` when it is released.
 
@@ -94,7 +100,7 @@ const button = new Digital({
     if (Time.delta(lastTime, now) < DEBOUNCE_MS) return;
     lastTime = now;
     const value = this.read();
-    trace(`Button: ${value ? "pressed" : "released"}\n`);
+    console.log(`Button: ${value ? "pressed" : "released"}`);
   }
 });
 ```
@@ -141,7 +147,7 @@ const button = new Digital({
   edge: Digital.Rising | Digital.Falling,
   onReadable() {
     const value = this.read();
-    trace(`Button: ${value ? "pressed" : "released"}\n`);
+    console.log(`Button: ${value ? "pressed" : "released"}`);
   }
 });
 ```
@@ -153,5 +159,5 @@ Consult your board's pinout diagram for the correct number. For the Raspberry Pi
 If the value never changes regardless of the button state, check the following:
 
 - Verify the button is wired between the GPIO pin and 3.3V (not GND). With `InputPullDown`, pressing should bring the pin HIGH.
-- If your circuit wires the button between the GPIO pin and GND instead, switch to `Digital.InputPullUp`. In that configuration the pin rests HIGH and goes LOW when pressed — reverse the pressed/released labels in your `trace` call accordingly.
+- If your circuit wires the button between the GPIO pin and GND instead, switch to `Digital.InputPullUp`. In that configuration the pin rests HIGH and goes LOW when pressed — reverse the pressed/released labels in your `console.log` call accordingly.
 - Confirm the pin number matches the physical connection on your board.
