@@ -1,7 +1,9 @@
 ---
-title: I2C Sensor Reading
+title: Reading Sensor Data with I2C
 description: Read temperature and humidity from an SHT30 sensor over I2C using ECMA-419
 ---
+
+<!-- TODO: update to use SI7020 as the reference sensor -->
 
 **Read temperature and humidity from an SHT30 sensor over I2C using ECMA-419**
 
@@ -161,7 +163,6 @@ Both formulas normalize the 16-bit raw value (0–65535) to a 0.0–1.0 range an
 Here is the complete `main.js` that takes a measurement every second and logs the results:
 
 ```javascript
-import Timer from "timer";
 
 const SHT30_ADDRESS                  = 0x44;
 const SHT30_CMD_MEASURE_HIGH_REP     = 0x24;
@@ -175,7 +176,7 @@ const sensor = new device.io.I2C({
 const cmd      = new Uint8Array([SHT30_CMD_MEASURE_HIGH_REP, SHT30_CMD_MEASURE_HIGH_REP_ARG]);
 const response = new Uint8Array(6);
 
-Timer.repeat(() => {
+System.setInterval(() => {
   sensor.write(cmd.buffer);
   Timer.delay(15);  // blocking spin-wait; acceptable here for a simple 1-second polling loop
 
@@ -214,7 +215,7 @@ The exact numbers will reflect the actual temperature and humidity where you are
 
 Try converting the temperature to Fahrenheit before logging it: `const fahrenheit = celsius * 9 / 5 + 32`.
 
-Experiment with the polling interval — change `1000` in `Timer.repeat` to `500` to sample twice per second, or to `5000` to sample every five seconds and observe how responsive the readings feel.
+Experiment with the polling interval — change `1000` in `System.setInterval` to `500` to sample twice per second, or to `5000` to sample every five seconds and observe how responsive the readings feel.
 
 You could also add a check that stops logging if the temperature or humidity values fall outside a plausible range (which can happen if the sensor is wired incorrectly and `read` returns zeros) and prints a warning instead.
 
