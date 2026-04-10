@@ -125,7 +125,9 @@ System.setInterval(() => {
 }, 200);
 ```
 
-<!-- TODO: add info note about how the `state ^= 1` eval works -->
+:::note
+`state ^= 1` is a bitwise XOR toggle. XOR (`^`) compares bits and returns `1` where the bits differ. Since `0 ^ 1 = 1` and `1 ^ 1 = 0`, XOR-ing any value with `1` flips its last bit — which alternates `state` between `0` and `1` on every call. It is equivalent to `state = state === 0 ? 1 : 0`, but more compact.
+:::
 
 ### Digital setup
 
