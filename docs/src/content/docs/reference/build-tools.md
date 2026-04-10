@@ -19,11 +19,11 @@ This is the tool that `xs-dev run` and `xs-dev build` call under the hood.
 
 ### mcrun
 
-`mcrun` builds and runs *mods* — lightweight `.xsa` archives of JS bytecode and assets that can be installed on a device without reflashing the firmware. Reach for `mcrun` instead of `mcconfig` when your changes are logic-only (no native C code): the mod is pushed over the existing firmware, which dramatically shortens the edit-compile-run cycle. Because mods run on top of an already-flashed host, they cannot contain native extensions; all hardware access goes through the modules the host exposes.
+`mcrun` builds and runs *mods* — lightweight `.xsa` archives of JS bytecode and assets that can be installed on a device without reflashing the firmware. Reach for `mcrun` instead of `mcconfig` when your changes are logic-only (no native C code): the mod is pushed over the existing firmware, which dramatically shortens the edit-compile-run cycle. Because mods run on top of an already-flashed host, they cannot contain native extensions; all hardware access goes through the modules the host exposes. xs-dev does not currently invoke `mcrun`; if you need to use it, you would call it directly.
 
 ### mcpack
 
-`mcpack` is a build-time preprocessor for `package.json`-based projects. It scans your source files for well-known globals — `setTimeout`, `console.log`, `fetch`, `TextDecoder`, `Worker`, and others — and automatically injects the corresponding Moddable SDK modules into the build, so you do not have to wire them up in `manifest.json` by hand. `mcpack` is not a standalone compiler; it wraps `mcconfig` or `mcrun` and forwards its arguments to them (for example, `mcpack mcconfig -d -m -p esp32/nodemcu`). It is the recommended entry point when you are starting from an npm-style project or when you want to share code between a device target and a Node.js host using the `"moddable"` package import condition.
+`mcpack` is a build-time preprocessor for `package.json`-based projects. It bridges npm-style project structure with the Moddable build pipeline and forwards its arguments to `mcconfig` (for example, `mcpack mcconfig -d -m -p esp32/nodemcu`). `mcpack` is not a standalone compiler; it is an optional layer that you opt into by having a `package.json` present and `mcpack` on your PATH. It is the recommended entry point when you are starting from an npm-style project or when you want to share code between a device target and a Node.js host using the `"moddable"` package import condition.
 
 ## How xs-dev Wraps Them
 
