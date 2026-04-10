@@ -40,7 +40,7 @@ A minimal project without any extra modules looks like this:
 
 An empty `moddable` object is enough to let xs-dev know this is a Moddable project. xs-dev reads this field and passes it through to `mcconfig`, the underlying Moddable SDK build tool.
 
-### Adding IO support
+### IO support
 
 The [ECMA-419](https://419.ecma-international.org/) IO APIs — the standard for hardware IO in embedded JavaScript — are included by default when you run `xs-dev init`. The generated `moddable` field pulls in the IO module bundle automatically:
 
