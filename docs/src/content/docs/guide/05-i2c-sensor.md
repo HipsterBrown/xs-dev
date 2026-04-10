@@ -163,6 +163,7 @@ Both formulas normalize the 16-bit raw value (0–65535) to a 0.0–1.0 range an
 Here is the complete `main.js` that takes a measurement every second and logs the results:
 
 ```javascript
+import Timer from "timer";
 
 const SHT30_ADDRESS                  = 0x44;
 const SHT30_CMD_MEASURE_HIGH_REP     = 0x24;
