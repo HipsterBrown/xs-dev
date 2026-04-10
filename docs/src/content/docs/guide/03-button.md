@@ -33,9 +33,7 @@ To find the correct GPIO pin numbers for your board, refer to its pinout diagram
 
 ## Reading the button
 
-<!-- TODO: define what an "interrupt" is -->
-
-Digital input with an interrupt callback is the idiomatic ECMA-419 pattern for responding to hardware events. If you have written JavaScript for the web or server, the mental model is similar to `addEventListener`: you register a callback that fires when something changes, rather than checking the value repeatedly.
+An **interrupt** is a hardware signal that tells the processor to immediately stop what it is doing and call a specific function — then resume where it left off. Digital input with an interrupt callback is the idiomatic ECMA-419 pattern for responding to hardware events. If you have written JavaScript for the web or server, the mental model is similar to `addEventListener`: you register a callback that fires when something changes, rather than checking the value repeatedly.
 
 Replace the contents of `main.js` with the following:
 
