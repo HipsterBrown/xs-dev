@@ -23,6 +23,8 @@ xs-dev run --device <device>
 
 ## Wiring
 
+<!-- TODO: create Fritzing diagram to embed in this guide -->
+
 You will need a potentiometer, an LED, and a current-limiting resistor (220 Ohm is a good starting point for 3.3 V systems).
 
 **Potentiometer:**
@@ -52,7 +54,7 @@ const pot = new device.io.Analog({
 });
 
 const rawValue = pot.read();
-trace(`raw: ${rawValue}\n`);
+console.log(`raw: ${rawValue}`);
 ```
 
 `device.io.Analog` is the [ECMA-419 Analog IO class](https://embedded.js.org/api/io-class/analog/). Calling `pot.read()` returns a raw integer representing the voltage measured on that pin. The integer range depends on the bit-depth of the ADC built into your microcontroller.
@@ -95,6 +97,7 @@ led.write(maxWrite);   // full brightness
 Now combine both sides. The strategy is straightforward: read the potentiometer, scale the raw value from the ADC range into the PWM range, write the result to the LED.
 
 Replace `main.js` with:
+<!-- TODO: use `System.setInterval` instead of `Timer.repeat` -->
 
 ```javascript
 import Timer from "timer";
@@ -135,13 +138,13 @@ Once the code is running, slowly rotate the potentiometer. The LED should dim an
 
 ## Keep exploring!
 
-Add a `trace` call inside the `Timer.repeat` callback to watch the raw and scaled values scroll past in xsbug:
+Add a `console.log` call inside the `Timer.repeat` callback to watch the raw and scaled values scroll past in xsbug:
 
 ```javascript
 Timer.repeat(() => {
   const raw = pot.read();
   const brightness = Math.round((raw / maxRead) * maxWrite);
-  trace(`raw: ${raw}  brightness: ${brightness}\n`);
+  console.log(`raw: ${raw}  brightness: ${brightness}`);
   led.write(brightness);
 }, 20);
 ```
