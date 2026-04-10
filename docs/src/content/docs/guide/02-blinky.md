@@ -125,6 +125,8 @@ System.setInterval(() => {
 }, 200);
 ```
 
+<!-- TODO: add info note about how the `state ^= 1` eval works -->
+
 ### Digital setup
 
 ```javascript
@@ -166,9 +168,9 @@ If it succeeds, you should see a blinking LED somewhere on your device! ✨
 
 ## Keep exploring!
 
-Try adding `trace` calls to log the state to the [xsbug](/reference/xsbug) console, or update the timer interval to send a message in [Morse code](https://ledask.com/morse-code-lights/). In Moddable/XS, `trace()` is the primary output function — `console.log` also works but `trace` is more idiomatic in SDK examples.
+Try adding `console.log` calls to log the state to the [xsbug](/reference/xsbug) console, or update the timer interval to send a message in [Morse code](https://ledask.com/morse-code-lights/).
 
-Ready to add more interactivity? Continue to [Button Input with Debounce](/guide/03-button).
+Ready to add more interactivity? Continue to learn about [Button Input](/guide/03-button).
 
 In the meantime, check out the [many examples available in the Moddable SDK](https://github.com/Moddable-OpenSource/moddable/tree/public/examples).
 
