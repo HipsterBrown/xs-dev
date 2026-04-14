@@ -1,3 +1,15 @@
+# v1.11.0 (Tue Apr 14 2026)
+
+#### 🚀 Enhancement
+
+- feat(esp32): check for IDF 6.0 support, use shallow fetch for updates [#252](https://github.com/HipsterBrown/xs-dev/pull/252) ([@HipsterBrown](https://github.com/HipsterBrown))
+
+#### Authors: 1
+
+- Nick Hehr ([@HipsterBrown](https://github.com/HipsterBrown))
+
+---
+
 # v1.10.1 (Fri Mar 27 2026)
 
 #### 🐛 Bug Fix
