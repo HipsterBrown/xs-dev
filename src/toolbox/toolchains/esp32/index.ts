@@ -21,11 +21,10 @@ const debug = debuglog('xs-dev:toolchains:esp32')
 
 function getVersionSatisfies(version: string, range: string): boolean {
   const major = parseInt(version.split('.')[0], 10)
-  if (range === '>= 4.2.x') return major >= 4
-  if (range === '>= 4.3.8') {
+  if (range === '>= 8.0.x') {
     const minor = parseInt(version.split('.')[1] ?? '0', 10)
     const patch = parseInt(version.split('.')[2] ?? '0', 10)
-    return major > 4 || (major === 4 && minor > 3) || (major === 4 && minor === 3 && patch >= 8)
+    return major > 8 || (major === 0 && minor > 0) || (major === 8 && minor === 0 && patch >= 0)
   }
   return false
 }
@@ -59,8 +58,8 @@ export const esp32Toolchain: Toolchain = {
 
     const isWindows = ctx.platform === 'win'
     const ESP_IDF_REPO = 'https://github.com/espressif/esp-idf.git'
-    const ESP_BRANCH_V4 = 'v4.4.3'
-    const ESP_BRANCH_V5 = 'v5.5'
+    const ESP_BRANCH_V5 = 'v5.5.1'
+    const ESP_BRANCH_V6 = 'v6.0'
     const ESP32_DIR = resolve(INSTALL_DIR, 'esp32')
     const IDF_PATH = resolve(ESP32_DIR, 'esp-idf')
 
@@ -89,9 +88,9 @@ export const esp32Toolchain: Toolchain = {
         const expectedEspIdfVersion = await getExpectedEspIdfVersion()
         const branch =
           expectedEspIdfVersion ??
-          ((moddableVersion.includes('branch') || getVersionSatisfies(moddableVersion, '>= 4.2.x'))
-            ? ESP_BRANCH_V5
-            : ESP_BRANCH_V4)
+          ((moddableVersion.includes('branch') || getVersionSatisfies(moddableVersion, '>= 8.0.x'))
+            ? ESP_BRANCH_V6
+            : ESP_BRANCH_V5)
         await execaCommand(
           `git clone --depth 1 --single-branch -b ${branch} --recurse-submodules --shallow-submodules ${ESP_IDF_REPO} ${IDF_PATH}`,
         )
@@ -190,8 +189,8 @@ If there is trouble finding the correct port, pass the "--port" flag to the abov
   },
 
   async *update(ctx: HostContext, prompter: Prompter): AsyncGenerator<OperationEvent, void, undefined> {
-    const ESP_BRANCH_V4 = 'v4.4.3'
-    const ESP_BRANCH_V5 = 'v5.5'
+    const ESP_BRANCH_V5 = 'v5.5.1'
+    const ESP_BRANCH_V6 = 'v6.0'
     const ESP32_DIR = resolve(INSTALL_DIR, 'esp32')
     const IDF_PATH = resolve(ESP32_DIR, 'esp-idf')
 
@@ -222,13 +221,13 @@ If there is trouble finding the correct port, pass the "--port" flag to the abov
       const expectedEspIdfVersion = await getExpectedEspIdfVersion()
       const branch =
         expectedEspIdfVersion ??
-        ((moddableVersion.includes('branch') || getVersionSatisfies(moddableVersion, '>= 4.2.x'))
-          ? ESP_BRANCH_V5
-          : ESP_BRANCH_V4)
+        ((moddableVersion.includes('branch') || getVersionSatisfies(moddableVersion, '>= 8.0.x'))
+          ? ESP_BRANCH_V6
+          : ESP_BRANCH_V5)
 
       if (
-        branch === ESP_BRANCH_V5 &&
-        !getVersionSatisfies(moddableVersion, '>= 4.3.8' as const)
+        branch === ESP_BRANCH_V6 &&
+        !getVersionSatisfies(moddableVersion, '>= 8.0.x' as const)
       ) {
         yield {
           type: 'step:fail',
@@ -237,9 +236,9 @@ If there is trouble finding the correct port, pass the "--port" flag to the abov
         return
       }
 
-      await execaCommand('git fetch --all --tags', { cwd: IDF_PATH })
+      await execaCommand(`git fetch --depth 1 origin ${branch}`, { cwd: IDF_PATH })
       await execaCommand(`git checkout ${branch}`, { cwd: IDF_PATH })
-      await execaCommand('git submodule update --init --recursive', {
+      await execaCommand('git submodule update --init --recursive --depth 1', {
         cwd: IDF_PATH,
       })
       debug('esp-idf repo updated')
