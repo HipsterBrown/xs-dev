@@ -1,3 +1,15 @@
+# v1.12.0 (Mon May 04 2026)
+
+#### 🚀 Enhancement
+
+- feat(pico): add support for EXPECTED_PICO_SDK from Moddable [#253](https://github.com/HipsterBrown/xs-dev/pull/253) ([@HipsterBrown](https://github.com/HipsterBrown))
+
+#### Authors: 1
+
+- Nick Hehr ([@HipsterBrown](https://github.com/HipsterBrown))
+
+---
+
 # v1.11.0 (Tue Apr 14 2026)
 
 #### 🚀 Enhancement
