@@ -161,7 +161,7 @@ const command = buildCommand({
         kind: 'boolean',
         brief: 'Log additional details. Useful for debugging',
         optional: true,
-      }
+      },
     },
     aliases: {
       d: 'device',

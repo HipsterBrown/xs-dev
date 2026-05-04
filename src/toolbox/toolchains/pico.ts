@@ -1,8 +1,8 @@
-import { chmod, mkdir, readdir, rm, symlink } from 'node:fs/promises'
+import { chmod, mkdir, readdir, readFile, rm, symlink } from 'node:fs/promises'
 import { resolve, join } from 'node:path'
 import { debuglog } from 'node:util'
 import { execaCommand } from 'execa'
-import { INSTALL_DIR, EXPORTS_FILE_PATH } from '../setup/constants.js'
+import { INSTALL_DIR, EXPORTS_FILE_PATH, INSTALL_PATH } from '../setup/constants.js'
 import upsert from '../patching/upsert.js'
 import { sourceEnvironment, which, execWithSudo } from '../system/exec.js'
 import { ensureHomebrew, formulaeExists } from '../setup/homebrew.js'
@@ -12,9 +12,29 @@ import type { Toolchain, HostContext, VerifyResult } from './interface.js'
 import type { OperationEvent } from '../../lib/events.js'
 import type { Prompter } from '../../lib/prompter.js'
 import { Octokit } from '@octokit/rest'
-import { downloadReleaseTools } from '../setup/moddable.js'
+import { downloadReleaseTools, moddableExists } from '../setup/moddable.js'
 
 const debug = debuglog('xs-dev:toolchains:pico')
+
+interface PicoManifest {
+  build?: { EXPECTED_PICO_SDK?: string }
+}
+
+export async function getExpectedPicoSDKVersion(): Promise<string | null> {
+  if (moddableExists()) {
+    try {
+      const manifestPath = resolve(INSTALL_PATH, 'build', 'devices', 'pico', 'manifest.json')
+      if (await exists(manifestPath)) {
+        const content = await readFile(manifestPath, 'utf-8')
+        const parsed = JSON.parse(content) as PicoManifest
+        return parsed.build?.EXPECTED_PICO_SDK ?? null
+      }
+    } catch {
+      return null
+    }
+  }
+  return null
+}
 
 async function* installMacDeps(prompter: Prompter): AsyncGenerator<OperationEvent> {
   try {
@@ -77,17 +97,6 @@ async function* installLinuxDeps(_prompter: Prompter): AsyncGenerator<OperationE
   }
 }
 
-const PICO_VERSION = '2.0.0'
-const repos = {
-  PICO_SDK: {
-    branch: PICO_VERSION,
-    url: 'https://github.com/raspberrypi/pico-sdk'
-  },
-  PICO_EXTRAS: { branch: `sdk-${PICO_VERSION}`, url: 'https://github.com/raspberrypi/pico-extras' },
-  PICO_EXAMPLES: { branch: `sdk-${PICO_VERSION}`, url: 'https://github.com/raspberrypi/pico-examples' },
-  PICOTOOL: { branch: PICO_VERSION, url: 'https://github.com/raspberrypi/picotool' },
-  PICO_SDK_TOOLS: { branch: 'v2.0.0-5', url: 'https://github.com/raspberrypi/pico-sdk-tools' }
-}
 
 export const picoToolchain: Toolchain = {
   name: 'pico',
@@ -105,6 +114,11 @@ export const picoToolchain: Toolchain = {
     const PIOASM_PATH = resolve(PICO_ROOT, 'pioasm', 'pioasm')
 
     await sourceEnvironment()
+
+    if (!moddableExists()) {
+      yield { type: 'step:fail', message: 'Moddable platform tooling required. Run `xs-dev setup` before trying again.' }
+      return
+    }
 
     try {
       debug('Ensuring pico directory')
@@ -144,6 +158,20 @@ export const picoToolchain: Toolchain = {
       return
     }
 
+    const expectedVersion = await getExpectedPicoSDKVersion();
+    const versionExists = expectedVersion !== null;
+    const PICO_VERSION = expectedVersion ?? '2.0.0';
+    const repos = {
+      PICO_SDK: {
+        branch: PICO_VERSION,
+        url: 'https://github.com/raspberrypi/pico-sdk'
+      },
+      PICO_EXTRAS: { branch: `sdk-${PICO_VERSION}`, url: 'https://github.com/raspberrypi/pico-extras' },
+      PICO_EXAMPLES: { branch: `sdk-${PICO_VERSION}`, url: 'https://github.com/raspberrypi/pico-examples' },
+      PICOTOOL: { branch: PICO_VERSION, url: 'https://github.com/raspberrypi/picotool' },
+      PICO_SDK_TOOLS: { branch: versionExists ? 'v2.2.0-3' : 'v2.0.0-5', url: 'https://github.com/raspberrypi/pico-sdk-tools' }
+    }
+
     // 2. Install the pico sdk, extras, examples, and picotool:
     const gitDeps = [
       { ...repos.PICO_SDK, dest: PICO_SDK_DIR },
@@ -171,7 +199,7 @@ export const picoToolchain: Toolchain = {
       repo: 'pico-sdk-tools',
       tag: repos.PICO_SDK_TOOLS.branch,
     })
-    const assets = [`pico-sdk-tools-${PICO_VERSION}`, `picotool-${PICO_VERSION}`].map(asset => {
+    const assets = [`pico-sdk-tools-${PICO_VERSION}`, `picotool-${PICO_VERSION}${versionExists ? '-a4' : ''}`].map(asset => {
       switch (ctx.platform) {
         case 'mac':
           return `${asset}-mac.zip`
@@ -346,6 +374,20 @@ Then run: xs-dev run --example helloworld --device pico`,
 
     // 2. Update the pico sdk, extras, examples, and picotool:
     try {
+      const expectedVersion = await getExpectedPicoSDKVersion();
+      const versionExists = expectedVersion !== null;
+      const PICO_VERSION = expectedVersion ?? '2.0.0';
+      const repos = {
+        PICO_SDK: {
+          branch: PICO_VERSION,
+          url: 'https://github.com/raspberrypi/pico-sdk'
+        },
+        PICO_EXTRAS: { branch: `sdk-${PICO_VERSION}`, url: 'https://github.com/raspberrypi/pico-extras' },
+        PICO_EXAMPLES: { branch: `sdk-${PICO_VERSION}`, url: 'https://github.com/raspberrypi/pico-examples' },
+        PICOTOOL: { branch: PICO_VERSION, url: 'https://github.com/raspberrypi/picotool' },
+        PICO_SDK_TOOLS: { branch: versionExists ? 'v2.2.0-3' : 'v2.0.0-5', url: 'https://github.com/raspberrypi/pico-sdk-tools' }
+      }
+
       if (await exists(PICO_SDK_DIR)) {
         debug('Updating pico-sdk repo')
         await execaCommand('git fetch --all --tags', { cwd: PICO_SDK_DIR })
@@ -380,7 +422,7 @@ Then run: xs-dev run --example helloworld --device pico`,
         repo: 'pico-sdk-tools',
         tag: repos.PICO_SDK_TOOLS.branch,
       })
-      const assets = [`pico-sdk-tools-${PICO_VERSION}`, `picotool-${PICO_VERSION}`].map(asset => {
+      const assets = [`pico-sdk-tools-${PICO_VERSION}`, `picotool-${PICO_VERSION}${versionExists ? '-a4' : ''}`].map(asset => {
         switch (ctx.platform) {
           case 'mac':
             return `${asset}-mac.zip`
