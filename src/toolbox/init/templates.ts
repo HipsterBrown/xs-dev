@@ -74,7 +74,7 @@ export async function createPackageJSON({
         build: {
           MODULES: '$(MODDABLE)/modules',
         },
-        include: ['$(MODULES)/io/manifest.json'],
+        include: ["$(MODDABLE)/examples/manifest_base.json", '$(MODULES)/io/manifest.json'],
       },
     }
   }
