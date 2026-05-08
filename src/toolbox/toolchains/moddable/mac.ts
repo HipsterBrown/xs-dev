@@ -354,22 +354,16 @@ export async function* updateMac(
           const tools = await readdir(BIN_PATH)
           await Promise.all(
             tools.map(async (tool) => {
+              const src = resolve(BIN_PATH, tool)
+              const dst = resolve(DEBUG_BIN_PATH, tool)
               if (tool.endsWith('.app')) {
-                const mainPath = resolve(
-                  BIN_PATH,
-                  tool,
-                  'Contents',
-                  'MacOS',
-                  'main',
-                )
+                const mainPath = resolve(src, 'Contents', 'MacOS', 'main')
                 await chmod(mainPath, 0o751)
+                await cp(src, dst, { recursive: true, verbatimSymlinks: true })
               } else {
-                await chmod(resolve(BIN_PATH, tool), 0o751)
+                await chmod(src, 0o751)
+                await copyFile(src, dst)
               }
-              await copyFile(
-                resolve(BIN_PATH, tool),
-                resolve(DEBUG_BIN_PATH, tool),
-              )
             }),
           )
 
