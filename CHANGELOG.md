@@ -1,3 +1,15 @@
+# v1.12.1 (Fri May 08 2026)
+
+#### 🐛 Bug Fix
+
+- fix(moddable): copy xsbug.app directory correctly during update on mac [#254](https://github.com/HipsterBrown/xs-dev/pull/254) ([@HipsterBrown](https://github.com/HipsterBrown))
+
+#### Authors: 1
+
+- Nick Hehr ([@HipsterBrown](https://github.com/HipsterBrown))
+
+---
+
 # v1.12.0 (Mon May 04 2026)
 
 #### 🚀 Enhancement
